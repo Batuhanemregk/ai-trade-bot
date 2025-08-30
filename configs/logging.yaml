@@ -1,0 +1,192 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  structured:
+    format: '{"timestamp": "%(asctime)s", "level": "%(levelname)s", "logger": "%(name)s", "message": "%(message)s", "module": "%(module)s", "function": "%(funcName)s", "line": "%(lineno)d"}'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  
+  detailed:
+    format: '%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d | %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  
+  simple:
+    format: '%(asctime)s | %(levelname)-8s | %(name)s | %(message)s'
+    datefmt: '%H:%M:%S'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: detailed
+    stream: ext://sys.stdout
+  
+  console_debug:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: detailed
+    stream: ext://sys.stdout
+  
+  file_info:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: structured
+    filename: .state/logs/aibotbs_info.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: utf8
+  
+  file_error:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: structured
+    filename: .state/logs/aibotbs_error.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: utf8
+  
+  file_debug:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: structured
+    filename: .state/logs/aibotbs_debug.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 3
+    encoding: utf8
+
+loggers:
+  # Root logger
+  "":
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # Core system loggers
+  aibotbs:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  aibotbs.core:
+    level: DEBUG
+    handlers: [console_debug, file_debug, file_info, file_error]
+    propagate: false
+  
+  # Agent system loggers
+  aibotbs.agents:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  aibotbs.agents.core:
+    level: DEBUG
+    handlers: [console_debug, file_debug, file_info, file_error]
+    propagate: false
+  
+  aibotbs.agents.roles:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # Service loggers
+  aibotbs.services:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  aibotbs.application:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # Infrastructure loggers
+  aibotbs.infrastructure:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  aibotbs.adapters:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # Execution loggers
+  aibotbs.execution:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # Telegram bot loggers
+  aibotbs.telegram_bot:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # LLM loggers
+  aibotbs.llm:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # News loggers
+  aibotbs.news:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # Scheduler loggers
+  scheduler:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  market_overview:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  state_backup:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  heartbeat:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  cleanup:
+    level: INFO
+    handlers: [console, file_info, file_error]
+    propagate: false
+  
+  # External library loggers (reduce noise)
+  httpx:
+    level: WARNING
+    handlers: [file_error]
+    propagate: false
+  
+  urllib3:
+    level: WARNING
+    handlers: [file_error]
+    propagate: false
+  
+  requests:
+    level: WARNING
+    handlers: [file_error]
+    propagate: false
+  
+  ccxt:
+    level: WARNING
+    handlers: [file_error]
+    propagate: false
+  
+  telegram:
+    level: WARNING
+    handlers: [file_error]
+    propagate: false
+
+# Ensure logs directory exists
+root:
+  level: INFO
+  handlers: [console, file_info, file_error]

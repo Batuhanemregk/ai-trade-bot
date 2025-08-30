@@ -1,0 +1,223 @@
+# AiBotBS Policy Configuration
+# Single source of truth for all trading and system policies
+
+# Trading Configuration
+trading:
+  # Risk Management
+  risk:
+    max_position_size: 0.1  # 10% of portfolio per position
+    max_leverage: 3.0       # Maximum leverage allowed
+    stop_loss_pct: 0.02     # 2% stop loss
+    take_profit_pct: 0.04   # 4% take profit
+    max_drawdown: 0.15      # 15% maximum drawdown
+    streak_guard:
+      max_losses: 3         # Max consecutive losses
+      cooldown_hours: 24    # Cooldown period after max losses
+  
+  # Execution
+  execution:
+    default_timeout: 30     # Seconds to wait for order execution
+    retry_attempts: 3       # Number of retry attempts
+    slippage_tolerance: 0.001  # 0.1% slippage tolerance
+    min_order_size: 10      # Minimum order size in USD
+    max_order_size: 10000   # Maximum order size in USD
+  
+  # Scoring
+  scoring:
+    ta_weight: 0.4          # Technical Analysis weight
+    ml_weight: 0.3          # Machine Learning weight
+    news_weight: 0.2        # News sentiment weight
+    risk_weight: 0.1        # Risk score weight
+    min_composite_score: 0.6  # Minimum score to execute trade
+
+# Agent System Configuration
+agents:
+  # Orchestrator
+  orchestrator:
+    enabled: true
+    max_concurrent_tasks: 5
+    task_timeout: 300       # 5 minutes
+    retry_policy:
+      max_retries: 3
+      backoff_factor: 2
+  
+  # Signal Agents
+  signal_agent:
+    enabled: true
+    update_interval: 60     # 1 minute
+    max_signals_per_hour: 10
+  
+  ta_agent:
+    enabled: true
+    indicators: ["RSI", "MACD", "BB", "ATR", "SMA"]
+    warmup_periods: 100
+    update_interval: 300    # 5 minutes
+  
+  ml_agent:
+    enabled: true
+    model_path: "pipelines/training/models/"
+    fallback_score: 0.5     # Neutral score when model fails
+    update_interval: 3600   # 1 hour
+  
+  news_agent:
+    enabled: true
+    sources: ["cryptocompare", "cryptopanic", "coinstats"]
+    update_interval: 900    # 15 minutes
+    sentiment_threshold: 0.6
+  
+  risk_agent:
+    enabled: true
+    check_interval: 60      # 1 minute
+    max_risk_score: 0.8     # Maximum allowed risk score
+  
+  execution_agent:
+    enabled: true
+    order_timeout: 60       # 1 minute
+    bracket_timeout: 300    # 5 minutes
+    partial_fill_threshold: 0.9  # 90% fill threshold
+  
+  portfolio_agent:
+    enabled: true
+    rebalance_interval: 3600  # 1 hour
+    max_positions: 10
+  
+  qa_agent:
+    enabled: true
+    health_check_interval: 300  # 5 minutes
+    consistency_check_interval: 1800  # 30 minutes
+
+# Exchange Configuration
+exchange:
+  name: "okx"
+  testnet: false
+  mode: "live"  # live, dry-run
+  api_key: "${OKX_API_KEY}"
+  secret: "${OKX_API_SECRET}"
+  passphrase: "${OKX_API_PASSPHRASE}"
+  sandbox: false
+  rate_limit:
+    requests_per_second: 10
+    burst_limit: 20
+  
+  # Symbol mapping
+  symbols:
+    default_quote: "USDT"
+    supported_pairs: ["BTC", "ETH", "SOL", "ADA", "DOT"]
+    # Trading symbols (pairs)
+    trading_pairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT"]
+
+# Telegram Configuration
+telegram:
+  enabled: true
+  token: "${TELEGRAM_BOT_TOKEN}"
+  chat_id: "${TELEGRAM_CHAT_ID}"
+  notifications:
+    trading_signals: true
+    risk_alerts: true
+    portfolio_updates: true
+    system_status: true
+  
+  # Order types
+  order_types:
+    - "market"
+    - "limit"
+    - "stop"
+    - "trigger"
+
+# Notification Configuration
+notifications:
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+    alerts:
+      - "trade_executed"
+      - "risk_alert"
+      - "system_status"
+      - "daily_summary"
+  
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    username: ""
+    password: ""
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "json"
+  handlers:
+    - "console"
+    - "file"
+  file:
+    path: "logs/"
+    max_size: "100MB"
+    backup_count: 5
+
+# Performance Monitoring
+performance:
+  enabled: true
+  metrics_interval: 60      # 1 minute
+  storage:
+    type: "sqlite"
+    path: "data/performance.db"
+  
+  # Key metrics to track
+  metrics:
+    - "pnl"
+    - "win_rate"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "total_trades"
+    - "avg_trade_duration"
+
+# Bias Service Configuration
+bias:
+  enabled: false  # Disabled by default for safety
+  
+  # Trend filter: block shorts in uptrend, block longs in downtrend
+  trend_filter:
+    enabled: true
+  
+  # News guard: block trades on high-impact news
+  news_guard:
+    enabled: true
+    threshold: 0.7          # News score threshold (0.0-1.0)
+    categories: ["REGULATION", "SECURITY"]  # High-impact categories
+    action: "block"         # block, downgrade
+    cooldown_sec: 3600      # 1 hour cooldown
+  
+  # Volatility guard: downgrade on high volatility
+  volatility_guard:
+    enabled: true
+    atr_limit_pct: 0.05     # 5% ATR threshold
+    penalty: 15             # Score penalty for high volatility
+  
+  # Funding guard: optional funding rate bias
+  funding_guard:
+    enabled: false          # Disabled by default
+    min_abs: 0.0001        # Minimum absolute funding rate
+    action: "downgrade"     # downgrade, block
+    penalty: 10             # Score penalty
+  
+  # Correlation guard: block high correlation trades
+  corr_guard:
+    enabled: true
+    max_correlation: 0.8    # Maximum correlation threshold
+    max_exposure: 0.15      # Maximum portfolio exposure
+
+# Development Configuration
+development:
+  debug_mode: false
+  mock_exchange: false
+  mock_news: false
+  test_mode: false
+  
+  # Feature flags
+  features:
+    advanced_risk_management: true
+    ml_scoring: true
+    news_integration: true
+    telegram_bot: true
+    performance_tracking: true

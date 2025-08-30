@@ -1,0 +1,694 @@
+# Agent Policy Configuration for AiBotBS
+# Defines limits, timeouts, and settings for each agent type
+
+# Global agent settings
+global:
+  max_concurrent_agents: 20
+  default_timeout: 300  # seconds
+  default_max_retries: 3
+  default_retry_delay: 5  # seconds
+  heartbeat_interval: 30  # seconds
+  health_check_interval: 60  # seconds
+  max_memory_usage: 512  # MB
+  log_level: "INFO"
+  enable_metrics: true
+  enable_tracing: false
+
+# Orchestrator agent settings
+orchestrator:
+  enabled: true
+  max_concurrent_workflows: 10
+  workflow_timeout: 3600  # 1 hour
+  max_workflow_steps: 50
+  enable_scheduling: true
+  enable_workflow_persistence: true
+  max_workflow_history: 1000
+  performance_tracking: true
+  agent_registry_update_interval: 30  # seconds
+  
+  # Workflow execution limits
+  workflow_limits:
+    max_execution_time: 3600  # 1 hour
+    max_memory_per_workflow: 100  # MB
+    max_api_calls_per_workflow: 1000
+    max_database_queries_per_workflow: 500
+  
+  # Retry policies
+  retry_policies:
+    default:
+      max_retries: 3
+      retry_delay: 5
+      backoff_multiplier: 2.0
+      max_retry_delay: 300  # 5 minutes
+    
+    critical:
+      max_retries: 5
+      retry_delay: 10
+      backoff_multiplier: 1.5
+      max_retry_delay: 600  # 10 minutes
+
+# Technical Analysis agent settings
+ta_agent:
+  enabled: true
+  max_concurrent_analyses: 5
+  analysis_timeout: 120  # 2 minutes
+  max_symbols_per_request: 10
+  max_timeframes_per_request: 5
+  max_indicators_per_request: 10
+  
+  # Data limits
+  data_limits:
+    max_klines_per_symbol: 10000
+    max_historical_days: 365
+    max_data_points_per_request: 50000
+  
+  # Indicator settings
+  indicators:
+    RSI:
+      default_period: 14
+      overbought_threshold: 70
+      oversold_threshold: 30
+      max_period: 50
+    
+    MACD:
+      default_fast_period: 12
+      default_slow_period: 26
+      default_signal_period: 9
+      max_fast_period: 50
+      max_slow_period: 100
+    
+    Bollinger_Bands:
+      default_period: 20
+      default_std_dev: 2.0
+      max_period: 100
+      max_std_dev: 5.0
+    
+    ATR:
+      default_period: 14
+      max_period: 50
+    
+    SMA:
+      default_period: 20
+      max_period: 200
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 300  # 5 minutes
+    max_cache_size: 100  # MB
+    enable_parallel_processing: true
+    max_worker_threads: 4
+
+# Machine Learning agent settings
+ml_agent:
+  enabled: true
+  max_concurrent_predictions: 3
+  prediction_timeout: 180  # 3 minutes
+  max_symbols_per_request: 5
+  max_models_per_request: 3
+  
+  # Model settings
+  models:
+    RandomForest:
+      max_estimators: 1000
+      max_depth: 20
+      min_samples_split: 2
+      min_samples_leaf: 1
+    
+    LinearRegression:
+      max_iterations: 1000
+      tolerance: 1e-4
+    
+    GradientBoosting:
+      max_estimators: 500
+      max_depth: 8
+      learning_rate: 0.1
+      min_samples_split: 2
+  
+  # Feature engineering
+  features:
+    max_features: 100
+    enable_technical_indicators: true
+    enable_price_features: true
+    enable_volume_features: true
+    enable_time_features: true
+    enable_sentiment_features: true
+  
+  # Training settings
+  training:
+    max_training_data_size: 1000000  # 1M samples
+    validation_split: 0.2
+    test_split: 0.1
+    enable_cross_validation: true
+    cross_validation_folds: 5
+  
+  # Prediction settings
+  prediction:
+    default_horizon: "1h"
+    max_horizon: "7d"
+    confidence_threshold: 0.6
+    enable_uncertainty_estimation: true
+  
+  # Performance settings
+  performance:
+    enable_model_caching: true
+    cache_ttl: 3600  # 1 hour
+    max_cache_size: 500  # MB
+    enable_batch_predictions: true
+    max_batch_size: 100
+
+# News agent settings
+news_agent:
+  enabled: true
+  max_concurrent_requests: 5
+  request_timeout: 90  # 1.5 minutes
+  max_sources_per_request: 5
+  max_articles_per_source: 100
+  
+  # News sources
+  sources:
+    cryptocompare:
+      enabled: true
+      rate_limit: 100  # requests per hour
+      timeout: 30
+      max_articles: 50
+    
+    cryptopanic:
+      enabled: true
+      rate_limit: 60  # requests per hour
+      timeout: 30
+      max_articles: 50
+    
+    coinstats:
+      enabled: true
+      rate_limit: 120  # requests per hour
+      timeout: 30
+      max_articles: 50
+    
+    custom_rss:
+      enabled: false
+      rate_limit: 30  # requests per hour
+      timeout: 45
+      max_articles: 100
+  
+  # Sentiment analysis
+  sentiment:
+    enable_gpt_analysis: true
+    enable_keyword_analysis: true
+    enable_emotion_detection: false
+    max_text_length: 10000  # characters
+    default_language: "en"
+    
+    # GPT settings
+    gpt:
+      model: "gpt-3.5-turbo"
+      max_tokens: 500
+      temperature: 0.3
+      timeout: 60
+      max_retries: 2
+      fallback_to_mock: true
+  
+  # Content filtering
+  filtering:
+    enable_keyword_filtering: true
+    enable_sentiment_filtering: true
+    enable_source_filtering: true
+    min_sentiment_score: -0.5
+    max_sentiment_score: 0.5
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 1800  # 30 minutes
+    max_cache_size: 200  # MB
+    enable_parallel_fetching: true
+    max_parallel_requests: 3
+
+# Risk agent settings
+risk_agent:
+  enabled: true
+  max_concurrent_assessments: 3
+  assessment_timeout: 120  # 2 minutes
+  max_positions_per_request: 50
+  max_symbols_per_request: 20
+  
+  # Risk limits
+  limits:
+    max_position_size: 0.1  # 10% of portfolio
+    max_leverage: 5.0
+    max_drawdown: 0.2  # 20%
+    max_var: 0.02  # 2% Value at Risk
+    max_correlation: 0.8
+    min_margin_ratio: 0.1  # 10%
+  
+  # Position limits
+  position_limits:
+    max_positions_per_symbol: 1
+    max_total_positions: 20
+    max_long_positions: 10
+    max_short_positions: 10
+  
+  # Portfolio limits
+  portfolio_limits:
+    max_sector_exposure: 0.3  # 30%
+    max_currency_exposure: 0.5  # 50%
+    max_instrument_type_exposure: 0.4  # 40%
+  
+  # Risk metrics
+  metrics:
+    enable_var_calculation: true
+    enable_stress_testing: false
+    enable_scenario_analysis: false
+    var_confidence_level: 0.95
+    var_time_horizon: 1  # day
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 300  # 5 minutes
+    max_cache_size: 100  # MB
+    enable_parallel_calculations: true
+    max_worker_threads: 2
+
+# Execution agent settings
+execution_agent:
+  enabled: true
+  max_concurrent_orders: 10
+  order_timeout: 180  # 3 minutes
+  max_orders_per_request: 20
+  max_symbols_per_request: 10
+  
+  # Order limits
+  order_limits:
+    max_order_value: 100000  # $100k
+    max_order_size: 1000  # units
+    min_order_value: 10  # $10
+    min_order_size: 0.001  # units
+  
+  # Execution settings
+  execution:
+    default_order_type: "limit"
+    default_time_in_force: "GTC"
+    enable_smart_routing: true
+    enable_partial_fills: true
+    enable_iceberg_orders: false
+    
+    # Slippage tolerance
+    slippage_tolerance: 0.001  # 0.1%
+    max_slippage: 0.01  # 1%
+    
+    # Price improvement
+    enable_price_improvement: true
+    min_price_improvement: 0.0001  # 0.01%
+  
+  # Bracket orders
+  bracket_orders:
+    enable_auto_tp_sl: true
+    default_tp_percentage: 0.03  # 3%
+    default_sl_percentage: 0.02  # 2%
+    max_tp_percentage: 0.1  # 10%
+    max_sl_percentage: 0.05  # 5%
+    enable_trailing_stops: false
+  
+  # Risk management
+  risk_management:
+    enable_pre_trade_checks: true
+    enable_post_trade_validation: true
+    enable_order_validation: true
+    max_retries_on_failure: 3
+  
+  # Performance settings
+  performance:
+    enable_order_caching: true
+    cache_ttl: 60  # 1 minute
+    max_cache_size: 50  # MB
+    enable_parallel_execution: true
+    max_worker_threads: 5
+
+# Portfolio agent settings
+portfolio_agent:
+  enabled: true
+  max_concurrent_updates: 5
+  update_timeout: 90  # 1.5 minutes
+  max_positions_per_request: 100
+  update_interval: 300  # 5 minutes
+  
+  # Portfolio tracking
+  tracking:
+    enable_real_time_updates: true
+    enable_historical_tracking: true
+    enable_performance_metrics: true
+    enable_risk_metrics: true
+    
+    # Update frequencies
+    position_update_frequency: 60  # 1 minute
+    pnl_update_frequency: 300  # 5 minutes
+    risk_update_frequency: 600  # 10 minutes
+    performance_update_frequency: 3600  # 1 hour
+  
+  # Performance metrics
+  metrics:
+    enable_sharpe_ratio: true
+    enable_sortino_ratio: true
+    enable_max_drawdown: true
+    enable_calmar_ratio: true
+    enable_information_ratio: true
+    
+    # Calculation periods
+    default_period: 252  # trading days
+    available_periods: [30, 90, 180, 252, 365]
+  
+  # Rebalancing
+  rebalancing:
+    enable_auto_rebalancing: false
+    rebalancing_threshold: 0.05  # 5%
+    rebalancing_frequency: 86400  # 1 day
+    max_rebalancing_trades: 10
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 600  # 10 minutes
+    max_cache_size: 150  # MB
+    enable_parallel_calculations: true
+    max_worker_threads: 3
+
+# Signal agent settings
+signal_agent:
+  enabled: true
+  max_concurrent_generations: 5
+  generation_timeout: 120  # 2 minutes
+  max_signals_per_request: 50
+  
+  # Signal generation
+  generation:
+    enable_ta_signals: true
+    enable_ml_signals: true
+    enable_news_signals: true
+    enable_composite_signals: true
+    
+    # Signal types
+    signal_types: ["buy", "sell", "hold", "strong_buy", "strong_sell"]
+    
+    # Confidence levels
+    min_confidence: 0.5
+    max_confidence: 1.0
+    confidence_threshold: 0.7
+  
+  # Scoring methods
+  scoring:
+    methods: ["weighted_average", "simple_average", "median", "custom"]
+    default_method: "weighted_average"
+    
+    # Default weights
+    default_weights:
+      ta: 0.4
+      ml: 0.4
+      news: 0.2
+    
+    # Custom scoring
+    enable_custom_scoring: true
+    max_custom_weights: 10
+  
+  # Signal filtering
+  filtering:
+    enable_confidence_filtering: true
+    enable_volume_filtering: true
+    enable_volatility_filtering: true
+    enable_trend_filtering: true
+    
+    # Filter thresholds
+    min_volume: 1000000  # $1M
+    max_volatility: 0.5  # 50%
+    min_trend_strength: 0.3
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 300  # 5 minutes
+    max_cache_size: 100  # MB
+    enable_parallel_processing: true
+    max_worker_threads: 3
+
+# Scoring agent settings
+scoring_agent:
+  enabled: true
+  max_concurrent_scorings: 5
+  scoring_timeout: 90  # 1.5 minutes
+  max_scores_per_request: 100
+  
+  # Scoring methods
+  methods:
+    weighted_average:
+      enabled: true
+      max_weights: 10
+      weight_precision: 0.01
+    
+    simple_average:
+      enabled: true
+      min_inputs: 2
+      max_inputs: 20
+    
+    median:
+      enabled: true
+      min_inputs: 3
+      max_inputs: 50
+    
+    custom:
+      enabled: true
+      max_custom_functions: 5
+  
+  # Score normalization
+  normalization:
+    enable_normalization: true
+    methods: ["min_max", "z_score", "robust", "custom"]
+    default_method: "min_max"
+    
+    # Normalization parameters
+    min_max:
+      min_value: 0.0
+      max_value: 1.0
+    
+    z_score:
+      mean: 0.0
+      std_dev: 1.0
+  
+  # Thresholds
+  thresholds:
+    enable_thresholds: true
+    default_buy_threshold: 0.7
+    default_sell_threshold: 0.3
+    default_hold_threshold: 0.4
+    
+    # Dynamic thresholds
+    enable_dynamic_thresholds: false
+    threshold_update_frequency: 3600  # 1 hour
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 300  # 5 minutes
+    max_cache_size: 100  # MB
+    enable_parallel_processing: true
+    max_worker_threads: 3
+
+# QA agent settings
+qa_agent:
+  enabled: true
+  max_concurrent_checks: 3
+  check_timeout: 60  # 1 minute
+  health_check_interval: 300  # 5 minutes
+  
+  # Health checks
+  health_checks:
+    enable_system_health: true
+    enable_agent_health: true
+    enable_database_health: true
+    enable_exchange_health: true
+    
+    # Check intervals
+    system_check_interval: 60  # 1 minute
+    agent_check_interval: 300  # 5 minutes
+    database_check_interval: 600  # 10 minutes
+    exchange_check_interval: 300  # 5 minutes
+  
+  # Consistency checks
+  consistency:
+    enable_data_consistency: true
+    enable_order_consistency: true
+    enable_position_consistency: true
+    enable_balance_consistency: true
+    
+    # Check frequencies
+    data_consistency_interval: 1800  # 30 minutes
+    order_consistency_interval: 300  # 5 minutes
+    position_consistency_interval: 300  # 5 minutes
+    balance_consistency_interval: 600  # 10 minutes
+  
+  # Alerting
+  alerting:
+    enable_alerts: true
+    alert_channels: ["telegram", "email", "log"]
+    alert_levels: ["info", "warning", "error", "critical"]
+    
+    # Alert thresholds
+    warning_threshold: 0.8
+    error_threshold: 0.6
+    critical_threshold: 0.4
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 600  # 10 minutes
+    max_cache_size: 50  # MB
+    enable_parallel_checks: true
+    max_worker_threads: 2
+
+# Data agent settings (for backtesting)
+data_agent:
+  enabled: true
+  max_concurrent_requests: 3
+  request_timeout: 300  # 5 minutes
+  max_data_size: 1000000  # 1M data points
+  
+  # Data sources
+  sources:
+    enable_historical_data: true
+    enable_real_time_data: false
+    enable_alternative_data: false
+  
+  # Data quality
+  quality:
+    enable_data_validation: true
+    enable_outlier_detection: true
+    enable_missing_data_handling: true
+    min_data_quality_score: 0.8
+  
+  # Storage
+  storage:
+    enable_compression: true
+    enable_indexing: true
+    max_storage_size: 10000  # MB
+    retention_period: 2592000  # 30 days
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 3600  # 1 hour
+    max_cache_size: 500  # MB
+    enable_parallel_processing: true
+    max_worker_threads: 4
+
+# Backtest agent settings
+backtest_agent:
+  enabled: true
+  max_concurrent_backtests: 2
+  backtest_timeout: 1800  # 30 minutes
+  max_backtest_duration: 365  # days
+  
+  # Backtest parameters
+  parameters:
+    max_initial_capital: 1000000  # $1M
+    min_initial_capital: 1000  # $1K
+    max_commission: 0.01  # 1%
+    min_commission: 0.0001  # 0.01%
+    
+    # Position sizing
+    enable_position_sizing: true
+    max_position_size: 0.2  # 20%
+    min_position_size: 0.01  # 1%
+  
+  # Strategy execution
+  execution:
+    enable_slippage: true
+    enable_partial_fills: true
+    enable_market_impact: false
+    execution_delay: 0  # seconds
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 7200  # 2 hours
+    max_cache_size: 1000  # MB
+    enable_parallel_execution: true
+    max_worker_threads: 2
+
+# Analysis agent settings
+analysis_agent:
+  enabled: true
+  max_concurrent_analyses: 3
+  analysis_timeout: 300  # 5 minutes
+  
+  # Analysis types
+  analysis:
+    enable_performance_analysis: true
+    enable_risk_analysis: true
+    enable_statistical_analysis: true
+    enable_visualization: true
+  
+  # Metrics calculation
+  metrics:
+    performance_metrics: ["sharpe_ratio", "sortino_ratio", "calmar_ratio", "information_ratio"]
+    risk_metrics: ["var", "cvar", "max_drawdown", "volatility"]
+    statistical_metrics: ["mean", "std", "skewness", "kurtosis"]
+  
+  # Visualization
+  visualization:
+    enable_charts: true
+    chart_formats: ["png", "svg", "html"]
+    max_chart_size: 10  # MB
+    enable_interactive_charts: false
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 1800  # 30 minutes
+    max_cache_size: 200  # MB
+    enable_parallel_processing: true
+    max_worker_threads: 3
+
+# Alert agent settings
+alert_agent:
+  enabled: true
+  max_concurrent_alerts: 10
+  alert_timeout: 30  # 30 seconds
+  
+  # Alert channels
+  channels:
+    telegram:
+      enabled: true
+      max_message_length: 4096
+      rate_limit: 30  # messages per minute
+      timeout: 10
+    
+    email:
+      enabled: true
+      max_subject_length: 100
+      max_body_length: 10000
+      rate_limit: 60  # emails per hour
+      timeout: 30
+    
+    webhook:
+      enabled: false
+      max_payload_size: 1000  # KB
+      rate_limit: 100  # requests per minute
+      timeout: 15
+  
+  # Alert management
+  management:
+    enable_alert_grouping: true
+    enable_alert_deduplication: true
+    enable_alert_escalation: false
+    max_alert_history: 10000
+    
+    # Grouping settings
+    grouping_timeout: 300  # 5 minutes
+    max_group_size: 100
+  
+  # Performance settings
+  performance:
+    enable_caching: true
+    cache_ttl: 300  # 5 minutes
+    max_cache_size: 50  # MB
+    enable_parallel_sending: true
+    max_worker_threads: 5
