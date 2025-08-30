@@ -1,0 +1,504 @@
+"""
+Order prevalidation utilities.
+Handles TP/SL validation, price policy checks, and order constraints.
+"""
+
+import math
+from dataclasses import dataclass
+from decimal import Decimal
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+
+class ValidationError(Exception):
+    """Raised when order validation fails."""
+    pass
+
+
+@dataclass
+class OrderPrevalidator:
+    """Order prevalidator for TP/SL validation and price policy checks."""
+    
+    def validate_order(self, order_dict_or_symbol=None, side=None, type_=None, amount=None, price=None, **kwargs) -> dict:
+        """Validate order with flexible signature (dict or keyword args)."""
+        if isinstance(order_dict_or_symbol, dict):
+            # Dict-based call (test compatibility)
+            order_dict = order_dict_or_symbol
+            symbol = order_dict.get("symbol")
+            side = order_dict.get("side")
+            price = order_dict.get("price")
+            tp_price = order_dict.get("tp")
+            sl_price = order_dict.get("sl")
+        else:
+            # Keyword-based call (executor compatibility)
+            symbol = order_dict_or_symbol or kwargs.get("symbol")
+            side = side or kwargs.get("side")
+            price = price or kwargs.get("price")
+            tp_price = kwargs.get("tp")
+            sl_price = kwargs.get("sl")
+        
+
+        
+        if not symbol or not side:
+            return {
+                'valid': False,
+                'errors': ['Missing required fields: symbol, side']
+            }
+        
+        try:
+            # Validate TP/SL logic before correction
+            if tp_price is not None and sl_price is not None:
+                # Check for invalid TP/SL before correction
+                if side == 'buy':  # LONG position
+                    if tp_price <= price:  # TP should be above price for long
+                        return {
+                            'valid': False,
+                            'error': f'TP price ({tp_price}) must be greater than entry price ({price}) for buy order'
+                        }
+                    if sl_price >= price:  # SL should be below price for long
+                        return {
+                            'valid': False,
+                            'error': f'SL price ({sl_price}) must be less than entry price ({price}) for buy order'
+                        }
+                elif side == 'sell':  # SHORT position
+                    if tp_price >= price:  # TP should be below price for short
+                        return {
+                            'valid': False,
+                            'error': f'TP price ({tp_price}) must be less than entry price ({price}) for sell order'
+                        }
+                    if sl_price <= price:  # SL should be above price for short
+                        return {
+                            'valid': False,
+                            'error': f'SL price ({sl_price}) must be greater than entry price ({price}) for sell order'
+                        }
+                
+                # If validation passes, correct with epsilon nudging
+                corrected_tp, corrected_sl = validate_tp_sl_prices(
+                    symbol, side, price, tp_price, sl_price
+                )
+                return {
+                    'valid': True,
+                    'tp': corrected_tp,
+                    'sl': corrected_sl
+                }
+            else:
+                return {'valid': True}
+                
+        except Exception as e:
+            return {
+                'valid': False,
+                'error': str(e)
+            }
+    
+    def validate_order_legacy(self, side_close: str, ref_price: float, tp_trigger: float = None, 
+                      sl_trigger: float = None, tick_sz: float = 0.01, 
+                      epsilon_ticks: int = 1) -> dict:
+        """Validate order parameters (legacy method)."""
+        result = {
+            'valid': True,
+            'errors': [],
+            'tp_trigger': tp_trigger,
+            'sl_trigger': sl_trigger
+        }
+        
+        # Validate TP/SL prices
+        if tp_trigger is not None or sl_trigger is not None:
+            tp_valid, sl_valid = self.validate_tp_sl_prices(
+                side_close, ref_price, tp_trigger, sl_trigger, tick_sz, epsilon_ticks
+            )
+            result['tp_trigger'] = tp_valid
+            result['sl_trigger'] = sl_valid
+        
+        # Validate price policy
+        if tp_trigger is not None:
+            result['tp_price'] = self.validate_order_price_policy(
+                side_close, tp_trigger, None, tick_sz
+            )
+        
+        if sl_trigger is not None:
+            result['sl_price'] = self.validate_order_price_policy(
+                side_close, sl_trigger, None, tick_sz
+            )
+        
+        return result
+    
+    def validate_tp_sl_prices(self, side_close: str, ref_price: float, tp_trigger: float = None,
+                             sl_trigger: float = None, tick_sz: float = 0.01, 
+                             epsilon_ticks: int = 1) -> Tuple[Optional[float], Optional[float]]:
+        """Validate TP/SL prices and adjust if needed."""
+        epsilon = epsilon_ticks * tick_sz
+        
+        if side_close == 'LONG':  # Reduce SELL: tp > ref, sl < ref
+            if tp_trigger is not None and tp_trigger <= ref_price:
+                tp_trigger = ref_price + epsilon
+                tp_trigger = round(tp_trigger / tick_sz) * tick_sz
+            
+            if sl_trigger is not None and sl_trigger >= ref_price:
+                sl_trigger = ref_price - epsilon
+                sl_trigger = round(sl_trigger / tick_sz) * tick_sz
+                
+        elif side_close == 'SHORT':  # Reduce BUY: tp < ref, sl > ref
+            if tp_trigger is not None and tp_trigger >= ref_price:
+                tp_trigger = ref_price - epsilon
+                tp_trigger = round(tp_trigger / tick_sz) * tick_sz
+            
+            if sl_trigger is not None and sl_trigger <= ref_price:
+                sl_trigger = ref_price + epsilon
+                sl_trigger = round(sl_trigger / tick_sz) * tick_sz
+        
+        return tp_trigger, sl_trigger
+    
+    def validate_order_price_policy(self, side_close: str, trigger: float, 
+                                  ord_px: float = None, tick_sz: float = 0.01) -> Optional[float]:
+        """Validate order price policy."""
+        if ord_px == -1:  # Market sentinel
+            return -1
+        
+        if ord_px is None:
+            return None
+        
+        # SELL: ordPx ≤ trigger; BUY: ordPx ≥ trigger
+        if side_close == 'LONG':  # SELL
+            if ord_px > trigger:
+                ord_px = trigger
+        elif side_close == 'SHORT':  # BUY
+            if ord_px < trigger:
+                ord_px = trigger
+        
+        # Quantize to tick size
+        if ord_px is not None:
+            ord_px = round(ord_px / tick_sz) * tick_sz
+        
+        return ord_px
+
+
+def validate_tp_sl_prices(symbol: str, side: str, ref_price: float, tp_price: float, sl_price: float) -> Tuple[float, float]:
+    """
+    Validate and correct TP/SL prices with epsilon nudging.
+    
+    Args:
+        symbol: Trading symbol (e.g., "BTC-USDT")
+        side: 'buy' or 'sell' (position side)
+        ref_price: Reference price for validation
+        tp_price: Take Profit price
+        sl_price: Stop Loss price
+    
+    Returns:
+        Tuple of corrected (tp_price, sl_price)
+    """
+    if tp_price is None or sl_price is None:
+        raise ValueError("TP and SL prices cannot be None")
+    
+    if side not in ['buy', 'sell']:
+        raise ValueError("Invalid side. Must be 'buy' or 'sell'")
+    
+    # Validate symbol format
+    if not symbol or "-" not in symbol:
+        raise ValueError(f"Invalid symbol format: {symbol}")
+    
+    # Get symbol metadata for tick size
+    try:
+        from adapters import get_fallback_tick_size
+        tick_sz = get_fallback_tick_size(symbol)
+    except ImportError:
+        # Fallback tick sizes based on symbol
+        if "BTC" in symbol:
+            tick_sz = 0.1
+        elif "ETH" in symbol:
+            tick_sz = 0.01
+        elif symbol in ["BTC-USDT", "ETH-USDT", "BTC-USDT-SWAP", "ETH-USDT-SWAP"]:
+            tick_sz = 0.1 if "BTC" in symbol else 0.01
+        else:
+            # Invalid symbol - should raise error
+            raise ValueError(f"Unknown symbol: {symbol}")
+    except Exception as e:
+        # Symbol not found or other error
+        raise ValueError(f"Symbol validation failed for {symbol}: {e}")
+    
+    epsilon = tick_sz
+    
+    if side == 'buy':  # LONG position
+        # For LONG: TP > ref_price, SL < ref_price
+        if tp_price <= ref_price:
+            tp_price = ref_price + epsilon
+        if sl_price >= ref_price:
+            sl_price = ref_price - epsilon
+    elif side == 'sell':  # SHORT position
+        # For SHORT: TP < ref_price, SL > ref_price
+        if tp_price >= ref_price:
+            tp_price = ref_price - epsilon
+        if sl_price <= ref_price:
+            sl_price = ref_price + epsilon
+    
+    # Quantize to tick size with proper precision
+    from decimal import Decimal, ROUND_HALF_UP
+    
+    # Convert to Decimal for precise arithmetic
+    tick_decimal = Decimal(str(tick_sz))
+    tp_decimal = Decimal(str(tp_price))
+    sl_decimal = Decimal(str(sl_price))
+    
+    # Quantize to tick size
+    tp_price = float(tp_decimal.quantize(tick_decimal, rounding=ROUND_HALF_UP))
+    sl_price = float(sl_decimal.quantize(tick_decimal, rounding=ROUND_HALF_UP))
+    
+    return tp_price, sl_price
+
+
+def validate_tp_sl_prices_legacy(side: str, entry_price: float, tp_price: float, sl_price: float) -> Tuple[bool, List[str]]:
+    """
+    Legacy: Validate Take Profit and Stop Loss prices relative to entry price.
+    
+    Args:
+        side: 'buy' or 'sell'
+        entry_price: The entry price of the position
+        tp_price: The Take Profit price
+        sl_price: The Stop Loss price
+    
+    Returns:
+        A tuple (is_valid, errors_list)
+    """
+    errors: List[str] = []
+    
+    if side == 'buy':
+        # For buy, TP > Entry > SL
+        if not (tp_price > entry_price):
+            errors.append(f"TP price ({tp_price}) must be greater than entry price ({entry_price}) for buy order.")
+        if not (entry_price > sl_price):
+            errors.append(f"Entry price ({entry_price}) must be greater than SL price ({sl_price}) for buy order.")
+    elif side == 'sell':
+        # For sell, SL > Entry > TP
+        if not (sl_price > entry_price):
+            errors.append(f"SL price ({sl_price}) must be greater than entry price ({entry_price}) for sell order.")
+        if not (entry_price > tp_price):
+            errors.append(f"Entry price ({entry_price}) must be greater than TP price ({tp_price}) for sell order.")
+    else:
+        errors.append("Invalid side. Must be 'buy' or 'sell'.")
+    
+    return len(errors) == 0, errors
+
+
+def validate_order_price_policy(current_price: float, order_price: float) -> Tuple[bool, List[str]]:
+    """
+    Validate if an order price is within acceptable spread from current market price.
+    
+    Args:
+        current_price: The current market price
+        order_price: The price at which the order is to be placed
+    
+    Returns:
+        A tuple (is_valid, errors_list)
+    """
+    errors: List[str] = []
+    
+    if current_price <= 0:
+        errors.append("Current price must be positive for price policy validation.")
+        return False, errors
+    
+    spread_pct = abs((order_price - current_price) / current_price)
+    
+    # Check if spread is within acceptable range (0.1% to 10%)
+    if spread_pct < 0.001:
+        errors.append(f"Order price ({order_price}) is too close to current price ({current_price}). "
+                      f"Spread {spread_pct:.4f}% is below minimum 0.1%.")
+    if spread_pct > 0.1:
+        errors.append(f"Order price ({order_price}) is too far from current price ({current_price}). "
+                      f"Spread {spread_pct:.4f}% is above maximum 10%.")
+    
+    return len(errors) == 0, errors
+
+
+def validate_order_size_constraints(size: float, min_size: float, max_size: float, 
+                                  lot_size: float, available_balance: float,
+                                  price: float, leverage: float = 1.0) -> Tuple[bool, List[str]]:
+    """
+    Validate order size constraints.
+    
+    Args:
+        size: Order size
+        min_size: Minimum order size
+        max_size: Maximum order size
+        lot_size: Lot size increment
+        available_balance: Available balance
+        price: Order price
+        leverage: Leverage (default 1.0)
+    
+    Returns:
+        Tuple of (is_valid, list_of_errors)
+    """
+    errors = []
+    
+    # Check minimum size
+    if size < min_size:
+        errors.append(f"Order size {size} below minimum {min_size}")
+    
+    # Check maximum size
+    if size > max_size:
+        errors.append(f"Order size {size} above maximum {max_size}")
+    
+    # Check lot size alignment
+    if lot_size > 0 and abs(size % lot_size) > 1e-10:
+        errors.append(f"Order size {size} not aligned with lot size {lot_size}")
+    
+    # Check balance sufficiency
+    required_margin = (size * price) / leverage
+    if required_margin > available_balance:
+        errors.append(f"Insufficient balance. Required: {required_margin}, Available: {available_balance}")
+    
+    return len(errors) == 0, errors
+
+
+def validate_bracket_order(entry_price: float, tp_price: float, sl_price: float,
+                          side: str, min_distance: float = 0.005) -> Tuple[bool, List[str]]:
+    """
+    Validate bracket order parameters.
+    
+    Args:
+        entry_price: Entry order price
+        tp_price: Take profit price
+        sl_price: Stop loss price
+        side: Order side ('buy' or 'sell')
+        min_distance: Minimum distance as percentage
+    
+    Returns:
+        Tuple of (is_valid, list_of_errors)
+    """
+    errors = []
+    
+    if side == 'buy':
+        if not (entry_price < sl_price < tp_price):
+            errors.append(f"Buy bracket: entry {entry_price} < sl {sl_price} < tp {tp_price}")
+    else:
+        if not (tp_price < sl_price < entry_price):
+            errors.append(f"Sell bracket: tp {tp_price} < sl {sl_price} < entry {entry_price}")
+    
+    # Check minimum distances
+    entry_tp_distance = abs(tp_price - entry_price) / entry_price
+    entry_sl_distance = abs(sl_price - entry_price) / entry_price
+    
+    if entry_tp_distance < min_distance:
+        errors.append(f"TP distance {entry_tp_distance:.4f} below minimum {min_distance}")
+    
+    if entry_sl_distance < min_distance:
+        errors.append(f"SL distance {entry_sl_distance:.4f} below minimum {min_distance}")
+    
+    return len(errors) == 0, errors
+
+
+def validate_market_order_params(symbol: str, side: str, size: float, 
+                               min_size: float, max_size: float) -> Tuple[bool, List[str]]:
+    """
+    Validate market order parameters.
+    
+    Args:
+        symbol: Trading symbol
+        side: Order side ('buy' or 'sell')
+        size: Order size
+        min_size: Minimum order size
+        max_size: Maximum order size
+    
+    Returns:
+        Tuple of (is_valid, list_of_errors)
+    """
+    errors = []
+    
+    # Basic validation
+    if not symbol or not isinstance(symbol, str):
+        errors.append("Symbol must be a non-empty string")
+    
+    if side not in ['buy', 'sell']:
+        errors.append("Side must be 'buy' or 'sell'")
+    
+    if not isinstance(size, (int, float)) or size <= 0:
+        errors.append("Size must be a positive number")
+    
+    # Size constraints
+    if size < min_size:
+        errors.append(f"Order size {size} below minimum {min_size}")
+    
+    if size > max_size:
+        errors.append(f"Order size {size} above maximum {max_size}")
+    
+    return len(errors) == 0, errors
+
+
+def get_prevalidation_summary() -> Dict[str, Any]:
+    """Get prevalidation configuration summary."""
+    return {
+        'min_spread_pct': 0.001,
+        'max_spread_pct': 0.1,
+        'min_tp_sl_distance': 0.005,
+        'default_min_size': 0.001,
+        'default_max_size': 1000000.0
+    }
+
+
+def log_prevalidation_report(validation_result: Tuple[bool, List[str]], 
+                           order_details: Dict[str, Any]) -> None:
+    """
+    Log prevalidation report.
+    
+    Args:
+        validation_result: Tuple of (is_valid, list_of_errors)
+        order_details: Order details for logging
+    """
+    is_valid, errors = validation_result
+    
+    if is_valid:
+        print(f"✅ Order validation passed: {order_details}")
+    else:
+        print(f"❌ Order validation failed: {order_details}")
+        for error in errors:
+            print(f"  - {error}")
+
+
+def log_tp_sl_validation_report(validation_result: Tuple[bool, List[str]], 
+                               tp_sl_details: Dict[str, Any]) -> None:
+    """
+    Log TP/SL validation report.
+    
+    Args:
+        validation_result: Tuple of (is_valid, list_of_errors)
+        tp_sl_details: TP/SL details for logging
+    """
+    is_valid, errors = validation_result
+    
+    if is_valid:
+        print(f"✅ TP/SL validation passed: {tp_sl_details}")
+    else:
+        print(f"❌ TP/SL validation failed: {tp_sl_details}")
+        for error in errors:
+            print(f"  - {error}")
+
+
+def get_order_prevalidator() -> OrderPrevalidator:
+    """Get order prevalidator instance."""
+    return OrderPrevalidator()
+
+
+def create_prevalidator_from_instrument(instrument: Dict[str, Any]) -> OrderPrevalidator:
+    """Create a prevalidator instance from instrument data."""
+    return OrderPrevalidator()
+
+
+def validate_order(symbol: str, side: str, size: float, price: float, order_type: str,
+                  tp_price: Optional[float] = None, sl_price: Optional[float] = None) -> Tuple[bool, List[str]]:
+    """Validate order using the global prevalidator."""
+    prevalidator = get_order_prevalidator()
+    return prevalidator.validate_order(symbol, side, size, price, order_type, tp_price, sl_price)
+
+
+__all__ = [
+    "ValidationError",
+    "OrderPrevalidator",
+    "validate_tp_sl_prices",
+    "validate_order_price_policy",
+    "validate_order_size_constraints",
+    "validate_bracket_order",
+    "validate_market_order_params",
+    "get_prevalidation_summary",
+    "log_prevalidation_report",
+    "log_tp_sl_validation_report",
+    "get_order_prevalidator",
+    "create_prevalidator_from_instrument",
+    "validate_order",
+]

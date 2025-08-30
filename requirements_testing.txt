@@ -1,0 +1,26 @@
+# Testing dependencies for OKX Trading Bot
+# Install with: pip install -r requirements_testing.txt
+
+# Core testing framework
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+
+# Data manipulation and analysis
+pandas>=1.5.0
+numpy>=1.21.0
+
+# Technical analysis
+ta>=0.10.0
+
+# YAML parsing
+PyYAML>=6.0.2
+
+# Mocking and testing utilities
+freezegun>=1.2.0
+faker>=18.0.0
+
+# Optional: for better test output
+pytest-html>=3.1.0
+pytest-xdist>=3.0.0
