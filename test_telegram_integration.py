@@ -80,3 +80,4 @@ async def test_telegram_integration():
 
 if __name__ == "__main__":
     asyncio.run(test_telegram_integration())
+
