@@ -4,6 +4,7 @@ Handles environment setup, configuration loading, and logging initialization.
 """
 
 import os
+import re
 from pathlib import Path
 from typing import Dict, Any, Optional
 
@@ -12,6 +13,23 @@ from loguru import logger
 import yaml
 
 from infrastructure.logger import initialize_logging
+
+
+def _resolve_env_vars(obj: Any) -> Any:
+    """Recursively resolve environment variables in policy configuration."""
+    if isinstance(obj, dict):
+        return {key: _resolve_env_vars(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [_resolve_env_vars(item) for item in obj]
+    elif isinstance(obj, str):
+        # Replace ${VAR} with environment variable values
+        def replace_env_var(match):
+            var_name = match.group(1)
+            return os.getenv(var_name, match.group(0))  # Return original if not found
+        
+        return re.sub(r'\$\{([^}]+)\}', replace_env_var, obj)
+    else:
+        return obj
 
 
 def load_env(env_file: Optional[str] = None) -> None:
@@ -65,6 +83,9 @@ def load_policy(policy_path: str = "configs/policy.yaml") -> Dict[str, Any]:
         
         with open(policy_file, 'r', encoding='utf-8') as f:
             policy = yaml.safe_load(f)
+        
+        # Resolve environment variables in policy
+        policy = _resolve_env_vars(policy)
         
         logger.info(f"Loaded policy from {policy_path}")
         return policy

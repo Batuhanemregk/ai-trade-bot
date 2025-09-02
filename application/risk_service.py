@@ -337,6 +337,18 @@ class RiskService:
             }
         }
 
+    async def get_status(self) -> dict[str, Any]:
+        """Get current risk status."""
+        return {
+            "risk_level": "LOW",  # Mock risk level
+            "portfolio_exposure": 0.15,  # 15% exposure
+            "active_positions": 2,
+            "max_drawdown": 0.05,  # 5% max drawdown
+            "correlation_risk": "LOW",
+            "volatility_risk": "MEDIUM",
+            "timestamp": "2025-09-02T03:19:00Z"
+        }
+
     def get_service_status(self) -> dict[str, Any]:
         """Get service status and performance metrics."""
         return {
