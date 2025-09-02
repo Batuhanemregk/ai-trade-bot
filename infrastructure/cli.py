@@ -9,15 +9,19 @@ import sys
 import time
 from typing import Any, Dict, List, Optional
 
-# Safe import for agent types
-try:
-    from agents.core.base import Message, MessageType  # official types
-except Exception:
-    # Fallback: Message exists, MessageType may not.
-    from agents.core.base import Message  # noqa
-    class MessageType:
-        TICK = "TICK"
-        HEARTBEAT = "HEARTBEAT"
+# agents disabled
+if False:  # never runs
+    from agents.core.base import Message, MessageType  # placeholder to avoid IDE errors
+
+# Fallback types for non-agent mode
+class Message:
+    def __init__(self, subject=None, body=None):
+        self.subject = subject
+        self.body = body or {}
+
+class MessageType:
+    TICK = "TICK"
+    HEARTBEAT = "HEARTBEAT"
 
 from loguru import logger
 
@@ -518,13 +522,9 @@ Examples:
             logger.info(f"Starting agents with graph: {args.graph}")
             logger.info(f"Effective execution mode: {effective_mode}")
             
-            # Initialize agent system
-            try:
-                from agents.core.simple_router import get_simple_router
-                router = get_simple_router()
-            except ImportError:
-                logger.warning("Agent router not available, using mock")
-                router = None
+            # Initialize agent system (disabled in non-agent mode)
+            logger.debug("Agents disabled: skip router initialization")
+            router = None
             
             if effective_mode == "dry-run":
                 # Dry-run mode with bounded execution
@@ -579,18 +579,18 @@ Examples:
                         # Send Telegram startup ping
                         await self._send_telegram_startup_ping(args.graph, effective_mode, symbols, tick_interval)
                         
-                        # Start heartbeat task
-                        heartbeat_task = asyncio.create_task(
-                            self._start_heartbeat(router, tick_interval)
-                        )
+                        # Start heartbeat task (disabled in non-agent mode)
+                        logger.debug("Agents disabled: skip heartbeat")
+                        heartbeat_task = None
                         
                         logger.info("Agent system started successfully")
                         
                         # Wait for shutdown signal
                         await shutdown_event.wait()
                         
-                        # Cancel heartbeat
-                        heartbeat_task.cancel()
+                        # Cancel heartbeat (disabled in non-agent mode)
+                        if heartbeat_task:
+                            heartbeat_task.cancel()
                         
                     else:
                         logger.warning("No router available, running mock mode")
@@ -788,15 +788,9 @@ Examples:
                 # Show specific agent status
                 logger.info(f"Status for agent: {args.agent}")
                 
-                # Try to get agent status from router
-                try:
-                    from agents.core.simple_router import get_simple_router
-                    router = get_simple_router()
-                    agent_status = router._agent_registry.get_agent_status(args.agent)
-                    logger.info(f"Agent {args.agent} status: {agent_status}")
-                except ImportError:
-                    logger.warning("Agent router not available, showing mock status")
-                    logger.info(f"Agent {args.agent}: Mock status - Not running")
+                # Try to get agent status from router (disabled in non-agent mode)
+                logger.debug("Agents disabled: skip agent status check")
+                logger.info(f"Agent {args.agent}: Not running (agents disabled)")
                 
             else:
                 # Show overall agent system status

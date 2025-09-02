@@ -342,6 +342,24 @@ class ScoringService:
             "risk_penalties": score.risk_penalties
         }
 
+    async def get_top_symbols(self, limit: int = 5) -> list[dict[str, Any]]:
+        """Get top symbols based on composite scores."""
+        # Default symbols from policy
+        default_symbols = ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT"]
+        
+        # Return mock top symbols for now
+        top_symbols = []
+        for i, symbol in enumerate(default_symbols[:limit]):
+            top_symbols.append({
+                "symbol": symbol,
+                "score": 75.0 - (i * 5),  # Mock descending scores
+                "signal": "HOLD",
+                "confidence": 0.8 - (i * 0.1),
+                "grade": ["A", "B+", "B", "C+", "C"][i] if i < 5 else "D"
+            })
+        
+        return top_symbols
+
     def get_service_status(self) -> dict[str, Any]:
         """Get service status and performance metrics."""
         return {

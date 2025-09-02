@@ -45,6 +45,26 @@ def main():
     3. Handles any top-level exceptions
     """
     try:
+        # Handle help flag
+        if len(sys.argv) > 1 and sys.argv[1] in ['--help', '-h']:
+            print("AiBotBS Trading System")
+            print("Usage: python main.py [command] [options]")
+            print("")
+            print("Commands:")
+            print("  trading    - Run complete trading system")
+            print("  agents     - Run agent system")
+            print("  scheduler  - Run scheduler")
+            print("  health     - Run health check")
+            print("  portfolio  - Show portfolio status")
+            print("  config     - Validate configuration")
+            print("")
+            print("Options:")
+            print("  --live     - Run in live mode")
+            print("  --symbols  - Specify trading symbols")
+            print("  --timeout  - Set timeout in seconds")
+            print("  --policy   - Specify policy file path")
+            return 0
+        
         # Set up basic logging for the entry point
         logger.add(
             "logs/main.log",

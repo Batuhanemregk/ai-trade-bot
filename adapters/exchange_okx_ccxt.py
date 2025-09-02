@@ -32,15 +32,20 @@ class OKXExchangeAdapter:
     def _init_ccxt_client(self):
         """Initialize CCXT client."""
         try:
+            # Check for simulated trading flag
+            import os
+            simulated_flag = os.environ.get('OKX_SIMULATED', '').strip() in ('1', 'true', 'True')
+            
             exchange_params = {
                 'apiKey': self.config.get('api_key', ''),
                 'secret': self.config.get('secret', ''),
                 'password': self.config.get('passphrase', ''),
-                'sandbox': self.config.get('sandbox', True),
-                'testnet': self.config.get('testnet', True),
+                'sandbox': self.config.get('sandbox', False),
+                'testnet': self.config.get('testnet', False),
                 'enableRateLimit': True,
                 'rateLimit': 100,
                 'timeout': 30000,
+                'headers': {'x-simulated-trading': '1'} if simulated_flag else {},
                 'options': {
                     'defaultType': 'swap',
                     'adjustForTimeDifference': True,
@@ -135,7 +140,14 @@ class OKXExchangeAdapter:
             ccxt_symbol = okx_to_ccxt_symbol(symbol)
             
             if self.mode == 'dry-run':
-                return [["MOCK", 0, 0, 0, 0, 0]]
+                # Return mock OHLCV data with proper timestamp
+                import time
+                current_time = int(time.time() * 1000)  # Current timestamp in ms
+                mock_data = []
+                for i in range(200):  # 200 bars
+                    timestamp = current_time - (i * 900000)  # 15min intervals
+                    mock_data.append([timestamp, 50000, 51000, 49000, 50500, 1000])
+                return mock_data
             
             result = self.ccxt_client.fetch_ohlcv(ccxt_symbol, timeframe, limit=limit)
             return result
@@ -174,6 +186,155 @@ class OKXExchangeAdapter:
         except Exception as e:
             logger.error(f"❌ Open orders fetch failed: {e}")
             raise map_ccxt_error(e) if hasattr(map_ccxt_error, '__call__') else e
+
+    async def create_market_order(self, symbol: str, side: str, amount: float, 
+                                 client_id: str = None, params: dict = None) -> dict:
+        """Create a market order."""
+        try:
+            # Symbol mapping
+            from execution.okx_symbol import okx_to_ccxt_symbol
+            ccxt_symbol = okx_to_ccxt_symbol(symbol)
+            
+            # Robust quantization with exchange limits
+            from execution.quantize import ensure_min_requirements, get_market
+            q_amount = ensure_min_requirements(ccxt_symbol, amount, price=None, client=self.ccxt_client)
+            
+            # Log amount bumping if it occurred
+            if q_amount > amount:
+                try:
+                    m = get_market(ccxt_symbol, self.ccxt_client)
+                    min_amount = m.get('limits', {}).get('amount', {}).get('min', 'unknown')
+                    min_cost = m.get('limits', {}).get('cost', {}).get('min', 'unknown')
+                    logger.info("amount_bumped", extra={
+                        "symbol": symbol, 
+                        "computed": amount, 
+                        "min_amount": min_amount, 
+                        "min_cost": min_cost, 
+                        "final_amount": q_amount
+                    })
+                except Exception as e:
+                    logger.warning(f"Could not log amount bump details: {e}")
+            
+            # Client ID
+            if client_id is None:
+                from execution.id_utils import generate_client_id
+                client_id = generate_client_id('E')
+            
+            # OKX params
+            td_mode = self.config.get('td_mode', 'cross')
+            hedge_mode = self.config.get('hedge_mode', False)
+            
+            order_params = {
+                'tdMode': td_mode,
+                'reduceOnly': False,
+                'clientOrderId': client_id,
+                'clOrdId': client_id,
+            }
+            
+            if hedge_mode:
+                order_params['posSide'] = 'long' if side == 'buy' else 'short'
+            
+            if params:
+                order_params.update(params)
+            
+            # Create order
+            result = self.ccxt_client.create_order(
+                ccxt_symbol, 'market', side, q_amount, None, order_params
+            )
+            
+            # Normalize result
+            return {
+                'status': result.get('status', 'unknown'),
+                'type': 'market',
+                'id': result.get('id', ''),
+                'clientOrderId': client_id,
+                'symbol': symbol,
+                'side': side,
+                'amount': q_amount,
+                'price': result.get('price'),
+                'raw': result
+            }
+            
+        except Exception as e:
+            from adapters.error_mapping import normalize_error
+            error_info = normalize_error(e, {'operation': 'create_market_order', 'symbol': symbol})
+            logger.error(f"❌ Market order failed for {symbol}: {error_info}")
+            raise
+
+    async def create_limit_order(self, symbol: str, side: str, amount: float, price: float,
+                                client_id: str = None, params: dict = None) -> dict:
+        """Create a limit order."""
+        try:
+            # Symbol mapping
+            from execution.okx_symbol import okx_to_ccxt_symbol
+            ccxt_symbol = okx_to_ccxt_symbol(symbol)
+            
+            # Robust quantization with exchange limits
+            from execution.quantize import ensure_min_requirements, quantize_price, get_market
+            q_amount = ensure_min_requirements(ccxt_symbol, amount, price=price, client=self.ccxt_client)
+            q_price = quantize_price(ccxt_symbol, price, client=self.ccxt_client)
+            
+            # Log amount bumping if it occurred
+            if q_amount > amount:
+                try:
+                    m = get_market(ccxt_symbol, self.ccxt_client)
+                    min_amount = m.get('limits', {}).get('amount', {}).get('min', 'unknown')
+                    min_cost = m.get('limits', {}).get('cost', {}).get('min', 'unknown')
+                    logger.info("amount_bumped", extra={
+                        "symbol": symbol, 
+                        "computed": amount, 
+                        "min_amount": min_amount, 
+                        "min_cost": min_cost, 
+                        "final_amount": q_amount
+                    })
+                except Exception as e:
+                    logger.warning(f"Could not log amount bump details: {e}")
+            
+            # Client ID
+            if client_id is None:
+                from execution.id_utils import generate_client_id
+                client_id = generate_client_id('E')
+            
+            # OKX params
+            td_mode = self.config.get('td_mode', 'cross')
+            hedge_mode = self.config.get('hedge_mode', False)
+            
+            order_params = {
+                'tdMode': td_mode,
+                'reduceOnly': False,
+                'clientOrderId': client_id,
+                'clOrdId': client_id,
+            }
+            
+            if hedge_mode:
+                order_params['posSide'] = 'long' if side == 'buy' else 'short'
+            
+            if params:
+                order_params.update(params)
+            
+            # Create order
+            result = self.ccxt_client.create_order(
+                ccxt_symbol, 'limit', side, q_amount, q_price, order_params
+            )
+            
+            # Normalize result
+            return {
+                'status': result.get('status', 'unknown'),
+                'type': 'limit',
+                'id': result.get('id', ''),
+                'clientOrderId': client_id,
+                'symbol': symbol,
+                'side': side,
+                'amount': q_amount,
+                'price': q_price,
+                'raw': result
+            }
+            
+        except Exception as e:
+            from adapters.error_mapping import normalize_error
+            error_info = normalize_error(e, {'operation': 'create_limit_order', 'symbol': symbol})
+            logger.error(f"❌ Limit order failed for {symbol}: {error_info}")
+            raise
 
 
 class OKXCCXTAdapter:
@@ -710,6 +871,127 @@ class OKXCCXTAdapter:
         except Exception as e:
             logger.error(f"❌ Error closing OKX CCXT adapter: {e}")
     
+    async def create_market_order(self, symbol: str, side: str, amount: float, 
+                                 *, reduce_only: bool = False, client_id: str = None, 
+                                 params: dict = None) -> dict:
+        """Create a market order."""
+        try:
+            # Symbol mapping
+            from execution.okx_symbol import okx_to_ccxt_symbol
+            ccxt_symbol = okx_to_ccxt_symbol(symbol)
+            
+            # Quantization
+            from execution.quantize import quantize_size, bump_to_min_size
+            q_amount = quantize_size(symbol, amount)
+            q_amount = bump_to_min_size(symbol, q_amount)
+            
+            # Client ID
+            if client_id is None:
+                from execution.id_utils import generate_client_id
+                client_id = generate_client_id('E')
+            
+            # OKX params
+            import os
+            td_mode = os.getenv('OKX_TD_MODE', 'cross')
+            hedge_mode = os.getenv('OKX_HEDGE_MODE', '').strip() in ('1', 'true', 'True')
+            
+            order_params = {
+                'tdMode': td_mode,
+                'reduceOnly': reduce_only,
+                'clientOrderId': client_id,
+                'clOrdId': client_id,
+            }
+            
+            if hedge_mode:
+                order_params['posSide'] = 'long' if side == 'buy' else 'short'
+            
+            if params:
+                order_params.update(params)
+            
+            # Create order
+            result = await self.ccxt_client.create_order(
+                ccxt_symbol, 'market', side, q_amount, None, order_params
+            )
+            
+            # Normalize result
+            return {
+                'id': result.get('id', ''),
+                'status': result.get('status', 'unknown'),
+                'symbol': symbol,
+                'side': side,
+                'type': 'market',
+                'amount': q_amount,
+                'price': result.get('price'),
+                'clientOrderId': client_id
+            }
+            
+        except Exception as e:
+            from adapters.error_mapping import normalize_error
+            error_info = normalize_error(e, {'operation': 'create_market_order', 'symbol': symbol})
+            logger.error(f"❌ Market order failed for {symbol}: {error_info}")
+            raise
+    
+    async def create_limit_order(self, symbol: str, side: str, amount: float, price: float,
+                                *, reduce_only: bool = False, client_id: str = None, 
+                                params: dict = None) -> dict:
+        """Create a limit order."""
+        try:
+            # Symbol mapping
+            from execution.okx_symbol import okx_to_ccxt_symbol
+            ccxt_symbol = okx_to_ccxt_symbol(symbol)
+            
+            # Quantization
+            from execution.quantize import quantize_size, bump_to_min_size, quantize_price
+            q_amount = quantize_size(symbol, amount)
+            q_amount = bump_to_min_size(symbol, q_amount)
+            q_price = quantize_price(symbol, price)
+            
+            # Client ID
+            if client_id is None:
+                from execution.id_utils import generate_client_id
+                client_id = generate_client_id('E')
+            
+            # OKX params
+            import os
+            td_mode = os.getenv('OKX_TD_MODE', 'cross')
+            hedge_mode = os.getenv('OKX_HEDGE_MODE', '').strip() in ('1', 'true', 'True')
+            
+            order_params = {
+                'tdMode': td_mode,
+                'reduceOnly': reduce_only,
+                'clientOrderId': client_id,
+                'clOrdId': client_id,
+            }
+            
+            if hedge_mode:
+                order_params['posSide'] = 'long' if side == 'buy' else 'short'
+            
+            if params:
+                order_params.update(params)
+            
+            # Create order
+            result = await self.ccxt_client.create_order(
+                ccxt_symbol, 'limit', side, q_amount, q_price, order_params
+            )
+            
+            # Normalize result
+            return {
+                'id': result.get('id', ''),
+                'status': result.get('status', 'unknown'),
+                'symbol': symbol,
+                'side': side,
+                'type': 'limit',
+                'amount': q_amount,
+                'price': q_price,
+                'clientOrderId': client_id
+            }
+            
+        except Exception as e:
+            from adapters.error_mapping import normalize_error
+            error_info = normalize_error(e, {'operation': 'create_limit_order', 'symbol': symbol})
+            logger.error(f"❌ Limit order failed for {symbol}: {error_info}")
+            raise
+
     def __repr__(self):
         return (f"OKXCCXTAdapter(sandbox={self.sandbox}, testnet={self.testnet}, "
                 f"initialized={self._initialized})")

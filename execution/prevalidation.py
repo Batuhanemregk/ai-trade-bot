@@ -365,11 +365,13 @@ def validate_bracket_order(entry_price: float, tp_price: float, sl_price: float,
     errors = []
     
     if side == 'buy':
-        if not (entry_price < sl_price < tp_price):
-            errors.append(f"Buy bracket: entry {entry_price} < sl {sl_price} < tp {tp_price}")
+        # For buy orders (LONG): sl < entry < tp
+        if not (sl_price < entry_price < tp_price):
+            errors.append(f"Buy bracket: sl {sl_price} < entry {entry_price} < tp {tp_price}")
     else:
-        if not (tp_price < sl_price < entry_price):
-            errors.append(f"Sell bracket: tp {tp_price} < sl {sl_price} < entry {entry_price}")
+        # For sell orders (SHORT): tp < entry < sl
+        if not (tp_price < entry_price < sl_price):
+            errors.append(f"Sell bracket: tp {tp_price} < entry {entry_price} < sl {sl_price}")
     
     # Check minimum distances
     entry_tp_distance = abs(tp_price - entry_price) / entry_price
