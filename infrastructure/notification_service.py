@@ -296,20 +296,58 @@ class NotificationManager:
             logger.error(f"Failed to process notification queue: {e}")
     
     async def _send_telegram_notification(self, notification: Dict[str, Any]) -> bool:
-        """Send notification through Telegram."""
+        """Send notification through Telegram.
+        Falls back to direct Bot API if the bot application isn't running.
+        """
         try:
             # Format message
             formatted_message = self._format_notification_message(notification)
-            
-            # Send through Telegram bot
-            await self.telegram_bot.send_notification(
-                notification["title"],
-                formatted_message,
-                notification["level"]
-            )
-            
-            return True
-            
+
+            # Preferred path: use running TelegramBot application (rich formatting, lifecycle)
+            try:
+                if getattr(self.telegram_bot, "application", None):
+                    await self.telegram_bot.send_notification(
+                        notification["title"],
+                        formatted_message,
+                        notification["level"]
+                    )
+                    return True
+            except Exception as e:
+                logger.warning(f"Primary Telegram send path failed, will try direct Bot API: {e}")
+
+            # Fallback path: use direct Bot API without starting polling application
+            try:
+                import os
+                from telegram import Bot as TelegramCoreBot
+
+                token = os.getenv("TELEGRAM_BOT_TOKEN")
+                chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+                if not token or not chat_id:
+                    logger.warning("Telegram token or chat_id not set; skipping send")
+                    return False
+
+                # Build full message including title/level like send_notification does
+                title = notification.get("title", "Notification")
+                level = notification.get("level", "info")
+                prefix = "ℹ️ "
+                if level == "success":
+                    prefix = "✅ "
+                elif level == "warning":
+                    prefix = "⚠️ "
+                elif level == "error":
+                    prefix = "❌ "
+
+                full_message = f"{prefix}<b>{title}</b>\n\n{formatted_message}"
+
+                core_bot = TelegramCoreBot(token=token)
+                await core_bot.send_message(chat_id=chat_id, text=full_message, parse_mode='HTML')
+                logger.info("Telegram message sent via direct Bot API fallback")
+                return True
+            except Exception as e:
+                logger.error(f"Direct Bot API send failed: {e}")
+                return False
+
         except Exception as e:
             logger.error(f"Failed to send Telegram notification: {e}")
             return False

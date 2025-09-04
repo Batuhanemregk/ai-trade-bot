@@ -41,18 +41,29 @@ class NewsScorer:
         }
 
     def _initialize_news_client(self):
-        """Initialize news client."""
+        """Initialize news client with new LLM-based system."""
         try:
-            # News integration not available, using simulated news client
-            self.news_client = SimulatedNewsClient()
-            logger.info("ℹ️ Using simulated news client (news integration not available)")
+            # Import new news service
+            from application.news_service import NewsService
+            import os
+            
+            # Load policy for news service
+            import yaml
+            with open('configs/policy.yaml', 'r') as f:
+                policy = yaml.safe_load(f)
+            
+            # Initialize news service
+            self.news_service = NewsService(policy)
+            logger.info("✅ News system initialized with LLM-based service")
+            
         except Exception as e:
-            logger.warning(f"⚠️ News client initialization failed: {e}")
-            self.news_client = None
+            logger.warning(f"⚠️ News service initialization failed, using simulated: {e}")
+            self.news_client = SimulatedNewsClient()
+            self.news_service = None
 
-    def score(self, symbol: str, lookback_minutes: int = 1440) -> tuple[float, list[str], str, float]:
+    async def score(self, symbol: str, lookback_minutes: int = 1440) -> tuple[float, list[str], str, float]:
         """
-        Compute news sentiment score for a symbol.
+        Compute news sentiment score for a symbol using LLM-based news service.
         
         Args:
             symbol: Trading symbol
@@ -62,31 +73,45 @@ class NewsScorer:
             Tuple of (score: float, categories: List[str], rationale: str, volatility_impact: float)
         """
         try:
+            # Use new news service if available
+            if hasattr(self, 'news_service') and self.news_service:
+                return await self.news_service.get_news_score(symbol)
+            
+            # Fallback to legacy system
             if not self.news_client:
                 return self._neutral_score(symbol)
 
-            # Get news for the symbol
-            headlines = self._get_news_for_symbol(symbol, lookback_minutes)
+            # Get real news for the symbol
+            headlines = await self._get_news_for_symbol(symbol, lookback_minutes)
 
             if not headlines:
+                logger.warning(f"No news found for {symbol}")
                 return self._neutral_score(symbol)
 
-            # Analyze sentiment by category
-            category_scores = self._analyze_category_sentiment(headlines)
+            logger.info(f"📰 Found {len(headlines)} news articles for {symbol}")
 
-            # Compute overall sentiment score
-            news_score = self._compute_overall_score(category_scores)
+            # Use LLM analyzer if available, otherwise fallback
+            if hasattr(self, 'llm_analyzer') and self.llm_analyzer:
+                if hasattr(self.llm_analyzer, 'analyze_news_batch'):
+                    # Check if it's async
+                    if asyncio.iscoroutinefunction(self.llm_analyzer.analyze_news_batch):
+                        # LLM analysis (async)
+                        news_score, categories, rationale, volatility_impact = await self.llm_analyzer.analyze_news_batch(headlines, symbol)
+                    else:
+                        # Fallback analysis (sync)
+                        news_score, categories, rationale, volatility_impact = self.llm_analyzer.analyze_news_batch(headlines, symbol)
+                else:
+                    # Fallback analysis
+                    news_score, categories, rationale, volatility_impact = self.llm_analyzer.analyze_news_batch(headlines, symbol)
+            else:
+                # Legacy analysis
+                category_scores = self._analyze_category_sentiment(headlines)
+                news_score = self._compute_overall_score(category_scores)
+                categories = self._get_relevant_categories(category_scores)
+                rationale = self._generate_rationale(category_scores, news_score)
+                volatility_impact = self._compute_volatility_impact(headlines, category_scores)
 
-            # Determine relevant categories
-            categories = self._get_relevant_categories(category_scores)
-
-            # Generate rationale
-            rationale = self._generate_rationale(category_scores, news_score)
-
-            # Compute volatility impact
-            volatility_impact = self._compute_volatility_impact(headlines, category_scores)
-
-            logger.debug(f"✅ News scoring completed for {symbol}: {news_score:.1f}")
+            logger.info(f"✅ News scoring completed for {symbol}: {news_score:.1f} ({categories})")
 
             return news_score, categories, rationale, volatility_impact
 
@@ -103,34 +128,22 @@ class NewsScorer:
             0.5  # Neutral volatility impact
         )
 
-    def _get_news_for_symbol(self, symbol: str, lookback_minutes: int) -> list[Any]:
-        """Get news headlines for a symbol within lookback period."""
+    async def _get_news_for_symbol(self, symbol: str, lookback_minutes: int) -> list[Any]:
+        """Get news headlines for a symbol within lookback period using real APIs."""
         try:
             if not self.news_client:
                 return []
 
-            # Try to get news using existing methods
+            # Use real news client if available
             if hasattr(self.news_client, 'get_news_for_symbol'):
-                headlines = self.news_client.get_news_for_symbol(symbol)
-            elif hasattr(self.news_client, 'fetch_news'):
-                # Fetch news and filter by symbol
-                try:
-                    # Handle both sync and async fetch methods
-                    if callable(self.news_client.fetch_news):
-                        if asyncio.iscoroutinefunction(self.news_client.fetch_news):
-                            # Async method - we'll skip for now in sync context
-                            headlines = []
-                        else:
-                            # Sync method
-                            self.news_client.fetch_news()
-                            headlines = self.news_client.get_news_for_symbol(symbol)
-                    else:
-                        headlines = []
-                except Exception:
-                    headlines = []
+                # MultiSourceNewsClient
+                headlines = await self.news_client.get_news_for_symbol(symbol, limit=20)
+            elif hasattr(self.news_client, 'get_news'):
+                # Legacy simulated client
+                headlines = self.news_client.get_news(symbol, lookback_minutes)
             else:
                 # Fallback: try to get general crypto news
-                headlines = self._get_general_crypto_news()
+                headlines = await self._get_general_crypto_news()
 
             # Filter by time if possible
             if headlines and lookback_minutes < 1440:
@@ -143,14 +156,14 @@ class NewsScorer:
             logger.error(f"News retrieval error for {symbol}: {e}")
             return []
 
-    def _get_general_crypto_news(self) -> list[Any]:
+    async def _get_general_crypto_news(self) -> list[Any]:
         """Get general crypto news as fallback."""
         try:
             # Try to get general market news
             if hasattr(self.news_client, 'get_market_news'):
-                return self.news_client.get_market_news()
+                return await self.news_client.get_market_news()
             elif hasattr(self.news_client, 'get_latest_news'):
-                return self.news_client.get_latest_news()
+                return await self.news_client.get_latest_news()
             else:
                 return []
         except:

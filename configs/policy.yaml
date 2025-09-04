@@ -1,6 +1,28 @@
 # AiBotBS Policy Configuration
 # Single source of truth for all trading and system policies
 
+# Scheduler Configuration
+schedule:
+  trailing_5m: "*/5 * * * *"    # Every 5 minutes (second=5)
+  trading_15m: "*/15 * * * *"   # Every 15 minutes (second=7)
+  regime_1h: "0 * * * *"        # Every hour (second=9)
+  risk_1m: "* * * * *"          # Every minute (second=12)
+  market_overview: "*/15 * * * *" # Every 15 minutes (second=3)
+
+scheduler:
+  semaphore_limit: 2            # Max concurrent jobs
+  retry:
+    attempts: 3
+    backoff_seconds: [15, 30, 60]
+  job_defaults:
+    coalesce: true
+    max_instances: 1
+    misfire_grace_time: 60
+
+idempotency:
+  persist_path: "data/runtime_state.json"
+  cleanup_interval_hours: 24
+
 # Trading Configuration
 trading:
   # Risk Management
@@ -13,6 +35,63 @@ trading:
     streak_guard:
       max_losses: 3         # Max consecutive losses
       cooldown_hours: 24    # Cooldown period after max losses
+    
+    # Risk Assessment Configuration
+    risk_assessment:
+      correlation_risk:
+        market_cap_tiers:
+          tier_1: ['BTC', 'ETH']  # >100B market cap
+          tier_2: ['ADA', 'SOL', 'DOT', 'AVAX', 'MATIC', 'LINK', 'UNI', 'ATOM']  # 10B-100B
+          tier_3: ['NEAR', 'ALGO', 'ICP', 'XRP', 'CFX', 'CRO', 'LDO', 'TAO', 'ARB', 'SUI', 'RENDER', 'JUP', 'OP']  # 1B-10B
+          tier_4: ['BIO', 'PENGU', 'FET', 'VET', 'FTM']  # <1B
+        risk_levels:
+          tier_1: 25.0  # En düşük korelasyon riski
+          tier_2: 35.0  # Orta korelasyon riski
+          tier_3: 50.0  # Yüksek korelasyon riski
+          tier_4: 70.0  # En yüksek korelasyon riski
+        default_unknown: 60.0  # Bilinmeyen coinler için
+      
+      liquidity_risk:
+        volume_thresholds:
+          BTC: {high: 50000000, medium: 10000000, low: 1000000}
+          ETH: {high: 30000000, medium: 5000000, low: 500000}
+          tier_2: {high: 10000000, medium: 2000000, low: 200000}
+          tier_3: {high: 5000000, medium: 1000000, low: 100000}
+          tier_4: {high: 1000000, medium: 200000, low: 20000}
+        default_unknown: 50.0
+      
+      volatility_risk:
+        volatility_thresholds:
+          BTC: {low: 0.15, medium: 0.35, high: 0.55}  # BTC daha stabil
+          ETH: {low: 0.20, medium: 0.40, high: 0.60}  # ETH orta volatilite
+          tier_2: {low: 0.25, medium: 0.45, high: 0.65}  # Major altcoinler
+          tier_3: {low: 0.30, medium: 0.50, high: 0.70}  # Mid-cap altcoinler
+          tier_4: {low: 0.35, medium: 0.55, high: 0.75}  # Small-cap altcoinler
+        default_unknown: 0.40
+      
+      market_risk:
+        base_risk: 30.0  # Temel piyasa riski
+        volatility_penalty: 20.0  # Volatilite cezası
+        trend_bonus: 10.0  # Trend bonusu
+        extreme_change_threshold: 0.2  # %20 değişim eşiği
+        strong_trend_threshold: 0.1  # %10 trend gücü eşiği
+        min_risk: 10.0
+        max_risk: 90.0
+      
+      score_risk:
+        long_thresholds:
+          strong: 80.0  # Güçlü sinyal
+          medium: 60.0  # Orta sinyal
+          weak: 50.0    # Zayıf sinyal
+        short_thresholds:
+          strong: 20.0  # Güçlü sinyal
+          medium: 40.0  # Orta sinyal
+          weak: 50.0    # Zayıf sinyal
+        risk_levels:
+          strong: 20.0  # Düşük risk
+          medium: 40.0  # Orta risk
+          weak: 60.0    # Yüksek risk
+          very_weak: 80.0  # Çok yüksek risk
   
   # Execution
   execution:
@@ -25,10 +104,76 @@ trading:
   # Scoring
   scoring:
     ta_weight: 0.4          # Technical Analysis weight
-    ml_weight: 0.3          # Machine Learning weight
+    ml_weight: 0.25         # Machine Learning weight
     news_weight: 0.2        # News sentiment weight
-    risk_weight: 0.1        # Risk score weight
+    risk_weight: 0.15       # Risk score weight
     min_composite_score: 0.6  # Minimum score to execute trade
+    
+    # Signal Thresholds (Single Source of Truth)
+    decision_thresholds:
+      enter_long: 60        # Score >= 60: LONG entry
+      exit_long: 45         # Score <= 45: LONG exit/reversal
+      enter_short: 40       # Score <= 40: SHORT entry
+      exit_short: 55        # Score >= 55: SHORT exit/reversal
+      flat_range: [45, 55]  # 45-55 arası: FLAT (neutral zone)
+    
+    # Signal Gating
+    signal:
+      persistence_bars: 2     # Signal must persist N bars
+      rev_confirm_bars: 2     # Reversal confirmation bars
+      rev_strength_min: 0.6   # Minimum reversal strength (0-1)
+      max_signal_age_bars: 6  # Maximum signal age
+      
+    # Position Sizing
+    position_sizing:
+      min_percentage: 0.01  # %1 minimum
+      max_percentage: 0.10  # %10 maximum
+      score_multiplier: 0.09 # Skor çarpanı
+      regime_multiplier: 0.6 # Low ADX regime multiplier
+      
+    # Risk Management (NO daily loss limits)
+    risk_management:
+      fees_bps: 6                 # Trading fees in basis points
+      slippage_bps: 3             # Slippage buffer in basis points
+      batch_size: 5               # Symbols per batch for processing
+      max_position_age_hours: 24  # Max 24h position age
+      max_position_size_pct: 0.10 # Max 10% per position
+      max_total_risk_pct: 0.60    # Max 60% total risk
+      max_concurrent_positions: 20 # Max 20 positions
+      
+    # Regime Filtering
+    regime:
+      adx_1h_min: 22              # Minimum ADX for trend mode
+      low_adx_threshold: 15       # Low ADX threshold
+      
+    # Position Management
+    position_management:
+      min_hold_bars: 3            # Min bars before signal-based exit
+      cooldown:
+        base_bars: 2              # Base cooldown (15m: 30min)
+        max_bars: 16              # Max cooldown (15m: 4h)
+        loss_multiplier: 0.5      # +50% per consecutive loss
+        same_direction_delay: 1   # +1 bar for same direction re-entry
+      
+    # Trailing Stops
+    trailing:
+      activation_r_multiple: 0.5  # Activate at +0.5R
+      breakeven_r_multiple: 1.0   # Move to BE at +1.0R
+      tight_r_multiple: 1.5       # Tight stop at +1.5R
+      tight_offset: 0.3           # Tight stop offset (+0.3R)
+      
+    # Regime Filtering
+    regime:
+      adx_1h_min: 22              # Min ADX for trend mode
+      low_adx_threshold: 20       # Below this: mean reversion mode
+      
+    # Reversal Policy
+    reversal:
+      edge_cost_ratio_min: 1.5    # Expected move / (fees + slippage)
+      atr_coefficient: 1.0        # ATR multiplier for expected move
+      score_distance_coefficient: 0.1 # Score distance multiplier
+      fees_bps: 0.05              # Trading fees (0.05%)
+      slippage_bps: 0.02          # Slippage buffer (0.02%)
 
 # Agent System Configuration
 agents:
@@ -102,9 +247,12 @@ exchange:
   # Symbol mapping
   symbols:
     default_quote: "USDT"
-    supported_pairs: ["BTC", "ETH", "SOL", "ADA", "DOT"]
+    supported_pairs: ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "MATIC", "LINK", "UNI", "ATOM", "NEAR", "FTM", "ALGO", "VET", "ICP", "XRP", "CFX", "BIO", "PENGU", "CRO", "LDO", "TAO", "ARB", "SUI", "RENDER", "FET", "JUP", "OP"]
     # Trading symbols (pairs)
-    trading_pairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT"]
+    trading_pairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT", "AVAX-USDT", "MATIC-USDT", "LINK-USDT", "UNI-USDT", "ATOM-USDT", "NEAR-USDT", "FTM-USDT", "ALGO-USDT", "VET-USDT", "ICP-USDT", "XRP-USDT", "CFX-USDT", "BIO-USDT", "PENGU-USDT", "CRO-USDT", "LDO-USDT", "TAO-USDT", "ARB-USDT", "SUI-USDT", "RENDER-USDT", "FET-USDT", "JUP-USDT", "OP-USDT"]
+  
+  # Symbol-specific overrides for minimum order requirements (disabled - using dynamic calculation)
+  # symbol_overrides: {}
 
 # Telegram Configuration
 telegram:
@@ -221,3 +369,29 @@ development:
     news_integration: true
     telegram_bot: true
     performance_tracking: true
+
+# News System Configuration
+news:
+  lookback_hours_bootstrap: 24
+  poll_interval_sec: 300
+  overlap_minutes: 30
+  dedupe:
+    key_fields: ["url", "title"]
+  
+news_llm:
+  enabled: true
+  digest:
+    max_items_per_symbol: 30
+  cache:
+    ttl_minutes: 60
+    invalidate_on_digest_change: true
+
+news_scoring:
+  thresholds:
+    specific: 0.70
+    mixed: 0.30
+  weights:
+    symbol_specific: 1.0
+    mixed_shared: 0.6
+    general_market: 0.2
+  majors_bonus: 0.1  # BTC/ETH için ek ağırlık
