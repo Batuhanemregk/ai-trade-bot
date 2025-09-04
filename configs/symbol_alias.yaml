@@ -1,0 +1,170 @@
+# Symbol Alias Configuration for News Analysis
+# Each symbol has multiple ways to be referenced in news articles
+
+BTC:
+  cashtags: ["BTC", "$BTC"]
+  names: ["Bitcoin", "BTC"]
+  url_keys: ["/bitcoin/", "/btc/"]
+  tag_keys: ["bitcoin", "btc"]
+
+ETH:
+  cashtags: ["ETH", "$ETH"]
+  names: ["Ethereum", "ETH", "Ether"]
+  url_keys: ["/ethereum/", "/eth/"]
+  tag_keys: ["ethereum", "eth", "ether"]
+
+SOL:
+  cashtags: ["SOL", "$SOL"]
+  names: ["Solana", "SPL", "Jito"]
+  url_keys: ["/solana/", "/sol/"]
+  tag_keys: ["solana", "sol", "spl"]
+
+ADA:
+  cashtags: ["ADA", "$ADA"]
+  names: ["Cardano", "ADA"]
+  url_keys: ["/cardano/", "/ada/"]
+  tag_keys: ["cardano", "ada"]
+
+DOT:
+  cashtags: ["DOT", "$DOT"]
+  names: ["Polkadot", "DOT"]
+  url_keys: ["/polkadot/", "/dot/"]
+  tag_keys: ["polkadot", "dot"]
+
+AVAX:
+  cashtags: ["AVAX", "$AVAX"]
+  names: ["Avalanche", "AVAX"]
+  url_keys: ["/avalanche/", "/avax/"]
+  tag_keys: ["avalanche", "avax"]
+
+MATIC:
+  cashtags: ["MATIC", "$MATIC"]
+  names: ["Polygon", "MATIC"]
+  url_keys: ["/polygon/", "/matic/"]
+  tag_keys: ["polygon", "matic"]
+
+LINK:
+  cashtags: ["LINK", "$LINK"]
+  names: ["Chainlink", "LINK"]
+  url_keys: ["/chainlink/", "/link/"]
+  tag_keys: ["chainlink", "link"]
+
+UNI:
+  cashtags: ["UNI", "$UNI"]
+  names: ["Uniswap", "UNI"]
+  url_keys: ["/uniswap/", "/uni/"]
+  tag_keys: ["uniswap", "uni"]
+
+ATOM:
+  cashtags: ["ATOM", "$ATOM"]
+  names: ["Cosmos", "ATOM"]
+  url_keys: ["/cosmos/", "/atom/"]
+  tag_keys: ["cosmos", "atom"]
+
+NEAR:
+  cashtags: ["NEAR", "$NEAR"]
+  names: ["NEAR Protocol", "NEAR"]
+  url_keys: ["/near/", "/near-protocol/"]
+  tag_keys: ["near", "near-protocol"]
+
+FTM:
+  cashtags: ["FTM", "$FTM"]
+  names: ["Fantom", "FTM"]
+  url_keys: ["/fantom/", "/ftm/"]
+  tag_keys: ["fantom", "ftm"]
+
+ALGO:
+  cashtags: ["ALGO", "$ALGO"]
+  names: ["Algorand", "ALGO"]
+  url_keys: ["/algorand/", "/algo/"]
+  tag_keys: ["algorand", "algo"]
+
+VET:
+  cashtags: ["VET", "$VET"]
+  names: ["VeChain", "VET"]
+  url_keys: ["/vechain/", "/vet/"]
+  tag_keys: ["vechain", "vet"]
+
+ICP:
+  cashtags: ["ICP", "$ICP"]
+  names: ["Internet Computer", "ICP"]
+  url_keys: ["/internet-computer/", "/icp/"]
+  tag_keys: ["internet-computer", "icp"]
+
+XRP:
+  cashtags: ["XRP", "$XRP"]
+  names: ["Ripple", "XRP"]
+  url_keys: ["/ripple/", "/xrp/"]
+  tag_keys: ["ripple", "xrp"]
+
+CFX:
+  cashtags: ["CFX", "$CFX"]
+  names: ["Conflux", "CFX"]
+  url_keys: ["/conflux/", "/cfx/"]
+  tag_keys: ["conflux", "cfx"]
+
+BIO:
+  cashtags: ["BIO", "$BIO"]
+  names: ["BioPassport", "BIO"]
+  url_keys: ["/biopassport/", "/bio/"]
+  tag_keys: ["biopassport", "bio"]
+
+PENGU:
+  cashtags: ["PENGU", "$PENGU"]
+  names: ["Penguin", "PENGU"]
+  url_keys: ["/penguin/", "/pengu/"]
+  tag_keys: ["penguin", "pengu"]
+
+CRO:
+  cashtags: ["CRO", "$CRO"]
+  names: ["Crypto.com", "CRO"]
+  url_keys: ["/crypto-com/", "/cro/"]
+  tag_keys: ["crypto-com", "cro"]
+
+LDO:
+  cashtags: ["LDO", "$LDO"]
+  names: ["Lido", "LDO"]
+  url_keys: ["/lido/", "/ldo/"]
+  tag_keys: ["lido", "ldo"]
+
+TAO:
+  cashtags: ["TAO", "$TAO"]
+  names: ["Bittensor", "TAO"]
+  url_keys: ["/bittensor/", "/tao/"]
+  tag_keys: ["bittensor", "tao"]
+
+ARB:
+  cashtags: ["ARB", "$ARB"]
+  names: ["Arbitrum", "ARB"]
+  url_keys: ["/arbitrum/", "/arb/"]
+  tag_keys: ["arbitrum", "arb"]
+
+SUI:
+  cashtags: ["SUI", "$SUI"]
+  names: ["Sui", "SUI Network"]
+  url_keys: ["/sui/", "/sui-network/"]
+  tag_keys: ["sui", "sui-network"]
+
+RENDER:
+  cashtags: ["RENDER", "$RENDER"]
+  names: ["Render", "Render Token"]
+  url_keys: ["/render/", "/render-token/"]
+  tag_keys: ["render", "render-token"]
+
+FET:
+  cashtags: ["FET", "$FET"]
+  names: ["Fetch.ai", "FET"]
+  url_keys: ["/fetch-ai/", "/fet/"]
+  tag_keys: ["fetch-ai", "fet"]
+
+JUP:
+  cashtags: ["JUP", "$JUP"]
+  names: ["Jupiter", "JUP"]
+  url_keys: ["/jupiter/", "/jup/"]
+  tag_keys: ["jupiter", "jup"]
+
+OP:
+  cashtags: ["OP", "$OP"]
+  names: ["Optimism", "OP"]
+  url_keys: ["/optimism/", "/op/"]
+  tag_keys: ["optimism", "op"]

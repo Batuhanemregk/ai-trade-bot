@@ -7,11 +7,206 @@ import math
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple, Union
+from loguru import logger
+import asyncio
 
 
 class ValidationError(Exception):
     """Raised when order validation fails."""
     pass
+
+
+def ceil_to_step(x: float, step: float) -> float:
+    """Round up to the nearest step."""
+    if step is None or step == 0:
+        return x
+    # step ondalık ise yukarı yuvarla
+    n = int(-(-x // step))  # ceiling division for floats' step (approx)
+    return round(n * step, 12)
+
+
+async def _get_dynamic_minimum_cost(exchange, symbol: str, price: float) -> float:
+    """Get dynamic minimum cost based on exchange rules and market conditions."""
+    try:
+        # Load markets if not loaded
+        if not hasattr(exchange, 'markets') or not exchange.markets:
+            exchange.load_markets()
+        
+        market = exchange.market(symbol)
+        info = market.get('info', {})
+        
+        # Get current order book for real-time price
+        orderbook = exchange.fetch_order_book(symbol)
+        if orderbook['bids'] and orderbook['asks']:
+            current_price = (orderbook['bids'][0][0] + orderbook['asks'][0][0]) / 2
+        else:
+            current_price = price
+        
+        # OKX specific minimum cost rules based on symbol type
+        base_currency = symbol.split('/')[0]
+        
+        # Different minimum costs for different asset classes
+        if base_currency in ['BTC', 'ETH']:
+            # Major cryptocurrencies - higher minimum
+            min_cost_usdt = 5.0
+        elif base_currency in ['SOL', 'ADA', 'DOT', 'MATIC', 'AVAX']:
+            # Mid-tier cryptocurrencies
+            min_cost_usdt = 2.0
+        elif base_currency in ['DOGE', 'SHIB', 'PEPE']:
+            # Meme coins - lower minimum
+            min_cost_usdt = 1.0
+        else:
+            # Default minimum
+            min_cost_usdt = 1.0
+        
+        # Adjust based on current price volatility
+        # If price is very high, increase minimum to avoid dust orders
+        if current_price > 1000:
+            min_cost_usdt *= 2
+        elif current_price > 100:
+            min_cost_usdt *= 1.5
+        
+        logger.info(f"📊 {symbol} dinamik minimum cost: ${min_cost_usdt:.2f} (base: {base_currency}, price: ${current_price:.2f})")
+        return min_cost_usdt
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to get dynamic minimum cost for {symbol}: {e}")
+        return 1.0  # Fallback
+
+
+async def compute_required_amount(exchange, symbol: str, price: float) -> dict:
+    """Compute required minimum amount for a symbol."""
+    try:
+        # Load policy overrides
+        try:
+            from infrastructure.bootstrap import load_policy
+            policy = load_policy()
+            symbol_overrides = policy.get('exchange', {}).get('symbol_overrides', {}).get(symbol, {})
+        except:
+            symbol_overrides = {}
+        
+        # Load markets if not loaded
+        if not hasattr(exchange, 'markets') or not exchange.markets:
+            exchange.load_markets()
+        
+        m = exchange.market(symbol)
+        limits = m.get('limits', {}) or {}
+        prec = m.get('precision', {}) or {}
+
+        # amount step & min
+        amount_step = None
+        amount_min = (limits.get('amount') or {}).get('min')
+        amount_step = (limits.get('amount') or {}).get('step')
+
+        # bazı OKX marketlerinde info altında minSz/lotSz olur
+        info = m.get('info', {}) or {}
+        min_sz = info.get('minSz')
+        lot_sz = info.get('lotSz')
+        tick_sz = info.get('tickSz')
+
+        # cost min
+        min_cost = (limits.get('cost') or {}).get('min') or m.get('minCost')
+        
+        # Note: OKX minimum cost is typically handled by position size calculation
+        # No need to override min_cost here as position size should be sufficient
+
+        # amount_step'i türet (elde yoksa lot_sz veya precision'dan)
+        if amount_step in (None, 0):
+            if lot_sz not in (None, ''):
+                try:
+                    amount_step = float(lot_sz)
+                except:
+                    amount_step = None
+        if amount_step in (None, 0) and 'amount' in prec and prec['amount'] is not None:
+            # precision -> step
+            # ör: precision.amount = 3 ise step = 0.001
+            try:
+                amount_step = 10 ** (-int(prec['amount']))
+            except:
+                amount_step = None
+
+        # amount_min'i türet (elde yoksa min_sz veya step'e düş)
+        if amount_min in (None, 0):
+            if min_sz not in (None, ''):
+                try:
+                    amount_min = float(min_sz)
+                except:
+                    amount_min = None
+
+        # Apply symbol overrides
+        if symbol_overrides:
+            if 'min_amount' in symbol_overrides:
+                amount_min = symbol_overrides['min_amount']
+            if 'min_cost_usdt' in symbol_overrides:
+                min_cost = symbol_overrides['min_cost_usdt']
+
+        # Fiyat yoksa min_cost kullanamayız
+        need_by_cost = 0.0
+        if price and min_cost:
+            need_by_cost = min_cost / float(price)
+        
+        # OKX'te min_cost genellikle None, bu yüzden amount_min kullan
+        # Ama amount_min çok küçükse, exchange'in gerçek minimum cost'unu hesapla
+        # SOL-USDT-SWAP için özel durum: gerçek minimum çok küçük, dinamik hesaplama yapma
+        if symbol == 'SOL-USDT-SWAP' and amount_min and amount_min <= 0.01:
+            logger.info(f"📊 {symbol} için gerçek minimum kullanılıyor: {amount_min} SOL")
+            # Gerçek minimum kullan, dinamik hesaplama yapma
+        elif amount_min and amount_min < 0.01:  # Diğer semboller için dinamik hesaplama
+            # Exchange'in gerçek minimum cost'unu hesapla
+            min_cost_usdt = await _get_dynamic_minimum_cost(exchange, symbol, price)
+            need_by_cost = min_cost_usdt / float(price)
+            logger.info(f"📊 {symbol} amount_min çok küçük ({amount_min}), dinamik minimum ${min_cost_usdt:.2f} kullanılıyor")
+
+        base_need = max(need_by_cost, amount_min or 0.0)
+
+        # step'e yukarı yuvarla
+        if amount_step and base_need:
+            base_need = ceil_to_step(base_need, amount_step)
+
+        return {
+            "amount_step": amount_step,
+            "amount_min": amount_min,
+            "min_cost": min_cost,
+            "required_amount": base_need,
+            "tick_sz": tick_sz,
+            "raw_info": {"minSz": min_sz, "lotSz": lot_sz},
+            "overrides_applied": bool(symbol_overrides)
+        }
+    except Exception as e:
+        logger.error(f"Error computing required amount for {symbol}: {e}")
+        return {
+            "amount_step": 0.001,
+            "amount_min": 0.001,
+            "min_cost": 5.0,
+            "required_amount": 0.001,
+            "tick_sz": 0.01,
+            "raw_info": {},
+            "overrides_applied": False
+        }
+
+
+async def ensure_minimums(exchange, symbol: str, price: float, requested_amount: float):
+    """Ensure order meets minimum requirements."""
+    try:
+        meta = await compute_required_amount(exchange, symbol, price)
+        required = meta["required_amount"] or 0.0
+        if requested_amount is None:
+            return required, meta, (required if required > 0 else None)
+
+        adj = requested_amount
+        # step yukarı yuvarlama
+        step = meta["amount_step"]
+        if step and step > 0:
+            adj = ceil_to_step(adj, step)
+
+        # min kontrol
+        if required and adj < required:
+            adj = required
+
+        return adj, meta, (None if adj >= required else required)
+    except Exception as e:
+        logger.error(f"Error ensuring minimums for {symbol}: {e}")
+        return requested_amount, {}, None
 
 
 @dataclass

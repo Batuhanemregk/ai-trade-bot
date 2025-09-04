@@ -32,28 +32,48 @@ class OKXExchangeAdapter:
     def _init_ccxt_client(self):
         """Initialize CCXT client."""
         try:
-            # Check for simulated trading flag
             import os
+            
+            # Get API credentials from environment variables
+            api_key = os.getenv('OKX_API_KEY', '')
+            secret = os.getenv('OKX_API_SECRET', '')
+            passphrase = os.getenv('OKX_API_PASSPHRASE', '')
+            testnet = os.getenv('OKX_TESTNET', 'false').lower() == 'true'
+            default_type = os.getenv('OKX_DEFAULT_TYPE', 'swap')
+            
+            # Validate required credentials
+            if not api_key:
+                raise RuntimeError("OKX_API_KEY is required but not found in environment variables")
+            if not secret:
+                raise RuntimeError("OKX_API_SECRET is required but not found in environment variables")
+            if not passphrase:
+                raise RuntimeError("OKX_API_PASSPHRASE is required but not found in environment variables")
+            
+            # Check for simulated trading flag
             simulated_flag = os.environ.get('OKX_SIMULATED', '').strip() in ('1', 'true', 'True')
             
             exchange_params = {
-                'apiKey': self.config.get('api_key', ''),
-                'secret': self.config.get('secret', ''),
-                'password': self.config.get('passphrase', ''),
-                'sandbox': self.config.get('sandbox', False),
-                'testnet': self.config.get('testnet', False),
+                'apiKey': api_key,
+                'secret': secret,
+                'password': passphrase,
+                'sandbox': testnet,
+                'testnet': testnet,
                 'enableRateLimit': True,
                 'rateLimit': 100,
                 'timeout': 30000,
                 'headers': {'x-simulated-trading': '1'} if simulated_flag else {},
                 'options': {
-                    'defaultType': 'swap',
+                    'defaultType': default_type,
                     'adjustForTimeDifference': True,
                     'recvWindow': 5000,
                 }
             }
+            
+            logger.info(f"🔑 Initializing OKX client with API key: {api_key[:8]}...")
+            logger.info(f"🔑 Testnet mode: {testnet}, Default type: {default_type}")
+            
             self.ccxt_client = ccxt.okx(exchange_params)
-            logger.info("✅ OKX CCXT client initialized")
+            logger.info("✅ OKX CCXT client initialized successfully")
         except Exception as e:
             logger.error(f"❌ Failed to initialize CCXT client: {e}")
             self.ccxt_client = None
@@ -340,17 +360,18 @@ class OKXExchangeAdapter:
 class OKXCCXTAdapter:
     """OKX exchange adapter using CCXT library for entry orders."""
     
-    def __init__(self, api_key: str = "", secret: str = "", passphrase: str = "",
-                 sandbox: bool = False, testnet: bool = False):
-        self.api_key = api_key
-        self.secret = secret
-        self.passphrase = passphrase
-        self.sandbox = sandbox
-        self.testnet = testnet
+    def __init__(self, config: dict = None):
+        self.config = config or {}
+        self.api_key = self.config.get('api_key', '')
+        self.secret = self.config.get('secret', '')
+        self.passphrase = self.config.get('passphrase', '')
+        self.sandbox = self.config.get('sandbox', False)
+        self.testnet = self.config.get('testnet', False)
         
         # Exchange instance
         self.exchange: Optional[ccxt.Exchange] = None
         self.pro_exchange: Optional[ccxtpro.Exchange] = None
+        self.ccxt_client: Optional[ccxt.Exchange] = None
         
         # Connection settings
         self._initialized = False
@@ -369,35 +390,68 @@ class OKXCCXTAdapter:
     def _init_exchange(self):
         """Initialize the CCXT exchange instance."""
         try:
+            import os
+            
+            # Get API credentials from environment variables
+            api_key = os.getenv('OKX_API_KEY', '')
+            secret = os.getenv('OKX_API_SECRET', '')
+            passphrase = os.getenv('OKX_API_PASSPHRASE', '')
+            testnet = os.getenv('OKX_TESTNET', 'false').lower() == 'true'
+            default_type = os.getenv('OKX_DEFAULT_TYPE', 'swap')
+            
+            # Validate required credentials
+            if not api_key:
+                raise RuntimeError("OKX_API_KEY is required but not found in environment variables")
+            if not secret:
+                raise RuntimeError("OKX_API_SECRET is required but not found in environment variables")
+            if not passphrase:
+                raise RuntimeError("OKX_API_PASSPHRASE is required but not found in environment variables")
+            
             # Configure exchange parameters
             exchange_params = {
-                'apiKey': self.api_key,
-                'secret': self.secret,
-                'password': self.passphrase,
-                'sandbox': self.sandbox,
-                'testnet': self.testnet,
+                'apiKey': api_key,
+                'secret': secret,
+                'password': passphrase,
+                'sandbox': testnet,
+                'testnet': testnet,
                 'enableRateLimit': True,
                 'rateLimit': 100,  # 100ms between requests
                 'timeout': self._timeout_seconds * 1000,
                 'options': {
-                    'defaultType': 'swap',  # Default to SWAP for futures
+                    'defaultType': default_type,
                     'adjustForTimeDifference': True,
                     'recvWindow': 5000,
                 }
             }
             
+            logger.info(f"🔑 Initializing OKX client with API key: {api_key[:8]}...")
+            logger.info(f"🔑 Testnet mode: {testnet}, Default type: {default_type}")
+            
             # Create exchange instance
             self.exchange = ccxt.okx(exchange_params)
+            self.ccxt_client = self.exchange  # Alias for compatibility
             
             # Create pro exchange for async operations
             self.pro_exchange = ccxtpro.okx(exchange_params)
             
             self._initialized = True
-            logger.info("✅ OKX CCXT adapter initialized")
+            logger.info("✅ OKX CCXT adapter initialized successfully")
             
         except Exception as e:
             logger.error(f"❌ Failed to initialize OKX CCXT adapter: {e}")
             self._initialized = False
+    
+    def load_markets(self):
+        """Load markets from the exchange."""
+        if self.exchange:
+            return self.exchange.load_markets()
+        return {}
+    
+    def market(self, symbol: str):
+        """Get market information for a symbol."""
+        if self.exchange:
+            return self.exchange.market(symbol)
+        return {}
     
     async def _rate_limit(self):
         """Apply rate limiting between requests."""
@@ -880,7 +934,31 @@ class OKXCCXTAdapter:
             from execution.okx_symbol import okx_to_ccxt_symbol
             ccxt_symbol = okx_to_ccxt_symbol(symbol)
             
-            # Quantization
+            # Get current price for minimum validation
+            try:
+                ticker = await self.fetch_ticker(symbol)
+                current_price = float(ticker.get('last', 0)) if ticker else 0
+            except:
+                current_price = 0
+            
+            # Ensure minimum order requirements
+            from execution.prevalidation import ensure_minimums
+            try:
+                adjusted_amount, meta, need = await ensure_minimums(self, ccxt_symbol, current_price, amount)
+                
+                if need:
+                    logger.warning(f"⚠️ Amount below minimum for {symbol}. Required: {need}, Requested: {amount}")
+                    logger.info(f"[OKX-LIMITS] sym={symbol} min_cost={meta.get('min_cost')}, min_amount={meta.get('amount_min')}, step={meta.get('amount_step')}, px={current_price}, requested={amount}, adjusted={adjusted_amount}")
+                    amount = adjusted_amount
+                
+            except Exception as e:
+                logger.error(f"❌ Failed to ensure minimums: {e}")
+                # Fallback to original quantization
+                from execution.quantize import quantize_size, bump_to_min_size
+                amount = quantize_size(symbol, amount)
+                amount = bump_to_min_size(symbol, amount)
+            
+            # Final quantization
             from execution.quantize import quantize_size, bump_to_min_size
             q_amount = quantize_size(symbol, amount)
             q_amount = bump_to_min_size(symbol, q_amount)
@@ -909,7 +987,7 @@ class OKXCCXTAdapter:
                 order_params.update(params)
             
             # Create order
-            result = await self.ccxt_client.create_order(
+            result = self.ccxt_client.create_order(
                 ccxt_symbol, 'market', side, q_amount, None, order_params
             )
             
@@ -930,6 +1008,47 @@ class OKXCCXTAdapter:
             error_info = normalize_error(e, {'operation': 'create_market_order', 'symbol': symbol})
             logger.error(f"❌ Market order failed for {symbol}: {error_info}")
             raise
+    
+    async def create_trigger_order(self, symbol: str, side: str, trigger_px: float, 
+                                  ord_px: float, reduce_only: bool, tag: str) -> dict:
+        """Create trigger order (TP/SL)."""
+        try:
+            # Symbol mapping
+            from execution.okx_symbol import okx_to_ccxt_symbol
+            ccxt_symbol = okx_to_ccxt_symbol(symbol)
+            
+            # Prepare trigger order parameters
+            order_params = {
+                'tdMode': 'cross',
+                'ordType': 'conditional',
+                'tpTriggerPx': str(trigger_px) if 'TP' in tag else None,
+                'slTriggerPx': str(trigger_px) if 'SL' in tag else None,
+                'ordPx': str(ord_px) if ord_px > 0 else '-1',
+                'reduceOnly': str(reduce_only).lower(),
+                'side': side.lower(),  # Convert to lowercase
+            }
+            
+            # Remove None values
+            order_params = {k: v for k, v in order_params.items() if v is not None}
+            
+            # Create trigger order with minimum amount
+            result = self.ccxt_client.create_order(
+                ccxt_symbol, 'market', side, 0.01, None, order_params
+            )
+            
+            logger.info(f"✅ Trigger order created: {tag} - {side} @ {trigger_px}")
+            return {
+                'algoId': result.get('id', tag),
+                'status': 'live',
+                'side': side,
+                'triggerPx': trigger_px,
+                'ordPx': ord_px,
+                'reduceOnly': reduce_only
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Trigger order creation failed for {symbol}: {e}")
+            return {}
     
     async def create_limit_order(self, symbol: str, side: str, amount: float, price: float,
                                 *, reduce_only: bool = False, client_id: str = None, 

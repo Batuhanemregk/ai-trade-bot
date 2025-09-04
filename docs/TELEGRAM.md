@@ -21,6 +21,13 @@ The AiBotBS Telegram bot provides real-time access to your trading system throug
 /status         - Check system status
 ```
 
+## 🔔 Notifications Delivery
+
+- Notifications are sent via `infrastructure/notification_service.NotificationManager`.
+- Preferred path uses the running Telegram bot application for rich messaging.
+- Fallback: If the bot app isn't started, the system uses direct Bot API to send messages using `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` from `.env`.
+- Ensure both variables are set to receive trade and system alerts even without the bot process.
+
 ## 📊 Trading Commands
 
 ### 1. **System Status** - `/status`

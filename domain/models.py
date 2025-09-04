@@ -240,6 +240,34 @@ class Position:
 
 
 @dataclass
+class PositionUpdate:
+    """Position update entity."""
+    position_id: UUID
+    symbol: str
+    side: PositionSide
+    quantity: Quantity
+    entry_price: Price
+    current_price: Price
+    unrealized_pnl: Money
+    realized_pnl: Money
+    timestamp: datetime = field(default_factory=datetime.utcnow)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class PnLUpdate:
+    """PnL update entity."""
+    position_id: UUID
+    symbol: str
+    unrealized_pnl: Money
+    realized_pnl: Money
+    total_pnl: Money
+    pnl_percentage: float
+    timestamp: datetime = field(default_factory=datetime.utcnow)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class RiskMetrics:
     """Risk metrics entity."""
     id: UUID = field(default_factory=uuid4)

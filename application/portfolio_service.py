@@ -1,260 +1,209 @@
 """
-Portfolio service for position management.
-Contains positions, exposure, PnL, and correlation lookup.
+Portfolio Service - Real portfolio management with exchange integration
 """
 
-import asyncio
-import logging
-from typing import Any, Dict, List, Optional
-
-import numpy as np
-import pandas as pd
+from typing import Dict, Any, List, Optional
+from decimal import Decimal
+from loguru import logger
 
 
 class PortfolioService:
-    """Service for managing portfolio positions and analysis."""
+    """Real portfolio service with exchange integration."""
     
-    def __init__(self, exchange, cache=None, logger=None):
-        self.exchange = exchange
-        self.cache = cache
-        self.logger = logger or logging.getLogger(__name__)
-        
-        # Portfolio state
-        self._positions_cache = {}
-        self._last_positions_update = 0
-        self._cache_ttl = 30  # 30 seconds cache TTL
+    def __init__(self, exchange_adapter=None):
+        self.exchange_adapter = exchange_adapter
+        self._cached_balance = None
+        self._cache_timestamp = None
+        self._cache_duration = 30  # Cache for 30 seconds
     
-    async def get_positions(self, symbols: Optional[List[str]] = None) -> List[Dict[str, Any]]:
-        """Get current positions with caching."""
+    async def get_portfolio_value(self) -> float:
+        """Get total portfolio value in USDT."""
         try:
-            current_time = asyncio.get_event_loop().time()
+            balance = await self._get_balance()
             
-            # Check cache validity
-            if (current_time - self._last_positions_update < self._cache_ttl and 
-                self._positions_cache):
-                if symbols:
-                    return [pos for pos in self._positions_cache if pos.get("symbol") in symbols]
-                return self._positions_cache.copy()
+            # Calculate total portfolio value
+            total_value = 0.0
             
-            # Fetch fresh positions
-            try:
-                positions = await self.exchange.fetch_positions()
-            except Exception as e:
-                self.logger.warning(f"Failed to fetch positions from exchange: {e}")
-                return []
+            # USDT balance
+            if 'USDT' in balance:
+                usdt_balance = balance['USDT']
+                if isinstance(usdt_balance, dict):
+                    total_value += float(usdt_balance.get('total', 0))
+                else:
+                    total_value += float(usdt_balance)
             
-            # Filter and normalize positions
-            normalized_positions = []
-            for pos in positions:
-                if pos.get("size", 0) != 0:  # Only non-zero positions
-                    normalized_pos = {
-                        "symbol": pos.get("symbol"),
-                        "side": pos.get("side", "unknown"),
-                        "size": abs(float(pos.get("size", 0))),
-                        "notional": float(pos.get("notional", 0)),
-                        "unrealized_pnl": float(pos.get("unrealizedPnl", 0)),
-                        "entry_price": float(pos.get("entryPrice", 0)),
-                        "mark_price": float(pos.get("markPrice", 0)),
-                        "leverage": float(pos.get("leverage", 1)),
-                        "margin_type": pos.get("marginType", "cross"),
-                        "timestamp": pos.get("timestamp", current_time)
-                    }
-                    normalized_positions.append(normalized_pos)
-            
-            # Update cache
-            self._positions_cache = normalized_positions
-            self._last_positions_update = current_time
-            
-            # Filter by symbols if requested
-            if symbols:
-                return [pos for pos in normalized_positions if pos.get("symbol") in symbols]
-            
-            return normalized_positions
-            
-        except Exception as e:
-            self.logger.error(f"Failed to get positions: {e}")
-            return []
-    
-    async def get_exposure(self) -> Dict[str, Any]:
-        """Get portfolio exposure summary."""
-        try:
-            positions = await self.get_positions()
-            
-            if not positions:
-                return {
-                    "total_positions": 0,
-                    "total_notional": 0.0,
-                    "total_unrealized_pnl": 0.0,
-                    "long_exposure": 0.0,
-                    "short_exposure": 0.0,
-                    "net_exposure": 0.0,
-                    "max_leverage": 0.0
-                }
-            
-            # Calculate exposure metrics
-            total_notional = sum(pos.get("notional", 0) for pos in positions)
-            total_unrealized_pnl = sum(pos.get("unrealized_pnl", 0) for pos in positions)
-            
-            long_positions = [pos for pos in positions if pos.get("side") == "long"]
-            short_positions = [pos for pos in positions if pos.get("side") == "short"]
-            
-            long_exposure = sum(pos.get("notional", 0) for pos in long_positions)
-            short_exposure = sum(pos.get("notional", 0) for pos in short_positions)
-            net_exposure = long_exposure - short_exposure
-            
-            max_leverage = max((pos.get("leverage", 1) for pos in positions), default=1)
-            
-            return {
-                "total_positions": len(positions),
-                "total_notional": total_notional,
-                "total_unrealized_pnl": total_unrealized_pnl,
-                "long_exposure": long_exposure,
-                "short_exposure": short_exposure,
-                "net_exposure": net_exposure,
-                "max_leverage": max_leverage,
-                "long_count": len(long_positions),
-                "short_count": len(short_positions)
-            }
-            
-        except Exception as e:
-            self.logger.error(f"Failed to get exposure: {e}")
-            return {}
-    
-    async def correlation(self, symbols: List[str]) -> float:
-        """Calculate correlation between symbols based on price movements."""
-        try:
-            if len(symbols) < 2:
-                return 0.0
-            
-            # Get historical price data for correlation calculation
-            correlations = []
-            
-            for i in range(len(symbols)):
-                for j in range(i + 1, len(symbols)):
-                    symbol1, symbol2 = symbols[i], symbols[j]
-                    
+            # Convert other currencies to USDT value
+            for currency, amounts in balance.items():
+                if currency == 'USDT':
+                    continue
+                
+                total = float(amounts.get('total', 0))
+                if total > 0:
+                    # Get current price for this currency
                     try:
-                        # Get OHLCV data for both symbols
-                        ohlcv1 = await self.exchange.fetch_ohlcv(symbol1, "1h", limit=100)
-                        ohlcv2 = await self.exchange.fetch_ohlcv(symbol2, "1h", limit=100)
-                        
-                        if len(ohlcv1) < 50 or len(ohlcv2) < 50:
-                            continue
-                        
-                        # Convert to pandas DataFrames
-                        df1 = pd.DataFrame(ohlcv1, columns=["timestamp", "open", "high", "low", "close", "volume"])
-                        df2 = pd.DataFrame(ohlcv2, columns=["timestamp", "open", "high", "low", "close", "volume"])
-                        
-                        # Calculate returns
-                        returns1 = df1["close"].pct_change().dropna()
-                        returns2 = df2["close"].pct_change().dropna()
-                        
-                        # Align series
-                        min_length = min(len(returns1), len(returns2))
-                        returns1 = returns1.tail(min_length)
-                        returns2 = returns2.tail(min_length)
-                        
-                        # Calculate correlation
-                        if len(returns1) > 10:  # Minimum data points
-                            corr = returns1.corr(returns2)
-                            if not pd.isna(corr):
-                                correlations.append(corr)
-                    
+                        ticker = await self.exchange_adapter.fetch_ticker(f"{currency}/USDT")
+                        price = float(ticker['last'])
+                        total_value += total * price
                     except Exception as e:
-                        self.logger.warning(f"Failed to calculate correlation for {symbol1}-{symbol2}: {e}")
+                        logger.warning(f"Could not get price for {currency}: {e}")
+                        # Use a conservative estimate or skip
                         continue
             
-            if not correlations:
-                return 0.0
-            
-            # Return average correlation
-            return float(np.mean(correlations))
+            logger.debug(f"Portfolio value: {total_value:.2f} USDT")
+            return total_value
             
         except Exception as e:
-            self.logger.error(f"Failed to calculate correlation: {e}")
+            logger.error(f"Failed to get portfolio value: {e}")
             return 0.0
     
-    async def get_portfolio_state(self) -> Dict[str, Any]:
-        """Get complete portfolio state including positions, exposure, and risk metrics."""
+    async def get_available_balance(self) -> float:
+        """Get available USDT balance for trading."""
         try:
-            positions = await self.get_positions()
-            exposure = await self.get_exposure()
+            balance = await self._get_balance()
             
-            # Get account balance if available
-            try:
-                balance = await self.exchange.fetch_balance()
-                total_balance = float(balance.get("total", {}).get("USDT", 0))
-                free_balance = float(balance.get("free", {}).get("USDT", 0))
-            except Exception:
-                total_balance = 0.0
-                free_balance = 0.0
+            if 'USDT' in balance:
+                usdt_balance = balance['USDT']
+                if isinstance(usdt_balance, dict):
+                    free_balance = float(usdt_balance.get('free', 0))
+                else:
+                    free_balance = float(usdt_balance)
+                logger.debug(f"Available USDT balance: {free_balance:.2f}")
+                return free_balance
+            else:
+                logger.warning("No USDT balance found")
+                return 0.0
+                
+        except Exception as e:
+            logger.error(f"Failed to get available balance: {e}")
+            return 0.0
+    
+    async def get_balance_breakdown(self) -> Dict[str, Any]:
+        """Get detailed balance breakdown."""
+        try:
+            balance = await self._get_balance()
             
-            return {
-                "positions": positions,
-                "exposure": exposure,
-                "balance": {
-                    "total_usdt": total_balance,
-                    "free_usdt": free_balance,
-                    "used_margin": total_balance - free_balance
-                },
-                "summary": {
-                    "total_positions": len(positions),
-                    "total_notional": exposure.get("total_notional", 0),
-                    "total_pnl": exposure.get("total_unrealized_pnl", 0),
-                    "net_exposure": exposure.get("net_exposure", 0)
-                },
-                "timestamp": asyncio.get_event_loop().time()
+            breakdown = {
+                'total_value_usdt': await self.get_portfolio_value(),
+                'available_usdt': await self.get_available_balance(),
+                'currencies': {}
             }
+            
+            # Add currency details
+            for currency, amounts in balance.items():
+                if isinstance(amounts, dict):
+                    total = float(amounts.get('total', 0))
+                    if total > 0:
+                        breakdown['currencies'][currency] = {
+                            'total': total,
+                            'free': float(amounts.get('free', 0)),
+                            'used': float(amounts.get('used', 0))
+                        }
+                else:
+                    # Handle case where amounts is just a number
+                    total = float(amounts)
+                    if total > 0:
+                        breakdown['currencies'][currency] = {
+                            'total': total,
+                            'free': total,
+                            'used': 0.0
+                        }
+            
+            return breakdown
             
         except Exception as e:
-            self.logger.error(f"Failed to get portfolio state: {e}")
+            logger.error(f"Failed to get balance breakdown: {e}")
             return {
-                "positions": [],
-                "exposure": {},
-                "balance": {"total_usdt": 0, "free_usdt": 0, "used_margin": 0},
-                "summary": {"total_positions": 0, "total_notional": 0, "total_pnl": 0, "net_exposure": 0},
-                "timestamp": asyncio.get_event_loop().time()
+                'total_value_usdt': 0.0,
+                'available_usdt': 0.0,
+                'currencies': {}
             }
-
-    async def get_position_risk(self, symbol: str) -> Dict[str, Any]:
-        """Get risk metrics for a specific position."""
+    
+    async def _get_balance(self) -> Dict[str, Any]:
+        """Get balance from exchange with caching."""
+        import time
+        
+        current_time = time.time()
+        
+        # Check if we have valid cached data
+        if (self._cached_balance and 
+            self._cache_timestamp and 
+            current_time - self._cache_timestamp < self._cache_duration):
+            return self._cached_balance
+        
         try:
-            positions = await self.get_positions([symbol])
-            if not positions:
+            if not self.exchange_adapter:
+                logger.error("No exchange adapter available")
                 return {}
             
-            position = positions[0]
+            # Fetch fresh balance from exchange
+            balance = await self.exchange_adapter.fetch_balance()
             
-            # Calculate risk metrics
-            notional = position.get("notional", 0)
-            unrealized_pnl = position.get("unrealized_pnl", 0)
-            entry_price = position.get("entry_price", 0)
-            mark_price = position.get("mark_price", 0)
-            leverage = position.get("leverage", 1)
+            # Cache the result
+            self._cached_balance = balance
+            self._cache_timestamp = current_time
             
-            # Calculate price change percentage
-            if entry_price > 0:
-                price_change_pct = ((mark_price - entry_price) / entry_price) * 100
-            else:
-                price_change_pct = 0.0
-            
-            # Calculate margin usage
-            margin_used = notional / leverage if leverage > 0 else 0
-            
-            return {
-                "symbol": symbol,
-                "notional": notional,
-                "unrealized_pnl": unrealized_pnl,
-                "price_change_pct": price_change_pct,
-                "margin_used": margin_used,
-                "leverage": leverage,
-                "side": position.get("side"),
-                "size": position.get("size")
-            }
+            logger.debug(f"Fetched fresh balance from exchange")
+            return balance
             
         except Exception as e:
-            self.logger.error(f"Failed to get position risk for {symbol}: {e}")
-            return {}
-
-
-__all__ = ["PortfolioService"]
+            logger.error(f"Failed to fetch balance from exchange: {e}")
+            # Return cached data if available, otherwise empty
+            return self._cached_balance or {}
+    
+    async def get_position_value(self, symbol: str) -> float:
+        """Get current value of a specific position."""
+        try:
+            if not self.exchange_adapter:
+                return 0.0
+            
+            # Get position info
+            positions = await self.exchange_adapter.fetch_positions([symbol])
+            
+            if not positions:
+                return 0.0
+            
+            position = positions[0]
+            if float(position.get('contracts', 0)) == 0:
+                return 0.0
+            
+            # Calculate position value
+            contracts = float(position['contracts'])
+            mark_price = float(position.get('markPrice', 0))
+            position_value = abs(contracts * mark_price)
+            
+            logger.debug(f"Position value for {symbol}: {position_value:.2f} USDT")
+            return position_value
+            
+        except Exception as e:
+            logger.error(f"Failed to get position value for {symbol}: {e}")
+            return 0.0
+    
+    async def get_total_position_value(self) -> float:
+        """Get total value of all open positions."""
+        try:
+            if not self.exchange_adapter:
+                return 0.0
+            
+            # Get all positions
+            positions = await self.exchange_adapter.fetch_positions()
+            
+            total_value = 0.0
+            for position in positions:
+                contracts = float(position.get('contracts', 0))
+                if contracts != 0:  # Only count open positions
+                    mark_price = float(position.get('markPrice', 0))
+                    position_value = abs(contracts * mark_price)
+                    total_value += position_value
+            
+            logger.debug(f"Total position value: {total_value:.2f} USDT")
+            return total_value
+            
+        except Exception as e:
+            logger.error(f"Failed to get total position value: {e}")
+            return 0.0
+    
+    def clear_cache(self):
+        """Clear cached balance data."""
+        self._cached_balance = None
+        self._cache_timestamp = None
+        logger.debug("Portfolio cache cleared")

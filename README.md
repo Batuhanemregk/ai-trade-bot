@@ -15,20 +15,23 @@ git clone <your-repo>
 cd AiBotBS
 pip install -r requirements.txt
 
-# Run agents in dry-run mode
-python -m infrastructure.cli agents run --graph default --dry-run
+# Create .env (OKX, Telegram, OpenAI keys)
+cp .env.example .env  # then edit values
 
-# Run test suite
-bash scripts/ci_smoke.sh
+# Install dependencies
+pip install -r requirements.txt
+
+# Start professional scheduler (live/dry mode via policy.yaml)
+python -m infrastructure.scheduler_runner
 ```
 
 ## ✨ Features
 
-- **🧠 Multi-Source Scoring**: Technical Analysis, ML Models, News Sentiment, Risk Assessment
+- **🧠 Multi-Source Scoring**: Technical Analysis, ML Models, LLM-backed News Sentiment, Risk Assessment
 - **⚡ Real-time Execution**: OKX Exchange integration via CCXT + REST APIs
 - **🤖 Agent Runtime**: Configurable agent graphs with dry-run safety
-- **📱 Telegram Bot**: Rich command interface with inline keyboards
-- **⏰ Job Scheduler**: Cron and interval-based job management
+- **📱 Telegram Notifications + Bot**: Trade/alert cards and command interface with inline keyboards
+- **⏰ Job Scheduler**: APScheduler-based cron jobs (15m trading, 5m trailing, 5m news, 1h regime, 1m risk)
 - **🔒 Risk Management**: Position sizing, stop-loss, take-profit automation
 - **📊 Portfolio Tracking**: Real-time PnL, exposure, correlation analysis
 - **🧪 Offline Testing**: Deterministic mocks for development
