@@ -24,6 +24,8 @@ from application.jobs.regime_1h import Regime1hJob
 from application.jobs.risk_monitor import RiskMonitorJob
 from application.jobs.market_overview import MarketOverviewJob
 from application.jobs.news_incremental_5m import NewsIncremental5mJob
+from application.jobs.telegram_summary_15m import TelegramSummary15mJob
+from application.jobs.run_watchdog import RunWatchdog
 
 
 class SchedulerRunner:
@@ -60,15 +62,33 @@ class SchedulerRunner:
             
             # Initialize scheduler
             self.scheduler = AsyncIOScheduler(
-                timezone=timezone.utc,
-                job_defaults=self.policy['scheduler']['job_defaults']
+                timezone="Europe/Istanbul",
+                job_defaults={
+                    "coalesce": True,
+                    "max_instances": 1,
+                    "misfire_grace_time": 300
+                }
             )
             
             # Initialize job classes
             await self._initialize_jobs()
             
+            # Initialize watchdog
+            self.watchdog = RunWatchdog(self.policy, self.scheduler, self.jobs)
+            
             # Register jobs
             await self._register_jobs()
+            
+            # Register watchdog job
+            self.scheduler.add_job(
+                self.watchdog.check_missed_runs,
+                trigger='cron',
+                minute='*',  # Every minute
+                timezone="Europe/Istanbul",
+                id='run_watchdog',
+                name='Run Watchdog (1m)',
+                replace_existing=True
+            )
             
             logger.info("✅ Scheduler initialized successfully")
             
@@ -86,6 +106,7 @@ class SchedulerRunner:
                 'risk_monitor': RiskMonitorJob(self.policy, self.semaphore, self.runtime_state),
                 'market_overview': MarketOverviewJob(self.policy, self.semaphore, self.runtime_state),
                 'news_incremental_5m': NewsIncremental5mJob(self.policy, self.semaphore, self.runtime_state),
+                'telegram_summary_15m': TelegramSummary15mJob(self.policy, self.semaphore, self.runtime_state),
             }
             
             # Initialize each job
@@ -105,7 +126,7 @@ class SchedulerRunner:
         # Trading Analysis (15m)
         self.scheduler.add_job(
             self._execute_job,
-            CronTrigger.from_crontab(schedule_config['trading_15m']),
+            CronTrigger.from_crontab(schedule_config['trading_15m'], timezone="Europe/Istanbul"),
             args=['trading_analysis'],
             id='trading_analysis',
             name='Trading Analysis (15m)',
@@ -168,6 +189,17 @@ class SchedulerRunner:
             second=3  # Align to 15m boundaries
         )
         
+        # Telegram Summary (15m)
+        self.scheduler.add_job(
+            self._execute_job,
+            CronTrigger.from_crontab(schedule_config['telegram_summary_15m'], timezone="Europe/Istanbul"),
+            args=['telegram_summary_15m'],
+            id='telegram_summary_15m',
+            name='Telegram Summary (15m)',
+            replace_existing=True,
+            second=11  # Align to 15m boundaries
+        )
+        
         logger.info("✅ All jobs registered with scheduler")
     
     async def _execute_job(self, job_name: str):
@@ -191,9 +223,17 @@ class SchedulerRunner:
                 duration = (datetime.now(timezone.utc) - start_time).total_seconds()
                 logger.info(f"[JOB] name={job_name} status=SUCCESS dur={duration:.2f}s")
                 
+                # Log to watchdog
+                duration_ms = int(duration * 1000)
+                await self.watchdog.log_job_run(job_name, 'SUCCESS', duration_ms)
+                
         except Exception as e:
             duration = (datetime.now(timezone.utc) - start_time).total_seconds()
             logger.error(f"[JOB] name={job_name} status=FAILED dur={duration:.2f}s error={e}")
+            
+            # Log to watchdog
+            duration_ms = int(duration * 1000)
+            await self.watchdog.log_job_run(job_name, 'FAILED', duration_ms, str(e))
             
             # Save error state
             await self._save_runtime_state()
@@ -263,6 +303,9 @@ class SchedulerRunner:
             for job in self.scheduler.get_jobs():
                 logger.info(f"  - {job.name} ({job.id}): {job.next_run_time}")
             
+            # Send startup message
+            await self._send_startup_message()
+            
             # Wait for shutdown signal
             await self.shutdown_event.wait()
             
@@ -274,6 +317,9 @@ class SchedulerRunner:
         """Stop the scheduler gracefully."""
         try:
             logger.info("🛑 Shutting down scheduler...")
+            
+            # Send shutdown message
+            await self._send_shutdown_message()
             
             # Save final state
             await self._save_runtime_state()
@@ -297,6 +343,24 @@ class SchedulerRunner:
         
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+    
+    async def _send_startup_message(self):
+        """Send startup message to Telegram"""
+        try:
+            from application.analysis_cards import AnalysisCardsService
+            cards_service = AnalysisCardsService(self.policy)
+            await cards_service.send_startup_message()
+        except Exception as e:
+            logger.error(f"❌ Failed to send startup message: {e}")
+    
+    async def _send_shutdown_message(self):
+        """Send shutdown message to Telegram"""
+        try:
+            from application.analysis_cards import AnalysisCardsService
+            cards_service = AnalysisCardsService(self.policy)
+            await cards_service.send_shutdown_message()
+        except Exception as e:
+            logger.error(f"❌ Failed to send shutdown message: {e}")
 
 
 async def main():

@@ -4,9 +4,9 @@ Handles signal persistence, confirmation, hysteresis, and regime filtering.
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 from loguru import logger
 
@@ -42,6 +42,7 @@ class GatedSignal:
     regime_info: RegimeInfo
     persistence_bars: int
     confirmation_bars: int
+    details: Dict[str, Any] = field(default_factory=dict)
 
 
 class SignalProcessor(ABC):
@@ -63,7 +64,7 @@ class PersistenceProcessor(SignalProcessor):
     
     def process(self, signal: Dict, history: List[SignalHistory], regime: RegimeInfo) -> GatedSignal:
         """Check signal persistence requirements."""
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         direction = self._get_direction(final_score)
         
         # Check if signal has persisted for required bars
@@ -136,7 +137,7 @@ class ConfirmationProcessor(SignalProcessor):
     
     def process(self, signal: Dict, history: List[SignalHistory], regime: RegimeInfo) -> GatedSignal:
         """Check signal confirmation requirements."""
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         direction = self._get_direction(final_score)
         
         # Count confirmation bars
@@ -305,7 +306,7 @@ class HysteresisProcessor(SignalProcessor):
     
     def process(self, signal: Dict, history: List[SignalHistory], regime: RegimeInfo) -> GatedSignal:
         """Apply hysteresis logic."""
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         
         # Determine if this is an entry or exit signal based on history
         is_entry = self._is_entry_signal(history, final_score)

@@ -447,6 +447,23 @@ class OKXCCXTAdapter:
             return self.exchange.load_markets()
         return {}
     
+    def normalize_symbol_for_ccxt(self, symbol: str) -> str:
+        """Normalize symbol for CCXT format."""
+        try:
+            # Convert from OKX format to CCXT format
+            # BTC-USDT-SWAP -> BTC/USDT:USDT
+            if symbol.endswith('-USDT-SWAP'):
+                base = symbol.replace('-USDT-SWAP', '')
+                return f"{base}/USDT:USDT"
+            elif symbol.endswith('-USDT'):
+                base = symbol.replace('-USDT', '')
+                return f"{base}/USDT"
+            else:
+                return symbol
+        except Exception as e:
+            logger.error(f"❌ Failed to normalize symbol {symbol}: {e}")
+            return symbol
+    
     def market(self, symbol: str):
         """Get market information for a symbol."""
         if self.exchange:

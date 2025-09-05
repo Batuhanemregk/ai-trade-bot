@@ -1,0 +1,29 @@
+# Telegram Notifications Configuration
+telegram:
+  enabled: true
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  chat_id: "${TELEGRAM_CHAT_ID}"
+  timeout_sec: 10
+  retries: 3
+  backoff_seconds: [2, 4, 8]
+  queue:
+    max_size: 100
+    drop_oldest: true
+    worker_interval: 1.0
+
+# Notification Types
+notifications:
+  trade_events: true
+  risk_alerts: true
+  news_alerts: true
+  system_status: true
+
+# Message Templates
+templates:
+  entry: "🚀 [ENTRY] {symbol} {direction} size={size} px={price} reason={reason}"
+  exit: "💰 [EXIT] {symbol} {reason} pnl={pnl} r={r_multiple}"
+  reversal: "🔄 [REVCHK] {symbol} strength={strength} confirm={confirm} → {result}"
+  trailing: "📈 [TRAIL] {symbol} moved to BE={be_price} tightened={tightened}"
+  risk: "⚠️ [RISK] {symbol} {alert_type} {details}"
+  news: "📰 [NEWS] {symbol} {classification} conf={confidence} {title}"
+  system: "🔧 [SYSTEM] {status} {details}"

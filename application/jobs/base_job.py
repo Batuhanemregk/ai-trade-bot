@@ -63,6 +63,7 @@ class BaseJob(ABC):
         
         last_processed = self.last_processed_bars.get(key)
         if last_processed and last_processed >= bar_id:
+            logger.debug(f"[BAR] tf={timeframe} symbol={symbol} bar={bar_id} already processed")
             return True
         
         return False

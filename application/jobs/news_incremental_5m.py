@@ -39,6 +39,9 @@ class NewsIncremental5mJob(BaseJob):
                 logger.warning("⚠️ No symbols configured for news update")
                 return
             
+            # On-start bootstrap if no watermarks exist
+            await self.news_service.ensure_bootstrap_on_start(symbols)
+            
             # Run incremental update
             await self.news_service.incremental_update_symbols(symbols)
             

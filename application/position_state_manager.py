@@ -70,14 +70,14 @@ class ReadyToOpenRule(StateTransitionRule):
         if current_state != PositionState.READY:
             return False
         
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
         enter_short = self.policy['trading']['scoring']['decision_thresholds']['enter_short']
         
         return final_score >= enter_long or final_score <= enter_short
     
     def get_transition(self, current_state: PositionState, signal: Dict, position_info: Optional[PositionInfo]) -> StateTransition:
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
         
         if final_score >= enter_long:
@@ -108,7 +108,7 @@ class SameDirectionIgnoreRule(StateTransitionRule):
         if current_state not in [PositionState.LONG_OPEN, PositionState.SHORT_OPEN]:
             return False
         
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
         enter_short = self.policy['trading']['scoring']['decision_thresholds']['enter_short']
         
@@ -143,7 +143,7 @@ class ReversalRule(StateTransitionRule):
         if not position_info:
             return False
         
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         exit_long = self.policy['trading']['scoring']['decision_thresholds']['exit_long']
         exit_short = self.policy['trading']['scoring']['decision_thresholds']['exit_short']
         min_hold_bars = self.policy['trading']['scoring']['position_management']['min_hold_bars']
@@ -155,7 +155,7 @@ class ReversalRule(StateTransitionRule):
             return final_score >= exit_short and position_info.holding_bars >= min_hold_bars
     
     def get_transition(self, current_state: PositionState, signal: Dict, position_info: Optional[PositionInfo]) -> StateTransition:
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         
         if current_state == PositionState.LONG_OPEN:
             return StateTransition(

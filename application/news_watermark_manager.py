@@ -55,6 +55,14 @@ class NewsWatermarkManager:
         """Get watermark for a symbol"""
         return self.watermarks.get(symbol)
     
+    def has_watermark(self, symbol: str) -> bool:
+        """Check if symbol has a watermark"""
+        return symbol in self.watermarks
+    
+    def get_all_watermarks(self) -> Dict[str, str]:
+        """Get all watermarks as ISO strings"""
+        return {symbol: timestamp.isoformat() for symbol, timestamp in self.watermarks.items()}
+    
     def set_watermark(self, symbol: str, timestamp: datetime):
         """Set watermark for a symbol"""
         self.watermarks[symbol] = timestamp

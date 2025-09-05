@@ -1,170 +1,166 @@
-# Symbol Alias Configuration for News Analysis
-# Each symbol has multiple ways to be referenced in news articles
+# Symbol Aliases for News Filtering
+# Maps trading symbols to news keywords and aliases
 
-BTC:
-  cashtags: ["BTC", "$BTC"]
-  names: ["Bitcoin", "BTC"]
-  url_keys: ["/bitcoin/", "/btc/"]
-  tag_keys: ["bitcoin", "btc"]
+symbols:
+  BTC-USDT-SWAP:
+    keywords: ["bitcoin", "btc", "crypto", "cryptocurrency", "digital currency"]
+    aliases: ["bitcoin", "btc", "crypto king", "digital gold"]
+    categories: ["cryptocurrency", "digital_assets", "blockchain"]
+    
+  ETH-USDT-SWAP:
+    keywords: ["ethereum", "eth", "ether", "smart contracts", "defi", "dapp"]
+    aliases: ["ethereum", "eth", "ether", "smart contract platform"]
+    categories: ["cryptocurrency", "smart_contracts", "defi", "blockchain"]
+    
+  SOL-USDT-SWAP:
+    keywords: ["solana", "sol", "blockchain", "defi", "nft", "web3"]
+    aliases: ["solana", "sol", "high performance blockchain"]
+    categories: ["cryptocurrency", "blockchain", "defi", "web3"]
+    
+  ADA-USDT-SWAP:
+    keywords: ["cardano", "ada", "blockchain", "proof of stake", "pos"]
+    aliases: ["cardano", "ada", "proof of stake blockchain"]
+    categories: ["cryptocurrency", "blockchain", "proof_of_stake"]
+    
+  DOT-USDT-SWAP:
+    keywords: ["polkadot", "dot", "parachain", "interoperability", "web3"]
+    aliases: ["polkadot", "dot", "interoperability protocol"]
+    categories: ["cryptocurrency", "blockchain", "interoperability", "web3"]
+    
+  AVAX-USDT-SWAP:
+    keywords: ["avalanche", "avax", "blockchain", "defi", "subnet"]
+    aliases: ["avalanche", "avax", "subnet blockchain"]
+    categories: ["cryptocurrency", "blockchain", "defi"]
+    
+  MATIC-USDT-SWAP:
+    keywords: ["polygon", "matic", "ethereum scaling", "layer 2", "l2"]
+    aliases: ["polygon", "matic", "ethereum scaling solution"]
+    categories: ["cryptocurrency", "blockchain", "layer_2", "scaling"]
+    
+  LINK-USDT-SWAP:
+    keywords: ["chainlink", "link", "oracle", "price feeds", "defi"]
+    aliases: ["chainlink", "link", "oracle network"]
+    categories: ["cryptocurrency", "oracle", "defi", "infrastructure"]
+    
+  UNI-USDT-SWAP:
+    keywords: ["uniswap", "uni", "dex", "defi", "automated market maker", "amm"]
+    aliases: ["uniswap", "uni", "decentralized exchange"]
+    categories: ["cryptocurrency", "defi", "dex", "amm"]
+    
+  ATOM-USDT-SWAP:
+    keywords: ["cosmos", "atom", "blockchain", "interoperability", "ibc"]
+    aliases: ["cosmos", "atom", "internet of blockchains"]
+    categories: ["cryptocurrency", "blockchain", "interoperability"]
+    
+  NEAR-USDT-SWAP:
+    keywords: ["near protocol", "near", "blockchain", "defi", "web3"]
+    aliases: ["near protocol", "near", "developer friendly blockchain"]
+    categories: ["cryptocurrency", "blockchain", "web3", "defi"]
+    
+  FTM-USDT-SWAP:
+    keywords: ["fantom", "ftm", "blockchain", "defi", "dag"]
+    aliases: ["fantom", "ftm", "dag blockchain"]
+    categories: ["cryptocurrency", "blockchain", "defi"]
+    
+  ALGO-USDT-SWAP:
+    keywords: ["algorand", "algo", "blockchain", "proof of stake", "pos"]
+    aliases: ["algorand", "algo", "pure proof of stake"]
+    categories: ["cryptocurrency", "blockchain", "proof_of_stake"]
+    
+  VET-USDT-SWAP:
+    keywords: ["vechain", "vet", "blockchain", "supply chain", "iot"]
+    aliases: ["vechain", "vet", "supply chain blockchain"]
+    categories: ["cryptocurrency", "blockchain", "supply_chain", "iot"]
+    
+  ICP-USDT-SWAP:
+    keywords: ["internet computer", "icp", "blockchain", "web3", "dapp"]
+    aliases: ["internet computer", "icp", "world computer"]
+    categories: ["cryptocurrency", "blockchain", "web3", "dapp"]
+    
+  XRP-USDT-SWAP:
+    keywords: ["ripple", "xrp", "cryptocurrency", "payments", "cross border"]
+    aliases: ["ripple", "xrp", "digital payment protocol"]
+    categories: ["cryptocurrency", "payments", "cross_border"]
+    
+  CFX-USDT-SWAP:
+    keywords: ["conflux", "cfx", "blockchain", "defi", "web3"]
+    aliases: ["conflux", "cfx", "tree graph blockchain"]
+    categories: ["cryptocurrency", "blockchain", "defi", "web3"]
+    
+  BIO-USDT-SWAP:
+    keywords: ["biopassport", "bio", "cryptocurrency", "identity", "web3"]
+    aliases: ["biopassport", "bio", "identity protocol"]
+    categories: ["cryptocurrency", "identity", "web3"]
+    
+  PENGU-USDT-SWAP:
+    keywords: ["penguin", "pengu", "cryptocurrency", "meme", "community"]
+    aliases: ["penguin", "pengu", "meme coin"]
+    categories: ["cryptocurrency", "meme", "community"]
+    
+  CRO-USDT-SWAP:
+    keywords: ["cronos", "cro", "cryptocurrency", "defi", "exchange"]
+    aliases: ["cronos", "cro", "crypto.com ecosystem"]
+    categories: ["cryptocurrency", "defi", "exchange"]
+    
+  LDO-USDT-SWAP:
+    keywords: ["lido", "ldo", "ethereum", "staking", "defi"]
+    aliases: ["lido", "ldo", "liquid staking protocol"]
+    categories: ["cryptocurrency", "staking", "defi"]
+    
+  TAO-USDT-SWAP:
+    keywords: ["bittensor", "tao", "cryptocurrency", "ai", "machine learning"]
+    aliases: ["bittensor", "tao", "ai blockchain"]
+    categories: ["cryptocurrency", "ai", "machine_learning"]
+    
+  ARB-USDT-SWAP:
+    keywords: ["arbitrum", "arb", "ethereum", "layer 2", "l2", "scaling"]
+    aliases: ["arbitrum", "arb", "ethereum layer 2"]
+    categories: ["cryptocurrency", "layer_2", "scaling"]
+    
+  SUI-USDT-SWAP:
+    keywords: ["sui", "blockchain", "defi", "web3", "move language"]
+    aliases: ["sui", "move blockchain"]
+    categories: ["cryptocurrency", "blockchain", "defi", "web3"]
+    
+  RENDER-USDT-SWAP:
+    keywords: ["render", "rndr", "cryptocurrency", "gpu", "rendering", "ai"]
+    aliases: ["render", "rndr", "gpu rendering network"]
+    categories: ["cryptocurrency", "gpu", "rendering", "ai"]
+    
+  FET-USDT-SWAP:
+    keywords: ["fetch.ai", "fet", "cryptocurrency", "ai", "machine learning"]
+    aliases: ["fetch.ai", "fet", "ai agent network"]
+    categories: ["cryptocurrency", "ai", "machine_learning"]
+    
+  JUP-USDT-SWAP:
+    keywords: ["jupiter", "jup", "cryptocurrency", "defi", "dex", "solana"]
+    aliases: ["jupiter", "jup", "solana dex aggregator"]
+    categories: ["cryptocurrency", "defi", "dex"]
+    
+  OP-USDT-SWAP:
+    keywords: ["optimism", "op", "ethereum", "layer 2", "l2", "scaling"]
+    aliases: ["optimism", "op", "ethereum layer 2"]
+    categories: ["cryptocurrency", "layer_2", "scaling"]
 
-ETH:
-  cashtags: ["ETH", "$ETH"]
-  names: ["Ethereum", "ETH", "Ether"]
-  url_keys: ["/ethereum/", "/eth/"]
-  tag_keys: ["ethereum", "eth", "ether"]
-
-SOL:
-  cashtags: ["SOL", "$SOL"]
-  names: ["Solana", "SPL", "Jito"]
-  url_keys: ["/solana/", "/sol/"]
-  tag_keys: ["solana", "sol", "spl"]
-
-ADA:
-  cashtags: ["ADA", "$ADA"]
-  names: ["Cardano", "ADA"]
-  url_keys: ["/cardano/", "/ada/"]
-  tag_keys: ["cardano", "ada"]
-
-DOT:
-  cashtags: ["DOT", "$DOT"]
-  names: ["Polkadot", "DOT"]
-  url_keys: ["/polkadot/", "/dot/"]
-  tag_keys: ["polkadot", "dot"]
-
-AVAX:
-  cashtags: ["AVAX", "$AVAX"]
-  names: ["Avalanche", "AVAX"]
-  url_keys: ["/avalanche/", "/avax/"]
-  tag_keys: ["avalanche", "avax"]
-
-MATIC:
-  cashtags: ["MATIC", "$MATIC"]
-  names: ["Polygon", "MATIC"]
-  url_keys: ["/polygon/", "/matic/"]
-  tag_keys: ["polygon", "matic"]
-
-LINK:
-  cashtags: ["LINK", "$LINK"]
-  names: ["Chainlink", "LINK"]
-  url_keys: ["/chainlink/", "/link/"]
-  tag_keys: ["chainlink", "link"]
-
-UNI:
-  cashtags: ["UNI", "$UNI"]
-  names: ["Uniswap", "UNI"]
-  url_keys: ["/uniswap/", "/uni/"]
-  tag_keys: ["uniswap", "uni"]
-
-ATOM:
-  cashtags: ["ATOM", "$ATOM"]
-  names: ["Cosmos", "ATOM"]
-  url_keys: ["/cosmos/", "/atom/"]
-  tag_keys: ["cosmos", "atom"]
-
-NEAR:
-  cashtags: ["NEAR", "$NEAR"]
-  names: ["NEAR Protocol", "NEAR"]
-  url_keys: ["/near/", "/near-protocol/"]
-  tag_keys: ["near", "near-protocol"]
-
-FTM:
-  cashtags: ["FTM", "$FTM"]
-  names: ["Fantom", "FTM"]
-  url_keys: ["/fantom/", "/ftm/"]
-  tag_keys: ["fantom", "ftm"]
-
-ALGO:
-  cashtags: ["ALGO", "$ALGO"]
-  names: ["Algorand", "ALGO"]
-  url_keys: ["/algorand/", "/algo/"]
-  tag_keys: ["algorand", "algo"]
-
-VET:
-  cashtags: ["VET", "$VET"]
-  names: ["VeChain", "VET"]
-  url_keys: ["/vechain/", "/vet/"]
-  tag_keys: ["vechain", "vet"]
-
-ICP:
-  cashtags: ["ICP", "$ICP"]
-  names: ["Internet Computer", "ICP"]
-  url_keys: ["/internet-computer/", "/icp/"]
-  tag_keys: ["internet-computer", "icp"]
-
-XRP:
-  cashtags: ["XRP", "$XRP"]
-  names: ["Ripple", "XRP"]
-  url_keys: ["/ripple/", "/xrp/"]
-  tag_keys: ["ripple", "xrp"]
-
-CFX:
-  cashtags: ["CFX", "$CFX"]
-  names: ["Conflux", "CFX"]
-  url_keys: ["/conflux/", "/cfx/"]
-  tag_keys: ["conflux", "cfx"]
-
-BIO:
-  cashtags: ["BIO", "$BIO"]
-  names: ["BioPassport", "BIO"]
-  url_keys: ["/biopassport/", "/bio/"]
-  tag_keys: ["biopassport", "bio"]
-
-PENGU:
-  cashtags: ["PENGU", "$PENGU"]
-  names: ["Penguin", "PENGU"]
-  url_keys: ["/penguin/", "/pengu/"]
-  tag_keys: ["penguin", "pengu"]
-
-CRO:
-  cashtags: ["CRO", "$CRO"]
-  names: ["Crypto.com", "CRO"]
-  url_keys: ["/crypto-com/", "/cro/"]
-  tag_keys: ["crypto-com", "cro"]
-
-LDO:
-  cashtags: ["LDO", "$LDO"]
-  names: ["Lido", "LDO"]
-  url_keys: ["/lido/", "/ldo/"]
-  tag_keys: ["lido", "ldo"]
-
-TAO:
-  cashtags: ["TAO", "$TAO"]
-  names: ["Bittensor", "TAO"]
-  url_keys: ["/bittensor/", "/tao/"]
-  tag_keys: ["bittensor", "tao"]
-
-ARB:
-  cashtags: ["ARB", "$ARB"]
-  names: ["Arbitrum", "ARB"]
-  url_keys: ["/arbitrum/", "/arb/"]
-  tag_keys: ["arbitrum", "arb"]
-
-SUI:
-  cashtags: ["SUI", "$SUI"]
-  names: ["Sui", "SUI Network"]
-  url_keys: ["/sui/", "/sui-network/"]
-  tag_keys: ["sui", "sui-network"]
-
-RENDER:
-  cashtags: ["RENDER", "$RENDER"]
-  names: ["Render", "Render Token"]
-  url_keys: ["/render/", "/render-token/"]
-  tag_keys: ["render", "render-token"]
-
-FET:
-  cashtags: ["FET", "$FET"]
-  names: ["Fetch.ai", "FET"]
-  url_keys: ["/fetch-ai/", "/fet/"]
-  tag_keys: ["fetch-ai", "fet"]
-
-JUP:
-  cashtags: ["JUP", "$JUP"]
-  names: ["Jupiter", "JUP"]
-  url_keys: ["/jupiter/", "/jup/"]
-  tag_keys: ["jupiter", "jup"]
-
-OP:
-  cashtags: ["OP", "$OP"]
-  names: ["Optimism", "OP"]
-  url_keys: ["/optimism/", "/op/"]
-  tag_keys: ["optimism", "op"]
+# Global keywords that apply to all crypto news
+global_keywords:
+  - "cryptocurrency"
+  - "crypto"
+  - "bitcoin"
+  - "ethereum"
+  - "blockchain"
+  - "defi"
+  - "web3"
+  - "nft"
+  - "trading"
+  - "market"
+  - "price"
+  - "bull"
+  - "bear"
+  - "pump"
+  - "dump"
+  - "hodl"
+  - "moon"
+  - "diamond hands"
+  - "fomo"
+  - "fud"

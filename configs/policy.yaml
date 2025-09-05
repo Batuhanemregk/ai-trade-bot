@@ -8,6 +8,7 @@ schedule:
   regime_1h: "0 * * * *"        # Every hour (second=9)
   risk_1m: "* * * * *"          # Every minute (second=12)
   market_overview: "*/15 * * * *" # Every 15 minutes (second=3)
+  telegram_summary_15m: "*/15 * * * *"  # Every 15 minutes (second=11)
 
 scheduler:
   semaphore_limit: 2            # Max concurrent jobs
@@ -41,9 +42,9 @@ trading:
       correlation_risk:
         market_cap_tiers:
           tier_1: ['BTC', 'ETH']  # >100B market cap
-          tier_2: ['ADA', 'SOL', 'DOT', 'AVAX', 'MATIC', 'LINK', 'UNI', 'ATOM']  # 10B-100B
+          tier_2: ['ADA', 'SOL', 'DOT', 'AVAX', 'LINK', 'UNI', 'ATOM']  # 10B-100B
           tier_3: ['NEAR', 'ALGO', 'ICP', 'XRP', 'CFX', 'CRO', 'LDO', 'TAO', 'ARB', 'SUI', 'RENDER', 'JUP', 'OP']  # 1B-10B
-          tier_4: ['BIO', 'PENGU', 'FET', 'VET', 'FTM']  # <1B
+          tier_4: ['BIO', 'PENGU']  # <1B
         risk_levels:
           tier_1: 25.0  # En düşük korelasyon riski
           tier_2: 35.0  # Orta korelasyon riski
@@ -247,9 +248,9 @@ exchange:
   # Symbol mapping
   symbols:
     default_quote: "USDT"
-    supported_pairs: ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "MATIC", "LINK", "UNI", "ATOM", "NEAR", "FTM", "ALGO", "VET", "ICP", "XRP", "CFX", "BIO", "PENGU", "CRO", "LDO", "TAO", "ARB", "SUI", "RENDER", "FET", "JUP", "OP"]
+    supported_pairs: ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "LINK", "UNI", "ATOM", "NEAR", "ALGO", "ICP", "XRP", "CFX", "BIO", "PENGU", "CRO", "LDO", "TAO", "ARB", "SUI", "RENDER", "JUP", "OP"]
     # Trading symbols (pairs)
-    trading_pairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT", "AVAX-USDT", "MATIC-USDT", "LINK-USDT", "UNI-USDT", "ATOM-USDT", "NEAR-USDT", "FTM-USDT", "ALGO-USDT", "VET-USDT", "ICP-USDT", "XRP-USDT", "CFX-USDT", "BIO-USDT", "PENGU-USDT", "CRO-USDT", "LDO-USDT", "TAO-USDT", "ARB-USDT", "SUI-USDT", "RENDER-USDT", "FET-USDT", "JUP-USDT", "OP-USDT"]
+    trading_pairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT", "AVAX-USDT", "LINK-USDT", "UNI-USDT", "ATOM-USDT", "NEAR-USDT", "ALGO-USDT", "ICP-USDT", "XRP-USDT", "CFX-USDT", "BIO-USDT", "PENGU-USDT", "CRO-USDT", "LDO-USDT", "TAO-USDT", "ARB-USDT", "SUI-USDT", "RENDER-USDT", "JUP-USDT", "OP-USDT"]
   
   # Symbol-specific overrides for minimum order requirements (disabled - using dynamic calculation)
   # symbol_overrides: {}
@@ -377,6 +378,10 @@ news:
   overlap_minutes: 30
   dedupe:
     key_fields: ["url", "title"]
+  storage_paths:
+    watermarks: "data/news_watermarks.json"
+    digests: "data/news_llm_digest.json"
+    news_store: "data/news_storage.json"
   
 news_llm:
   enabled: true
@@ -395,3 +400,15 @@ news_scoring:
     mixed_shared: 0.6
     general_market: 0.2
   majors_bonus: 0.1  # BTC/ETH için ek ağırlık
+
+# Analysis Cards Configuration
+analysis_cards:
+  enabled: true  # 0/1 ile aç/kapa
+  send_on_startup: true  # Başlangıçta gönder
+  send_on_shutdown: true  # Kapanışta gönder
+  trading_analysis:
+    enabled: true  # 15dk analiz kartları
+    include_scores: true
+    include_news: true
+    include_risk: true
+    include_decision: true
