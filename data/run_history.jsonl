@@ -287,3 +287,6 @@
 {"name": "risk_monitor", "started_at": "2025-09-05T14:47:00.416063+00:00", "finished_at": "2025-09-05T14:47:00.416070+00:00", "status": "SUCCESS", "duration_ms": 405, "error": null}
 {"name": "risk_monitor", "started_at": "2025-09-05T14:48:00.510686+00:00", "finished_at": "2025-09-05T14:48:00.510692+00:00", "status": "SUCCESS", "duration_ms": 498, "error": null}
 {"name": "risk_monitor", "started_at": "2025-09-05T14:49:00.386262+00:00", "finished_at": "2025-09-05T14:49:00.386267+00:00", "status": "SUCCESS", "duration_ms": 373, "error": null}
+{"name": "risk_monitor", "started_at": "2025-09-05T14:50:00.427412+00:00", "finished_at": "2025-09-05T14:50:00.427418+00:00", "status": "SUCCESS", "duration_ms": 416, "error": null}
+{"name": "trailing_5m", "started_at": "2025-09-05T14:50:00.428318+00:00", "finished_at": "2025-09-05T14:50:00.428323+00:00", "status": "SUCCESS", "duration_ms": 400, "error": null}
+{"name": "risk_monitor", "started_at": "2025-09-05T14:51:00.459789+00:00", "finished_at": "2025-09-05T14:51:00.459794+00:00", "status": "SUCCESS", "duration_ms": 456, "error": null}

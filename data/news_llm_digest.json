@@ -16,19 +16,20 @@
     "digest": "e3c405d95860f6f9"
   },
   "BTC_last": {
-    "timestamp": "2025-09-05T00:15:53.752025+00:00",
+    "timestamp": "2025-09-05T14:50:56.982658+00:00",
     "result": {
-      "score": 50.0,
+      "score": 20.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis of the news articles about BTC is neutral, with a mix of positive and negative mentions. While some articles discuss potential trend shifts and price pressures on Bitcoin, others focus on specific technical analysis signals and performance comparisons with other cryptocurrencies like XRP, Solana, Dogecoin, and Shiba Inu. The overall sentiment is balanced, indicating a lack of clear direction in the market.",
-      "volatility_impact": 0.7,
-      "timestamp": "2025-09-05T00:15:53.752014+00:00"
+      "rationale": "The sentiment analysis for BTC based on the provided news articles is negative. Articles 2 and 8 highlight concerns about Bitcoin price drops and potential liquidations, indicating market uncertainty. Additionally, Article 3 mentions the possibility of a bear market, adding to the negative sentiment. The news about a crypto kidnapping crisis in Article 5 and controversies surrounding Bitcoin Knots in Article 9 contribute to security and regulatory concerns, further impacting the sentiment negatively.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:56.982647+00:00"
     },
-    "digest": "051bbc2341eeb396"
+    "digest": "40a29d1a6248e9a6"
   },
   "ETH_3a104a71c653b991": {
     "timestamp": "2025-09-04T21:30:07.128380+00:00",
@@ -47,19 +48,20 @@
     "digest": "3a104a71c653b991"
   },
   "ETH_last": {
-    "timestamp": "2025-09-05T00:15:55.400341+00:00",
+    "timestamp": "2025-09-05T14:50:59.339223+00:00",
     "result": {
-      "score": 50.0,
+      "score": 75.0,
       "categories": [
         "MARKET",
         "TECHNOLOGY",
-        "GENERAL"
+        "REGULATION",
+        "PARTNERSHIP"
       ],
-      "rationale": "The sentiment analysis for ETH based on the provided news articles is neutral. The articles cover a range of topics including market trends, meme coins, price predictions, and AI technology. There is no clear positive or negative sentiment specifically related to ETH in these articles.",
-      "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:15:55.400332+00:00"
+      "rationale": "The sentiment analysis of the news articles related to ETH is positive overall. Articles highlight positive developments such as Gemini expanding its services in the EU with ETH staking, which indicates growing adoption and utility for ETH. Additionally, the news about Nexchain presale offering higher ROI potential than ETH and ADA shows market interest in new projects. These developments suggest a positive outlook for ETH in terms of market expansion and technological advancements.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:59.339214+00:00"
     },
-    "digest": "67663aa7df735d29"
+    "digest": "5bf311a32a59eee9"
   },
   "SOL_adf39c8103219ddd": {
     "timestamp": "2025-09-04T21:30:12.396623+00:00",
@@ -78,19 +80,21 @@
     "digest": "adf39c8103219ddd"
   },
   "SOL_last": {
-    "timestamp": "2025-09-05T00:15:56.917663+00:00",
+    "timestamp": "2025-09-05T14:51:01.082547+00:00",
     "result": {
-      "score": 30.0,
+      "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
+        "REGULATION",
+        "PARTNERSHIP",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis for SOL based on the provided news articles is negative. Articles highlight Solana slipping in price amid market volatility and facing selling pressure despite positive upgrades. The market sentiment towards SOL appears cautious and uncertain.",
-      "volatility_impact": 0.8,
-      "timestamp": "2025-09-05T00:15:56.917652+00:00"
+      "rationale": "The sentiment analysis for SOL based on the provided news articles is neutral. The articles cover a range of topics including market developments, regulatory advancements, partnership expansions, and security concerns. While there are no overwhelmingly positive or negative sentiments detected, the mixed nature of the news suggests a balanced outlook for SOL.",
+      "volatility_impact": 0.7,
+      "timestamp": "2025-09-05T14:51:01.082536+00:00"
     },
-    "digest": "79a5b44071ebd3c7"
+    "digest": "3d1abca60c542935"
   },
   "ADA_cdab36016bed0bec": {
     "timestamp": "2025-09-04T21:30:14.676658+00:00",
@@ -108,20 +112,21 @@
     "digest": "cdab36016bed0bec"
   },
   "ADA_last": {
-    "timestamp": "2025-09-05T00:15:59.649568+00:00",
+    "timestamp": "2025-09-05T14:51:03.047637+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
         "REGULATION",
+        "TECHNOLOGY",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis for ADA is neutral as the news articles provide mixed signals. While there is mention of Cardano in the list of best cryptos to buy, there are no specific positive or negative indicators for ADA in the articles. The overall sentiment in the market seems balanced with no significant impact on ADA's price volatility expected.",
-      "volatility_impact": 0.3,
-      "timestamp": "2025-09-05T00:15:59.649559+00:00"
+      "rationale": "The sentiment analysis for ADA based on the provided news articles is neutral. The articles cover a range of topics including regulatory developments in Kazakhstan, market investments by Justin Sun, and a new crypto kidnapping case in France. These articles do not provide a clear positive or negative sentiment specifically towards ADA, resulting in a neutral sentiment score.",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-09-05T14:51:03.047629+00:00"
     },
-    "digest": "eead28a2d80dbb44"
+    "digest": "d2de627b550665cd"
   },
   "AVAX_036810b594ee924e": {
     "timestamp": "2025-09-04T21:30:17.088994+00:00",
@@ -140,20 +145,20 @@
     "digest": "036810b594ee924e"
   },
   "AVAX_last": {
-    "timestamp": "2025-09-05T00:16:04.748856+00:00",
+    "timestamp": "2025-09-05T14:51:06.547648+00:00",
     "result": {
-      "score": 75.0,
+      "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
         "REGULATION",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis of the news articles related to AVAX is mostly positive. There are mentions of AVAX being one of the top altcoins to buy for Q4 gains, with strong institutional growth and technical upgrades. Additionally, AVAX is highlighted for its institutional power meeting technical growth, indicating a positive outlook for the cryptocurrency. The news articles also discuss AVAX being part of the top 5 altcoins to watch, further boosting its market perception.",
-      "volatility_impact": 0.7,
-      "timestamp": "2025-09-05T00:16:04.748843+00:00"
+      "rationale": "The news articles do not directly mention AVAX or provide any significant developments related to the AVAX cryptocurrency. The articles cover various topics such as crypto kidnapping cases, stablecoins in Kazakhstan, price predictions of different tokens, and new token launches. As a result, the relevance to AVAX is low, leading to a neutral sentiment score.",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-09-05T14:51:06.547640+00:00"
     },
-    "digest": "44c62f89f3a0561b"
+    "digest": "12b3df4686119db6"
   },
   "MATIC_11ad1bd991f7c1fa": {
     "timestamp": "2025-09-04T21:30:20.176101+00:00",
@@ -199,18 +204,21 @@
     "digest": "2e98bf99027cd124"
   },
   "LINK_last": {
-    "timestamp": "2025-09-05T00:16:06.608103+00:00",
+    "timestamp": "2025-09-05T14:51:08.890069+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY"
+        "REGULATION",
+        "TECHNOLOGY",
+        "SECURITY",
+        "GENERAL"
       ],
-      "rationale": "The analyzed articles do not provide direct information or significant developments related to LINK specifically. They cover news about Dogecoin, OpenAI, XRP, and WLFI Token. As a result, the relevance to LINK is low, leading to a neutral sentiment score.",
-      "volatility_impact": 0.2,
-      "timestamp": "2025-09-05T00:16:06.608092+00:00"
+      "rationale": "The news articles provide a mixed sentiment towards LINK. While there are mentions of crypto-related incidents like kidnapping cases and controversies within the Bitcoin community, there are also positive developments such as Gemini's expansion in the EU and Nexchain's presale offering. Overall, the sentiment is neutral with a mix of positive and negative factors impacting LINK.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:08.890060+00:00"
     },
-    "digest": "5e38d3234af0a7f6"
+    "digest": "6201daf094b984ca"
   },
   "UNI_c10debc56e1435d4": {
     "timestamp": "2025-09-04T21:30:26.930533+00:00",
@@ -229,22 +237,19 @@
     "digest": "c10debc56e1435d4"
   },
   "UNI_last": {
-    "timestamp": "2025-09-05T00:16:08.958655+00:00",
+    "timestamp": "2025-09-05T14:51:10.875208+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
         "REGULATION",
-        "PARTNERSHIP",
-        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The news articles do not provide specific information or sentiment related to UNI. The focus is on other cryptocurrencies, market trends, technology developments, and regulatory updates. As a result, the impact on UNI's price or market sentiment is not directly addressed.",
-      "volatility_impact": 0,
-      "timestamp": "2025-09-05T00:16:08.958646+00:00"
+      "rationale": "The news articles cover a wide range of topics in the cryptocurrency market, including Bitcoin price movements, regulatory developments, and investment strategies. There is minimal specific mention of UNI in the articles, indicating low relevance to UNI. The sentiment across the articles is mixed, with no clear positive or negative bias. Therefore, the overall sentiment is assessed as neutral.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:10.875198+00:00"
     },
-    "digest": "ea06ff42ddaa180f"
+    "digest": "7ba1d156337de20f"
   },
   "ATOM_c4345676fd1a3b65": {
     "timestamp": "2025-09-04T21:30:29.073076+00:00",
@@ -264,22 +269,19 @@
     "digest": "c4345676fd1a3b65"
   },
   "ATOM_last": {
-    "timestamp": "2025-09-05T00:16:10.997355+00:00",
+    "timestamp": "2025-09-05T14:51:12.705095+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
         "REGULATION",
-        "PARTNERSHIP",
-        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis for ATOM is classified as mixed as there are mentions of other cryptocurrencies alongside ATOM in the news articles. The overall sentiment is neutral, with a sentiment score of 50, indicating a balanced view. The articles cover a range of topics including market trends, technology developments, and regulatory updates, contributing to a diverse sentiment. The impact on price volatility is expected to be moderate.",
+      "rationale": "The sentiment analysis for ATOM based on the provided news articles is neutral. The articles cover a range of topics such as regulatory developments in Kazakhstan, crypto-related kidnappings in France, price predictions for various tokens, and new token launches. While there is no direct impact on ATOM discussed in the articles, the mixed nature of the news and the variety of topics suggest a neutral sentiment overall.",
       "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:16:10.997345+00:00"
+      "timestamp": "2025-09-05T14:51:12.705086+00:00"
     },
-    "digest": "0320f53d2f7572a0"
+    "digest": "8e7a09a613b5fed2"
   },
   "NEAR_856d97414865d8c2": {
     "timestamp": "2025-09-04T21:30:32.246198+00:00",
@@ -298,19 +300,20 @@
     "digest": "856d97414865d8c2"
   },
   "NEAR_last": {
-    "timestamp": "2025-09-05T00:16:13.380786+00:00",
+    "timestamp": "2025-09-05T14:51:16.907156+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis for NEAR based on the provided articles is neutral. While there are mentions of other cryptocurrencies like XRP, Bitcoin, Cardano, Solana, and Dogecoin, the direct relevance to NEAR is limited. The articles cover a mix of market updates, price predictions, and regulatory news, providing a broad overview of the cryptocurrency landscape. As a result, the sentiment towards NEAR remains neutral.",
+      "rationale": "The news articles cover a variety of topics in the cryptocurrency market, such as price analysis, regulatory developments, and security issues. There is no specific focus on NEAR in these articles, indicating low relevance to the token. The sentiment across the articles is mixed, with no clear positive or negative bias. Therefore, the overall sentiment is assessed as neutral.",
       "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:16:13.380776+00:00"
+      "timestamp": "2025-09-05T14:51:16.907144+00:00"
     },
-    "digest": "ec421d3b38b11f5b"
+    "digest": "2c02f54cfa7f9cff"
   },
   "FTM_5f38501136bc192b": {
     "timestamp": "2025-09-04T21:30:34.240763+00:00",
@@ -362,22 +365,20 @@
     "digest": "98fc3ca165f09227"
   },
   "ALGO_last": {
-    "timestamp": "2025-09-05T00:16:15.034263+00:00",
+    "timestamp": "2025-09-05T14:51:18.521537+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
         "REGULATION",
-        "PARTNERSHIP",
-        "SECURITY",
+        "TECHNOLOGY",
         "GENERAL"
       ],
-      "rationale": "The news articles do not provide significant information or updates specifically related to ALGO. The focus is on various other cryptocurrencies, blockchain projects, and market trends. As a result, the impact on ALGO's price or market sentiment is minimal.",
-      "volatility_impact": 0.1,
-      "timestamp": "2025-09-05T00:16:15.034251+00:00"
+      "rationale": "The news articles cover a variety of topics in the cryptocurrency space, including regulatory developments, market activities, and technological advancements. The information provided does not show a direct impact on ALGO specifically, leading to a neutral sentiment score.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:18.521525+00:00"
     },
-    "digest": "0cf8a36308955fda"
+    "digest": "d8943bee57e5af87"
   },
   "VET_ade17a3bde43dde3": {
     "timestamp": "2025-09-04T21:30:38.762563+00:00",
@@ -429,22 +430,21 @@
     "digest": "cbc879f96954d71d"
   },
   "ICP_last": {
-    "timestamp": "2025-09-05T00:16:16.934270+00:00",
+    "timestamp": "2025-09-05T14:51:20.383819+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
         "TECHNOLOGY",
         "REGULATION",
-        "PARTNERSHIP",
         "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The news articles cover a wide range of topics in the cryptocurrency market, including new projects, price predictions, regulatory updates, and blockchain developments. There is limited specific mention of ICP, indicating a general market overview with low relevance to ICP. The sentiment across the articles is mixed, with no clear positive or negative bias detected.",
+      "rationale": "The news articles cover a variety of topics within the cryptocurrency space, including regulatory developments, market activities, and technological advancements. However, there is limited specific mention of ICP in the articles, indicating a general relevance to the broader crypto market. The sentiment is neutral as the articles present a mix of positive and negative developments.",
       "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:16:16.934261+00:00"
+      "timestamp": "2025-09-05T14:51:20.383809+00:00"
     },
-    "digest": "db322f8f1a2bc480"
+    "digest": "da59471ab4ef3592"
   },
   "XRP_456090df184cbe35": {
     "timestamp": "2025-09-04T21:30:43.455190+00:00",
@@ -462,18 +462,22 @@
     "digest": "456090df184cbe35"
   },
   "XRP_last": {
-    "timestamp": "2025-09-05T00:16:18.608563+00:00",
+    "timestamp": "2025-09-05T14:51:22.411766+00:00",
     "result": {
-      "score": 30.0,
+      "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY"
+        "TECHNOLOGY",
+        "REGULATION",
+        "PARTNERSHIP",
+        "SECURITY",
+        "GENERAL"
       ],
-      "rationale": "The sentiment around XRP is negative as articles highlight XRP testing critical support levels amid market volatility. Analysts suggest monitoring support and resistance levels closely. There are concerns about XRP's performance in the current cycle and the need to reach a significant rally level. Overall, the sentiment is cautious and uncertain.",
-      "volatility_impact": 0.8,
-      "timestamp": "2025-09-05T00:16:18.608550+00:00"
+      "rationale": "The analyzed news articles do not provide specific information or significant developments related to XRP. The sentiment across the articles is neutral, with a focus on other cryptocurrencies, market trends, regulatory developments, and technology advancements.",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-09-05T14:51:22.411758+00:00"
     },
-    "digest": "e481d2d065138cad"
+    "digest": "c2d345bfb0bdd3e0"
   },
   "CFX_60751ecabfd26554": {
     "timestamp": "2025-09-04T21:30:45.358692+00:00",
@@ -493,22 +497,20 @@
     "digest": "60751ecabfd26554"
   },
   "CFX_last": {
-    "timestamp": "2025-09-05T00:16:20.352937+00:00",
+    "timestamp": "2025-09-05T14:51:24.482981+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY",
         "REGULATION",
-        "PARTNERSHIP",
         "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The news articles do not provide specific information or significant developments related to CFX. The content mainly focuses on other cryptocurrencies, market trends, and technology advancements in the crypto space. As a result, the sentiment towards CFX remains neutral.",
-      "volatility_impact": 0.1,
-      "timestamp": "2025-09-05T00:16:20.352917+00:00"
+      "rationale": "The news articles provide a mixed sentiment towards the cryptocurrency market in general, with mentions of regulatory developments, security concerns, and market activities. The focus is not heavily on CFX specifically, leading to a neutral sentiment score.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:24.482966+00:00"
     },
-    "digest": "bd8933009c65b52c"
+    "digest": "8847208a7e68d7cc"
   },
   "BIO_7ef77c324dfacda0": {
     "timestamp": "2025-09-04T21:30:47.449937+00:00",
@@ -526,19 +528,20 @@
     "digest": "7ef77c324dfacda0"
   },
   "BIO_last": {
-    "timestamp": "2025-09-05T00:16:22.643437+00:00",
+    "timestamp": "2025-09-05T14:51:26.181980+00:00",
     "result": {
-      "score": 50.0,
+      "score": 75.0,
       "categories": [
         "MARKET",
         "TECHNOLOGY",
-        "GENERAL"
+        "REGULATION",
+        "SECURITY"
       ],
-      "rationale": "The news articles do not provide any specific information or relevance to the cryptocurrency BIO. The sentiment across the articles is neutral, with no significant positive or negative factors identified. Therefore, the impact on BIO's price volatility is expected to be low.",
-      "volatility_impact": 0.1,
-      "timestamp": "2025-09-05T00:16:22.643428+00:00"
+      "rationale": "The sentiment analysis of the news articles related to BIO indicates a positive outlook. The market is showing signs of bullish setups with potential breakout opportunities. Regulatory developments in stablecoin acceptance and technology commitments are contributing to a positive sentiment. Security incidents in the crypto space are also highlighting the importance of secure transactions, which could benefit BIO. Overall, the news suggests a favorable environment for BIO.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:51:26.181970+00:00"
     },
-    "digest": "e091dca79edb188c"
+    "digest": "74a9ed52d882c350"
   },
   "PENGU_a8217826abb75251": {
     "timestamp": "2025-09-04T21:30:49.802223+00:00",
@@ -557,19 +560,21 @@
     "digest": "a8217826abb75251"
   },
   "PENGU_last": {
-    "timestamp": "2025-09-05T00:16:26.599988+00:00",
+    "timestamp": "2025-09-05T14:51:30.154671+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
         "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The news articles provide a mix of information about various cryptocurrencies, including XRP, Bitcoin, Dogecoin, and Shiba Inu. There is no specific focus on PENGU in the articles, indicating low relevance to PENGU. The sentiment across the articles is neutral, with discussions on market trends, price analysis, and potential shifts in cryptocurrency values.",
-      "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:16:26.599979+00:00"
+      "rationale": "The sentiment analysis for PENGU based on the provided news articles is neutral. The articles do not contain specific positive or negative information directly impacting PENGU's price or market position. The focus of the articles is on general market trends, regulatory developments, and technological advancements in the cryptocurrency space.",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-09-05T14:51:30.154660+00:00"
     },
-    "digest": "e1cd4ef3d6c7c45a"
+    "digest": "d0884e309002be9c"
   },
   "CRO_065a6688321a4d83": {
     "timestamp": "2025-09-04T21:30:51.516341+00:00",
@@ -587,18 +592,21 @@
     "digest": "065a6688321a4d83"
   },
   "CRO_last": {
-    "timestamp": "2025-09-05T00:16:34.397302+00:00",
+    "timestamp": "2025-09-05T14:50:38.630317+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "TECHNOLOGY"
+        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
       ],
-      "rationale": "The news articles do not provide significant information or impact on CRO specifically. The focus is mainly on other cryptocurrencies and general market trends.",
-      "volatility_impact": 0.2,
-      "timestamp": "2025-09-05T00:16:34.397290+00:00"
+      "rationale": "The sentiment analysis for CRO based on the news articles is neutral. The articles provide a mix of market updates, regulatory developments, and technological advancements without a clear positive or negative bias towards CRO.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:38.630307+00:00"
     },
-    "digest": "4b4f3a580539d68c"
+    "digest": "25032d3093e2028b"
   },
   "LDO_bbeb596e4cafde63": {
     "timestamp": "2025-09-04T21:30:53.661702+00:00",
@@ -617,19 +625,22 @@
     "digest": "bbeb596e4cafde63"
   },
   "LDO_last": {
-    "timestamp": "2025-09-05T00:16:36.026307+00:00",
+    "timestamp": "2025-09-05T14:50:41.498844+00:00",
     "result": {
-      "score": 50.0,
+      "score": 65.0,
       "categories": [
         "MARKET",
         "TECHNOLOGY",
+        "REGULATION",
+        "PARTNERSHIP",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis for LDO based on the provided news articles is neutral. The articles cover a range of topics in the cryptocurrency market, mentioning LDO along with other cryptocurrencies. There is no clear positive or negative sentiment towards LDO specifically.",
-      "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:16:36.026296+00:00"
+      "rationale": "The sentiment analysis of the news articles related to LDO is mixed, with a slightly positive bias. The articles cover various topics such as staking offerings, presale opportunities, price predictions, and market trends. Positive mentions include partnerships, technological advancements, and market potential. However, there are also elements of market uncertainty and whale activity mentioned. Overall, the news suggests a moderately positive outlook for LDO.",
+      "volatility_impact": 0.7,
+      "timestamp": "2025-09-05T14:50:41.498835+00:00"
     },
-    "digest": "60f1f89783ec3cbc"
+    "digest": "0d67ab668afc2d3c"
   },
   "TAO_005b9d20518219bc": {
     "timestamp": "2025-09-04T21:30:57.255433+00:00",
@@ -647,19 +658,21 @@
     "digest": "005b9d20518219bc"
   },
   "TAO_last": {
-    "timestamp": "2025-09-05T00:16:38.565223+00:00",
+    "timestamp": "2025-09-05T14:50:43.378499+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
         "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The news articles do not contain specific information or significant developments related to TAO. The sentiment across the articles is neutral, with a focus on other cryptocurrencies and general market trends.",
-      "volatility_impact": 0.2,
-      "timestamp": "2025-09-05T00:16:38.565210+00:00"
+      "rationale": "The news articles cover a wide range of topics in the cryptocurrency market, including Bitcoin price movements, regulatory developments, technology advancements, and security concerns. There is no specific focus on TAO in the articles analyzed, leading to a general classification with low TAO relevance. The sentiment across the articles is neutral, with a balanced mix of positive and negative factors discussed.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:43.378490+00:00"
     },
-    "digest": "1089e35fdca8209b"
+    "digest": "05730fabddcba6d0"
   },
   "ARB_08fd6536782723d0": {
     "timestamp": "2025-09-04T21:31:01.794212+00:00",
@@ -680,19 +693,20 @@
     "digest": "08fd6536782723d0"
   },
   "ARB_last": {
-    "timestamp": "2025-09-05T00:16:41.756718+00:00",
+    "timestamp": "2025-09-05T14:50:45.269174+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
         "TECHNOLOGY",
+        "REGULATION",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis of the news articles related to ARB is neutral, with a mix of information about various cryptocurrencies and the general crypto market. The articles cover topics such as market trends, price predictions, altcoins, and meme coins, with no specific focus on ARB.",
+      "rationale": "The sentiment analysis of the news articles related to ARB is neutral as there is a mix of positive and negative news. The articles cover various topics such as staking offerings, delisting of futures contracts, presale opportunities, market shifts, and technology developments. The impact on ARB's price volatility is uncertain due to the diverse nature of the news.",
       "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:16:41.756705+00:00"
+      "timestamp": "2025-09-05T14:50:45.269164+00:00"
     },
-    "digest": "c87a481e53433e2a"
+    "digest": "03411611dd21e3df"
   },
   "SUI_e74c7bdc780403a0": {
     "timestamp": "2025-09-04T21:31:03.337487+00:00",
@@ -709,19 +723,20 @@
     "digest": "e74c7bdc780403a0"
   },
   "SUI_last": {
-    "timestamp": "2025-09-05T00:16:44.306579+00:00",
+    "timestamp": "2025-09-05T14:50:47.699808+00:00",
     "result": {
-      "score": 20.0,
+      "score": 30.0,
       "categories": [
         "MARKET",
         "REGULATION",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The news articles related to SUI primarily focus on regulatory setbacks and delays, such as the SEC's approval decision delay for the 21Shares Physical SUI ETF. These developments have contributed to a negative sentiment surrounding SUI. Additionally, the general market sentiment is mixed with some positive news about other cryptocurrencies like Solana and Dogecoin.",
+      "rationale": "The sentiment analysis for SUI based on the news articles is negative due to the involvement of SUI in a crypto kidnapping case and regulatory uncertainties in the market. The news about the billionaire wallet being blacklisted and the XRP whale transfer also contribute to the negative sentiment. However, the market is also experiencing some positive developments such as stablecoins being accepted for regulatory fees and investments in US crypto stocks.",
       "volatility_impact": 0.8,
-      "timestamp": "2025-09-05T00:16:44.306567+00:00"
+      "timestamp": "2025-09-05T14:50:47.699800+00:00"
     },
-    "digest": "bde55d8f844287d5"
+    "digest": "04b243936bd15c72"
   },
   "FET_3ca99766081ab3b0": {
     "timestamp": "2025-09-04T21:31:07.519216+00:00",
@@ -769,19 +784,20 @@
     "digest": "d5b3eaffafe8f0bc"
   },
   "JUP_last": {
-    "timestamp": "2025-09-05T00:16:47.418775+00:00",
+    "timestamp": "2025-09-05T14:50:52.017708+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
+        "REGULATION",
         "TECHNOLOGY",
         "GENERAL"
       ],
-      "rationale": "The news articles do not provide significant information or sentiment specifically related to JUP. The overall sentiment in the articles is mixed and focused on various cryptocurrencies and market trends.",
-      "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:16:47.418766+00:00"
+      "rationale": "The analyzed articles cover a wide range of cryptocurrencies and general market trends, with minimal specific mention of JUP. The sentiment across the articles is neutral, with no significant positive or negative factors identified for JUP. The content is more focused on broader market developments and regulatory updates.",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-09-05T14:50:52.017699+00:00"
     },
-    "digest": "46d5513d7cbdd66d"
+    "digest": "d1c80d9e3ba781a6"
   },
   "OP_c6e446d8c46fd564": {
     "timestamp": "2025-09-04T21:31:11.401214+00:00",
@@ -800,19 +816,21 @@
     "digest": "c6e446d8c46fd564"
   },
   "OP_last": {
-    "timestamp": "2025-09-05T00:16:49.010895+00:00",
+    "timestamp": "2025-09-05T14:50:54.726371+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
         "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
         "GENERAL"
       ],
-      "rationale": "The sentiment analysis for OP is neutral as the news articles provide a mix of information related to various cryptocurrencies, including OP. The market seems to be in a state of flux with discussions on different coins and their potential. No clear positive or negative bias is evident from the articles analyzed.",
+      "rationale": "The news articles cover a variety of topics in the cryptocurrency market, such as price movements, regulatory developments, and technological advancements. There is no specific mention of OP in the articles, indicating low relevance to the token. The sentiment across the articles is mixed, with some discussing market volatility and others focusing on regulatory changes and technological innovations. Overall, the news does not provide a clear indication of market direction for OP.",
       "volatility_impact": 0.5,
-      "timestamp": "2025-09-05T00:16:49.010887+00:00"
+      "timestamp": "2025-09-05T14:50:54.726356+00:00"
     },
-    "digest": "dcce12d9721d87f1"
+    "digest": "81008794d2935fa0"
   },
   "BTC_afaf3746d1d7f5f6": {
     "timestamp": "2025-09-04T21:31:13.500643+00:00",
@@ -23507,5 +23525,630 @@
       "timestamp": "2025-09-05T00:16:49.010887+00:00"
     },
     "digest": "dcce12d9721d87f1"
+  },
+  "BTC_7c29df72ae8855bf": {
+    "timestamp": "2025-09-05T14:50:02.318835+00:00",
+    "result": {
+      "score": 20.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for BTC based on the provided news articles is negative. The articles highlight concerns such as Bitcoin price drops, potential liquidation alerts, and the challenging decision-making time for investors in the crypto market. Additionally, the news about a crypto kidnapping crisis and controversies within the Bitcoin community add to the negative sentiment. These factors may contribute to increased market volatility.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:02.318825+00:00"
+    },
+    "digest": "7c29df72ae8855bf"
+  },
+  "ETH_821405612ec8bb82": {
+    "timestamp": "2025-09-05T14:50:04.870648+00:00",
+    "result": {
+      "score": 70.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "PARTNERSHIP"
+      ],
+      "rationale": "The sentiment analysis of the news articles related to ETH is positive. Articles highlight positive developments such as Gemini expanding its services in the EU to include ETH staking, which aligns with regulatory approval. Additionally, Nexchain's presale offering higher ROI potential than ETH and ADA indicates market interest in alternative projects. These partnerships and market expansions contribute to a positive sentiment for ETH.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:04.870637+00:00"
+    },
+    "digest": "821405612ec8bb82"
+  },
+  "SOL_cce1b365008147ec": {
+    "timestamp": "2025-09-05T14:50:08.060010+00:00",
+    "result": {
+      "score": 65.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "PARTNERSHIP",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for SOL is positive overall, with news of Gemini expanding its EU offering with ETH and SOL staking being a key positive development. Additionally, the article about Nexchain presale offering higher ROI potential than ETH and ADA could attract investor interest. However, the mention of a billionaire wallet being blacklisted in relation to WLFI may have a negative impact on sentiment. The news articles cover a mix of market updates, regulatory advancements, and partnership expansions.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:08.060000+00:00"
+    },
+    "digest": "cce1b365008147ec"
+  },
+  "ADA_e487ce7b3d19b88d": {
+    "timestamp": "2025-09-05T14:50:11.200052+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for ADA based on the provided news articles is neutral. The articles cover a variety of topics such as regulatory developments in Kazakhstan, crypto kidnapping cases in France, price predictions for various tokens, and investments in US crypto stocks. These articles do not provide a clear positive or negative sentiment specifically towards ADA, resulting in a neutral sentiment score.",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-09-05T14:50:11.200043+00:00"
+    },
+    "digest": "e487ce7b3d19b88d"
+  },
+  "AVAX_b1eb6eda0f7ff5f0": {
+    "timestamp": "2025-09-05T14:50:13.573617+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a variety of topics in the cryptocurrency market, such as regulatory developments, market activities, and security concerns. There is no specific focus on AVAX in the articles, leading to a low relevance to the token.",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-09-05T14:50:13.573609+00:00"
+    },
+    "digest": "b1eb6eda0f7ff5f0"
+  },
+  "LINK_9921ae36671b5291": {
+    "timestamp": "2025-09-05T14:50:15.795932+00:00",
+    "result": {
+      "score": 20.0,
+      "categories": [
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles related to LINK primarily focus on security concerns, such as crypto kidnapping cases and controversies within the crypto community. These events may create negative sentiment around LINK due to association with criminal activities and uncertainties within the community.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:15.795923+00:00"
+    },
+    "digest": "9921ae36671b5291"
+  },
+  "UNI_82534d7c7b4e85e8": {
+    "timestamp": "2025-09-05T14:50:19.267949+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a wide range of topics in the cryptocurrency market, with minimal specific mention of UNI. The sentiment across the articles is mixed, with some positive developments like regulatory advancements in Kazakhstan and Gemini's expansion in the EU, but also negative events like the WLFI price drop and the Fed rate cut discussions. Overall, the news does not provide a strong indication of potential impact on UNI's price volatility.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:19.267938+00:00"
+    },
+    "digest": "82534d7c7b4e85e8"
+  },
+  "ATOM_a79cdcaf358f4ec4": {
+    "timestamp": "2025-09-05T14:50:21.810297+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The news articles do not provide specific information or significant developments related to ATOM. The articles cover various topics such as crypto kidnapping cases, stablecoins, price predictions of other cryptocurrencies, and fitness-related blockchain projects. As a result, the impact on ATOM's price or market sentiment is minimal.",
+      "volatility_impact": 0.1,
+      "timestamp": "2025-09-05T14:50:21.810287+00:00"
+    },
+    "digest": "a79cdcaf358f4ec4"
+  },
+  "NEAR_d04714ba34325b1c": {
+    "timestamp": "2025-09-05T14:50:24.895749+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for NEAR based on the provided news articles is neutral. The articles cover a range of topics such as market predictions, regulatory developments, and general crypto industry news. While there are no specific positive or negative indicators for NEAR in these articles, the overall sentiment remains neutral.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:24.895740+00:00"
+    },
+    "digest": "d04714ba34325b1c"
+  },
+  "ALGO_f3f23f9cd6db52f9": {
+    "timestamp": "2025-09-05T14:50:26.790140+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a variety of topics in the cryptocurrency market, such as regulatory developments, market activities, and new projects. There is no specific focus on ALGO in these articles, indicating a general overview of the crypto space.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:26.790130+00:00"
+    },
+    "digest": "f3f23f9cd6db52f9"
+  },
+  "ICP_8dd44b7896e5fffb": {
+    "timestamp": "2025-09-05T14:50:28.445901+00:00",
+    "result": {
+      "score": 20.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY"
+      ],
+      "rationale": "The news articles related to ICP primarily focus on negative events such as crypto kidnapping cases, regulatory challenges, and market disruptions. These factors contribute to a negative sentiment surrounding ICP.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:28.445892+00:00"
+    },
+    "digest": "8dd44b7896e5fffb"
+  },
+  "XRP_89a6cecf97f0bac7": {
+    "timestamp": "2025-09-05T14:50:30.300057+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles do not provide significant information or updates specifically related to XRP. The content mainly focuses on Bitcoin, technology developments, regulatory changes, security incidents, and general market trends. As a result, the sentiment analysis for XRP remains neutral due to the lack of direct impact or relevance.",
+      "volatility_impact": 0.1,
+      "timestamp": "2025-09-05T14:50:30.300049+00:00"
+    },
+    "digest": "89a6cecf97f0bac7"
+  },
+  "CFX_d409a6562d7d9e2c": {
+    "timestamp": "2025-09-05T14:50:32.392633+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for CFX based on the news articles is neutral. While there are mentions of cryptocurrency-related incidents and developments, the direct impact on CFX is not explicitly highlighted in the articles. The news covers a range of topics such as regulatory advancements, market activities, and security concerns within the broader crypto space.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:32.392624+00:00"
+    },
+    "digest": "d409a6562d7d9e2c"
+  },
+  "BIO_068af8fbc9f0bbbd": {
+    "timestamp": "2025-09-05T14:50:35.023377+00:00",
+    "result": {
+      "score": 70.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis of the news articles related to BIO indicates a positive outlook. Articles highlight bullish setups, stable price actions, and regulatory advancements in the cryptocurrency market. These factors contribute to a positive sentiment towards BIO.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:35.023369+00:00"
+    },
+    "digest": "068af8fbc9f0bbbd"
+  },
+  "PENGU_37ff769223bf6f0f": {
+    "timestamp": "2025-09-05T14:50:36.855586+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for PENGU based on the provided news articles is neutral. The articles do not contain specific positive or negative information directly impacting PENGU's price or market position. The focus of the articles is on general market trends, regulatory developments, and technology advancements in the cryptocurrency space.",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-09-05T14:50:36.855578+00:00"
+    },
+    "digest": "37ff769223bf6f0f"
+  },
+  "CRO_25032d3093e2028b": {
+    "timestamp": "2025-09-05T14:50:38.630317+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for CRO based on the news articles is neutral. The articles provide a mix of market updates, regulatory developments, and technological advancements without a clear positive or negative bias towards CRO.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:38.630307+00:00"
+    },
+    "digest": "25032d3093e2028b"
+  },
+  "LDO_0d67ab668afc2d3c": {
+    "timestamp": "2025-09-05T14:50:41.498844+00:00",
+    "result": {
+      "score": 65.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "PARTNERSHIP",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis of the news articles related to LDO is mixed, with a slightly positive bias. The articles cover various topics such as staking offerings, presale opportunities, price predictions, and market trends. Positive mentions include partnerships, technological advancements, and market potential. However, there are also elements of market uncertainty and whale activity mentioned. Overall, the news suggests a moderately positive outlook for LDO.",
+      "volatility_impact": 0.7,
+      "timestamp": "2025-09-05T14:50:41.498835+00:00"
+    },
+    "digest": "0d67ab668afc2d3c"
+  },
+  "TAO_05730fabddcba6d0": {
+    "timestamp": "2025-09-05T14:50:43.378499+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a wide range of topics in the cryptocurrency market, including Bitcoin price movements, regulatory developments, technology advancements, and security concerns. There is no specific focus on TAO in the articles analyzed, leading to a general classification with low TAO relevance. The sentiment across the articles is neutral, with a balanced mix of positive and negative factors discussed.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:43.378490+00:00"
+    },
+    "digest": "05730fabddcba6d0"
+  },
+  "ARB_03411611dd21e3df": {
+    "timestamp": "2025-09-05T14:50:45.269174+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis of the news articles related to ARB is neutral as there is a mix of positive and negative news. The articles cover various topics such as staking offerings, delisting of futures contracts, presale opportunities, market shifts, and technology developments. The impact on ARB's price volatility is uncertain due to the diverse nature of the news.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:45.269164+00:00"
+    },
+    "digest": "03411611dd21e3df"
+  },
+  "SUI_04b243936bd15c72": {
+    "timestamp": "2025-09-05T14:50:47.699808+00:00",
+    "result": {
+      "score": 30.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for SUI based on the news articles is negative due to the involvement of SUI in a crypto kidnapping case and regulatory uncertainties in the market. The news about the billionaire wallet being blacklisted and the XRP whale transfer also contribute to the negative sentiment. However, the market is also experiencing some positive developments such as stablecoins being accepted for regulatory fees and investments in US crypto stocks.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:47.699800+00:00"
+    },
+    "digest": "04b243936bd15c72"
+  },
+  "RENDER_d76c45d8856e0db8": {
+    "timestamp": "2025-09-05T14:50:50.140334+00:00",
+    "result": {
+      "score": 20.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The news article discusses a major investor wallet tied to Tron founder Justin Sun being blacklisted, causing panic in the market and a significant drop in WLFI price. The uncertainty surrounding the future of the Trump family-backed project raises concerns and contributes to a bearish sentiment.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:50.140324+00:00"
+    },
+    "digest": "d76c45d8856e0db8"
+  },
+  "RENDER_last": {
+    "timestamp": "2025-09-05T14:50:50.140334+00:00",
+    "result": {
+      "score": 20.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The news article discusses a major investor wallet tied to Tron founder Justin Sun being blacklisted, causing panic in the market and a significant drop in WLFI price. The uncertainty surrounding the future of the Trump family-backed project raises concerns and contributes to a bearish sentiment.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:50.140324+00:00"
+    },
+    "digest": "d76c45d8856e0db8"
+  },
+  "JUP_d1c80d9e3ba781a6": {
+    "timestamp": "2025-09-05T14:50:52.017708+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "TECHNOLOGY",
+        "GENERAL"
+      ],
+      "rationale": "The analyzed articles cover a wide range of cryptocurrencies and general market trends, with minimal specific mention of JUP. The sentiment across the articles is neutral, with no significant positive or negative factors identified for JUP. The content is more focused on broader market developments and regulatory updates.",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-09-05T14:50:52.017699+00:00"
+    },
+    "digest": "d1c80d9e3ba781a6"
+  },
+  "OP_81008794d2935fa0": {
+    "timestamp": "2025-09-05T14:50:54.726371+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a variety of topics in the cryptocurrency market, such as price movements, regulatory developments, and technological advancements. There is no specific mention of OP in the articles, indicating low relevance to the token. The sentiment across the articles is mixed, with some discussing market volatility and others focusing on regulatory changes and technological innovations. Overall, the news does not provide a clear indication of market direction for OP.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:50:54.726356+00:00"
+    },
+    "digest": "81008794d2935fa0"
+  },
+  "BTC_40a29d1a6248e9a6": {
+    "timestamp": "2025-09-05T14:50:56.982658+00:00",
+    "result": {
+      "score": 20.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for BTC based on the provided news articles is negative. Articles 2 and 8 highlight concerns about Bitcoin price drops and potential liquidations, indicating market uncertainty. Additionally, Article 3 mentions the possibility of a bear market, adding to the negative sentiment. The news about a crypto kidnapping crisis in Article 5 and controversies surrounding Bitcoin Knots in Article 9 contribute to security and regulatory concerns, further impacting the sentiment negatively.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:56.982647+00:00"
+    },
+    "digest": "40a29d1a6248e9a6"
+  },
+  "ETH_5bf311a32a59eee9": {
+    "timestamp": "2025-09-05T14:50:59.339223+00:00",
+    "result": {
+      "score": 75.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "PARTNERSHIP"
+      ],
+      "rationale": "The sentiment analysis of the news articles related to ETH is positive overall. Articles highlight positive developments such as Gemini expanding its services in the EU with ETH staking, which indicates growing adoption and utility for ETH. Additionally, the news about Nexchain presale offering higher ROI potential than ETH and ADA shows market interest in new projects. These developments suggest a positive outlook for ETH in terms of market expansion and technological advancements.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:50:59.339214+00:00"
+    },
+    "digest": "5bf311a32a59eee9"
+  },
+  "SOL_3d1abca60c542935": {
+    "timestamp": "2025-09-05T14:51:01.082547+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "PARTNERSHIP",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for SOL based on the provided news articles is neutral. The articles cover a range of topics including market developments, regulatory advancements, partnership expansions, and security concerns. While there are no overwhelmingly positive or negative sentiments detected, the mixed nature of the news suggests a balanced outlook for SOL.",
+      "volatility_impact": 0.7,
+      "timestamp": "2025-09-05T14:51:01.082536+00:00"
+    },
+    "digest": "3d1abca60c542935"
+  },
+  "ADA_d2de627b550665cd": {
+    "timestamp": "2025-09-05T14:51:03.047637+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "TECHNOLOGY",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for ADA based on the provided news articles is neutral. The articles cover a range of topics including regulatory developments in Kazakhstan, market investments by Justin Sun, and a new crypto kidnapping case in France. These articles do not provide a clear positive or negative sentiment specifically towards ADA, resulting in a neutral sentiment score.",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-09-05T14:51:03.047629+00:00"
+    },
+    "digest": "d2de627b550665cd"
+  },
+  "AVAX_12b3df4686119db6": {
+    "timestamp": "2025-09-05T14:51:06.547648+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles do not directly mention AVAX or provide any significant developments related to the AVAX cryptocurrency. The articles cover various topics such as crypto kidnapping cases, stablecoins in Kazakhstan, price predictions of different tokens, and new token launches. As a result, the relevance to AVAX is low, leading to a neutral sentiment score.",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-09-05T14:51:06.547640+00:00"
+    },
+    "digest": "12b3df4686119db6"
+  },
+  "LINK_6201daf094b984ca": {
+    "timestamp": "2025-09-05T14:51:08.890069+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "TECHNOLOGY",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles provide a mixed sentiment towards LINK. While there are mentions of crypto-related incidents like kidnapping cases and controversies within the Bitcoin community, there are also positive developments such as Gemini's expansion in the EU and Nexchain's presale offering. Overall, the sentiment is neutral with a mix of positive and negative factors impacting LINK.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:08.890060+00:00"
+    },
+    "digest": "6201daf094b984ca"
+  },
+  "UNI_7ba1d156337de20f": {
+    "timestamp": "2025-09-05T14:51:10.875208+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a wide range of topics in the cryptocurrency market, including Bitcoin price movements, regulatory developments, and investment strategies. There is minimal specific mention of UNI in the articles, indicating low relevance to UNI. The sentiment across the articles is mixed, with no clear positive or negative bias. Therefore, the overall sentiment is assessed as neutral.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:10.875198+00:00"
+    },
+    "digest": "7ba1d156337de20f"
+  },
+  "ATOM_8e7a09a613b5fed2": {
+    "timestamp": "2025-09-05T14:51:12.705095+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for ATOM based on the provided news articles is neutral. The articles cover a range of topics such as regulatory developments in Kazakhstan, crypto-related kidnappings in France, price predictions for various tokens, and new token launches. While there is no direct impact on ATOM discussed in the articles, the mixed nature of the news and the variety of topics suggest a neutral sentiment overall.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:12.705086+00:00"
+    },
+    "digest": "8e7a09a613b5fed2"
+  },
+  "NEAR_2c02f54cfa7f9cff": {
+    "timestamp": "2025-09-05T14:51:16.907156+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a variety of topics in the cryptocurrency market, such as price analysis, regulatory developments, and security issues. There is no specific focus on NEAR in these articles, indicating low relevance to the token. The sentiment across the articles is mixed, with no clear positive or negative bias. Therefore, the overall sentiment is assessed as neutral.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:16.907144+00:00"
+    },
+    "digest": "2c02f54cfa7f9cff"
+  },
+  "ALGO_d8943bee57e5af87": {
+    "timestamp": "2025-09-05T14:51:18.521537+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "TECHNOLOGY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a variety of topics in the cryptocurrency space, including regulatory developments, market activities, and technological advancements. The information provided does not show a direct impact on ALGO specifically, leading to a neutral sentiment score.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:18.521525+00:00"
+    },
+    "digest": "d8943bee57e5af87"
+  },
+  "ICP_da59471ab4ef3592": {
+    "timestamp": "2025-09-05T14:51:20.383819+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles cover a variety of topics within the cryptocurrency space, including regulatory developments, market activities, and technological advancements. However, there is limited specific mention of ICP in the articles, indicating a general relevance to the broader crypto market. The sentiment is neutral as the articles present a mix of positive and negative developments.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:20.383809+00:00"
+    },
+    "digest": "da59471ab4ef3592"
+  },
+  "XRP_c2d345bfb0bdd3e0": {
+    "timestamp": "2025-09-05T14:51:22.411766+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "PARTNERSHIP",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The analyzed news articles do not provide specific information or significant developments related to XRP. The sentiment across the articles is neutral, with a focus on other cryptocurrencies, market trends, regulatory developments, and technology advancements.",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-09-05T14:51:22.411758+00:00"
+    },
+    "digest": "c2d345bfb0bdd3e0"
+  },
+  "CFX_8847208a7e68d7cc": {
+    "timestamp": "2025-09-05T14:51:24.482981+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The news articles provide a mixed sentiment towards the cryptocurrency market in general, with mentions of regulatory developments, security concerns, and market activities. The focus is not heavily on CFX specifically, leading to a neutral sentiment score.",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-09-05T14:51:24.482966+00:00"
+    },
+    "digest": "8847208a7e68d7cc"
+  },
+  "BIO_74a9ed52d882c350": {
+    "timestamp": "2025-09-05T14:51:26.181980+00:00",
+    "result": {
+      "score": 75.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY"
+      ],
+      "rationale": "The sentiment analysis of the news articles related to BIO indicates a positive outlook. The market is showing signs of bullish setups with potential breakout opportunities. Regulatory developments in stablecoin acceptance and technology commitments are contributing to a positive sentiment. Security incidents in the crypto space are also highlighting the importance of secure transactions, which could benefit BIO. Overall, the news suggests a favorable environment for BIO.",
+      "volatility_impact": 0.8,
+      "timestamp": "2025-09-05T14:51:26.181970+00:00"
+    },
+    "digest": "74a9ed52d882c350"
+  },
+  "PENGU_d0884e309002be9c": {
+    "timestamp": "2025-09-05T14:51:30.154671+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECHNOLOGY",
+        "REGULATION",
+        "SECURITY",
+        "GENERAL"
+      ],
+      "rationale": "The sentiment analysis for PENGU based on the provided news articles is neutral. The articles do not contain specific positive or negative information directly impacting PENGU's price or market position. The focus of the articles is on general market trends, regulatory developments, and technological advancements in the cryptocurrency space.",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-09-05T14:51:30.154660+00:00"
+    },
+    "digest": "d0884e309002be9c"
   }
 }
