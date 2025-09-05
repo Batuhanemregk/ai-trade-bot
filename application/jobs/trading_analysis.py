@@ -22,6 +22,7 @@ from infrastructure.runtime import (
 from application.position_state_manager import PositionStateManager
 from application.signal_gate import SignalGate
 from application.reversal_manager import ReversalManager
+from application.analysis_cards import AnalysisCardsService
 
 
 class TradingAnalysisJob(BaseJob):
@@ -37,6 +38,7 @@ class TradingAnalysisJob(BaseJob):
         self.state_manager = None
         self.signal_gate = None
         self.reversal_manager = None
+        self.analysis_cards = None
         
     async def initialize(self):
         """Initialize trading analysis components."""
@@ -61,6 +63,9 @@ class TradingAnalysisJob(BaseJob):
             self.signal_gate = SignalGate(self.policy)
             self.reversal_manager = ReversalManager(self.policy)
             
+            # Initialize analysis cards
+            self.analysis_cards = AnalysisCardsService(self.policy)
+            
             logger.info("✅ TradingAnalysisJob initialized")
             
         except Exception as e:
@@ -70,19 +75,38 @@ class TradingAnalysisJob(BaseJob):
     async def execute(self):
         """Execute 15-minute trading analysis."""
         try:
+            # Check idempotency for 15m bar
+            bar_id = self.get_current_bar_id('15m')
+            if self.is_bar_already_processed('15m', bar_id):
+                logger.info(f"already processed tf=15m bar={bar_id} → skipping")
+                return
+            
             symbols = self.get_all_symbols()
             logger.info(f"[JOB] trading_analysis processing {len(symbols)} symbols")
             
             processed_count = 0
+            analysis_results = []  # Store results for cards
+            entries = 0
+            exits = 0
+            reversals = 0
+            ignored_same_dir = 0
+            
             for symbol in symbols:
                 try:
-                    # Check bar idempotency
-                    if self.is_bar_already_processed(symbol, '15m'):
-                        logger.debug(f"[BAR] {symbol} 15m bar already processed, skipping")
-                        continue
-                    
                     # Process symbol
-                    await self._process_symbol(symbol)
+                    result = await self._process_symbol(symbol)
+                    if result:
+                        analysis_results.append(result)
+                        
+                        # Count actions
+                        if result.get('action') == 'entry':
+                            entries += 1
+                        elif result.get('action') == 'exit':
+                            exits += 1
+                        elif result.get('action') == 'reversal':
+                            reversals += 1
+                        elif result.get('action') == 'ignored_same_dir':
+                            ignored_same_dir += 1
                     
                     # Mark bar as processed
                     self.mark_bar_processed(symbol, '15m')
@@ -92,7 +116,15 @@ class TradingAnalysisJob(BaseJob):
                     logger.error(f"❌ Failed to process {symbol}: {e}")
                     continue
             
-            logger.info(f"[JOB] trading_analysis completed {processed_count}/{len(symbols)} symbols")
+            # Send analysis cards if enabled
+            if analysis_results and self.analysis_cards:
+                await self.analysis_cards.send_analysis_cards(analysis_results)
+            
+            # Mark 15m bar as processed
+            self.mark_bar_processed('15m', bar_id)
+            
+            # Job summary
+            logger.info(f"[JOB-SUMMARY] trading_analysis symbols_scored={processed_count} entries={entries} exits={exits} reversals={reversals} ignored_same_dir={ignored_same_dir}")
             
         except Exception as e:
             logger.error(f"❌ TradingAnalysisJob execution failed: {e}")
@@ -171,7 +203,7 @@ class TradingAnalysisJob(BaseJob):
             # Process through signal gate - REAL LOGIC
             gated_signal = self.signal_gate.process_signal(symbol, signal_dict, ohlcv_1h_list)
             
-            logger.info(f"🎯 {symbol} Gated Signal: {gated_signal.direction} (original={composite_signal.final_score:.1f}, gated={gated_signal.final_score:.1f}, valid={gated_signal.is_valid})")
+            logger.info(f"🎯 {symbol} Gated Signal: {gated_signal.direction} (original={composite_signal.final_score:.1f}, gated={composite_signal.final_score:.1f}, valid={gated_signal.is_valid})")
             logger.info(f"🎯 {symbol} Signal Details: {gated_signal.details}")
             
             # Step 8: Process state transition - REAL LOGIC
@@ -203,9 +235,29 @@ class TradingAnalysisJob(BaseJob):
                 
             logger.info(f"✅ {symbol} processed successfully")
             
+            # Return analysis result for cards
+            return {
+                'symbol': symbol,
+                'decision': composite_signal.decision,
+                'final_score': composite_signal.final_score,
+                'ta_score': ta_score,
+                'ml_score': ml_score,
+                'news_score': news_score,
+                'risk_score': risk_score,
+                'news_info': {
+                    'type': news_categories.get('type', 'general'),
+                    'confidence': news_categories.get('confidence', 0),
+                    'title': news_categories.get('title', 'No recent news')
+                },
+                'risk_info': {
+                    'level': risk_details.get('level', 'medium'),
+                    'factors': risk_details.get('factors', [])
+                }
+            }
+            
         except Exception as e:
             logger.error(f"❌ Failed to process {symbol}: {e}")
-            raise
+            return None
     
     async def _execute_trade(self, symbol: str, side: str, score: float):
         """Execute a real trade using the existing trading logic."""

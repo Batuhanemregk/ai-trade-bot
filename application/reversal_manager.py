@@ -322,7 +322,7 @@ class EdgeCostCalculator:
             atr_component = current_atr * self.atr_coefficient
             
             # Score distance component
-            final_score = signal.get('final_score', 50)
+            final_score = signal.get('final_score', 50) if isinstance(signal, dict) else getattr(signal, 'final_score', 50)
             score_distance = abs(final_score - 50) / 50  # Normalize to 0-1
             score_component = score_distance * self.score_distance_coefficient * current_price
             
@@ -416,6 +416,9 @@ class ReversalManager:
             
             reason = "PASS" if is_eligible else f"FAIL: {', '.join(reasons)}"
             
+            # Structured log for reversal check
+            logger.info(f"[REVCHK] sym={symbol} strength={strength:.2f} confirm={confirmation_bars} holding={holding_bars} edge={edge_cost_ratio:.2f}x cost={total_cost:.2f}x → {reason}")
+            
             return ReversalCheck(
                 is_eligible=is_eligible,
                 strength=strength,
@@ -445,7 +448,7 @@ class ReversalManager:
     def create_reversal_signal(self, symbol: str, signal: Dict, reversal_check: ReversalCheck, 
                              current_direction: str) -> ReversalSignal:
         """Create reversal signal if eligible."""
-        final_score = signal.get('final_score', 0)
+        final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         
         # Determine new direction
         if current_direction == 'long':

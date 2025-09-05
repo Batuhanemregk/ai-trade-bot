@@ -94,7 +94,7 @@ class RiskService:
                 return 50.0
             
             # Get price data for volatility calculation
-            if 'trend' in market_data and not market_data['trend'].empty:
+            if 'trend' in market_data and market_data['trend'] is not None and hasattr(market_data['trend'], 'empty') and not market_data['trend'].empty:
                 prices = market_data['trend']['close'].values
                 
                 if len(prices) < 20:
@@ -170,7 +170,7 @@ class RiskService:
                 return 50.0
             
             # Get volume data
-            if 'trend' in market_data and not market_data['trend'].empty:
+            if 'trend' in market_data and market_data['trend'] is not None and hasattr(market_data['trend'], 'empty') and not market_data['trend'].empty:
                 volumes = market_data['trend']['volume'].values
                 recent_volume = np.mean(volumes[-10:])  # Average of last 10 periods
                 
@@ -332,7 +332,7 @@ class RiskService:
             trend_strength = 0.0
             
             # Add market-specific risk factors
-            if 'trend' in market_data and not market_data['trend'].empty:
+            if 'trend' in market_data and market_data['trend'] is not None and hasattr(market_data['trend'], 'empty') and not market_data['trend'].empty:
                 # Check for extreme market conditions
                 prices = market_data['trend']['close'].values
                 recent_change = (prices[-1] - prices[-20]) / prices[-20] if len(prices) >= 20 else 0

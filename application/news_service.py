@@ -24,10 +24,17 @@ class NewsService:
         self.llm_config = policy.get('news_llm', {})
         self.scoring_config = policy.get('news_scoring', {})
         
-        # Initialize components
+        # Storage paths from policy
+        storage_paths = self.news_config.get('storage_paths', {})
+        self.watermark_path = storage_paths.get('watermarks', 'data/news_watermarks.json')
+        self.digest_path = storage_paths.get('digests', 'data/news_llm_digest.json')
+        self.news_storage_path = storage_paths.get('news_store', 'data/news_storage.json')
+        
+        # Initialize components with paths
         self.news_client = MultiSourceNewsClient()
-        self.watermark_manager = NewsWatermarkManager()
+        self.watermark_manager = NewsWatermarkManager(self.watermark_path)
         self.digest_manager = NewsDigestManager(
+            cache_path=self.digest_path,
             ttl_minutes=self.llm_config.get('cache', {}).get('ttl_minutes', 60)
         )
         
@@ -46,7 +53,6 @@ class NewsService:
         self.symbol_aliases = self._load_symbol_aliases()
         
         # News storage
-        self.news_storage_path = "data/news_storage.json"
         self.news_data: Dict[str, List[Dict[str, Any]]] = {}
         self._load_news_storage()
     
@@ -98,6 +104,28 @@ class NewsService:
         
         logger.info("✅ News bootstrap completed")
     
+    async def ensure_bootstrap_on_start(self, symbols: List[str]):
+        """On-start bootstrap: If no watermarks exist, bootstrap all symbols"""
+        symbols_without_watermark = []
+        
+        for symbol in symbols:
+            if not self.watermark_manager.has_watermark(symbol):
+                symbols_without_watermark.append(symbol)
+        
+        if symbols_without_watermark:
+            logger.info(f"🔄 [NEWS] On-start bootstrap for {len(symbols_without_watermark)} symbols without watermarks")
+            await self.bootstrap_all_symbols(symbols_without_watermark)
+        else:
+            logger.info("✅ [NEWS] All symbols have watermarks, skipping bootstrap")
+    
+    async def lazy_bootstrap_symbol(self, symbol: str):
+        """Lazy bootstrap: Bootstrap single symbol if no watermark"""
+        if not self.watermark_manager.has_watermark(symbol):
+            logger.info(f"🔄 [NEWS] Lazy bootstrap for {symbol} (no watermark)")
+            lookback_hours = self.news_config.get('lookback_hours_bootstrap', 24)
+            since_timestamp = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
+            await self._bootstrap_symbol(symbol, since_timestamp)
+    
     async def _bootstrap_symbol(self, symbol: str, since_timestamp: datetime):
         """Bootstrap news collection for a single symbol"""
         logger.info(f"📊 [NEWS] sym={symbol} bootstrap since={since_timestamp.isoformat()}")
@@ -137,11 +165,16 @@ class NewsService:
     
     async def _incremental_update_symbol(self, symbol: str, overlap_minutes: int):
         """Incremental news update for a single symbol"""
-        # Get fetch since timestamp
+        # Lazy bootstrap if no watermark
+        if not self.watermark_manager.has_watermark(symbol):
+            await self.lazy_bootstrap_symbol(symbol)
+            return
+        
+        # Get fetch since timestamp with overlap
         since_timestamp = self.watermark_manager.get_fetch_since_timestamp(symbol, overlap_minutes)
         
         if since_timestamp is None:
-            logger.warning(f"⚠️ [NEWS] sym={symbol} no watermark, skipping incremental")
+            logger.warning(f"⚠️ [NEWS] sym={symbol} no watermark after bootstrap, skipping incremental")
             return
         
         logger.info(f"📊 [NEWS] sym={symbol} incremental since={since_timestamp.isoformat()}")
@@ -175,13 +208,19 @@ class NewsService:
             # Use multi-source news client
             news_items = await self.news_client.get_news_for_symbol(symbol, limit=50)
             
-            # Filter by timestamp
+            # If no timestamp filtering needed (bootstrap), return all news
+            if since_timestamp.year < 2020:  # Very old timestamp means bootstrap
+                logger.info(f"📰 [NEWS] sym={symbol} bootstrap mode: returning {len(news_items)} articles")
+                return news_items
+            
+            # Filter by timestamp for incremental updates
             filtered_items = []
             for item in news_items:
                 item_timestamp = self._extract_timestamp(item)
                 if item_timestamp and item_timestamp >= since_timestamp:
                     filtered_items.append(item)
             
+            logger.info(f"📰 [NEWS] sym={symbol} timestamp filter: {len(news_items)} -> {len(filtered_items)} articles")
             return filtered_items
             
         except Exception as e:
@@ -190,13 +229,14 @@ class NewsService:
     
     def _extract_timestamp(self, item: Dict[str, Any]) -> Optional[datetime]:
         """Extract timestamp from news item"""
-        timestamp_fields = ['publishedAt', 'published_at', 'timestamp', 'time']
+        timestamp_fields = ['publishedAt', 'published_at', 'published_on', 'timestamp', 'time']
         
         for field in timestamp_fields:
             if field in item and item[field]:
                 try:
                     timestamp_value = item[field]
                     if isinstance(timestamp_value, (int, float)):
+                        # CryptoCompare uses Unix timestamp
                         return datetime.fromtimestamp(timestamp_value, tz=timezone.utc)
                     elif isinstance(timestamp_value, str):
                         if timestamp_value.endswith('Z'):
@@ -205,7 +245,8 @@ class NewsService:
                             return datetime.fromisoformat(timestamp_value)
                     elif isinstance(timestamp_value, datetime):
                         return timestamp_value
-                except Exception:
+                except Exception as e:
+                    logger.debug(f"Failed to parse timestamp {field}={timestamp_value}: {e}")
                     continue
         
         return None
@@ -239,11 +280,13 @@ class NewsService:
         )
         
         if not is_changed and cached_result:
-            logger.info(f"📊 [LLM] sym={symbol} using cached result")
+            logger.info(f"📊 [LLM] sym={symbol} digest=UNCHANGED run=NO items={len(news_items)}")
             return
         
         # Run LLM analysis
         try:
+            logger.info(f"📊 [LLM] sym={symbol} digest=CHANGED run=YES items={len(news_items[:max_items])}")
+            
             score, categories, rationale, volatility_impact = await self.llm_analyzer.analyze_news_batch(
                 news_items[:max_items], symbol, self.symbol_aliases
             )
@@ -259,8 +302,28 @@ class NewsService:
             
             self.digest_manager.cache_digest_result(symbol, digest_hash, result)
             
+            # Log classification results
+            classification = self._determine_classification(categories, score)
+            logger.info(f"📊 [NEWSCLS] type={classification['type']} sym={symbol} conf={classification['confidence']:.2f} title=\"{news_items[0].get('title', 'N/A')[:50]}...\"")
+            
         except Exception as e:
             logger.error(f"❌ LLM analysis failed for {symbol}: {e}")
+    
+    def _determine_classification(self, categories: List[str], score: float) -> Dict[str, Any]:
+        """Determine news classification type and confidence"""
+        if not categories:
+            return {'type': 'general', 'confidence': 0.5}
+        
+        # Check for symbol-specific categories
+        symbol_specific = any('SYMBOL_SPECIFIC' in cat for cat in categories)
+        mixed = any('MIXED' in cat for cat in categories)
+        
+        if symbol_specific:
+            return {'type': 'symbol_specific', 'confidence': score / 100.0}
+        elif mixed:
+            return {'type': 'mixed', 'confidence': score / 100.0}
+        else:
+            return {'type': 'general', 'confidence': score / 100.0}
     
     async def get_news_score(self, symbol: str) -> Tuple[float, List[str], str, float]:
         """Get news score for a symbol"""

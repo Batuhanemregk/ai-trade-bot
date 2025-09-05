@@ -13,8 +13,8 @@ from loguru import logger
 class NewsDigestManager:
     """Manages digest-based caching for LLM analysis to avoid redundant API calls"""
     
-    def __init__(self, cache_file_path: str = "data/news_digest_cache.json", ttl_minutes: int = 60):
-        self.cache_file_path = cache_file_path
+    def __init__(self, cache_path: str = "data/news_llm_digest.json", ttl_minutes: int = 60):
+        self.cache_file_path = cache_path
         self.ttl_minutes = ttl_minutes
         self.digest_cache: Dict[str, Dict[str, Any]] = {}
         self._ensure_data_directory()

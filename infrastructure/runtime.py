@@ -574,6 +574,9 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         client_order_id = generate_client_id("E")
         logger.info(f"📝 Generated client order ID: {client_order_id}")
         
+        # Structured log for trade attempt
+        logger.info(f"[ENTRY] sym={symbol} dir={composite_signal.decision} size=0.000000 px=0.000000 reason=score>={composite_signal.final_score} state=READY tf=15m bar={datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%MZ')}")
+        
         # Step 2: Get current market price first
         current_price = await _get_current_price(exchange_adapter, symbol)
         logger.info(f"💲 Current market price: {current_price}")
@@ -663,12 +666,25 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
             logger.info(f"🚀 Executing LIVE {composite_signal.decision} order")
             # Convert decision to side: LONG -> buy, SHORT -> sell
             side = 'buy' if composite_signal.decision == 'LONG' else 'sell'
-            entry_result = await exchange_adapter.create_market_order(
-                symbol=symbol,
-                side=side,
-                amount=quantized_size,
-                client_id=client_order_id
-            )
+            
+            # Order tracking log
+            logger.info(f"[ORDER] sym={symbol} clientId={client_order_id} side={side} amount={quantized_size} price={quantized_price}")
+            
+            try:
+                entry_result = await exchange_adapter.create_market_order(
+                    symbol=symbol,
+                    side=side,
+                    amount=quantized_size,
+                    client_id=client_order_id
+                )
+                
+                # Order success log
+                logger.info(f"[ORDER] sym={symbol} clientId={client_order_id} status=SUCCESS ordId={entry_result.get('id', 'N/A')} filled={entry_result.get('filled', 0)}")
+                
+            except Exception as e:
+                # Order error log
+                logger.error(f"[ORDER] sym={symbol} clientId={client_order_id} status=ERROR error={str(e)}")
+                raise
         else:
             logger.info(f"🧪 DRY-RUN: Would execute {composite_signal.decision} order")
             entry_result = {
