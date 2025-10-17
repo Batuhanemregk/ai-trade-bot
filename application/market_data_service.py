@@ -1,5 +1,6 @@
 """
 Market Data Service - Robust market data fetching with fallbacks
+Enhanced with unified MarketDataCache for TA/ML/Risk sharing.
 """
 
 import asyncio
@@ -10,6 +11,65 @@ from typing import Dict, List, Optional, Any, Tuple
 import pandas as pd
 import numpy as np
 from loguru import logger
+
+
+class MarketDataCache:
+    """
+    Unified market data cache shared between TA, ML, and Risk services.
+    Ensures single fetch per analysis cycle and data consistency.
+    """
+    
+    def __init__(self):
+        self.cache: Dict[str, Dict[str, Any]] = {}
+        self.cache_timestamps: Dict[str, datetime] = {}
+        self.ttl_seconds = 300  # 5 minutes
+    
+    def get(self, symbol: str, timeframe: str) -> Optional[Dict[str, Any]]:
+        """Get cached data for symbol and timeframe."""
+        key = f"{symbol}:{timeframe}"
+        
+        if key not in self.cache:
+            return None
+        
+        # Check if cache is still valid
+        cache_time = self.cache_timestamps.get(key)
+        if cache_time:
+            age = (datetime.now(timezone.utc) - cache_time).total_seconds()
+            if age > self.ttl_seconds:
+                # Cache expired
+                del self.cache[key]
+                del self.cache_timestamps[key]
+                return None
+        
+        return self.cache[key]
+    
+    def set(self, symbol: str, timeframe: str, data: Dict[str, Any]):
+        """Cache data for symbol and timeframe."""
+        key = f"{symbol}:{timeframe}"
+        self.cache[key] = data
+        self.cache_timestamps[key] = datetime.now(timezone.utc)
+    
+    def clear(self):
+        """Clear all cache."""
+        self.cache.clear()
+        self.cache_timestamps.clear()
+    
+    def get_age(self, symbol: str, timeframe: str) -> Optional[float]:
+        """Get cache age in seconds."""
+        key = f"{symbol}:{timeframe}"
+        cache_time = self.cache_timestamps.get(key)
+        if cache_time:
+            return (datetime.now(timezone.utc) - cache_time).total_seconds()
+        return None
+
+
+# Global singleton cache
+_market_data_cache = MarketDataCache()
+
+
+def get_market_data_cache() -> MarketDataCache:
+    """Get the global market data cache instance."""
+    return _market_data_cache
 
 
 class MarketDataService:
@@ -24,6 +84,9 @@ class MarketDataService:
         
         # Load existing cache
         self.cache = self._load_cache()
+        
+        # Use global market data cache
+        self.market_cache = get_market_data_cache()
     
     def _load_cache(self) -> Dict:
         """Load market data cache from disk."""

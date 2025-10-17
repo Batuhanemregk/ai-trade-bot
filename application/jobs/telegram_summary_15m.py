@@ -25,7 +25,8 @@ class TelegramSummary15mJob(BaseJob):
             
             # Check idempotency for 15m bar
             bar_id = self.get_current_bar_id('15m')
-            if self.is_bar_already_processed('15m', bar_id):
+            job_key = 'telegram_summary_15m'
+            if self.is_bar_already_processed(job_key, '15m'):
                 logger.info(f"already processed tf=15m bar={bar_id} → skipping")
                 return
             
@@ -39,7 +40,7 @@ class TelegramSummary15mJob(BaseJob):
             await self._send_summary_to_telegram(summary_cards)
             
             # Mark bar as processed
-            self.mark_bar_processed('15m', bar_id)
+            self.mark_bar_processed(job_key, '15m')
             
             logger.info(f"[JOB] name=telegram_summary_15m status=SUCCESS dur=0.0s")
             

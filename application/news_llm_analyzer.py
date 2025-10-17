@@ -3,6 +3,7 @@ News LLM Analyzer - Advanced LLM-based news classification and sentiment analysi
 """
 
 import json
+import os
 import re
 from typing import List, Dict, Any, Tuple, Optional
 from loguru import logger
@@ -17,6 +18,9 @@ class NewsLLMAnalyzer:
         self.client = AsyncOpenAI(api_key=api_key)
         self.model = model
         self.cache = {}  # Simple cache for repeated analysis
+        
+        # Log verbosity control
+        self.verbose_logging = os.getenv('NEWS_VERBOSITY', 'summary').lower() == 'full'
     
     async def analyze_news_batch(
         self, 
@@ -46,7 +50,8 @@ class NewsLLMAnalyzer:
             # Parse and validate result
             score, categories, rationale, volatility_impact = self._parse_analysis_result(analysis_result)
             
-            logger.info(f"✅ [LLM] sym={symbol} analysis completed: {score:.1f} ({categories})")
+            if self.verbose_logging:
+                logger.info(f"✅ [LLM] sym={symbol} analysis completed: {score:.1f} ({categories})")
             
             return score, categories, rationale, volatility_impact
             

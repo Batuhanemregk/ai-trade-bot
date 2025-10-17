@@ -27,6 +27,9 @@ from application.jobs.news_incremental_5m import NewsIncremental5mJob
 from application.jobs.telegram_summary_15m import TelegramSummary15mJob
 from application.jobs.run_watchdog import RunWatchdog
 
+# Monitoring
+from monitoring.prometheus_exporter import get_prometheus_exporter
+
 
 class SchedulerRunner:
     """Professional scheduler runner with production features."""
@@ -44,12 +47,22 @@ class SchedulerRunner:
         self.state_file = None
         self.runtime_state = {}
         
+        # Monitoring
+        self.prometheus_exporter = None
+        
     async def initialize(self):
         """Initialize scheduler and load configuration."""
         try:
             # Load environment and policy
             load_env()
             self.policy = load_policy(self.policy_path)
+            
+            # Validate configuration (AUTO-CHECK ON STARTUP)
+            from infrastructure.bootstrap import validate_policy
+            if not validate_policy(self.policy):
+                logger.error("❌ Configuration validation failed! Fix errors in policy.yaml")
+                raise ValueError("Invalid configuration - scheduler cannot start")
+            logger.info("✅ Configuration validated successfully")
             
             # Initialize state persistence
             self.state_file = Path(self.policy['idempotency']['persist_path'])
@@ -59,6 +72,30 @@ class SchedulerRunner:
             # Initialize semaphore for concurrency control
             semaphore_limit = self.policy['scheduler']['semaphore_limit']
             self.semaphore = asyncio.Semaphore(semaphore_limit)
+            
+            # Initialize Prometheus monitoring (if enabled)
+            monitoring_config = self.policy.get('monitoring', {})
+            if monitoring_config.get('prometheus', {}).get('enabled', False):
+                port = monitoring_config.get('prometheus', {}).get('port', 8000)
+                try:
+                    self.prometheus_exporter = get_prometheus_exporter(port=port)
+                    self.prometheus_exporter.start()
+                    
+                    # Set bot info
+                    mode = self.policy.get('exchange', {}).get('mode', 'unknown')
+                    symbols = ', '.join(self.policy.get('exchange', {}).get('symbols', {}).keys())
+                    self.prometheus_exporter.set_bot_info(
+                        version='2.0.0',
+                        mode=mode,
+                        symbols=symbols
+                    )
+                    
+                    logger.info(f"✅ Prometheus monitoring enabled on port {port}")
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to start Prometheus exporter: {e}")
+                    self.prometheus_exporter = None
+            else:
+                logger.info("ℹ️ Prometheus monitoring disabled")
             
             # Initialize scheduler
             self.scheduler = AsyncIOScheduler(

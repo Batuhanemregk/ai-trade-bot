@@ -102,7 +102,6 @@ class CryptoCompareNewsAPI:
             'TAO': ['bittensor', 'tao', 'ai', 'blockchain'],
             'ARB': ['arbitrum', 'arb', 'ethereum', 'layer 2'],
             'SUI': ['sui', 'blockchain', 'defi'],
-            'RENDER': ['render', 'rndr', 'gpu', 'rendering'],
             'FET': ['fetch.ai', 'fet', 'ai', 'blockchain'],
             'JUP': ['jupiter', 'jup', 'solana', 'dex'],
             'OP': ['optimism', 'op', 'ethereum', 'layer 2']
@@ -139,18 +138,39 @@ class MultiSourceNewsClient:
     
     def __init__(self):
         self.cryptocompare = CryptoCompareNewsAPI()
+        self._session = None
+        self._session_lock = asyncio.Lock()
+    
+    async def _get_session(self):
+        """Get or create persistent session"""
+        if self._session is None or self._session.closed:
+            async with self._session_lock:
+                if self._session is None or self._session.closed:
+                    self._session = aiohttp.ClientSession(
+                        timeout=aiohttp.ClientTimeout(total=30),
+                        connector=aiohttp.TCPConnector(limit=10, limit_per_host=5)
+                    )
+        return self._session
     
     async def get_news_for_symbol(self, symbol: str, limit: int = 20) -> List[Dict[str, Any]]:
         """Get news from CryptoCompare for a symbol"""
         try:
-            # Use only CryptoCompare
+            # Use persistent session
+            session = await self._get_session()
             async with self.cryptocompare as cc:
+                cc.session = session  # Use persistent session
                 news = await cc.get_news_for_symbol(symbol, limit)
                 return news
             
         except Exception as e:
             logger.error(f"Failed to get news for symbol {symbol}: {e}")
             return []
+    
+    async def close(self):
+        """Close persistent session"""
+        if self._session and not self._session.closed:
+            await self._session.close()
+            self._session = None
     
     def _remove_duplicates(self, news_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Remove duplicate news items based on URL"""

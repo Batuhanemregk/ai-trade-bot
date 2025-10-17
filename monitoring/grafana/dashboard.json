@@ -1,0 +1,369 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "aibot-trading",
+    "title": "AiBotBS Trading Dashboard",
+    "tags": ["trading", "crypto", "ai"],
+    "timezone": "browser",
+    "schemaVersion": 27,
+    "version": 1,
+    "refresh": "10s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Portfolio PnL (USD)",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "aibot_portfolio_pnl_usd",
+            "legendFormat": "Total PnL",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "currencyUSD", "label": "PnL" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Open Positions",
+        "type": "stat",
+        "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "aibot_positions_open",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto",
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 3, "color": "yellow" },
+                { "value": 5, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Current Drawdown (%)",
+        "type": "stat",
+        "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "aibot_drawdown_current",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 5, "color": "yellow" },
+                { "value": 10, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Exposure (%)",
+        "type": "gauge",
+        "gridPos": { "x": 12, "y": 4, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "aibot_exposure_percentage",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 50, "color": "yellow" },
+                { "value": 70, "color": "orange" },
+                { "value": 90, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Total Trades",
+        "type": "stat",
+        "gridPos": { "x": 18, "y": 4, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "sum(aibot_trades_total)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 6,
+        "title": "Win Rate by Symbol",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "aibot_win_rate",
+            "legendFormat": "{{symbol}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "percent", "label": "Win Rate", "min": 0, "max": 100 },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Composite Scores",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "aibot_composite_score",
+            "legendFormat": "{{symbol}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "short", "label": "Score", "min": 0, "max": 100 },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Score Components (Latest Symbol)",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "aibot_ta_score{symbol=\"BTC-USDT\"}",
+            "legendFormat": "TA Score",
+            "refId": "A"
+          },
+          {
+            "expr": "aibot_ml_score{symbol=\"BTC-USDT\"}",
+            "legendFormat": "ML Score",
+            "refId": "B"
+          },
+          {
+            "expr": "aibot_news_score{symbol=\"BTC-USDT\"}",
+            "legendFormat": "News Score",
+            "refId": "C"
+          },
+          {
+            "expr": "aibot_risk_score{symbol=\"BTC-USDT\"}",
+            "legendFormat": "Risk Score",
+            "refId": "D"
+          }
+        ],
+        "yaxes": [
+          { "format": "short", "label": "Score", "min": 0, "max": 100 },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Trade Distribution",
+        "type": "piechart",
+        "gridPos": { "x": 12, "y": 16, "w": 6, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum(aibot_trades_total{result=\"win\"})",
+            "legendFormat": "Wins",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(aibot_trades_total{result=\"loss\"})",
+            "legendFormat": "Losses",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(aibot_trades_total{result=\"breakeven\"})",
+            "legendFormat": "Breakeven",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Circuit Breaker State",
+        "type": "stat",
+        "gridPos": { "x": 18, "y": 16, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "aibot_circuit_breaker_state",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "type": "value", "value": "0", "text": "NORMAL" },
+              { "type": "value", "value": "1", "text": "WARNING" },
+              { "type": "value", "value": "2", "text": "EMERGENCY" },
+              { "type": "value", "value": "3", "text": "PAUSED" }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 2, "color": "red" },
+                { "value": 3, "color": "orange" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Bot Uptime",
+        "type": "stat",
+        "gridPos": { "x": 18, "y": 20, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "aibot_uptime_seconds",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "API Call Latency",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(aibot_api_latency_seconds_bucket[5m]))",
+            "legendFormat": "p95 - {{exchange}}/{{endpoint}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(aibot_api_latency_seconds_bucket[5m]))",
+            "legendFormat": "p99 - {{exchange}}/{{endpoint}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          { "format": "s", "label": "Latency" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Job Execution Rate",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(aibot_job_executions_total[5m])",
+            "legendFormat": "{{job_name}} ({{status}})",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "ops", "label": "Executions/sec" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 32, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(aibot_errors_total[5m])",
+            "legendFormat": "{{error_type}} - {{component}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "ops", "label": "Errors/sec" },
+          { "format": "short" }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Position Sizes by Symbol",
+        "type": "table",
+        "gridPos": { "x": 12, "y": 32, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "aibot_position_size_usd",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "instance": true,
+                "job": true
+              },
+              "renameByName": {
+                "symbol": "Symbol",
+                "Value": "Size (USD)"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+
+
+
+
