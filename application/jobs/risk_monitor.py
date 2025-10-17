@@ -19,6 +19,7 @@ class RiskMonitorJob(BaseJob):
     def __init__(self, policy: Dict[str, Any], semaphore: asyncio.Semaphore, runtime_state: Dict[str, Any]):
         super().__init__(policy, semaphore, runtime_state)
         self.exchange_adapter = None
+        self.circuit_breaker = None
         self.api_health_status = {}
         
     async def initialize(self):
@@ -27,6 +28,10 @@ class RiskMonitorJob(BaseJob):
             # Initialize exchange adapter
             from adapters.exchange_okx_ccxt import OKXCCXTAdapter
             self.exchange_adapter = OKXCCXTAdapter()
+            
+            # Initialize circuit breaker
+            from application.circuit_breaker import CircuitBreaker
+            self.circuit_breaker = CircuitBreaker(self.policy)
             
             logger.info("✅ RiskMonitorJob initialized")
             
@@ -47,6 +52,10 @@ class RiskMonitorJob(BaseJob):
             
             # Check system health
             await self._check_system_health()
+            
+            # Check circuit breaker conditions
+            if self.circuit_breaker:
+                await self._check_circuit_breaker()
             
             logger.info("[JOB] risk_monitor completed successfully")
             
@@ -289,3 +298,42 @@ class RiskMonitorJob(BaseJob):
     def get_api_health_status(self) -> Dict[str, Any]:
         """Get current API health status."""
         return self.api_health_status
+    
+    async def _check_circuit_breaker(self):
+        """Check circuit breaker conditions."""
+        try:
+            # Get portfolio state
+            try:
+                balance = await self.exchange_adapter.fetch_balance()
+                total_value = float(balance.get('USDT', {}).get('total', 0))
+                
+                # Get positions for PnL
+                positions = await self.exchange_adapter.fetch_positions()
+                total_pnl = sum(float(pos.get('unrealizedPnl', 0)) for pos in positions if pos.get('contracts', 0) != 0)
+                
+                # Simple drawdown estimation
+                max_drawdown = abs(min(0, total_pnl / total_value)) if total_value > 0 else 0
+                
+                portfolio = {
+                    'total_value': total_value,
+                    'total_pnl': total_pnl,
+                    'max_drawdown': max_drawdown
+                }
+                
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to fetch portfolio for circuit breaker: {e}")
+                return
+            
+            # Get recent trades (simplified - would need trade history)
+            recent_trades = []  # TODO: Implement trade history tracking
+            
+            # Check circuit breaker
+            state = await self.circuit_breaker.check_conditions(portfolio, recent_trades)
+            
+            if state != 'normal':
+                logger.warning(f"⚠️ Circuit breaker state: {state}")
+            else:
+                logger.debug(f"✅ Circuit breaker: {state}")
+            
+        except Exception as e:
+            logger.error(f"❌ Circuit breaker check failed: {e}")

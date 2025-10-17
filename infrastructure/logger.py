@@ -1,6 +1,6 @@
 """
 Logging infrastructure for AiBotBS.
-Provides structured logging with YAML configuration, multiple handlers, and colored output.
+Provides structured logging with YAML configuration, multiple handlers, colored output, and emojis.
 """
 
 import logging
@@ -16,17 +16,167 @@ try:
 except ImportError:
     jsonlogger = None
 
+# Initialize colorama for Windows color support
+try:
+    import colorama
+    colorama.init(autoreset=True)
+except ImportError:
+    pass
 
-def initialize_logging(config_path: Optional[str] = None):
-    """Initialize the logging system."""
-    # Basic setup for now
-    logger.remove()
-    logger.add(sys.stdout, level="INFO", colorize=True)
-    logger.add("logs/aibotbs.log", level="DEBUG", rotation="10 MB")
+# Emoji mapping for log levels
+EMOJI_MAP = {
+    "TRACE": "🔍",
+    "DEBUG": "🐞",
+    "INFO": "ℹ️",
+    "SUCCESS": "✅",
+    "WARNING": "⚠️",
+    "ERROR": "❌",
+    "CRITICAL": "🚨"
+}
+
+
+def _get_env_config():
+    """Get environment-based configuration."""
+    return {
+        'env': os.getenv('APP_ENV', 'prod'),  # dev/prod
+        'dev_console': os.getenv('DEV_CONSOLE', '0') == '1',
+        'log_level': os.getenv('LOG_LEVEL', 'INFO' if os.getenv('APP_ENV') != 'dev' else 'DEBUG'),
+        'console_enabled': os.getenv('CONSOLE_LOG', '1') == '1',
+        'file_enabled': os.getenv('FILE_LOG', '1') == '1',
+        'emoji_enabled': os.getenv('LOG_EMOJI', '1') == '1',
+    }
+
+
+def _emoji_format_filter(record):
+    """Add emoji to log records based on level."""
+    config = _get_env_config()
+    if config['emoji_enabled']:
+        emoji = EMOJI_MAP.get(record["level"].name, "📝")
+        record["extra"]["emoji"] = emoji
+    else:
+        record["extra"]["emoji"] = ""
+    return True
+
+
+def _get_console_format(dev_mode=False):
+    """Get console log format based on mode."""
+    if dev_mode:
+        # Dev: Detailed with emoji, timestamp, file:line
+        return "<level>{extra[emoji]}</level> <green>{time:HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{line}</cyan> → <level>{message}</level>"
+    else:
+        # Prod: Compact with emoji and timestamp - only important messages
+        return "<level>{extra[emoji]}</level> <green>{time:HH:mm:ss}</green> | <level>{message}</level>"
+
+
+def initialize_logging(config_path: Optional[str] = None, cli_level: Optional[str] = None, cli_console: bool = False):
+    """Initialize the logging system with security redaction and emoji support."""
+    from infrastructure.log_redaction import create_redaction_filter
     
     # Create logs directory
     Path("logs").mkdir(exist_ok=True)
-    logger.info("✅ Basic logging initialized")
+    
+    # Get environment config
+    env_config = _get_env_config()
+    
+    # Override with CLI args
+    if cli_level:
+        env_config['log_level'] = cli_level
+    if cli_console:
+        env_config['console_enabled'] = True
+        env_config['dev_console'] = True
+    
+    # Create redaction filter
+    redaction_filter = create_redaction_filter(show_prefix=4)
+    
+    # Remove existing handlers
+    logger.remove()
+    
+    # Console handler (if enabled) - Summary only
+    if env_config['console_enabled']:
+        is_dev = env_config['env'] == 'dev' or env_config['dev_console']
+        console_format = _get_console_format(dev_mode=is_dev)
+        
+        # Filter function for console - only show important messages
+        def console_filter(record):
+            if not (redaction_filter(record) and _emoji_format_filter(record)):
+                return False
+            
+            # In production, only show INFO and above, skip DEBUG/verbose messages
+            if not is_dev:
+                # Skip verbose logs from news, fetch operations, etc.
+                if any(skip in record["message"].lower() for skip in [
+                    "fetching", "fetched", "creating features", "created features",
+                    "timestamp filter", "digest=changed", "bootstrap since",
+                    "news service stats", "analysis completed", "bootstrap completed"
+                ]):
+                    return False
+            
+            return True
+        
+        logger.add(
+            sys.stdout,
+            level=env_config['log_level'],
+            colorize=True,
+            format=console_format,
+            filter=console_filter,
+            encoding="utf-8",
+            errors="replace",
+            backtrace=is_dev,  # Full traceback in dev
+            diagnose=is_dev,   # Variable values in dev
+        )
+    
+    # File handler (if enabled) - Detailed logs
+    if env_config['file_enabled']:
+        log_file = f"logs/{env_config['env']}.log" if env_config['env'] == 'dev' else "logs/aibotbs.log"
+        logger.add(
+            log_file,
+            level="DEBUG",  # Always debug in file - all details
+            rotation="10 MB",
+            retention="30 days",
+            compression="zip",
+            format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
+            filter=redaction_filter,  # Only redaction, no other filtering
+            backtrace=True,
+            diagnose=True,
+        )
+    
+    # Log startup info
+    mode_emoji = "🔧" if env_config['env'] == 'dev' else "🚀"
+    logger.info(f"{mode_emoji} Logging initialized: mode={env_config['env']} level={env_config['log_level']} console={env_config['console_enabled']} file={env_config['file_enabled']}")
+    
+    # Set up exception hook for uncaught exceptions
+    def exception_handler(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        logger.opt(exception=(exc_type, exc_value, exc_traceback)).critical("Uncaught exception")
+    
+    sys.excepthook = exception_handler
+    
+    # Configure 3rd party loggers
+    _configure_third_party_loggers(env_config)
+
+
+def _configure_third_party_loggers(env_config):
+    """Configure log levels for noisy 3rd party libraries."""
+    third_party_level = "WARNING" if env_config['env'] == 'prod' else "INFO"
+    
+    noisy_loggers = [
+        'ccxt',
+        'httpx',
+        'httpcore',
+        'urllib3',
+        'asyncio',
+        'apscheduler',
+        'websockets',
+        'aiohttp',
+        'telegram',
+    ]
+    
+    for logger_name in noisy_loggers:
+        logging.getLogger(logger_name).setLevel(getattr(logging, third_party_level))
+    
+    logger.debug(f"🔇 Configured {len(noisy_loggers)} 3rd party loggers to {third_party_level}")
 
 
 def get_logger(name: str) -> logging.Logger:
@@ -302,19 +452,34 @@ def log_execution_time(func_name: str, execution_time: float):
 
 def setup_basic_logging(level: str = "INFO", log_file: Optional[str] = None):
     """Set up basic logging without YAML configuration."""
+    from infrastructure.log_redaction import create_redaction_filter
+    
+    # Create redaction filter
+    redaction_filter = create_redaction_filter(show_prefix=4)
+    
     # Remove existing handlers
     logger.remove()
     
-    # Add console handler
-    logger.add(sys.stdout, level=level, colorize=True)
+    # Add console handler with redaction
+    logger.add(
+        sys.stdout, 
+        level=level, 
+        colorize=True,
+        filter=redaction_filter
+    )
     
     # Add file handler if specified
     if log_file:
         log_path = Path(log_file)
         log_path.parent.mkdir(parents=True, exist_ok=True)
-        logger.add(log_file, level=level, rotation="10 MB")
+        logger.add(
+            log_file, 
+            level=level, 
+            rotation="10 MB",
+            filter=redaction_filter
+        )
     
-    logger.info(f"Basic logging initialized at level {level}")
+    logger.info(f"Secure logging initialized at level {level}")
 
 
 __all__ = [

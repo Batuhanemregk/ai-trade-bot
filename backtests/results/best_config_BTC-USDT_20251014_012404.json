@@ -1,0 +1,18 @@
+{
+  "symbol": "BTC-USDT",
+  "config_name": "pos15_sl1.5_tp3",
+  "parameters": {
+    "position_size": 0.15,
+    "stop_loss": 0.015,
+    "take_profit": 0.03
+  },
+  "performance": {
+    "total_return": 6.81258240526362,
+    "sharpe_ratio": 3.2754032805446567,
+    "sortino_ratio": 2.421856055518093,
+    "max_drawdown_pct": -13.256894482315326,
+    "win_rate": 47.368421052631575,
+    "profit_factor": 1.3389365997782745
+  },
+  "timestamp": "20251014_012404"
+}

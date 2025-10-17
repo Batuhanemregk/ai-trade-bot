@@ -1,10 +1,13 @@
 """
 Risk Service - Real risk management with market analysis
+Enhanced with log deduplication to reduce spam.
 """
 
 from typing import Dict, Any, List, Optional
 import numpy as np
 from loguru import logger
+
+from application.log_dedup_service import get_log_dedup_service
 
 
 class RiskService:
@@ -14,6 +17,7 @@ class RiskService:
         self.policy = policy or {}
         self._volatility_cache = {}
         self._correlation_cache = {}
+        self._log_dedup = get_log_dedup_service()
     
     async def assess_risk(self, symbol: str, score: float, signal_type: str, market_data: Dict[str, Any]) -> Dict[str, Any]:
         """Assess comprehensive risk for a trading decision."""
@@ -82,7 +86,11 @@ class RiskService:
             risk_config = self.policy.get('trading', {}).get('risk', {}).get('risk_assessment', {}).get('volatility_risk', {})
             
             if not risk_config:
-                logger.warning("No volatility risk config in policy, using defaults")
+                key = "risk:no_volatility_config"
+                should_log, is_first = self._log_dedup.should_log(key)
+                if should_log:
+                    suffix = " (first occurrence)" if is_first else ""
+                    logger.info(f"No volatility risk config in policy, using defaults{suffix}")
                 return 50.0
             
             # Policy'den volatility threshold'ları al
@@ -90,7 +98,11 @@ class RiskService:
             default_unknown = risk_config.get('default_unknown', 0.40)
             
             if not volatility_thresholds:
-                logger.warning("No volatility thresholds in policy, using defaults")
+                key = "risk:no_volatility_thresholds"
+                should_log, is_first = self._log_dedup.should_log(key)
+                if should_log:
+                    suffix = " (first occurrence)" if is_first else ""
+                    logger.info(f"No volatility thresholds in policy, using defaults{suffix}")
                 return 50.0
             
             # Get price data for volatility calculation
@@ -121,7 +133,11 @@ class RiskService:
                             break
                 
                 if not thresholds:
-                    logger.warning(f"No thresholds found for {symbol}, using default")
+                    key = f"risk:no_vol_thresholds:{symbol}"
+                    should_log, is_first = self._log_dedup.should_log(key)
+                    if should_log:
+                        suffix = " (first occurrence)" if is_first else ""
+                        logger.info(f"No thresholds found for {symbol}, using default{suffix}")
                     return 50.0
                 
                 # Calculate volatility-based risk
@@ -144,7 +160,11 @@ class RiskService:
                 logger.debug(f"Volatility risk for {symbol}: {risk} (volatility: {volatility:.3f}, thresholds: {thresholds})")
                 return risk
             else:
-                logger.warning(f"No price data for {symbol}, using default")
+                key = f"risk:no_price_volatility:{symbol}"
+                should_log, is_first = self._log_dedup.should_log(key)
+                if should_log:
+                    suffix = " (first occurrence)" if is_first else ""
+                    logger.info(f"No price data for {symbol}, using default{suffix}")
                 return 50.0
                 
         except Exception as e:
@@ -189,7 +209,11 @@ class RiskService:
                             break
                 
                 if not thresholds:
-                    logger.warning(f"No thresholds found for {symbol}, using default")
+                    key = f"risk:no_thresholds:{symbol}"
+                    should_log, is_first = self._log_dedup.should_log(key)
+                    if should_log:
+                        suffix = " (first occurrence)" if is_first else ""
+                        logger.info(f"No thresholds found for {symbol}, using default{suffix}")
                     return default_unknown
                 
                 # Calculate volume-based risk
@@ -209,7 +233,11 @@ class RiskService:
                 logger.debug(f"Liquidity risk for {symbol}: {risk} (volume: {recent_volume:.0f}, thresholds: {thresholds})")
                 return risk
             else:
-                logger.warning(f"No volume data for {symbol}, using default")
+                key = f"risk:no_volume:{symbol}"
+                should_log, is_first = self._log_dedup.should_log(key)
+                if should_log:
+                    suffix = " (first occurrence)" if is_first else ""
+                    logger.info(f"No volume data for {symbol}, using default{suffix}")
                 return default_unknown
                 
         except Exception as e:
@@ -260,7 +288,11 @@ class RiskService:
             risk_config = self.policy.get('trading', {}).get('risk', {}).get('risk_assessment', {}).get('score_risk', {})
             
             if not risk_config:
-                logger.warning("No score risk config in policy, using defaults")
+                key = "risk:no_score_config"
+                should_log, is_first = self._log_dedup.should_log(key)
+                if should_log:
+                    suffix = " (first occurrence)" if is_first else ""
+                    logger.info(f"No score risk config in policy, using defaults{suffix}")
                 return 50.0
             
             # Policy'den threshold'ları al
@@ -314,7 +346,11 @@ class RiskService:
             risk_config = self.policy.get('trading', {}).get('risk', {}).get('risk_assessment', {}).get('market_risk', {})
             
             if not risk_config:
-                logger.warning("No market risk config in policy, using defaults")
+                key = "risk:no_market_config"
+                should_log, is_first = self._log_dedup.should_log(key)
+                if should_log:
+                    suffix = " (first occurrence)" if is_first else ""
+                    logger.info(f"No market risk config in policy, using defaults{suffix}")
                 return 40.0
             
             # Policy'den parametreleri al

@@ -122,10 +122,6 @@ symbols:
     aliases: ["sui", "move blockchain"]
     categories: ["cryptocurrency", "blockchain", "defi", "web3"]
     
-  RENDER-USDT-SWAP:
-    keywords: ["render", "rndr", "cryptocurrency", "gpu", "rendering", "ai"]
-    aliases: ["render", "rndr", "gpu rendering network"]
-    categories: ["cryptocurrency", "gpu", "rendering", "ai"]
     
   FET-USDT-SWAP:
     keywords: ["fetch.ai", "fet", "cryptocurrency", "ai", "machine learning"]

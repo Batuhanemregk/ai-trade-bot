@@ -37,22 +37,39 @@ class BaseJob(ABC):
         """Get current closed bar ID for given timeframe."""
         now = datetime.now(timezone.utc)
         
-        if timeframe == '1m':
+        # Handle different input types
+        if isinstance(timeframe, datetime):
+            # If timeframe is actually a datetime, use it as bar_time
+            logger.warning(f"⚠️ get_current_bar_id received datetime instead of timeframe string: {timeframe}")
+            return timeframe.isoformat()
+        
+        # Ensure timeframe is a string
+        timeframe_str = str(timeframe).lower()
+        
+        if timeframe_str == '1m':
             # Round down to minute boundary
             bar_time = now.replace(second=0, microsecond=0)
-        elif timeframe == '5m':
+        elif timeframe_str == '5m':
             # Round down to 5-minute boundary
             minute = (now.minute // 5) * 5
             bar_time = now.replace(minute=minute, second=0, microsecond=0)
-        elif timeframe == '15m':
+        elif timeframe_str == '15m':
             # Round down to 15-minute boundary
             minute = (now.minute // 15) * 15
             bar_time = now.replace(minute=minute, second=0, microsecond=0)
-        elif timeframe == '1h':
+        elif timeframe_str == '1h':
             # Round down to hour boundary
             bar_time = now.replace(minute=0, second=0, microsecond=0)
+        elif timeframe_str in ['4h', '1d']:
+            # Handle additional timeframes with default behavior
+            logger.warning(f"⚠️ Unsupported timeframe '{timeframe_str}', using 15m as default")
+            minute = (now.minute // 15) * 15
+            bar_time = now.replace(minute=minute, second=0, microsecond=0)
         else:
-            raise ValueError(f"Unsupported timeframe: {timeframe}")
+            # Default to 15m for unknown timeframes
+            logger.warning(f"⚠️ Unknown timeframe '{timeframe}', defaulting to 15m")
+            minute = (now.minute // 15) * 15
+            bar_time = now.replace(minute=minute, second=0, microsecond=0)
         
         return bar_time.isoformat()
     

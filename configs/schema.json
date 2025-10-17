@@ -1,0 +1,173 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AiBotBS Policy Configuration Schema",
+  "description": "JSON Schema for validating policy.yaml configuration",
+  "type": "object",
+  "required": ["exchange", "trading", "schedule", "scheduler"],
+  "properties": {
+    "schedule": {
+      "type": "object",
+      "description": "Cron schedule definitions for jobs",
+      "required": ["trading_15m", "trailing_5m", "regime_1h", "risk_1m"],
+      "properties": {
+        "trading_15m": {"type": "string", "pattern": "^[*/0-9 ]+$"},
+        "trailing_5m": {"type": "string", "pattern": "^[*/0-9 ]+$"},
+        "regime_1h": {"type": "string", "pattern": "^[*/0-9 ]+$"},
+        "risk_1m": {"type": "string", "pattern": "^[*/0-9 ]+$"},
+        "market_overview": {"type": "string", "pattern": "^[*/0-9 ]+$"},
+        "telegram_summary_15m": {"type": "string", "pattern": "^[*/0-9 ]+$"}
+      }
+    },
+    "scheduler": {
+      "type": "object",
+      "description": "Scheduler configuration",
+      "required": ["semaphore_limit", "retry"],
+      "properties": {
+        "semaphore_limit": {"type": "integer", "minimum": 1, "maximum": 10},
+        "retry": {
+          "type": "object",
+          "required": ["attempts", "backoff_seconds"],
+          "properties": {
+            "attempts": {"type": "integer", "minimum": 1, "maximum": 5},
+            "backoff_seconds": {
+              "type": "array",
+              "items": {"type": "integer", "minimum": 1},
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "exchange": {
+      "type": "object",
+      "description": "Exchange configuration",
+      "required": ["name", "mode", "symbols"],
+      "properties": {
+        "name": {"type": "string", "enum": ["okx"]},
+        "mode": {"type": "string", "enum": ["live", "dry-run"]},
+        "testnet": {"type": "boolean"},
+        "sandbox": {"type": "boolean"},
+        "symbols": {
+          "type": "object",
+          "required": ["trading_pairs"],
+          "properties": {
+            "default_quote": {"type": "string"},
+            "trading_pairs": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1
+            }
+          }
+        }
+      }
+    },
+    "trading": {
+      "type": "object",
+      "description": "Trading configuration",
+      "required": ["risk", "scoring"],
+      "properties": {
+        "risk": {
+          "type": "object",
+          "description": "Risk management settings",
+          "required": ["max_position_size", "stop_loss_pct", "take_profit_pct"],
+          "properties": {
+            "max_position_size": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.5,
+              "description": "Maximum position size as fraction of portfolio (0.01-0.5)"
+            },
+            "max_leverage": {
+              "type": "number",
+              "minimum": 1.0,
+              "maximum": 10.0
+            },
+            "stop_loss_pct": {
+              "type": "number",
+              "minimum": 0.005,
+              "maximum": 0.1,
+              "description": "Stop loss percentage (0.5%-10%)"
+            },
+            "take_profit_pct": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.2,
+              "description": "Take profit percentage (1%-20%)"
+            },
+            "max_drawdown": {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 0.5
+            }
+          }
+        },
+        "scoring": {
+          "type": "object",
+          "description": "Scoring weights and thresholds",
+          "required": ["ta_weight", "ml_weight", "news_weight", "risk_weight"],
+          "properties": {
+            "ta_weight": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Technical Analysis weight (0.0-1.0)"
+            },
+            "ml_weight": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Machine Learning weight (0.0-1.0)"
+            },
+            "news_weight": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "News Sentiment weight (0.0-1.0)"
+            },
+            "risk_weight": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Risk Score weight (0.0-1.0)"
+            },
+            "min_composite_score": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Minimum composite score to execute trade"
+            },
+            "decision_thresholds": {
+              "type": "object",
+              "properties": {
+                "enter_long": {"type": "number", "minimum": 50, "maximum": 100},
+                "exit_long": {"type": "number", "minimum": 0, "maximum": 50},
+                "enter_short": {"type": "number", "minimum": 0, "maximum": 50},
+                "exit_short": {"type": "number", "minimum": 50, "maximum": 100}
+              }
+            }
+          }
+        }
+      }
+    },
+    "telegram": {
+      "type": "object",
+      "description": "Telegram configuration",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "token": {"type": "string"},
+        "chat_id": {"type": "string"},
+        "notifications": {
+          "type": "object",
+          "properties": {
+            "trading_signals": {"type": "boolean"},
+            "risk_alerts": {"type": "boolean"},
+            "portfolio_updates": {"type": "boolean"},
+            "system_status": {"type": "boolean"}
+          }
+        }
+      }
+    }
+  }
+}
+

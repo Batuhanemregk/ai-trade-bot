@@ -1,6 +1,6 @@
 # 🤖 AiBotBS Runtime Agent System
 
-> **Production-grade Runtime Agent System with Clean Architecture & SOLID Principles**
+> **Production-grade AI Trading Bot with Scheduler Architecture & SOLID Principles**
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-org/aibotbs)
 [![Test Coverage](https://img.shields.io/badge/coverage-65%25-orange)](https://github.com/your-org/aibotbs)
@@ -12,18 +12,27 @@
 ```bash
 # Clone and setup
 git clone <your-repo>
-cd AiBotBS
+cd ai-trade-bot
 pip install -r requirements.txt
 
 # Create .env (OKX, Telegram, OpenAI keys)
 cp .env.example .env  # then edit values
 
-# Install dependencies
-pip install -r requirements.txt
+# Test scheduler
+python scripts/test_scheduler.py
 
-# Start professional scheduler (live/dry mode via policy.yaml)
+# Configure OKX IP whitelist (IMPORTANT!)
+# https://www.okx.com → API Management → Add your IP
+
+# Start production scheduler
 python -m infrastructure.scheduler_runner
 ```
+
+**📖 Quick Guide:** See [docs/QUICKSTART.md](docs/QUICKSTART.md) for 5-minute setup  
+**📚 Scheduler Guide:** See [docs/SCHEDULER_CALISTIRMA_KILAVUZU.md](docs/SCHEDULER_CALISTIRMA_KILAVUZU.md) (Turkish)  
+**🔧 Development:** See [docs/DEVELOPMENT_TESTING.md](docs/DEVELOPMENT_TESTING.md) for dev workflow  
+**🚀 Start & Monitoring:** See [docs/START_AND_MONITORING.md](docs/START_AND_MONITORING.md) for scripts & monitoring setup  
+**📊 Enhanced Logging:** See [docs/ENHANCED_LOGGING.md](docs/ENHANCED_LOGGING.md) for professional logging system (v2.0)
 
 ## ✨ Features
 
@@ -59,14 +68,29 @@ python -m infrastructure.scheduler_runner
 
 ## 📚 Documentation
 
-- **[🏗️ Architecture](docs/ARCHITECTURE.md)** - Clean Architecture layers, module map, data flow
-- **[🤖 Agents](docs/AGENTS.md)** - Agent roles, graphs, dry-run lifecycle, troubleshooting
-- **[⚡ Execution](docs/EXECUTION.md)** - Quantization, prevalidation, bracket orders, adapters
-- **[📱 Telegram](docs/TELEGRAM.md)** - Bot setup, commands, examples, offline mocks
-- **[⏰ Scheduler](docs/SCHEDULER.md)** - Job API, cron/interval jobs, management
-- **[⚙️ Configuration](docs/CONFIG.md)** - Policy fields, weights, limits, examples
-- **[🧪 Testing](docs/TESTING.md)** - Core/glue tests, smoke, markers, offline rules
-- **[🤝 Contributing](docs/CONTRIBUTING.md)** - Development setup, standards, PR process
+### **Getting Started:**
+- **[⚡ Quick Start](docs/QUICKSTART.md)** - 5-minute setup guide
+- **[🇹🇷 Türkçe Başlangıç](docs/BASLATMA_ONEMLI.md)** - Hızlı başlatma (Turkish)
+- **[📊 Scheduler Guide](docs/SCHEDULER_CALISTIRMA_KILAVUZU.md)** - Complete scheduler guide (Turkish)
+
+### **Architecture & Design:**
+- **[🏗️ Architecture](docs/ARCHITECTURE_FINAL.md)** - Clean Architecture layers, SOLID principles
+- **[🤖 Agents](docs/AGENTS.md)** - Multi-agent system, workflows, message protocol
+- **[⏰ Scheduler](docs/SCHEDULER.md)** - Job architecture, scheduling patterns
+
+### **Development:**
+- **[🔧 Development & Testing](docs/DEVELOPMENT_TESTING.md)** - Dev workflow, when to use which mode
+- **[🧪 Testing Strategy](docs/TESTING.md)** - Test types, markers, best practices
+- **[🤝 Contributing](docs/CONTRIBUTING.md)** - PR process, code standards
+
+### **Operations:**
+- **[⚡ Execution](docs/EXECUTION.md)** - Order execution, bracket orders, quantization
+- **[📱 Telegram](docs/TELEGRAM.md)** - Bot commands, notifications, cards
+- **[⚙️ Configuration](docs/CONFIG.md)** - Policy.yaml reference, risk settings
+
+### **Production:**
+- **[✅ Production Readiness](docs/SCHEDULER_PRODUCTION_READY.md)** - Deployment checklist, monitoring
+- **[📖 Scheduler Operations](docs/START_SCHEDULER.md)** - Operations guide, troubleshooting
 
 ## 🛠️ Development
 
@@ -87,37 +111,50 @@ black .               # Code formatting
 
 ## 🔧 Configuration
 
-The system uses `policy.yaml` for configuration:
+The system uses `configs/policy.yaml` for all configuration:
 
 ```yaml
-risk:
-  max_daily_loss: 0.05
-  max_position_size: 0.1
-  stop_loss_atr_multiplier: 2.0
-
-scoring:
-  min_score: 0.5
-  news_weight: 0.3
-  ta_weight: 0.4
+exchange:
+  mode: "dry-run"  # or "live"
+  
+trading:
+  risk:
+    max_position_size: 0.1
+    max_total_risk: 0.6
+    stop_loss_pct: 0.02
+  
+  scoring:
+    ta_weight: 0.4
+    ml_weight: 0.25
+    news_weight: 0.2
+    risk_weight: 0.15
 ```
 
-See [CONFIG.md](docs/CONFIG.md) for complete configuration options.
+See [docs/CONFIG.md](docs/CONFIG.md) for complete configuration reference.
 
 ## 🚨 Safety Features
 
 - **Dry-Run Mode**: Test strategies without live trading
+- **Circuit Breaker**: Auto emergency stop on 25% daily loss, 3 consecutive losses
 - **Risk Limits**: Configurable position sizing and loss limits
+- **Config Validation**: JSON Schema + Pydantic validation
+- **Log Redaction**: Automatic API key/secret masking
+- **Decision Logging**: Full trade replay capability
 - **Prevalidation**: Order validation before execution
-- **Offline Mocks**: Deterministic testing environment
-- **Environment Isolation**: Safe configuration management
+- **Telegram Controls**: /stop, /pause, /resume commands
 
 ## 📈 Status
 
 - **Current Version**: 1.0.0
 - **Architecture**: Clean Architecture + SOLID Principles
-- **Testing**: 26 tests (Core + Glue)
-- **Coverage**: 65%+ (target)
+- **Scheduler**: Production Ready ✅
+- **Security**: Log Redaction, Circuit Breaker ✅
+- **Config Validation**: JSON Schema + Pydantic ✅
+- **Decision Logging**: Structured JSONL ✅
+- **Testing**: 26+ tests (Core + Integration)
+- **Coverage**: 65%+ (target: 80%)
 - **Quality**: Ruff + MyPy compliant
+- **Jobs**: 7 automated jobs (trading, trailing, news, regime, risk, overview, telegram)
 
 ## 🤝 Contributing
 

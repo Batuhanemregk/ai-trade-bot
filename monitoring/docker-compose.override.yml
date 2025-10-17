@@ -1,0 +1,29 @@
+# Docker Compose Override for Development
+# This file is automatically loaded in dev mode
+# It enables:
+# - Attach mode (no -d) for live logs
+# - TTY/stdin for interactive debugging
+# - Debug environment variables
+# - Smaller log files for faster development
+
+services:
+  prometheus:
+    # Development logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    
+  grafana:
+    # Development logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    environment:
+      # Enable dev mode
+      - GF_LOG_LEVEL=debug
+      - GF_LOG_MODE=console
+

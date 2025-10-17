@@ -5,6 +5,7 @@ Delegates to existing CLI and application services without duplicating logic.
 
 import asyncio
 import sys
+from datetime import datetime, timezone
 from typing import Optional
 
 from loguru import logger
@@ -112,11 +113,10 @@ async def trading_main(
         logger.info("📈 Analysis → Decision pipeline start")
         
         for symbol in symbols:
-            logger.info(f"🔍 Processing {symbol}")
+            logger.debug(f"🔍 Processing {symbol}")
             
             try:
                 # Step 1: Fetch OHLCV data (multi-timeframe)
-                logger.info(f"📊 Fetching OHLCV data for {symbol}")
                 ohlcv_data = await _fetch_multi_timeframe_data(exchange_adapter, symbol, live)
                 
                 if not ohlcv_data:
@@ -124,23 +124,18 @@ async def trading_main(
                     continue
                 
                 # Step 2: Technical Analysis
-                logger.info(f"📈 Computing TA scores for {symbol}")
                 ta_score, ta_rationale, ta_flags = await _compute_ta_analysis(ta_scorer, ohlcv_data, symbol)
                 
                 # Step 3: ML Analysis
-                logger.info(f"🤖 Computing ML scores for {symbol}")
                 ml_score, ml_rationale, ml_details = await _compute_ml_analysis(ml_scorer, ohlcv_data, symbol)
                 
                 # Step 4: News Analysis
-                logger.info(f"📰 Computing News scores for {symbol}")
                 news_score, news_categories, news_rationale, news_volatility = await _compute_news_analysis(news_scorer, symbol)
                 
                 # Step 5: Risk Analysis (read-only)
-                logger.info(f"⚠️ Computing Risk annotations for {symbol}")
                 risk_score, risk_details = await _compute_risk_analysis(risk_service, symbol, ohlcv_data)
                 
                 # Step 6: Composite Score & Decision
-                logger.info(f"🎯 Computing composite score for {symbol}")
                 composite_signal = await _compute_composite_signal(
                     symbol, ta_score, ta_rationale, ta_flags,
                     ml_score, ml_rationale, ml_details,
@@ -148,18 +143,7 @@ async def trading_main(
                     risk_score, risk_details
                 )
                 
-                # Log results
-                logger.info(f"📊 {symbol} Analysis Results:")
-                logger.info(f"  TA Score: {ta_score:.1f} - {ta_rationale}")
-                logger.info(f"  ML Score: {ml_score:.1f} - {ml_rationale}")
-                logger.info(f"  News Score: {news_score:.1f} - {news_rationale}")
-                logger.info(f"  Risk Score: {risk_score:.1f}")
-                logger.info(f"  Final Score: {composite_signal.final_score:.1f}")
-                logger.info(f"  Grade: {composite_signal.grade}")
-                logger.info(f"  Decision: {composite_signal.decision}")
-                
                 # Step 7: Enhanced Signal Processing
-                logger.info(f"🎯 Processing signal with enhanced gating for {symbol}")
                 gated_signal = signal_gate.process_signal(symbol, {
                     'final_score': composite_signal.final_score,
                     'ta_score': ta_score,
@@ -168,30 +152,51 @@ async def trading_main(
                     'risk_score': risk_score
                 }, ohlcv_data.get('1h', []))
                 
-                logger.info(f"🎯 {symbol} Gated Signal: {gated_signal.direction} "
-                           f"(original={gated_signal.original_score:.1f}, "
-                           f"gated={gated_signal.gated_score:.1f}, "
-                           f"valid={gated_signal.is_valid})")
-                logger.info(f"🎯 {symbol} Signal Details: {gated_signal.reason}")
-                
                 # Step 8: State Management & Decision
-                logger.info(f"🎯 Processing state transition for {symbol}")
                 transition = state_manager.process_signal(symbol, {
                     'final_score': gated_signal.gated_score,
                     'direction': gated_signal.direction,
                     'strength': gated_signal.strength
                 })
                 
-                logger.info(f"🎯 {symbol} State Transition: {transition.from_state.value} -> "
-                           f"{transition.to_state.value} action={transition.action}")
-                logger.info(f"🎯 {symbol} Transition Reason: {transition.reason}")
+                # Enhanced logging (single line summary)
+                from application.log_formatter import get_log_formatter
+                formatter = get_log_formatter()
+                
+                gate_details = {
+                    'persist_count': gated_signal.persistence_bars,
+                    'persist_required': 5,
+                    'confidence': gated_signal.details.get('confidence', 0.0),
+                    'conf_required': gated_signal.details.get('conf_threshold', 0.0)
+                }
+                
+                signal_history = signal_gate.get_signal_history(symbol)
+                age_bars = len(signal_history) if signal_history else 0
+                
+                log_message = formatter.format_analysis_summary({
+                    'symbol': symbol,
+                    'timeframe': '15m',
+                    'timestamp': datetime.now(timezone.utc),
+                    'ta_score': ta_score,
+                    'ml_score': ml_score,
+                    'news_score': news_score,
+                    'risk_score': risk_score,
+                    'final_score': composite_signal.final_score,
+                    'grade': composite_signal.grade,
+                    'direction': gated_signal.direction,
+                    'gate_status': 'PASS' if gated_signal.is_valid else 'PENDING',
+                    'gate_details': gate_details,
+                    'age_bars': age_bars,
+                    'max_age_bars': 6
+                })
+                logger.info(log_message)
                 
                 # Step 9: Handle State Transitions
                 if transition.action == 'IGNORE':
-                    logger.info(f"⏸️ {symbol}: IGNORE - Same direction signal ignored")
+                    logger.debug(f"⏸️ {symbol}: IGNORE - Same direction signal ignored")
                     continue
                 elif transition.action == 'MAINTAIN':
-                    logger.info(f"⏸️ {symbol}: MAINTAIN - No state change")
+                    logger.debug(f"⏸️ {symbol}: MAINTAIN - No state change")
                     continue
                 elif transition.action in ['OPEN_LONG', 'OPEN_SHORT']:
                     # New position opening
@@ -764,7 +769,7 @@ async def _calculate_position_size(composite_signal, symbol: str, exchange_adapt
         
         logger.info(f"📊 Risk status: total_risk=${total_risk_usdt:.2f}, available=${available_risk:.2f}, limit=${max_risk_limit:.2f}")
         
-        # Dynamic position size based on composite score AND risk score (1% to 10% of portfolio)
+        # Dynamic position size based on composite score, risk score, AND ML confidence
         composite_score = composite_signal.final_score
         risk_score = composite_signal.risk.score
         
@@ -777,8 +782,25 @@ async def _calculate_position_size(composite_signal, symbol: str, exchange_adapt
         risk_multiplier = 1.0 - (risk_score / 100.0) * 0.5  # Reduce by up to 50% for high risk
         risk_multiplier = max(0.5, min(1.0, risk_multiplier))  # Clamp 0.5-1.0
         
-        # Final position size = signal strength * risk adjustment
-        base_percentage = signal_percentage * risk_multiplier
+        # ML Confidence adjustment: higher confidence = larger position
+        ml_confidence = 'low'  # default
+        ml_confidence_multiplier = 1.0  # default (no adjustment)
+        
+        if hasattr(composite_signal, 'ml') and hasattr(composite_signal.ml, 'details'):
+            ml_details = composite_signal.ml.details
+            if isinstance(ml_details, dict):
+                ml_confidence = ml_details.get('confidence', 'low')
+        
+        # Adjust position size based on ML confidence
+        if ml_confidence == 'high':
+            ml_confidence_multiplier = 1.0  # Full size for high confidence
+        elif ml_confidence == 'medium':
+            ml_confidence_multiplier = 0.85  # 85% size for medium confidence
+        else:  # low
+            ml_confidence_multiplier = 0.70  # 70% size for low confidence
+        
+        # Final position size = signal strength * risk adjustment * ML confidence
+        base_percentage = signal_percentage * risk_multiplier * ml_confidence_multiplier
         base_percentage = max(0.01, min(0.10, base_percentage))  # Final clamp 1%-10%
         
         # Calculate desired position size
@@ -814,7 +836,7 @@ async def _calculate_position_size(composite_signal, symbol: str, exchange_adapt
         max_position_size = usdt_balance * 0.10
         position_size_usdt = min(position_size_usdt, max_position_size)
         
-        logger.info(f"💰 Dynamic position size: balance=${usdt_balance:.2f}, signal_score={composite_score:.1f}, risk_score={risk_score:.1f}, signal_pct={signal_percentage:.1%}, risk_mult={risk_multiplier:.2f}, final_pct={base_percentage:.1%}, desired=${desired_size_usdt:.2f}, min_req=${min_required_usdt:.2f}, final=${position_size_usdt:.2f}")
+        logger.info(f"💰 Dynamic position size: balance=${usdt_balance:.2f}, signal_score={composite_score:.1f}, risk_score={risk_score:.1f}, ml_conf={ml_confidence}, signal_pct={signal_percentage:.1%}, risk_mult={risk_multiplier:.2f}, ml_mult={ml_confidence_multiplier:.2f}, final_pct={base_percentage:.1%}, desired=${desired_size_usdt:.2f}, min_req=${min_required_usdt:.2f}, final=${position_size_usdt:.2f}")
         
         return position_size_usdt
         

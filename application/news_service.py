@@ -24,6 +24,9 @@ class NewsService:
         self.llm_config = policy.get('news_llm', {})
         self.scoring_config = policy.get('news_scoring', {})
         
+        # Log verbosity control
+        self.verbose_logging = os.getenv('NEWS_VERBOSITY', 'summary').lower() == 'full'
+        
         # Storage paths from policy
         storage_paths = self.news_config.get('storage_paths', {})
         self.watermark_path = storage_paths.get('watermarks', 'data/news_watermarks.json')
@@ -128,7 +131,8 @@ class NewsService:
     
     async def _bootstrap_symbol(self, symbol: str, since_timestamp: datetime):
         """Bootstrap news collection for a single symbol"""
-        logger.info(f"📊 [NEWS] sym={symbol} bootstrap since={since_timestamp.isoformat()}")
+        if self.verbose_logging:
+            logger.info(f"📊 [NEWS] sym={symbol} bootstrap since={since_timestamp.isoformat()}")
         
         # Fetch news
         news_items = await self._fetch_news_for_symbol(symbol, since_timestamp)
@@ -145,23 +149,36 @@ class NewsService:
             if self.llm_analyzer:
                 await self._analyze_news_with_llm(symbol, news_items)
             
-            logger.info(f"✅ [NEWS] sym={symbol} bootstrap completed: {len(news_items)} articles")
+            if self.verbose_logging:
+                logger.info(f"✅ [NEWS] sym={symbol} bootstrap completed: {len(news_items)} articles")
         else:
-            logger.warning(f"⚠️ [NEWS] sym={symbol} no articles found in bootstrap")
+            if self.verbose_logging:
+                logger.warning(f"⚠️ [NEWS] sym={symbol} no articles found in bootstrap")
     
     async def incremental_update_symbols(self, symbols: List[str]):
         """Incremental news update for all symbols"""
-        logger.info(f"🔄 Starting incremental news update for {len(symbols)} symbols")
+        if self.verbose_logging:
+            logger.info(f"🔄 Starting incremental news update for {len(symbols)} symbols")
         
         overlap_minutes = self.news_config.get('overlap_minutes', 30)
+        total_fetched = 0
+        total_llm = 0
+        total_changed = 0
+        errors = 0
         
         for symbol in symbols:
             try:
                 await self._incremental_update_symbol(symbol, overlap_minutes)
             except Exception as e:
                 logger.error(f"❌ Incremental update failed for {symbol}: {e}")
+                errors += 1
         
-        logger.info("✅ Incremental news update completed")
+        if not self.verbose_logging:
+            # Summary log instead of verbose logs
+            stats = self.get_news_stats()
+            logger.info(f"NEWS 5m | symbols={len(symbols)} | fetched={stats.get('total_articles', 0)} | llm={stats.get('llm_analyzed', 0)} | changed={stats.get('cache_changed', 0)} | errors={errors}")
+        else:
+            logger.info("✅ Incremental news update completed")
     
     async def _incremental_update_symbol(self, symbol: str, overlap_minutes: int):
         """Incremental news update for a single symbol"""
@@ -210,7 +227,8 @@ class NewsService:
             
             # If no timestamp filtering needed (bootstrap), return all news
             if since_timestamp.year < 2020:  # Very old timestamp means bootstrap
-                logger.info(f"📰 [NEWS] sym={symbol} bootstrap mode: returning {len(news_items)} articles")
+                if self.verbose_logging:
+                    logger.info(f"📰 [NEWS] sym={symbol} bootstrap mode: returning {len(news_items)} articles")
                 return news_items
             
             # Filter by timestamp for incremental updates
@@ -220,7 +238,8 @@ class NewsService:
                 if item_timestamp and item_timestamp >= since_timestamp:
                     filtered_items.append(item)
             
-            logger.info(f"📰 [NEWS] sym={symbol} timestamp filter: {len(news_items)} -> {len(filtered_items)} articles")
+            if self.verbose_logging:
+                logger.info(f"📰 [NEWS] sym={symbol} timestamp filter: {len(news_items)} -> {len(filtered_items)} articles")
             return filtered_items
             
         except Exception as e:
@@ -366,3 +385,12 @@ class NewsService:
             'digest_cache': digest_stats,
             'llm_enabled': self.llm_analyzer is not None
         }
+    
+    async def close(self):
+        """Close news service and clean up resources"""
+        try:
+            if self.news_client:
+                await self.news_client.close()
+            logger.info("✅ News service closed successfully")
+        except Exception as e:
+            logger.error(f"❌ Error closing news service: {e}")

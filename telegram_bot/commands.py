@@ -6,6 +6,7 @@ Contains all command logic without bot wiring.
 import asyncio
 import logging
 from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone, timedelta
 
 from infrastructure.logger import get_agent_logger
 from infrastructure.scheduler import get_scheduler
@@ -41,6 +42,10 @@ class CommandHandler:
 **Control:**
 • /restart - Restart system
 • /shutdown - Shutdown system
+• /stop - Emergency stop (close all)
+• /pause [hours] - Pause trading
+• /resume - Resume trading
+• /breaker - Circuit breaker status
 
 Use /help <command> for details."""
     
@@ -226,10 +231,101 @@ Use /help <command> for details."""
         except Exception as e:
             self.logger.error(f"Shutdown command failed: {e}")
             return "❌ Failed to shutdown system"
+    
+    async def handle_stop(self, context: Dict[str, Any]) -> str:
+        """Handle /stop command - Emergency stop."""
+        self.logger.info("Emergency stop command received")
+        try:
+            from application.circuit_breaker import get_circuit_breaker
+            
+            circuit_breaker = get_circuit_breaker()
+            await circuit_breaker.manual_stop("Manual stop via Telegram /stop command")
+            
+            return "🚨 **EMERGENCY STOP TRIGGERED**\n\nAll positions should be closed.\nTrading halted.\n\nUse /resume to restart after investigation."
+        except Exception as e:
+            self.logger.error(f"Stop command failed: {e}")
+            return f"❌ Failed to trigger emergency stop: {e}"
+    
+    async def handle_pause(self, context: Dict[str, Any]) -> str:
+        """Handle /pause command - Pause trading."""
+        self.logger.info("Pause command received")
+        try:
+            from application.circuit_breaker import get_circuit_breaker
+            
+            # Get hours from context (default: 24)
+            hours = int(context.get('args', [24])[0]) if context.get('args') else 24
+            hours = max(1, min(hours, 168))  # Clamp to 1-168 hours
+            
+            circuit_breaker = get_circuit_breaker()
+            await circuit_breaker.manual_pause(hours, f"Manual pause via Telegram ({hours}h)")
+            
+            pause_until = datetime.now(timezone.utc) + timedelta(hours=hours)
+            
+            return f"⏸️ **Trading Paused**\n\nDuration: {hours} hours\nPaused until: {pause_until.strftime('%Y-%m-%d %H:%M UTC')}\n\nUse /resume to restart early."
+        except Exception as e:
+            self.logger.error(f"Pause command failed: {e}")
+            return f"❌ Failed to pause trading: {e}"
+    
+    async def handle_resume(self, context: Dict[str, Any]) -> str:
+        """Handle /resume command - Resume trading."""
+        self.logger.info("Resume command received")
+        try:
+            from application.circuit_breaker import get_circuit_breaker
+            
+            circuit_breaker = get_circuit_breaker()
+            success = await circuit_breaker.manual_resume("Manual resume via Telegram /resume command")
+            
+            if success:
+                return "▶️ **Trading Resumed**\n\nNormal operation restored."
+            else:
+                return "⚠️ **Cannot Resume**\n\nEmergency state active.\nContact admin for reset."
+        except Exception as e:
+            self.logger.error(f"Resume command failed: {e}")
+            return f"❌ Failed to resume trading: {e}"
+    
+    async def handle_breaker(self, context: Dict[str, Any]) -> str:
+        """Handle /breaker command - Circuit breaker status."""
+        self.logger.info("Breaker status command received")
+        try:
+            from application.circuit_breaker import get_circuit_breaker
+            
+            circuit_breaker = get_circuit_breaker()
+            status = circuit_breaker.get_status()
+            
+            state_emoji = {
+                'normal': '🟢',
+                'warning': '🟡',
+                'paused': '⏸️',
+                'emergency': '🚨'
+            }.get(status['state'], '⚪')
+            
+            result = f"{state_emoji} **Circuit Breaker Status**\n\n"
+            result += f"**State:** {status['state'].upper()}\n"
+            result += f"**Trading Allowed:** {'Yes ✅' if status['trading_allowed'] else 'No ❌'}\n"
+            result += f"**Emergency:** {'Active 🚨' if status['emergency_triggered'] else 'Inactive'}\n"
+            
+            if status['paused_until']:
+                result += f"**Paused Until:** {status['paused_until']}\n"
+            
+            result += f"**Consecutive Losses:** {status['consecutive_losses']}\n"
+            
+            result += f"\n**Thresholds:**\n"
+            thresholds = status['thresholds']
+            result += f"• Daily Loss Limit: {thresholds['daily_loss_limit']:.1%}\n"
+            result += f"• Max Drawdown: {thresholds['max_drawdown']:.1%}\n"
+            result += f"• Max Consecutive Losses: {thresholds['max_consecutive_losses']}\n"
+            
+            return result
+        except Exception as e:
+            self.logger.error(f"Breaker command failed: {e}")
+            return f"❌ Failed to get circuit breaker status: {e}"
 
 
 # Global command handler instance
 command_handler = CommandHandler()
 
 
-__all__ = ["CommandHandler", "command_handler"]
+__all__ = [
+    "CommandHandler", 
+    "command_handler"
+]

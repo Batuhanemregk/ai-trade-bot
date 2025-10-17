@@ -1,0 +1,43 @@
+# Prometheus Configuration for AI Trading Bot
+
+global:
+  scrape_interval: 15s  # Her 15 saniyede bir metrics topla
+  evaluation_interval: 15s  # Her 15 saniyede bir alertleri değerlendir
+  external_labels:
+    monitor: 'ai-trading-bot'
+    environment: 'production'
+
+# Alertmanager configuration (opsiyonel)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Rule dosyaları (opsiyonel - alert kuralları)
+# rule_files:
+#   - "alerts/*.yml"
+
+# Scrape (metrics toplama) ayarları
+scrape_configs:
+  # Prometheus'un kendi metrics'leri
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # AI Trading Bot Metrics
+  - job_name: 'ai-trading-bot'
+    scrape_interval: 10s  # Bot için daha sık toplama (10 saniye)
+    scrape_timeout: 5s
+    static_configs:
+      - targets: ['host.docker.internal:8000']  # Windows/Mac için
+        labels:
+          app: 'ai-trading-bot'
+          service: 'main'
+    # Linux için alternatif:
+    # - targets: ['172.17.0.1:8000']
+
+  # Node Exporter (sistem metrikleri - opsiyonel)
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+

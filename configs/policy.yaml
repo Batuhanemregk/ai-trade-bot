@@ -248,9 +248,9 @@ exchange:
   # Symbol mapping
   symbols:
     default_quote: "USDT"
-    supported_pairs: ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "LINK", "UNI", "ATOM", "NEAR", "ALGO", "ICP", "XRP", "CFX", "BIO", "PENGU", "CRO", "LDO", "TAO", "ARB", "SUI", "RENDER", "JUP", "OP"]
+    supported_pairs: ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "LINK", "UNI", "ATOM", "NEAR", "ALGO", "ICP", "XRP", "CFX", "BIO", "PENGU", "CRO", "LDO", "TAO", "ARB", "SUI", "JUP", "OP"]
     # Trading symbols (pairs)
-    trading_pairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT", "AVAX-USDT", "LINK-USDT", "UNI-USDT", "ATOM-USDT", "NEAR-USDT", "ALGO-USDT", "ICP-USDT", "XRP-USDT", "CFX-USDT", "BIO-USDT", "PENGU-USDT", "CRO-USDT", "LDO-USDT", "TAO-USDT", "ARB-USDT", "SUI-USDT", "RENDER-USDT", "JUP-USDT", "OP-USDT"]
+    trading_pairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT", "AVAX-USDT", "LINK-USDT", "UNI-USDT", "ATOM-USDT", "NEAR-USDT", "ALGO-USDT", "ICP-USDT", "XRP-USDT", "CFX-USDT", "BIO-USDT", "PENGU-USDT", "CRO-USDT", "LDO-USDT", "TAO-USDT", "ARB-USDT", "SUI-USDT", "JUP-USDT", "OP-USDT"]
   
   # Symbol-specific overrides for minimum order requirements (disabled - using dynamic calculation)
   # symbol_overrides: {}
@@ -296,6 +296,7 @@ notifications:
 logging:
   level: "INFO"
   format: "json"
+  summary_mode: "line"  # line (single line) or block (multi-line panel)
   handlers:
     - "console"
     - "file"
@@ -303,6 +304,10 @@ logging:
     path: "logs/"
     max_size: "100MB"
     backup_count: 5
+  dedup:
+    enabled: true
+    ttl_seconds: 3600  # Only log same message once per hour
+  news_verbosity: "summary"  # summary (compact) or full (verbose)
 
 # Performance Monitoring
 performance:
@@ -371,6 +376,36 @@ development:
     telegram_bot: true
     performance_tracking: true
 
+# Machine Learning Configuration
+ml_scoring:
+  enabled: true
+  model:
+    path: "models/rf_v1.pkl"
+    type: "RandomForest"
+    version: "v1"
+    auto_reload: false  # Auto-reload if new model detected
+  
+  scoring:
+    # Confidence thresholds
+    confidence:
+      high_threshold: 0.30    # |p_up - 0.5| > 0.30 = high confidence
+      medium_threshold: 0.15  # |p_up - 0.5| > 0.15 = medium
+      # low: rest
+    
+    # Neutral band (ignore weak signals)
+    neutral_band:
+      enabled: true
+      lower: 0.45  # If p_up in [0.45, 0.55], treat as neutral
+      upper: 0.55
+    
+    # Score adjustment
+    score_multiplier: 1.0  # Multiply ML score if needed
+    
+  fallback:
+    enabled: true
+    neutral_score: 50.0  # Fallback to neutral if model unavailable
+    variation: 5.0       # Add random [-5, +5] variation to avoid bias
+
 # News System Configuration
 news:
   lookback_hours_bootstrap: 24
@@ -412,3 +447,13 @@ analysis_cards:
     include_news: true
     include_risk: true
     include_decision: true
+
+# Monitoring Configuration
+monitoring:
+  prometheus:
+    enabled: true
+    port: 8000
+  alerts:
+    drawdown_threshold: 0.10
+    exposure_threshold: 0.70
+    loss_streak_threshold: 3
