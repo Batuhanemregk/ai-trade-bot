@@ -33,6 +33,15 @@ class Regime1hJob(BaseJob):
             logger.error(f"❌ Failed to initialize Regime1hJob: {e}")
             raise
     
+    async def cleanup(self):
+        """Cleanup regime update resources"""
+        try:
+            if hasattr(self, 'exchange_adapter') and self.exchange_adapter:
+                await self.exchange_adapter.close()
+                logger.debug("✅ Closed exchange adapter for Regime1hJob")
+        except Exception as e:
+            logger.error(f"❌ Regime1hJob cleanup failed: {e}")
+    
     async def execute(self):
         """Execute 1-hour regime update."""
         try:
