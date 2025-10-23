@@ -1,0 +1,4 @@
+TRADING_MODE=paper
+TESTNET=false
+SANDBOX=false
+DRY_RUN=false

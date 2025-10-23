@@ -1,198 +1,176 @@
-# OKX Trading Bot Test Suite
+# AiBotBS Real Data Tests
 
-## Overview
+Bu test suite'i gerçek API'ler ve gerçek market verileri kullanarak botun tüm özelliklerini test eder. Mock veriler kullanılmaz.
 
-This test suite validates the newly integrated features for the OKX trading bot without touching live execution. The tests ensure deterministic, fast, and comprehensive validation of all components.
+## Test Kategorileri
 
-## Test Objectives
+### 1. Integration Tests (`tests/integration/`)
 
-- ✅ **Multi-timeframe TA (1h/15m/5m)** - Technical analysis across multiple timeframes
-- ✅ **Unified Composite Scoring** - Single source of truth for final_score
-- ✅ **ML Integration** - 3 models with neutral fallback = 50
-- ✅ **News Sentiment** - Keyword/regex scoring with fallbacks
-- ✅ **Risk Scoring** - Read-only portfolio risk assessment
-- ✅ **Policy-driven Weights** - Technical 40%, ML 25%, News 20%, Risk 15%
-- ✅ **Confidence Grading** - A+/A/B/C/D based on final_score
-- ✅ **End-to-End Pipeline** - Complete analysis workflow validation
+#### `test_real_exchange_api.py`
+- **OKX Exchange API** gerçek bağlantı testleri
+- Gerçek OHLCV verisi çekme
+- Gerçek ticker ve orderbook verileri
+- API rate limiting testleri
+- Çoklu sembol testleri
 
-## Test Structure
+#### `test_real_news_api.py`
+- **CryptoCompare News API** gerçek bağlantı testleri
+- Gerçek haber verisi çekme
+- LLM analiz testleri
+- Haber kalitesi ve timestamp filtreleme
+- API rate limiting testleri
 
-```
-tests/
-├── conftest.py                 # Global fixtures and configuration
-├── test_config_policy.py       # Policy validation
-├── test_indicators_ta.py       # Technical analysis indicators
-├── test_ml_news_fallbacks.py   # ML and news fallback mechanisms
-├── test_risk_scorer.py         # Risk management validation
-├── test_composite_math.py      # Composite scoring mathematics
-├── test_pipeline_smoke.py      # End-to-end pipeline testing
-└── README.md                   # This file
-```
+#### `test_real_trading_analysis.py`
+- **TA Scorer** gerçek market verisi ile
+- **ML Scorer** gerçek market verisi ile
+- **News Scorer** gerçek haber verisi ile
+- **Risk Scorer** gerçek market verisi ile
+- Tam analiz pipeline testi
+- Çoklu sembol analizi
+- Signal gate persistence testleri
 
-## Quick Start
+#### `test_real_risk_assessment.py`
+- **Risk Service** gerçek market verisi ile
+- Volatilite hesaplama testleri
+- Likidite değerlendirme testleri
+- Korelasyon analizi testleri
+- Risk manager testleri
+- Position sizing testleri
+- Risk threshold testleri
 
-### 1. Install Dependencies
+### 2. End-to-End Tests (`tests/e2e/`)
+
+#### `test_real_trading_cycle.py`
+- **Tam trading cycle** gerçek verilerle
+- Signal generation ve processing
+- Portfolio management testleri
+- Position monitoring testleri
+- Trading orchestrator testleri
+- Çoklu sembol trading cycle
+- Performance testleri
+- Error handling testleri
+- Data consistency testleri
+
+## API Gereksinimleri
+
+Testlerin çalışması için gerekli API'ler:
+
+### 1. OKX Exchange API
 ```bash
-pip install -r requirements_testing.txt
+# .env dosyasında
+OKX_API_KEY=your_api_key
+OKX_API_SECRET=your_api_secret
+OKX_API_PASSPHRASE=your_passphrase
 ```
 
-### 2. Run All Tests
+### 2. OpenAI API (LLM için)
 ```bash
-./scripts/run_smoke.sh
+# .env dosyasında
+OPENAI_API_KEY=your_openai_key
 ```
 
-### 3. Run Specific Test Categories
+### 3. Internet Bağlantısı
+- News API'leri için internet bağlantısı gerekli
+- OKX API'leri için internet bağlantısı gerekli
+
+## Test Çalıştırma
+
+### Tüm Testleri Çalıştır
 ```bash
-# Configuration and policy
-pytest tests/test_config_policy.py -v
-
-# Technical analysis indicators
-pytest tests/test_indicators_ta.py -v
-
-# Composite scoring
-pytest tests/test_composite_math.py -v
-
-# End-to-end pipeline
-pytest tests/test_pipeline_smoke.py -v
+python scripts/run_tests.py
 ```
 
-## Key Features
-
-### 🎯 **Deterministic Testing**
-- Global random seeds (numpy, random) set to 42
-- Fixed timestamps for time-based calculations
-- Same results every run
-
-### 🔌 **Comprehensive Mocking**
-- ML models: Mocked for available/unavailable scenarios
-- News APIs: Mocked for positive/negative/empty results
-- Risk manager: Mocked portfolio state
-- All external dependencies stubbed
-
-### 📊 **Data Generation**
-- Synthetic OHLCV data for 1h/15m/5m timeframes
-- Realistic price movements and volume patterns
-- 300+ bars per timeframe for indicator warmup
-
-### 🧮 **Pure Pandas/NumPy Indicators**
-- **No external TA library dependencies**
-- RSI, MACD, Bollinger Bands, ATR, SMA calculated using pure pandas/NumPy
-- Deterministic calculations for consistent results
-- Warmup period (50 bars) applied to remove initial NaN values
-- All assertions performed after warmup for reliable validation
-
-### 🚀 **Fast Execution**
-- Total test suite runs in <60 seconds
-- Efficient fixtures with session scope where possible
-- Minimal external API calls (all mocked)
-
-### 🛡️ **Error Handling**
-- Graceful degradation when components fail
-- Neutral fallback scores (50.0) for unavailable services
-- Comprehensive error logging and validation
-
-## Test Scenarios
-
-### Technical Analysis
-- **Indicator Calculation**: RSI ∈ [0,100], ATR > 0, MACD finite, Bollinger width > 0
-- **Warmup Handling**: 50-bar warmup period, post-warmup validation
-- **Data Quality**: OHLCV relationships, volume validation
-- **Scoring Consistency**: Deterministic results across multiple runs
-
-### ML Integration
-- **Model Available**: Normal scoring with mocked predictions
-- **Model Unavailable**: Fallback to neutral score (50.0)
-- **Error Handling**: Graceful degradation on ML failures
-
-### News Sentiment
-- **Positive News**: Bullish sentiment scoring
-- **Negative News**: Bearish sentiment scoring
-- **Empty Results**: Fallback to neutral score (50.0)
-- **API Errors**: Graceful error handling
-
-### Risk Management
-- **Portfolio State**: Exposure, correlation, drawdown assessment
-- **Policy Limits**: Risk threshold enforcement
-- **Penalty Application**: Score reduction for risk violations
-- **Bounds Enforcement**: Score clamped to [0, 100]
-
-### Composite Scoring
-- **Weighted Aggregation**: Technical 40% + ML 25% + News 20% + Risk 15%
-- **Grading Bands**: A+ (90+), A (80+), B (70+), C (60+), D (50+)
-- **Decision Logic**: LONG/SHORT/FLAT based on confidence and direction
-- **Single Source of Truth**: final_score exposed to all consumers
-
-### End-to-End Pipeline
-- **Complete Workflow**: TA → ML → News → Risk → Composite
-- **Fallback Scenarios**: Graceful degradation when components fail
-- **Consistency**: Deterministic results across multiple executions
-- **Error Handling**: Robust error handling throughout pipeline
-
-## Performance
-
-- **Total Runtime**: <60 seconds
-- **Memory Usage**: Minimal (synthetic data, no large files)
-- **CPU Usage**: Low (pure calculations, no network calls)
-- **Deterministic**: Same results every run
-
-## Important Notes
-
-### Indicator Calculator
-- **Pure Implementation**: No external TA library dependencies
-- **Warmup Period**: 50 bars required for reliable indicator calculation
-- **Validation**: All assertions performed after warmup period
-- **Consistency**: Same input produces identical output
-
-### Test Data
-- **Synthetic Generation**: No real market data required
-- **Realistic Patterns**: Price movements simulate real market behavior
-- **Multiple Timeframes**: 1h, 15m, 5m data bundles
-- **Volume Patterns**: Realistic volume distribution and ratios
-
-### Mocking Strategy
-- **External APIs**: All network calls mocked
-- **ML Models**: Predictions and availability mocked
-- **News Sources**: Headlines and sentiment mocked
-- **Risk Manager**: Portfolio state and policy mocked
-
-## Debugging Tips
-
-### Common Issues
-1. **Import Errors**: Check virtual environment and dependencies
-2. **Indicator NaN**: Ensure sufficient data (300+ bars) for warmup
-3. **Mock Failures**: Verify mock configurations in fixtures
-4. **Timing Issues**: Check for time-dependent calculations
-
-### Debug Commands
+### Belirli Kategorileri Çalıştır
 ```bash
-# Run with verbose output
-pytest -v -s
+# Sadece integration testleri
+python -m pytest tests/integration/ -v -s
 
-# Run single test with debug
-pytest tests/test_indicators_ta.py::TestIndicatorsTA::test_indicator_calculation -v -s
+# Sadece E2E testleri
+python -m pytest tests/e2e/ -v -s
 
-# Check indicator calculation
-python -c "from scoring.strategy_scorer import calculate_all_indicators; print('Function available:', calculate_all_indicators is not None)"
+# Belirli bir test dosyası
+python -m pytest tests/integration/test_real_exchange_api.py -v -s
 ```
 
-## Success Criteria
+### Test Raporları
+Testler çalıştırıldıktan sonra HTML raporları `test_reports/` klasöründe oluşturulur:
+- `unit_test_report.html`
+- `integration_test_report.html`
+- `e2e_test_report.html`
+- `performance_test_report.html`
 
-- ✅ **All Tests Pass**: 100% test success rate
-- ✅ **Fast Execution**: Complete suite <60 seconds
-- ✅ **Deterministic**: Identical results on every run
-- ✅ **Offline**: No external dependencies or network calls
-- ✅ **Comprehensive**: All major functionality validated
-- ✅ **No Live Execution**: Pure testing environment
+## Test Davranışı
 
-## Coverage
+### Skip Edilen Testler
+API'ler mevcut değilse testler `pytest.skip()` ile atlanır:
+```python
+except Exception as e:
+    pytest.skip(f"OKX connection failed (likely API keys not configured): {e}")
+```
 
-- **Configuration**: Policy structure and values
-- **Technical Analysis**: All major indicators and scoring
-- **ML Integration**: Model availability and fallbacks
-- **News Sentiment**: Sentiment analysis and fallbacks
-- **Risk Management**: Portfolio risk assessment
-- **Composite Scoring**: Weighted aggregation and grading
-- **End-to-End**: Complete pipeline validation
-- **Error Handling**: Graceful degradation scenarios
+### Gerçek Veri Kullanımı
+- Tüm testler gerçek market verilerini kullanır
+- Mock veriler kullanılmaz
+- Gerçek API çağrıları yapılır
+- Gerçek hesaplama sonuçları doğrulanır
 
-The test suite is **100% complete** and successfully validates all integrated features for production use! 🎉
+### Performance Testleri
+- API response time'ları ölçülür
+- Analysis süreleri kontrol edilir
+- Rate limiting davranışı test edilir
+
+## Test Sonuçları
+
+### Başarılı Test
+```
+✅ Exchange API: Connected to OKX, found 150 markets
+✅ OHLCV Data: Retrieved 100 real OHLCV candles for BTC-USDT-SWAP
+✅ TA Scorer: Score 75.3 for BTC-USDT-SWAP
+```
+
+### Atlanan Test
+```
+⚠️ OKX connection failed (likely API keys not configured): 50110
+```
+
+### Başarısız Test
+```
+❌ Risk assessment failed: Invalid data format
+```
+
+## Önemli Notlar
+
+1. **API Limitleri**: Testler API rate limitlerini aşmamaya dikkat eder
+2. **Gerçek Veri**: Tüm testler gerçek market verilerini kullanır
+3. **Skip Mekanizması**: API'ler mevcut değilse testler atlanır
+4. **Performance**: Testler makul sürelerde tamamlanmalı
+5. **Error Handling**: Hata durumları graceful şekilde handle edilir
+
+## Sorun Giderme
+
+### API Key Hatası
+```
+50110: Invalid API key
+```
+**Çözüm**: `.env` dosyasında API key'leri kontrol edin
+
+### Bağlantı Hatası
+```
+Connection timeout
+```
+**Çözüm**: Internet bağlantısını kontrol edin
+
+### Rate Limit Hatası
+```
+429: Too many requests
+```
+**Çözüm**: Testler arasında bekleme süresi ekleyin
+
+## Test Geliştirme
+
+Yeni test eklerken:
+1. Gerçek API'leri kullanın
+2. Mock veriler kullanmayın
+3. API mevcut değilse `pytest.skip()` kullanın
+4. Performance threshold'ları belirleyin
+5. Error handling ekleyin

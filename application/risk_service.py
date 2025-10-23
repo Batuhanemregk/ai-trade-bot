@@ -3,7 +3,7 @@ Risk Service - Real risk management with market analysis
 Enhanced with log deduplication to reduce spam.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 from loguru import logger
 
@@ -493,3 +493,48 @@ class RiskService:
                 'correlation_risk': 100.0,
                 'recommendation': 'error'
             }
+    
+    def check_min_quantize_guard(self, size: float, min_size: float, min_notional: float, 
+                                price: float, mode: str = "PAPER") -> Tuple[bool, str, Dict[str, Any]]:
+        """
+        Check min/quantize guard and return skip decision with reason and details.
+        
+        Args:
+            size: Order size
+            min_size: Minimum order size
+            min_notional: Minimum notional value
+            price: Order price
+            mode: Trading mode (LIVE/PAPER/DRY-RUN)
+        
+        Returns:
+            Tuple of (should_skip, reason, details)
+        """
+        # Check size constraints
+        if size < min_size:
+            return True, "below_min_size", {
+                'size': size,
+                'min_size': min_size,
+                'deficit': min_size - size,
+                'mode': mode
+            }
+        
+        # Check notional constraints
+        notional_value = size * price
+        if notional_value < min_notional:
+            return True, "below_min_notional", {
+                'size': size,
+                'price': price,
+                'notional_value': notional_value,
+                'min_notional': min_notional,
+                'deficit': min_notional - notional_value,
+                'mode': mode
+            }
+        
+        return False, "ok", {
+            'size': size,
+            'price': price,
+            'notional_value': notional_value,
+            'min_size': min_size,
+            'min_notional': min_notional,
+            'mode': mode
+        }

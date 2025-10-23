@@ -12,6 +12,32 @@ $env:PYTHONPATH = "."
 $env:CONSOLE_LOG = "1"
 $env:LOG_EMOJI = "1"
 
+# ========================================
+# UTF-8 ENCODING SETUP
+# ========================================
+
+# Set UTF-8 environment variables
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
+$env:LANG = "C.UTF-8"
+
+# Configure PowerShell for UTF-8
+try {
+    # Set console code page to UTF-8 (silent)
+    chcp 65001 | Out-Null
+    # Set PowerShell output encoding to UTF-8
+    $OutputEncoding = [System.Text.UTF8Encoding]::new()
+    Write-Host "✅ UTF-8 encoding active (PowerShell)" -ForegroundColor Green
+} catch {
+    Write-Host "⚠️ UTF-8 setup warning: $($_.Exception.Message)" -ForegroundColor Yellow
+}
+
+# Check PowerShell version and recommend PS7
+$PSVersion = $PSVersionTable.PSVersion
+if ($PSVersion.Major -lt 7) {
+    Write-Host "💡 Tip: PowerShell 7+ recommended for better UTF-8 support" -ForegroundColor Cyan
+}
+
 # Navigate to project root
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $ProjectRoot

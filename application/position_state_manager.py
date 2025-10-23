@@ -70,6 +70,21 @@ class ReadyToOpenRule(StateTransitionRule):
         if current_state != PositionState.READY:
             return False
         
+        # Check gating first - must be valid
+        is_valid = signal.get('is_valid', False) if isinstance(signal, dict) else getattr(signal, 'is_valid', False)
+        if not is_valid:
+            return False
+        
+        # Check size > 0 (from execution pipeline)
+        size = signal.get('size', 0) if isinstance(signal, dict) else getattr(signal, 'size', 0)
+        if size <= 0:
+            return False
+        
+        # Check mode (LIVE/PAPER only, not DRY-RUN)
+        mode = signal.get('mode', 'UNKNOWN') if isinstance(signal, dict) else getattr(signal, 'mode', 'UNKNOWN')
+        if mode not in ('LIVE', 'PAPER'):
+            return False
+        
         final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
         enter_short = self.policy['trading']['scoring']['decision_thresholds']['enter_short']
@@ -79,6 +94,7 @@ class ReadyToOpenRule(StateTransitionRule):
     def get_transition(self, current_state: PositionState, signal: Dict, position_info: Optional[PositionInfo]) -> StateTransition:
         final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
+        enter_short = self.policy['trading']['scoring']['decision_thresholds']['enter_short']
         
         if final_score >= enter_long:
             return StateTransition(

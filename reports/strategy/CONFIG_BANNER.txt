@@ -1,0 +1,28 @@
+================================================================================
+🚀 AIBOTBS CONFIGURATION BANNER
+================================================================================
+MODE: PAPER (source=policy.yaml)
+STRATEGY: single_flip (source=policy.yaml)
+USE_POSITION_TPSL: True (source=policy.yaml)
+REDUCE_ONLY: True (source=policy.yaml)
+ENTRY_COOLDOWN_BARS: 2 (source=policy.yaml)
+ONCE_PER_BAR: True (source=policy.yaml)
+SAME_DIRECTION_BLOCK: True (source=policy.yaml)
+REVERSAL_ENABLED: True (source=policy.yaml)
+
+RISK LIMITS:
+  max_position_size_pct: 0.01 (source=policy.yaml)
+  max_total_risk_pct: 0.6 (source=policy.yaml)
+  max_leverage: 3.0 (source=policy.yaml)
+
+SYMBOLS:
+  supported_pairs: ['BTC-USDT-SWAP', 'ETH-USDT-SWAP', 'SOL-USDT-SWAP'] (source=policy.yaml)
+  timeframe: 15m (source=default)
+
+SCALE-IN CONFIG (if enabled):
+  enabled: False (source=policy.yaml)
+  max_ladders: 2 (source=policy.yaml)
+  ladder_size_usdt: 5 (source=policy.yaml)
+  min_dist_pct: 0.5 (source=policy.yaml)
+  add_on_profit_only: True (source=policy.yaml)
+================================================================================

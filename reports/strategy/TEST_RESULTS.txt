@@ -1,0 +1,27 @@
+================================================================================
+STRATEGY MODES TEST REPORT
+================================================================================
+Test Date: 2025-10-23 13:10:11 UTC
+
+SINGLE_FLIP STRATEGY RESULTS:
+  Entries: 1
+  Flips: 1
+  Skips: 3
+  Duration: 5 minutes
+
+SCALE_IN STRATEGY RESULTS:
+  Entries: 1
+  Scale-ins: 0
+  Skips: 4
+  Duration: 5 minutes
+
+PROTECTION GUARDS STATUS:
+  Once-per-bar: True
+  Same-direction block: True
+  Reversal enabled: True
+  Entry cooldown bars: 2
+
+POSITION-LEVEL TP/SL STATUS:
+  Use position TP/SL: True
+  Reduce-only: True
+================================================================================

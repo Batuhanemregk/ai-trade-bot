@@ -27,6 +27,7 @@ from application.reversal_manager import ReversalManager
 from application.analysis_cards import AnalysisCardsService
 from application.analysis_summary_logger import get_analysis_summary_logger
 from monitoring.prometheus_exporter import get_prometheus_exporter
+from application.decision_tracer import get_decision_tracer, DecisionSnapshot
 
 
 class TradingAnalysisJob(BaseJob):
@@ -229,8 +230,15 @@ class TradingAnalysisJob(BaseJob):
             # Process through signal gate
             gated_signal = self.signal_gate.process_signal(symbol, signal_dict, ohlcv_1h_list)
             
-            # Step 8: Process state transition
-            transition = self.state_manager.process_signal(symbol, gated_signal)
+            # Step 8: Process state transition (pass gated_signal with is_valid, size, mode)
+            gated_signal_dict = {
+                'final_score': gated_signal.original_score,
+                'is_valid': gated_signal.is_valid,
+                'direction': gated_signal.direction,
+                'size': 0.0,  # Will be updated by execution pipeline
+                'mode': 'PAPER'  # Default mode, will be updated by execution pipeline
+            }
+            transition = self.state_manager.process_signal(symbol, gated_signal_dict)
             
             # Extract gate details for logging
             gate_details = {
@@ -245,7 +253,98 @@ class TradingAnalysisJob(BaseJob):
             age_bars = len(signal_history) if signal_history else 0
             max_age_bars = self.policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('max_signal_age_bars', 6)
             
-            # Step 9: Log enhanced summary (single line or block mode)
+            # Step 9: Create decision snapshot for tracing
+            tracer = get_decision_tracer()
+            if tracer.enabled:
+                # Get current bar ID
+                current_bar_id = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%MZ')
+                
+                # Get balance and risk info
+                balance_usdt = 100.0  # Fallback
+                total_risk_usdt = 0.0
+                try:
+                    if hasattr(self.exchange_adapter, 'fetch_balance'):
+                        balance = await self.exchange_adapter.fetch_balance()
+                        balance_usdt = balance.get('USDT', {}).get('total', 100.0)
+                    if hasattr(self.exchange_adapter, 'fetch_positions'):
+                        positions = await self.exchange_adapter.fetch_positions()
+                        total_risk_usdt = sum(float(pos.get('notional', 0)) for pos in positions if pos.get('size', 0) != 0)
+                except:
+                    pass
+                
+                # Calculate position size
+                position_size_usdt = balance_usdt * (risk_details.get('position_size_pct', 0) / 100) if risk_details else 0
+                position_size_pct = risk_details.get('position_size_pct', 0) if risk_details else 0
+                
+                # Create snapshot
+                snapshot = DecisionSnapshot(
+                    timestamp=datetime.now(timezone.utc).strftime('%H:%M:%S'),
+                    symbol=symbol,
+                    timeframe='15m',
+                    bar_id=current_bar_id,
+                    
+                    # Scores
+                    ta_score=ta_score,
+                    ml_score=ml_score,
+                    news_score=news_score,
+                    risk_score=risk_score,
+                    final_score=composite_signal.final_score,
+                    grade=composite_signal.grade,
+                    decision=gated_signal.direction,
+                    confidence_pct=composite_signal.confidence_pct,
+                    
+                    # Gating
+                    persistence_bars=gated_signal.persistence_bars,
+                    persistence_required=gate_details['persist_required'],
+                    confirmation_bars=gated_signal.confirmation_bars,
+                    confirmation_required=gate_details['conf_required'],
+                    signal_age=age_bars,
+                    signal_age_max=max_age_bars,
+                    hysteresis_ok=gated_signal.is_valid,
+                    
+                    # State
+                    state_before=transition.from_state.value,
+                    state_after=transition.to_state.value,
+                    transition_action=transition.action,
+                    transition_reason=transition.reason,
+                    
+                    # Risk/Size
+                    position_size_usdt=position_size_usdt,
+                    position_size_pct=position_size_pct,
+                    leverage=risk_details.get('leverage', 1) if risk_details else 1,
+                    balance_usdt=balance_usdt,
+                    total_risk_usdt=total_risk_usdt,
+                    max_risk_limit=balance_usdt * 0.6,
+                    
+                    # TP/SL
+                    tp_distance_atr=risk_details.get('tp_atr', 4) if risk_details else 4,
+                    sl_distance_atr=risk_details.get('sl_atr', 2) if risk_details else 2,
+                    tp_price=0.0,  # Will be calculated during execution
+                    sl_price=0.0,  # Will be calculated during execution
+                    
+                    # Guards
+                    same_direction_blocked=transition.action == 'MAINTAIN' and 'same direction' in transition.reason.lower(),
+                    once_per_bar_blocked=False,  # Not implemented yet
+                    reversal_approved=transition.action == 'CLOSE_REVERSE',
+                    bias_penalty=0.0,  # Not tracked in current flow
+                    bias_reason='',
+                    
+                    # Result
+                    execution_result='PENDING' if transition.action in ['OPEN_LONG', 'OPEN_SHORT'] else 'SKIP',
+                    skip_reason=transition.reason if transition.action == 'MAINTAIN' else '',
+                    client_order_id='',
+                    
+                    # Metadata
+                    regime=gated_signal.regime_info.regime if hasattr(gated_signal, 'regime_info') else 'unknown',
+                    adx_1h=gated_signal.regime_info.adx_1h if hasattr(gated_signal, 'regime_info') else 0.0,
+                    confidence_multiplier=gated_signal.regime_info.confidence_multiplier if hasattr(gated_signal, 'regime_info') else 1.0
+                )
+                
+                # Trace the decision
+                tracer.trace_decision(snapshot)
+                tracer.log_console_summary(snapshot)
+            
+            # Step 10: Log enhanced summary (single line or block mode)
             self.summary_logger.log_analysis({
                 'symbol': symbol,
                 'timeframe': '15m',
@@ -287,17 +386,22 @@ class TradingAnalysisJob(BaseJob):
                 })
             
             # Step 10: Execute transition actions - REAL TRADING LOGIC
+            # Add gating info to composite_signal for enforcement
+            composite_signal.gate_pass = gated_signal.is_valid
+            composite_signal.state_before = transition.from_state.value
+            composite_signal.decision = gated_signal.direction
+            
             if transition.action == 'OPEN_LONG':
                 logger.info(f"🚀 {symbol}: Opening LONG position")
-                await self._execute_trade(symbol, 'long', composite_signal.final_score)
+                await self._execute_trade(symbol, 'long', composite_signal.final_score, composite_signal)
                 
             elif transition.action == 'OPEN_SHORT':
                 logger.info(f"🚀 {symbol}: Opening SHORT position")
-                await self._execute_trade(symbol, 'short', composite_signal.final_score)
+                await self._execute_trade(symbol, 'short', composite_signal.final_score, composite_signal)
                 
             elif transition.action == 'CLOSE_REVERSE':
                 logger.info(f"🔄 {symbol}: Close & Reverse - {transition.reason}")
-                await self._execute_close_and_reverse(symbol, gated_signal.direction, composite_signal.final_score)
+                await self._execute_close_and_reverse(symbol, gated_signal.direction, composite_signal.final_score, composite_signal)
                 
             elif transition.action == 'MAINTAIN':
                 logger.debug(f"⏸️ {symbol}: MAINTAIN - No state change")
@@ -307,8 +411,8 @@ class TradingAnalysisJob(BaseJob):
                 
             logger.debug(f"✅ {symbol} processed successfully")
             
-            # Return analysis result for cards
-            return {
+            # Build analysis result for cards
+            result = {
                 'symbol': symbol,
                 'decision': composite_signal.decision,
                 'final_score': composite_signal.final_score,
@@ -316,14 +420,15 @@ class TradingAnalysisJob(BaseJob):
                 'ml_score': ml_score,
                 'news_score': news_score,
                 'risk_score': risk_score,
+                'action': transition.action,  # Add action here
                 'news_info': {
-                    'type': news_categories.get('type', 'general'),
-                    'confidence': news_categories.get('confidence', 0),
-                    'title': news_categories.get('title', 'No recent news')
+                    'type': news_categories.get('type', 'general') if isinstance(news_categories, dict) else 'general',
+                    'confidence': news_categories.get('confidence', 0) if isinstance(news_categories, dict) else 0,
+                    'title': news_categories.get('title', 'No recent news') if isinstance(news_categories, dict) else 'No recent news'
                 },
                 'risk_info': {
-                    'level': risk_details.get('level', 'medium'),
-                    'factors': risk_details.get('factors', [])
+                    'level': risk_details.get('level', 'medium') if risk_details else 'medium',
+                    'factors': risk_details.get('factors', []) if risk_details else []
                 }
             }
             
@@ -350,6 +455,7 @@ class TradingAnalysisJob(BaseJob):
                 except Exception as log_err:
                     logger.warning(f"⚠️ Decision logging failed for {symbol}: {log_err}")
             
+            # Return the result dict
             return result
             
         except Exception as e:
@@ -359,18 +465,31 @@ class TradingAnalysisJob(BaseJob):
                 self.prometheus_exporter.record_error('symbol_processing', 'trading_analysis')
             return None
     
-    async def _execute_trade(self, symbol: str, side: str, score: float):
+    async def _execute_trade(self, symbol: str, side: str, score: float, composite_signal=None):
         """Execute a real trade using the existing trading logic."""
         try:
             # Import the real trading execution logic from runtime
             from infrastructure.runtime import _execute_trade as runtime_execute_trade
             
+            # composite_signal should ALWAYS be provided from caller
+            # If not provided, this is a logic error - log and raise
+            if composite_signal is None:
+                logger.error(f"❌ [EXEC] {symbol}: composite_signal is None - this should never happen!")
+                logger.error(f"   Caller must provide composite_signal object, not separate side/score")
+                raise ValueError(f"composite_signal is required for trade execution (got None)")
+            
+            # Validate composite_signal has required attributes
+            required_attrs = ['decision', 'final_score', 'technical', 'ml', 'news', 'risk', 'timestamp']
+            missing_attrs = [attr for attr in required_attrs if not hasattr(composite_signal, attr)]
+            if missing_attrs:
+                logger.error(f"❌ [EXEC] {symbol}: composite_signal missing attributes: {missing_attrs}")
+                raise ValueError(f"composite_signal incomplete: missing {missing_attrs}")
+            
             # Execute the trade using the real logic
             await runtime_execute_trade(
                 exchange_adapter=self.exchange_adapter,
                 symbol=symbol,
-                side=side,
-                score=score,
+                composite_signal=composite_signal,
                 live=True  # This is the scheduler, so always live
             )
             
@@ -378,7 +497,7 @@ class TradingAnalysisJob(BaseJob):
             logger.error(f"❌ Failed to execute trade for {symbol}: {e}")
             raise
     
-    async def _execute_close_and_reverse(self, symbol: str, new_direction: str, score: float):
+    async def _execute_close_and_reverse(self, symbol: str, new_direction: str, score: float, composite_signal=None):
         """Execute close and reverse using real trading logic."""
         try:
             # First close existing position
@@ -386,7 +505,7 @@ class TradingAnalysisJob(BaseJob):
             # Close logic would go here
             
             # Then open new position
-            await self._execute_trade(symbol, new_direction, score)
+            await self._execute_trade(symbol, new_direction, score, composite_signal)
             
         except Exception as e:
             logger.error(f"❌ Failed to execute close and reverse for {symbol}: {e}")

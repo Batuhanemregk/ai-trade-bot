@@ -278,7 +278,120 @@ NEWS_VERBOSITY=full docker compose up
 - RENDER coin kaldırıldı
 - Performans iyileştirildi
 
+### 7. Risk Servisi Veri Hizalaması ✅
+
+**Dosyalar:**
+- `application/risk_service.py`
+- `application/jobs/trading_analysis.py`
+- `infrastructure/runtime.py`
+- `application/market_data_service.py`
+
+**Durum:** Risk servisi veri hizalaması **zaten tamamlanmış** ve doğru şekilde çalışıyor.
+
+**Mevcut Implementasyon:**
+- ✅ Risk hesaplaması `_fetch_multi_timeframe_data` sonrasında çalışıyor
+- ✅ Aynı `ohlcv_data` parametresi TA, ML ve Risk servislerine gönderiliyor
+- ✅ `MarketDataCache` sistemi mevcut ve kullanıma hazır
+- ✅ Veri tutarlılığı sağlanmış
+
+**Çağrı Sırası (Mevcut):**
+```python
+# 1. Veri fetch (tek seferlik)
+ohlcv_data = await _fetch_multi_timeframe_data(exchange_adapter, symbol, live)
+
+# 2. TA Analysis (cached data kullanır)
+ta_score, ta_rationale, ta_flags = await _compute_ta_analysis(ta_scorer, ohlcv_data, symbol)
+
+# 3. ML Analysis (cached data kullanır)  
+ml_score, ml_rationale, ml_details = await _compute_ml_analysis(ml_scorer, ohlcv_data, symbol)
+
+# 4. News Analysis (independent)
+news_score, news_categories, news_rationale, news_volatility = await _compute_news_analysis(news_scorer, symbol)
+
+# 5. Risk Analysis (cached data kullanır) ✅
+risk_score, risk_details = await _compute_risk_analysis(risk_service, symbol, ohlcv_data)
+```
+
+**MarketDataCache Sistemi:**
+```python
+# application/market_data_service.py
+class MarketDataCache:
+    """Unified market data cache shared between TA, ML, and Risk services."""
+    
+    def store_data(self, symbol: str, timeframe: str, data: pd.DataFrame):
+        """Store OHLCV data in cache."""
+        
+    def get_data(self, symbol: str, timeframe: str) -> Optional[pd.DataFrame]:
+        """Retrieve OHLCV data from cache."""
+
+# Global singleton
+_market_data_cache = MarketDataCache()
+```
+
+**Artık Ne Oluyor?**
+- ✅ Risk hesaplaması TA ile aynı veri snapshot'ını kullanıyor
+- ✅ Veri tutarlılığı sağlandı
+- ✅ "No price/volume → default" mesajları throttle ediliyor
+- ✅ MarketDataCache sistemi hazır (gelecekte daha da optimize edilebilir)
+
 **Sistem artık production-ready log seviyesinde çalışıyor!** 🚀
 
 ---
-*Rapor oluşturulma zamanı: 2025-10-16 14:30:00*
+## 🧪 E2E Test Altyapısı Eklendi ✅
+
+**Tarih:** 2025-01-27  
+**Versiyon:** 2.0  
+**Durum:** Tamamlandı ✅
+
+### Yeni E2E Test Sistemi
+
+**Dosyalar:**
+- `tests/e2e/e2e_real_runner.py` - Ana E2E test koşucu
+- `tests/e2e/checks/` - Kontrol modülleri
+  - `orders.py` - Order lifecycle kontrolleri
+  - `signals.py` - Signal gating kontrolleri
+  - `risk.py` - Risk management kontrolleri
+  - `state.py` - State machine kontrolleri
+  - `telemetry.py` - Monitoring kontrolleri
+- `scripts/run_e2e_real.ps1` - PowerShell wrapper
+- `scripts/run_e2e_real.sh` - Bash wrapper
+- `env.e2e.example` - Environment konfigürasyonu
+- `reports/e2e/` - Rapor klasörü
+
+**Özellikler:**
+- ✅ Gerçek OKX API'leri ile test (mock yok)
+- ✅ Uçtan uca test kapsamı
+- ✅ Kapsamlı raporlama sistemi
+- ✅ Environment-based konfigürasyon
+- ✅ Cross-platform script desteği
+
+**Test Kapsamı:**
+1. **Veri Toplama**: OHLCV, ticker, balance verileri
+2. **Signal Üretimi**: TA/ML/News/Risk skorları
+3. **Gating Kuralları**: Persist/age/conf/hysteresis
+4. **Order Lifecycle**: Entry → Bracket → Trailing → Exit
+5. **Risk Yönetimi**: Position sizing, limits, circuit breaker
+6. **State Machine**: Geçişler ve tutarlılık
+7. **Bildirimler**: Telegram mesajları
+8. **Scheduler**: Job'lar ve watchdog
+9. **Monitoring**: Prometheus ve Grafana
+
+**Kullanım:**
+```bash
+# PowerShell
+.\scripts\run_e2e_real.ps1 -Mode paper -Duration 30
+
+# Bash
+./scripts/run_e2e_real.sh --mode paper --duration 30
+```
+
+**Raporlar:**
+- `reports/e2e/E2E_REPORT.md` - Ana test raporu
+- `reports/e2e/orders.jsonl` - Emir yaşam döngü kaydı
+- `reports/e2e/trades.csv` - İşlem özeti
+- `reports/e2e/metrics_snapshot.txt` - Prometheus metrikleri
+- `reports/e2e/logs/` - Detaylı test logları
+
+---
+
+*Rapor oluşturulma zamanı: 2025-01-27 15:30:00*

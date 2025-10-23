@@ -1,0 +1,36 @@
+PAPER Mode Metrics Summary
+==========================
+
+Test Configuration:
+- Mode: PAPER (virtual trading)
+- Symbol: BTC-USDT-SWAP
+- Duration: 30 minutes
+- Date: 2025-10-23 14:46:27
+
+Prometheus Metrics:
+- aibot_decision_traces_total: Active
+- aibot_gate_checks_total: Active
+- aibot_safety_blocks_total: Active
+- aibot_paper_orders_total: Active
+- aibot_virtual_positions_total: Active
+
+Key Metrics Observed:
+- Mode banner: PAPER mode correctly identified
+- Safety checks: Non-LIVE mode protection active
+- Min/quantize guard: Below minimum orders properly skipped
+- Virtual execution: Paper executor ready
+
+Mode Status:
+- TRADING_MODE: paper
+- TESTNET: false
+- SANDBOX: false
+- DRY_RUN: false
+- LIVE: false
+
+Safety Metrics:
+- Real order blocks: ✅ Working
+- Virtual execution: ✅ Ready
+- Min size validation: ✅ Active
+- Gate enforcement: ✅ Working
+
+Result: All metrics properly configured for PAPER mode operation

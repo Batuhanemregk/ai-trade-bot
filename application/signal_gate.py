@@ -439,8 +439,16 @@ class SignalGate:
     def _combine_results(self, persistence: GatedSignal, confirmation: GatedSignal, 
                         hysteresis: GatedSignal, regime: RegimeInfo) -> GatedSignal:
         """Combine all processing results."""
-        # Signal is valid if all processors agree
-        is_valid = (persistence.is_valid and confirmation.is_valid and hysteresis.is_valid)
+        # Check if hysteresis is disabled for testing
+        import os
+        hysteresis_enabled = os.environ.get('HYSTERESIS_ENABLE', 'true').lower() != 'false'
+        
+        if hysteresis_enabled:
+            # Signal is valid if all processors agree
+            is_valid = (persistence.is_valid and confirmation.is_valid and hysteresis.is_valid)
+        else:
+            # Skip hysteresis check for testing
+            is_valid = (persistence.is_valid and confirmation.is_valid)
         
         # Apply regime multiplier to score
         gated_score = hysteresis.gated_score * regime.confidence_multiplier
