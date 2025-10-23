@@ -16,7 +16,7 @@
     "digest": "e3c405d95860f6f9"
   },
   "BTC_last": {
-    "timestamp": "2025-10-23T21:55:13.919942+00:00",
+    "timestamp": "2025-10-23T22:00:18.146454+00:00",
     "result": {
       "score": 50.0,
       "categories": [
@@ -24,9 +24,9 @@
       ],
       "rationale": "Neutral (LLM analysis unavailable)",
       "volatility_impact": 0.5,
-      "timestamp": "2025-10-23T21:55:13.919934+00:00"
+      "timestamp": "2025-10-23T22:00:18.146447+00:00"
     },
-    "digest": "9b83b3c24a2d7a66"
+    "digest": "b9159f929159d3f5"
   },
   "ETH_3a104a71c653b991": {
     "timestamp": "2025-09-04T21:30:07.128380+00:00",
@@ -45,7 +45,7 @@
     "digest": "3a104a71c653b991"
   },
   "ETH_last": {
-    "timestamp": "2025-10-23T21:55:17.533824+00:00",
+    "timestamp": "2025-10-23T22:00:22.208630+00:00",
     "result": {
       "score": 50.0,
       "categories": [
@@ -53,9 +53,9 @@
       ],
       "rationale": "Neutral (LLM analysis unavailable)",
       "volatility_impact": 0.5,
-      "timestamp": "2025-10-23T21:55:17.533815+00:00"
+      "timestamp": "2025-10-23T22:00:22.208623+00:00"
     },
-    "digest": "de5611b106d54ec3"
+    "digest": "39c5f4d4101700cc"
   },
   "SOL_adf39c8103219ddd": {
     "timestamp": "2025-09-04T21:30:12.396623+00:00",
@@ -74,7 +74,7 @@
     "digest": "adf39c8103219ddd"
   },
   "SOL_last": {
-    "timestamp": "2025-10-23T21:55:21.162497+00:00",
+    "timestamp": "2025-10-23T22:00:26.240543+00:00",
     "result": {
       "score": 50.0,
       "categories": [
@@ -82,9 +82,9 @@
       ],
       "rationale": "Neutral (LLM analysis unavailable)",
       "volatility_impact": 0.5,
-      "timestamp": "2025-10-23T21:55:21.162485+00:00"
+      "timestamp": "2025-10-23T22:00:26.240536+00:00"
     },
-    "digest": "70a6f8853c8bedb0"
+    "digest": "fe66af27ad2a2100"
   },
   "ADA_cdab36016bed0bec": {
     "timestamp": "2025-09-04T21:30:14.676658+00:00",
@@ -87688,5 +87688,83 @@
       "timestamp": "2025-10-23T21:55:21.162485+00:00"
     },
     "digest": "70a6f8853c8bedb0"
+  },
+  "BTC_b5843800bf19de79": {
+    "timestamp": "2025-10-23T22:00:04.753227+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL"
+      ],
+      "rationale": "Neutral (LLM analysis unavailable)",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-10-23T22:00:04.753218+00:00"
+    },
+    "digest": "b5843800bf19de79"
+  },
+  "ETH_2252318e6cac9f98": {
+    "timestamp": "2025-10-23T22:00:09.103281+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL"
+      ],
+      "rationale": "Neutral (LLM analysis unavailable)",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-10-23T22:00:09.103271+00:00"
+    },
+    "digest": "2252318e6cac9f98"
+  },
+  "SOL_ce9d8c6661c73bf3": {
+    "timestamp": "2025-10-23T22:00:13.532047+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL"
+      ],
+      "rationale": "Neutral (LLM analysis unavailable)",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-10-23T22:00:13.532041+00:00"
+    },
+    "digest": "ce9d8c6661c73bf3"
+  },
+  "BTC_b9159f929159d3f5": {
+    "timestamp": "2025-10-23T22:00:18.146454+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL"
+      ],
+      "rationale": "Neutral (LLM analysis unavailable)",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-10-23T22:00:18.146447+00:00"
+    },
+    "digest": "b9159f929159d3f5"
+  },
+  "ETH_39c5f4d4101700cc": {
+    "timestamp": "2025-10-23T22:00:22.208630+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL"
+      ],
+      "rationale": "Neutral (LLM analysis unavailable)",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-10-23T22:00:22.208623+00:00"
+    },
+    "digest": "39c5f4d4101700cc"
+  },
+  "SOL_fe66af27ad2a2100": {
+    "timestamp": "2025-10-23T22:00:26.240543+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL"
+      ],
+      "rationale": "Neutral (LLM analysis unavailable)",
+      "volatility_impact": 0.5,
+      "timestamp": "2025-10-23T22:00:26.240536+00:00"
+    },
+    "digest": "fe66af27ad2a2100"
   }
 }
