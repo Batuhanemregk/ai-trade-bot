@@ -52,6 +52,10 @@ class SchedulerRunner:
         # Monitoring
         self.prometheus_exporter = None
         
+        # Global shared adapters
+        self.global_exchange_adapter = None
+        self.global_news_service = None
+        
     async def initialize(self):
         """Initialize scheduler and load configuration."""
         try:
@@ -99,6 +103,9 @@ class SchedulerRunner:
             else:
                 logger.info("ℹ️ Prometheus monitoring disabled")
             
+            # Initialize global shared adapters
+            await self._initialize_global_adapters()
+            
             # Initialize scheduler
             self.scheduler = AsyncIOScheduler(
                 timezone="Europe/Istanbul",
@@ -135,6 +142,23 @@ class SchedulerRunner:
             logger.error(f"❌ Failed to initialize scheduler: {e}")
             raise
     
+    async def _initialize_global_adapters(self):
+        """Initialize global shared adapters to prevent session leaks."""
+        try:
+            # Initialize global exchange adapter
+            from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+            self.global_exchange_adapter = OKXCCXTAdapter()
+            logger.info("✅ Global exchange adapter initialized")
+            
+            # Initialize global news service
+            from application.news_service import NewsService
+            self.global_news_service = NewsService(self.policy)
+            logger.info("✅ Global news service initialized")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize global adapters: {e}")
+            raise
+    
     async def _initialize_jobs(self):
         """Initialize all job classes."""
         try:
@@ -147,6 +171,11 @@ class SchedulerRunner:
                 'news_incremental_5m': NewsIncremental5mJob(self.policy, self.semaphore, self.runtime_state),
                 'telegram_summary_15m': TelegramSummary15mJob(self.policy, self.semaphore, self.runtime_state),
             }
+            
+            # Pass global adapters to jobs
+            for job_name, job_instance in self.jobs.items():
+                if hasattr(job_instance, 'set_global_adapters'):
+                    job_instance.set_global_adapters(self.global_exchange_adapter, self.global_news_service)
             
             # Initialize each job
             for job_name, job_instance in self.jobs.items():
@@ -460,6 +489,21 @@ async def main():
                             logger.debug(f"✅ Closed aiohttp session for {job_name}")
                         except Exception as e:
                             logger.debug(f"⚠️ Session close warning: {e}")
+            
+            # Close global adapters
+            try:
+                if 'runner' in locals() and runner and hasattr(runner, 'global_exchange_adapter') and runner.global_exchange_adapter:
+                    await runner.global_exchange_adapter.close()
+                    logger.debug("✅ Closed global exchange adapter")
+            except Exception as e:
+                logger.debug(f"⚠️ Global exchange adapter close warning: {e}")
+            
+            try:
+                if 'runner' in locals() and runner and hasattr(runner, 'global_news_service') and runner.global_news_service:
+                    await runner.global_news_service.close()
+                    logger.debug("✅ Closed global news service")
+            except Exception as e:
+                logger.debug(f"⚠️ Global news service close warning: {e}")
             
             # Close global sessions
             try:
