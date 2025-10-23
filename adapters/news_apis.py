@@ -25,6 +25,12 @@ class CryptoCompareNewsAPI:
         if self.session:
             await self.session.close()
     
+    async def close(self):
+        """Close the session."""
+        if self.session:
+            await self.session.close()
+            self.session = None
+    
     async def get_crypto_news(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Get latest cryptocurrency news"""
         try:

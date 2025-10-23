@@ -13,6 +13,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any, Optional
 
+# Windows signal handling
+if sys.platform == "win32":
+    import win32api
+    import win32con
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from loguru import logger
@@ -378,8 +383,17 @@ class SchedulerRunner:
             asyncio.create_task(self.stop())
             self.shutdown_event.set()
         
-        signal.signal(signal.SIGINT, signal_handler)
-        signal.signal(signal.SIGTERM, signal_handler)
+        if sys.platform == "win32":
+            # Windows signal handling
+            signal.signal(signal.SIGINT, signal_handler)
+            signal.signal(signal.SIGTERM, signal_handler)
+            # Windows specific signals
+            if hasattr(signal, 'SIGBREAK'):
+                signal.signal(signal.SIGBREAK, signal_handler)
+        else:
+            # Unix signal handling
+            signal.signal(signal.SIGINT, signal_handler)
+            signal.signal(signal.SIGTERM, signal_handler)
     
     async def _send_startup_message(self):
         """Send startup message to Telegram"""
@@ -422,12 +436,15 @@ async def main():
         # Cleanup: Close all sessions
         logger.info("🧹 Cleaning up resources...")
         try:
-            if runner and hasattr(runner, 'jobs'):
+            if 'runner' in locals() and runner and hasattr(runner, 'jobs'):
                 for job_name, job_instance in runner.jobs.items():
                     # Close news service
                     if hasattr(job_instance, 'news_service') and job_instance.news_service:
-                        await job_instance.news_service.close()
-                        logger.debug(f"✅ Closed news service for {job_name}")
+                        try:
+                            await job_instance.news_service.close()
+                            logger.debug(f"✅ Closed news service for {job_name}")
+                        except Exception as e:
+                            logger.debug(f"⚠️ News service close warning: {e}")
                     
                     # Close exchange adapter
                     if hasattr(job_instance, 'exchange_adapter') and job_instance.exchange_adapter:
@@ -436,6 +453,23 @@ async def main():
                             logger.debug(f"✅ Closed exchange adapter for {job_name}")
                         except Exception as e:
                             logger.debug(f"⚠️ Exchange adapter close warning: {e}")
+                    
+                    # Close any aiohttp sessions
+                    if hasattr(job_instance, 'session') and job_instance.session:
+                        try:
+                            await job_instance.session.close()
+                            logger.debug(f"✅ Closed aiohttp session for {job_name}")
+                        except Exception as e:
+                            logger.debug(f"⚠️ Session close warning: {e}")
+            
+            # Close global sessions
+            try:
+                import aiohttp
+                # Close any remaining aiohttp sessions
+                if hasattr(aiohttp, '_connector'):
+                    await aiohttp._connector.close()
+            except Exception as e:
+                logger.debug(f"⚠️ Global session close warning: {e}")
             
             logger.info("✅ Cleanup completed")
         except Exception as e:

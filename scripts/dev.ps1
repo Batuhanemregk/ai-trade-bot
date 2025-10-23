@@ -169,7 +169,7 @@ function Start-Trading {
     try {
         $pythonPath = Get-PythonPath -VenvPath $VenvPath -NoVenv:$NoVenv
         
-        $arguments = @("-u", "main.py", "trading")
+        $arguments = @("-u", "-m", "infrastructure.runtime", "trading")
         
         if ($Once) { $arguments += "--once" }
         if ($Timeout -gt 0) { $arguments += "--timeout", $Timeout }
@@ -205,7 +205,7 @@ function Start-Scheduler {
     try {
         $pythonPath = Get-PythonPath -VenvPath $VenvPath -NoVenv:$NoVenv
         
-        $arguments = @("-u", "main.py", "scheduler")
+        $arguments = @("-u", "-m", "infrastructure.scheduler_runner")
         
         Write-Host "Python: $pythonPath" -ForegroundColor Cyan
         Write-Host "Environment:" -ForegroundColor Yellow
@@ -272,7 +272,7 @@ function Start-FullStack {
         Write-Host "✅ Full stack is ready! Press Ctrl+C to stop..." -ForegroundColor Green
         Write-Host ""
         
-        $arguments = @("-u", "main.py", "scheduler")
+        $arguments = @("-u", "-m", "infrastructure.scheduler_runner")
         & $pythonPath @arguments
     } catch {
         Write-Host "❌ Hata: $_" -ForegroundColor Red
