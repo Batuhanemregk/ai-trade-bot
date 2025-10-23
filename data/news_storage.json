@@ -1,6 +1,26 @@
 {
   "BTC": [
     {
+      "id": "53553301",
+      "guid": "https://en.coinotag.com/us-considers-quantum-investments-to-counter-china-as-bitcoin-encryption-risks-loom/",
+      "published_on": 1761255795,
+      "imageurl": "https://resources.cryptocompare.com/news/77/53553301.jpeg",
+      "title": "US Considers Quantum Investments to Counter China as Bitcoin Encryption Risks Loom",
+      "url": "https://en.coinotag.com/us-considers-quantum-investments-to-counter-china-as-bitcoin-encryption-risks-loom/",
+      "body": "The US government is exploring direct investments in quantum computing companies via CHIPS Act funds to counter China\u2019s advancements, raising alarms in the crypto sector over potential threats to encryption",
+      "tags": "Guides|News|BTC|ETH",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "ASIA|BTC|ETH|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinOtag",
+        "img": "https://resources.cryptocompare.com/news/77/default.png",
+        "lang": "EN"
+      },
+      "source": "coinotag"
+    },
+    {
       "id": "53553069",
       "guid": "https://en.coinotag.com/bnb-and-trump-linked-tokens-gain-after-czs-reported-pardon/",
       "published_on": 1761255309,
@@ -839,49 +859,29 @@
         "lang": "EN"
       },
       "source": "bitzo"
-    },
-    {
-      "id": "53550639",
-      "guid": "https://timestabloid.com/?p=87345",
-      "published_on": 1761249951,
-      "imageurl": "https://resources.cryptocompare.com/news/67/default.png",
-      "title": "Is Ripple Hinting at an XRP Price Rally? Here\u2019s What Happened",
-      "url": "https://timestabloid.com/is-ripple-hinting-at-an-xrp-price-rally-heres-what-happened/",
-      "body": "When a major blockchain firm begins to beef up its treasury operations, raise funds, and link its ecosystem to institutional finance, the question naturally arises: Are they preparing for the asset to move higher? Recent corporate maneuvers by Ripple Labs alongside commentary from influencer Mickle are stirring fresh speculation that XRP could be positioned for a price rally. The debate now centers on whether such actions amount to nothing more than operational expansion, or whether they represent a clear corporate thesis that XRP must go up. What Mickle Says In a clip posted on X, Mickle asserts: \u201cRipple thinks the price of XRP is going much higher; you don\u2019t launch a treasury company unless you believe that the price is going up or down, and if Ripple believes the price is going higher, then you\u2019d better believe it also. I don\u2019t think there\u2019s any question about this\u201d. Going further, he argued that \u201cXRP being at such high prices is not only good for us, but very good for Ripple and everyone in our ecosystem. Everyone wants to see, and just like you and I think XRP will be significantly higher in the future.\u201d Is Ripple Hinting at an XRP Price Surge? #XRP #Crypto pic.twitter.com/yRXys9SpZp \u2014 mickle (@xrpmickle) October 22, 2025 In his view, the very act of launching treasury-oriented companies tied into the XRP ecosystem signals that Ripple expects meaningful appreciation , and he invites readers and investors to draw the same conclusion. Corporate Moves: More Than Just Talk Beyond commentary, public filings and media coverage show Ripple and affiliates taking tangible steps into treasury infrastructure. Notably, Ripple\u2019s acquisition of a major treasury-software provider and its backing of an entity aiming to raise over US$1 billion to accumulate XRP adds weight to the suggestion of strategic intent. These are not casual side-projects: they are precisely the kind of moves one expects when a firm foresees an upward trajectory in its native token. Supply, Demand, and Ecosystem Dynamics If a large treasury vehicle begins accumulating XRP , the implications are two-fold. First, direct demand may tighten available supply, especially in a crypto market where movement can be lumpy. Second, ecosystem sentiment may shift when insiders are seen putting capital behind an asset; others tend to follow. Nevertheless, execution matters: how quickly purchases are made, how transparent the policy is, whether reserves are locked up, and whether the token\u2019s role in Ripple\u2019s product stack expands all factors into whether the accumulation story translates to price. We are on X, follow us to connect with us :- @TimesTabloid1 \u2014 TimesTabloid (@TimesTabloid1) June 15, 2025 Cautions and Context Mickle\u2019s interpretation is compelling, but several caveats remain. Corporate intent does not guarantee market movement. Treasury operations may shift strategy, market conditions may change, and regulatory frameworks, especially since Ripple has had high-profile interactions with regulators, can affect execution. Additionally, even when accumulation is happening, price responses may be muted if many had anticipated the move. As some analysts note, news announcements often spark spikes that fade without follow-through. Final Thoughts The substantive corporate decisions by Ripple, combined with Mickle\u2019s commentary, form a coherent narrative that the company expects XRP to move higher. While it would be unwise to interpret the signal as a sure bet, the alignment of ecosystem development, treasury strategy, and community messaging does elevate the probability of a positive price outcome. For those watching XRP, the prudent stance is to monitor execution and market reaction rather than rely solely on intent. Disclaimer : This content is meant to inform and should not be considered financial advice. The views expressed in this article may include the author\u2019s personal opinions and do not represent Times Tabloid\u2019s opinion. Readers are urged to do in-depth research before making any investment decisions. Any action taken by the reader is strictly at their own risk. Times Tabloid is not responsible for any financial losses. Follow us on Twitter , Facebook , Telegram , and Google News The post Is Ripple Hinting at an XRP Price Rally? Here\u2019s What Happened appeared first on Times Tabloid .",
-      "tags": "Cryptocurrency|News|Ripple|XRP|XRP Price",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "TRADING|XRP|DIGITAL ASSET TREASURY|MACROECONOMICS|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "TimesTabloid",
-        "img": "https://resources.cryptocompare.com/news/67/default.png",
-        "lang": "EN"
-      },
-      "source": "timestabloid"
-    },
-    {
-      "id": "53550631",
-      "guid": "https://cryptodaily.co.uk/2025/10/prediction-markets-hit-all-time-highs",
-      "published_on": 1761249941,
-      "imageurl": "https://resources.cryptocompare.com/news/75/53550631.jpeg",
-      "title": "Prediction Markets Hit All-Time Highs",
-      "url": "https://cryptodaily.co.uk/2025/10/prediction-markets-hit-all-time-highs",
-      "body": "Prediction markets are setting fresh records. This week, daily trading volumes on major prediction\u2011market platforms surpassed $2\u202fbillion, according to Dune Analytics.\u202fBoth trading volumes and user numbers are rising, reflecting accelerating interest in crypto betting, web3 sports betting, and bitcoin betting on smart contract-based prediction platforms. Prediction markets and betting platforms aggregate collective knowledge, being often more accurate than traditional polls or expert forecasts. As noted by Alex\u202fTabarrok , professor of economics at George\u202fMason\u202fUniversity, on the a16z crypto podcast: \u201cThey tend to be better than complicated statistical models\u2026 They tend to be better than polls, or at least as good. And there\u2019s one reason for that: in making bets on the prediction market, I push the prediction market closer to the truth!\u201d Web3 infrastructure enhances this trend by tokenizing events themselves, making them tradable on decentralized betting platforms and bitcoin sportsbooks. Users can engage in online betting with cryptocurrency, esport betting, or sport betting, often without intermediaries, creating decentralized sports betting ecosystems with global accessibility. The most popular topics remain politics and sports. Last week, political markets recorded $322.6\u202fmillion in trading volume, while sports markets reached $414.7\u202fmillion. \u201cSports and politics are the most emotionally charged topics. People care deeply about their teams and elections as if they were personal, and they want to test how accurate their intuition is. These are constant news\u2011makers, with clear outcomes \u2014 victory or defeat \u2014 making them perfect for betting and prediction markets,\u201d says Vladislav\u202fPetkevich, UBO of Dexsport , an esport crypto betting platform. Decentralization and reduced barriers to entry are key drivers. Platforms like Polymarket and other crypto bookmakers remove intermediaries. Everything operates on blockchain smart contracts. Participants can bet anonymously and globally, bypassing banks, brokers, or licenses. This opens markets to users in regions where traditional betting or financial systems are restricted. Industry reports project strong growth for prediction crypto markets. The decentralized prediction markets industry could expand from roughly $1.4\u202fbillion in 2024 to $95.5\u202fbillion by 2035, a compound annual growth rate (CAGR) of ~46.8%. Disclaimer: This is a sponsored article and is for informational purposes only. It does not reflect the views of Crypto Daily, nor is it intended to be used as legal, tax, investment, or financial advice.",
-      "tags": "More News",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|MARKET|REGULATION|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Crypto Daily",
-        "img": "https://resources.cryptocompare.com/news/75/default.png",
-        "lang": "EN"
-      },
-      "source": "cryptodaily"
     }
   ],
   "ETH": [
+    {
+      "id": "53553301",
+      "guid": "https://en.coinotag.com/us-considers-quantum-investments-to-counter-china-as-bitcoin-encryption-risks-loom/",
+      "published_on": 1761255795,
+      "imageurl": "https://resources.cryptocompare.com/news/77/53553301.jpeg",
+      "title": "US Considers Quantum Investments to Counter China as Bitcoin Encryption Risks Loom",
+      "url": "https://en.coinotag.com/us-considers-quantum-investments-to-counter-china-as-bitcoin-encryption-risks-loom/",
+      "body": "The US government is exploring direct investments in quantum computing companies via CHIPS Act funds to counter China\u2019s advancements, raising alarms in the crypto sector over potential threats to encryption",
+      "tags": "Guides|News|BTC|ETH",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "ASIA|BTC|ETH|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinOtag",
+        "img": "https://resources.cryptocompare.com/news/77/default.png",
+        "lang": "EN"
+      },
+      "source": "coinotag"
+    },
     {
       "id": "53552981",
       "guid": "https://en.bitcoinsistemi.com/?p=180919",
@@ -1201,46 +1201,6 @@
         "lang": "EN"
       },
       "source": "cointelegraph"
-    },
-    {
-      "id": "53550639",
-      "guid": "https://timestabloid.com/?p=87345",
-      "published_on": 1761249951,
-      "imageurl": "https://resources.cryptocompare.com/news/67/default.png",
-      "title": "Is Ripple Hinting at an XRP Price Rally? Here\u2019s What Happened",
-      "url": "https://timestabloid.com/is-ripple-hinting-at-an-xrp-price-rally-heres-what-happened/",
-      "body": "When a major blockchain firm begins to beef up its treasury operations, raise funds, and link its ecosystem to institutional finance, the question naturally arises: Are they preparing for the asset to move higher? Recent corporate maneuvers by Ripple Labs alongside commentary from influencer Mickle are stirring fresh speculation that XRP could be positioned for a price rally. The debate now centers on whether such actions amount to nothing more than operational expansion, or whether they represent a clear corporate thesis that XRP must go up. What Mickle Says In a clip posted on X, Mickle asserts: \u201cRipple thinks the price of XRP is going much higher; you don\u2019t launch a treasury company unless you believe that the price is going up or down, and if Ripple believes the price is going higher, then you\u2019d better believe it also. I don\u2019t think there\u2019s any question about this\u201d. Going further, he argued that \u201cXRP being at such high prices is not only good for us, but very good for Ripple and everyone in our ecosystem. Everyone wants to see, and just like you and I think XRP will be significantly higher in the future.\u201d Is Ripple Hinting at an XRP Price Surge? #XRP #Crypto pic.twitter.com/yRXys9SpZp \u2014 mickle (@xrpmickle) October 22, 2025 In his view, the very act of launching treasury-oriented companies tied into the XRP ecosystem signals that Ripple expects meaningful appreciation , and he invites readers and investors to draw the same conclusion. Corporate Moves: More Than Just Talk Beyond commentary, public filings and media coverage show Ripple and affiliates taking tangible steps into treasury infrastructure. Notably, Ripple\u2019s acquisition of a major treasury-software provider and its backing of an entity aiming to raise over US$1 billion to accumulate XRP adds weight to the suggestion of strategic intent. These are not casual side-projects: they are precisely the kind of moves one expects when a firm foresees an upward trajectory in its native token. Supply, Demand, and Ecosystem Dynamics If a large treasury vehicle begins accumulating XRP , the implications are two-fold. First, direct demand may tighten available supply, especially in a crypto market where movement can be lumpy. Second, ecosystem sentiment may shift when insiders are seen putting capital behind an asset; others tend to follow. Nevertheless, execution matters: how quickly purchases are made, how transparent the policy is, whether reserves are locked up, and whether the token\u2019s role in Ripple\u2019s product stack expands all factors into whether the accumulation story translates to price. We are on X, follow us to connect with us :- @TimesTabloid1 \u2014 TimesTabloid (@TimesTabloid1) June 15, 2025 Cautions and Context Mickle\u2019s interpretation is compelling, but several caveats remain. Corporate intent does not guarantee market movement. Treasury operations may shift strategy, market conditions may change, and regulatory frameworks, especially since Ripple has had high-profile interactions with regulators, can affect execution. Additionally, even when accumulation is happening, price responses may be muted if many had anticipated the move. As some analysts note, news announcements often spark spikes that fade without follow-through. Final Thoughts The substantive corporate decisions by Ripple, combined with Mickle\u2019s commentary, form a coherent narrative that the company expects XRP to move higher. While it would be unwise to interpret the signal as a sure bet, the alignment of ecosystem development, treasury strategy, and community messaging does elevate the probability of a positive price outcome. For those watching XRP, the prudent stance is to monitor execution and market reaction rather than rely solely on intent. Disclaimer : This content is meant to inform and should not be considered financial advice. The views expressed in this article may include the author\u2019s personal opinions and do not represent Times Tabloid\u2019s opinion. Readers are urged to do in-depth research before making any investment decisions. Any action taken by the reader is strictly at their own risk. Times Tabloid is not responsible for any financial losses. Follow us on Twitter , Facebook , Telegram , and Google News The post Is Ripple Hinting at an XRP Price Rally? Here\u2019s What Happened appeared first on Times Tabloid .",
-      "tags": "Cryptocurrency|News|Ripple|XRP|XRP Price",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "TRADING|XRP|DIGITAL ASSET TREASURY|MACROECONOMICS|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "TimesTabloid",
-        "img": "https://resources.cryptocompare.com/news/67/default.png",
-        "lang": "EN"
-      },
-      "source": "timestabloid"
-    },
-    {
-      "id": "53550631",
-      "guid": "https://cryptodaily.co.uk/2025/10/prediction-markets-hit-all-time-highs",
-      "published_on": 1761249941,
-      "imageurl": "https://resources.cryptocompare.com/news/75/53550631.jpeg",
-      "title": "Prediction Markets Hit All-Time Highs",
-      "url": "https://cryptodaily.co.uk/2025/10/prediction-markets-hit-all-time-highs",
-      "body": "Prediction markets are setting fresh records. This week, daily trading volumes on major prediction\u2011market platforms surpassed $2\u202fbillion, according to Dune Analytics.\u202fBoth trading volumes and user numbers are rising, reflecting accelerating interest in crypto betting, web3 sports betting, and bitcoin betting on smart contract-based prediction platforms. Prediction markets and betting platforms aggregate collective knowledge, being often more accurate than traditional polls or expert forecasts. As noted by Alex\u202fTabarrok , professor of economics at George\u202fMason\u202fUniversity, on the a16z crypto podcast: \u201cThey tend to be better than complicated statistical models\u2026 They tend to be better than polls, or at least as good. And there\u2019s one reason for that: in making bets on the prediction market, I push the prediction market closer to the truth!\u201d Web3 infrastructure enhances this trend by tokenizing events themselves, making them tradable on decentralized betting platforms and bitcoin sportsbooks. Users can engage in online betting with cryptocurrency, esport betting, or sport betting, often without intermediaries, creating decentralized sports betting ecosystems with global accessibility. The most popular topics remain politics and sports. Last week, political markets recorded $322.6\u202fmillion in trading volume, while sports markets reached $414.7\u202fmillion. \u201cSports and politics are the most emotionally charged topics. People care deeply about their teams and elections as if they were personal, and they want to test how accurate their intuition is. These are constant news\u2011makers, with clear outcomes \u2014 victory or defeat \u2014 making them perfect for betting and prediction markets,\u201d says Vladislav\u202fPetkevich, UBO of Dexsport , an esport crypto betting platform. Decentralization and reduced barriers to entry are key drivers. Platforms like Polymarket and other crypto bookmakers remove intermediaries. Everything operates on blockchain smart contracts. Participants can bet anonymously and globally, bypassing banks, brokers, or licenses. This opens markets to users in regions where traditional betting or financial systems are restricted. Industry reports project strong growth for prediction crypto markets. The decentralized prediction markets industry could expand from roughly $1.4\u202fbillion in 2024 to $95.5\u202fbillion by 2035, a compound annual growth rate (CAGR) of ~46.8%. Disclaimer: This is a sponsored article and is for informational purposes only. It does not reflect the views of Crypto Daily, nor is it intended to be used as legal, tax, investment, or financial advice.",
-      "tags": "More News",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|MARKET|REGULATION|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Crypto Daily",
-        "img": "https://resources.cryptocompare.com/news/75/default.png",
-        "lang": "EN"
-      },
-      "source": "cryptodaily"
     }
   ],
   "SOL": [
@@ -1603,46 +1563,6 @@
         "lang": "EN"
       },
       "source": "cryptopolitan"
-    },
-    {
-      "id": "53550639",
-      "guid": "https://timestabloid.com/?p=87345",
-      "published_on": 1761249951,
-      "imageurl": "https://resources.cryptocompare.com/news/67/default.png",
-      "title": "Is Ripple Hinting at an XRP Price Rally? Here\u2019s What Happened",
-      "url": "https://timestabloid.com/is-ripple-hinting-at-an-xrp-price-rally-heres-what-happened/",
-      "body": "When a major blockchain firm begins to beef up its treasury operations, raise funds, and link its ecosystem to institutional finance, the question naturally arises: Are they preparing for the asset to move higher? Recent corporate maneuvers by Ripple Labs alongside commentary from influencer Mickle are stirring fresh speculation that XRP could be positioned for a price rally. The debate now centers on whether such actions amount to nothing more than operational expansion, or whether they represent a clear corporate thesis that XRP must go up. What Mickle Says In a clip posted on X, Mickle asserts: \u201cRipple thinks the price of XRP is going much higher; you don\u2019t launch a treasury company unless you believe that the price is going up or down, and if Ripple believes the price is going higher, then you\u2019d better believe it also. I don\u2019t think there\u2019s any question about this\u201d. Going further, he argued that \u201cXRP being at such high prices is not only good for us, but very good for Ripple and everyone in our ecosystem. Everyone wants to see, and just like you and I think XRP will be significantly higher in the future.\u201d Is Ripple Hinting at an XRP Price Surge? #XRP #Crypto pic.twitter.com/yRXys9SpZp \u2014 mickle (@xrpmickle) October 22, 2025 In his view, the very act of launching treasury-oriented companies tied into the XRP ecosystem signals that Ripple expects meaningful appreciation , and he invites readers and investors to draw the same conclusion. Corporate Moves: More Than Just Talk Beyond commentary, public filings and media coverage show Ripple and affiliates taking tangible steps into treasury infrastructure. Notably, Ripple\u2019s acquisition of a major treasury-software provider and its backing of an entity aiming to raise over US$1 billion to accumulate XRP adds weight to the suggestion of strategic intent. These are not casual side-projects: they are precisely the kind of moves one expects when a firm foresees an upward trajectory in its native token. Supply, Demand, and Ecosystem Dynamics If a large treasury vehicle begins accumulating XRP , the implications are two-fold. First, direct demand may tighten available supply, especially in a crypto market where movement can be lumpy. Second, ecosystem sentiment may shift when insiders are seen putting capital behind an asset; others tend to follow. Nevertheless, execution matters: how quickly purchases are made, how transparent the policy is, whether reserves are locked up, and whether the token\u2019s role in Ripple\u2019s product stack expands all factors into whether the accumulation story translates to price. We are on X, follow us to connect with us :- @TimesTabloid1 \u2014 TimesTabloid (@TimesTabloid1) June 15, 2025 Cautions and Context Mickle\u2019s interpretation is compelling, but several caveats remain. Corporate intent does not guarantee market movement. Treasury operations may shift strategy, market conditions may change, and regulatory frameworks, especially since Ripple has had high-profile interactions with regulators, can affect execution. Additionally, even when accumulation is happening, price responses may be muted if many had anticipated the move. As some analysts note, news announcements often spark spikes that fade without follow-through. Final Thoughts The substantive corporate decisions by Ripple, combined with Mickle\u2019s commentary, form a coherent narrative that the company expects XRP to move higher. While it would be unwise to interpret the signal as a sure bet, the alignment of ecosystem development, treasury strategy, and community messaging does elevate the probability of a positive price outcome. For those watching XRP, the prudent stance is to monitor execution and market reaction rather than rely solely on intent. Disclaimer : This content is meant to inform and should not be considered financial advice. The views expressed in this article may include the author\u2019s personal opinions and do not represent Times Tabloid\u2019s opinion. Readers are urged to do in-depth research before making any investment decisions. Any action taken by the reader is strictly at their own risk. Times Tabloid is not responsible for any financial losses. Follow us on Twitter , Facebook , Telegram , and Google News The post Is Ripple Hinting at an XRP Price Rally? Here\u2019s What Happened appeared first on Times Tabloid .",
-      "tags": "Cryptocurrency|News|Ripple|XRP|XRP Price",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "TRADING|XRP|DIGITAL ASSET TREASURY|MACROECONOMICS|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "TimesTabloid",
-        "img": "https://resources.cryptocompare.com/news/67/default.png",
-        "lang": "EN"
-      },
-      "source": "timestabloid"
-    },
-    {
-      "id": "53550631",
-      "guid": "https://cryptodaily.co.uk/2025/10/prediction-markets-hit-all-time-highs",
-      "published_on": 1761249941,
-      "imageurl": "https://resources.cryptocompare.com/news/75/53550631.jpeg",
-      "title": "Prediction Markets Hit All-Time Highs",
-      "url": "https://cryptodaily.co.uk/2025/10/prediction-markets-hit-all-time-highs",
-      "body": "Prediction markets are setting fresh records. This week, daily trading volumes on major prediction\u2011market platforms surpassed $2\u202fbillion, according to Dune Analytics.\u202fBoth trading volumes and user numbers are rising, reflecting accelerating interest in crypto betting, web3 sports betting, and bitcoin betting on smart contract-based prediction platforms. Prediction markets and betting platforms aggregate collective knowledge, being often more accurate than traditional polls or expert forecasts. As noted by Alex\u202fTabarrok , professor of economics at George\u202fMason\u202fUniversity, on the a16z crypto podcast: \u201cThey tend to be better than complicated statistical models\u2026 They tend to be better than polls, or at least as good. And there\u2019s one reason for that: in making bets on the prediction market, I push the prediction market closer to the truth!\u201d Web3 infrastructure enhances this trend by tokenizing events themselves, making them tradable on decentralized betting platforms and bitcoin sportsbooks. Users can engage in online betting with cryptocurrency, esport betting, or sport betting, often without intermediaries, creating decentralized sports betting ecosystems with global accessibility. The most popular topics remain politics and sports. Last week, political markets recorded $322.6\u202fmillion in trading volume, while sports markets reached $414.7\u202fmillion. \u201cSports and politics are the most emotionally charged topics. People care deeply about their teams and elections as if they were personal, and they want to test how accurate their intuition is. These are constant news\u2011makers, with clear outcomes \u2014 victory or defeat \u2014 making them perfect for betting and prediction markets,\u201d says Vladislav\u202fPetkevich, UBO of Dexsport , an esport crypto betting platform. Decentralization and reduced barriers to entry are key drivers. Platforms like Polymarket and other crypto bookmakers remove intermediaries. Everything operates on blockchain smart contracts. Participants can bet anonymously and globally, bypassing banks, brokers, or licenses. This opens markets to users in regions where traditional betting or financial systems are restricted. Industry reports project strong growth for prediction crypto markets. The decentralized prediction markets industry could expand from roughly $1.4\u202fbillion in 2024 to $95.5\u202fbillion by 2035, a compound annual growth rate (CAGR) of ~46.8%. Disclaimer: This is a sponsored article and is for informational purposes only. It does not reflect the views of Crypto Daily, nor is it intended to be used as legal, tax, investment, or financial advice.",
-      "tags": "More News",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|MARKET|REGULATION|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Crypto Daily",
-        "img": "https://resources.cryptocompare.com/news/75/default.png",
-        "lang": "EN"
-      },
-      "source": "cryptodaily"
     }
   ],
   "ADA": [
