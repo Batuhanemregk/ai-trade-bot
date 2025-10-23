@@ -1,6 +1,46 @@
 {
   "BTC": [
     {
+      "id": "53554188",
+      "guid": "https://cryptonews.com/?p=442805",
+      "published_on": 1761257767,
+      "imageurl": "https://resources.cryptocompare.com/news/52/53554188.jpeg",
+      "title": "China Is Third-Largest Contributor To Global Bitcoin Mining: Why It Matters",
+      "url": "https://cryptonews.com/news/china-is-third-largest-contributor-to-global-bitcoin-mining-why-it-matters/",
+      "body": "China was once the undisputed center for Bitcoin mining. Known for its cheap power and access to leading hardware manufacturers, all of this positioned China as a leader in global Bitcoin mining. However, this changed when mining was banned by the Chinese government in 2021 . In late September 2021, the People\u2019s Bank of China (PBOC) further banned all cryptocurrency transactions. The PBOC cited the role of cryptocurrencies in facilitating financial crime as well as posing a growing risk to China\u2019s financial system. Fast-forward to today\u2014despite the government\u2019s strong efforts to weed out all crypto miners, many have found ways to continue operations . According to the Q4 2025 update of Luxor\u2019s Global Hashrate Map , China currently accounts for 14.05% of Bitcoin\u2019s total compute power, or roughly 145 exahashes per second (EH/s). This is a modest rise from 13.8% in Q3. Source: Luxor China Leads in Global Bitcoin Mining Kaan Farahani, research associate at Luxor, told Cryptonews that Luxor\u2019s Global Hashrate Map estimates the geographic distribution of Bitcoin mining activity across the world. \u201cThe map provides weighted hashrate concentration across regions by incorporating mining pool data, ASIC trading flows, and firmware adoption trends,\u201d Farahani said. Based on the recent data, China is the third-largest contributor globally to Bitcoin mining , just behind the U.S. and Russia. Luxor\u2019s findings do not show where specifically the hashrate resides. According to Miner Weekly , multiple sources across the ASIC supply chain have pointed to one possible destination, which is Xinjiang. The region\u2019s relative isolation and abundant energy resources have made it a longtime hub for Bitcoin mining before China\u2019s ban in 2021. China Reveals Underground Bitcoin Mining Operations While China\u2019s continuation of Bitcoin mining may not come as a complete shock, this illustrates the murky, underground nature of the mining industry. Kent Halliburton, CEO and co-founder of Bitcoin mining platform Sazmining, told Cryptonews that he is not surprised to see mining still occurring in China. \u201cThis is one of the beauties of Bitcoin mining. It\u2019s a cypherpunk way to generate Bitcoin, meaning that as long as you have electricity and hardware, you can generate Bitcoin for yourself. It\u2019s tough to shut down mining on the outskirts, and that is why I believe the hashrate we see in China continues to exist,\u201d Halliburton said. Other regions where Bitcoin mining is considered illegal are also showing signs of growth. For example, Farahani noted that Luxor\u2019s Hashrate Map gives insight into Iran, estimating that around 8 EH/s of hashrate is operational in the region as of Q4-2025. This represents 0.75% of global market share. According to Halliburton, Iran is another good example of where Bitcoin mining has been occurring, but has largely been illegal . Iran initially banned Bitcoin mining in May of 2021 for four months. The region\u2019s second ban took place in December 2021. Prior to this, Iran\u2019s bitcoin mining was estimated to make up between 4% and 8% of the global BTC network. \u201cEssentially, any country with stringent controls on capital outflows is likely to restrict or attempt to ban Bitcoin mining,\u201d Halliburton said. \u201cBut if you have power, you can generate Bitcoin as long as you have the right hardware to harness it. That means that if you\u2019re trying to stem the flow of capital from leaving your country, you have a way to do that with Bitcoin mining.\u201d China\u2019s Concerning Mining Infrastructure Empire In addition to mining, recent findings from Bitcoin solutions manufacturer Auradine found that over 95% of Bitcoin ASIC mining equipment is manufactured by Chinese firms like Bitmain, MicroBT, and Canaan. Auradine\u2019s report notes that Chinese equipment manufacturing poses a major threat to U.S. national security and key infrastructure. Sanjay Gupta, chief strategy officer at Auradine, told Cryptonews that China\u2019s mining infrastructure operations are concerning for a number of reasons. For instance, he mentioned that there are over a million Chinese-based Bitcoin mining machines with foreign firmware connected to the U.S. electrical grid. \u201cThis poses a potential serious cybersecurity risk to the electrical grid across multiple states,\u201d Gupta said. \u201cIf there is embedded software in these Chinese miners that is triggered for a coordinated cyber attack to drive a large number of miners to simultaneously go in rapid over- or underdrive, this could cause a catastrophic failure of the U.S. electrical grid.\u201d And they would have gotten away with it too, if not for President Xi and President Putin. China, Russia and co-operative nations within BRICS have enough control over BTC mining repositories to bring Bitcoin to ZERO. The U.S. will not get away with this. pic.twitter.com/Ylx81nBFw0 \u2014 Inevitable China (@InevitableChina) September 8, 2025 Gupta added that the BTC mining hardware supply being highly concentrated poses a major risk of a potential 51% takeover of the bitcoin protocol in a hostile geopolitical situation. This has become even more of a threat with the recent tariffs imposed on China by President Trump, which could rise to 155% in the coming weeks . \u201cThis could cause a dramatic impact on the value of BTC and ripple effect in financial markets,\u201d Gupta remarked. Is China A Threat To Bitcoin Miners? It\u2019s clear that Bitcoin mining and manufacturing continue to take place in China despite bans. So what does this mean for miners based in regions where BTC mining is considered legal? According to Farahani, Luxor is unaware of challenges or threats based on China\u2019s mining operations. On the other hand, Gupta believes that Chinese firms supplying mining equipment will create complexities for other regions. \u201cTo combat this, we need to enable strong U.S.-based Bitcoin mining suppliers that can drive continuous innovation and performance for mining operations,\u201d he said. The ongoing trade tensions between the US and China are having a significant and costly impact on the Bitcoin mining industry. According to a new report from The Miner Mag, rising tariffs on mining equipment have exposed American companies to substantial financial liabilities.\u2026 \u2014 Dr Martin Hiesboeck (@MHiesboeck) August 21, 2025 Gupta added that moving forward, Bitcoin miners should have technology that allows energy demand response with the ability to rapidly increase or decrease power consumption based on the needs of a state or region\u2019s electrical grid. In the meantime, the architecture and legacy of mining in China will likely continue to loom over the global network. In crypto\u2019s ever\u2011shifting world, China isn\u2019t gone\u2014but rather simply operating in the margins. The post China Is Third-Largest Contributor To Global Bitcoin Mining: Why It Matters appeared first on Cryptonews .",
+      "tags": "Bitcoin News|News|Bitcoin|Bitcoin Mining|China",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "ASIA|BTC|MINING|MACROECONOMICS|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "cryptonews",
+        "img": "https://images.cryptocompare.com/news/default/cryptonews.png",
+        "lang": "EN"
+      },
+      "source": "cryptonews"
+    },
+    {
+      "id": "53554094",
+      "guid": "https://en.coinotag.com/kraken-posts-record-648m-q3-revenue-amid-potential-ipo-plans/",
+      "published_on": 1761257602,
+      "imageurl": "https://resources.cryptocompare.com/news/77/53554094.jpeg",
+      "title": "Kraken Posts Record $648M Q3 Revenue Amid Potential IPO Plans",
+      "url": "https://en.coinotag.com/kraken-posts-record-648m-q3-revenue-amid-potential-ipo-plans/",
+      "body": "Kraken reported $648 million in revenue for Q3 2025, marking a 114% year-over-year increase driven by surging trading volumes, user expansion to 5.2 million accounts, and strategic acquisitions that enhanced",
+      "tags": "News",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "BUSINESS|EXCHANGE|TRADING|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinOtag",
+        "img": "https://resources.cryptocompare.com/news/77/default.png",
+        "lang": "EN"
+      },
+      "source": "coinotag"
+    },
+    {
       "id": "53553924",
       "guid": "https://timestabloid.com/?p=87353",
       "published_on": 1761257119,
@@ -779,66 +819,6 @@
         "lang": "EN"
       },
       "source": "cryptonews"
-    },
-    {
-      "id": "53551632",
-      "guid": "https://www.cryptopolitan.com/?p=843771",
-      "published_on": 1761251105,
-      "imageurl": "https://resources.cryptocompare.com/news/43/53551632.jpeg",
-      "title": "Amazon launches new AI tool to assist hesitant shoppers",
-      "url": "https://www.cryptopolitan.com/amazon-ai-to-push-indecisive-shoppers/",
-      "body": "Amazon has introduced a new artificial intelligence tool designed to guide hesitant shoppers toward making purchases. The move comes as more e-commerce companies continue to add more AI solutions on their platforms to assist buyers and drive sales, driving up the competition between rivals in the industry. Amazon\u2019s new feature is called Help Me Decide The feature, called Help Me Decide, appears at the top of a product detail page when Amazon\u2019s system detects that a shopper has browsed multiple similar items without making a choice. Those who tap the button will receive a single product recommendation, complete with an explanation of why it\u2019s the best fit. The tool is initially available on Amazon\u2019s smartphone app and mobile browser for a limited group of millions of US users, with a larger rollout expected in the coming months. The feature uses large language models to match a shopper\u2019s purchase and browsing history with product descriptions and reviews. It can also present alternative options at higher and lower price points. For instance, if a user has previously bought cold-weather sleeping bags and hiking boots while browsing tents, the AI might recommend a four-person, all-season tent as the ideal choice. AI enters recommendation conversations Amazon has long used algorithms to recommend products based on browsing and buying patterns, but Help Me Decide goes a step further by distilling a sea of options into a single, decisive suggestion. The company says the tool is aimed at addressing decision fatigue, which is a common challenge for consumers overwhelmed by the sheer number of options available online. \u201cPersonalized recommendations include clear explanations of why a product is right for you based on your specific needs and preferences,\u201d Amazon said on its official blog . Amazon also has Rufus, its chatbot assistant, which powers AI-driven shopping experiences and was launched to all US customers in 2024. Rufus differs from Help Me Decide in that the former enables conversational product searches, while the latter is designed to step in when users appear stuck at the final stage, the decision to buy. Questions of transparency grow A September survey of 5,000 people by Adobe found that more than a third of shoppers had used AI tools for product research or recommendations, evidence of growing comfort with AI-driven decision-making. Walmart, Amazon\u2019s biggest rival in US retail, recently announced a partnership with OpenAI that lets users browse and purchase products directly from ChatGPT . The partnership, as expected, threatens Amazon\u2019s dominance of the e-commerce scene, and it also intensifies the competition for digital retail mindshare. The launch of Help Me Decide by Amazon may be part of a preemptive strike to ensure that it remains the default destination for product discovery and purchase decisions. Critics are concerned that the AI recommendations may be influenced by advertising or product margins, steering shoppers towards higher-profit items or Amazon\u2019s own private-label goods. Also, there are concerns about the possible impact this new AI update will have on third-party sellers. While the impact is yet to be known, if Amazon\u2019s AI disproportionately recommends certain listings, it could limit visibility for smaller merchants who rely on organic search placement. Don\u2019t just read crypto news. Understand it. Subscribe to our newsletter. It's free .",
-      "tags": "Business|Amazon",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BUSINESS|TRADING|RESEARCH|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Cryptopolitan",
-        "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
-        "lang": "EN"
-      },
-      "source": "cryptopolitan"
-    },
-    {
-      "id": "53551115",
-      "guid": "https://coinpaper.com/11858/fidelity-crypto-adds-solana-as-analysts-target-500-breakout",
-      "published_on": 1761251041,
-      "imageurl": "https://resources.cryptocompare.com/news/93/default.png",
-      "title": "Fidelity Crypto Adds Solana as Analysts Target $500 Breakout",
-      "url": "https://coinpaper.com/11858/fidelity-crypto-adds-solana-as-analysts-target-500-breakout",
-      "body": "Fidelity Digital Assets has expanded its cryptocurrency lineup by adding Solana (SOL) trading and custody services across its platforms. The expansion includes retail, institutional, and wealth management channels, positioning Fidelity among the few major financial institutions offering multi-asset crypto exposure. The new addition extends accessibility for millions of users who already trade Bitcoin, Ethereum, and Litecoin through Fidelity Crypto and its institutional platform. Solana Trading Now Live Across Fidelity Platforms Fidelity\u2019s Solana support went live on Thursday across several products, including Fidelity Crypto for retail and IRAs, Fidelity Crypto for Wealth Managers, and the firm\u2019s institutional trading suite. The move reflects Fidelity\u2019s continued focus on broadening digital asset services for both individual and professional investors. The firm\u2019s retail platform, launched in March 2023, allows users to trade major cryptocurrencies with zero commission. However, the platform applies a spread of up to 1% per trade. New users must open a Fidelity Brokerage account to gain access to crypto features, though the service is not yet available in all states. Besides enhancing accessibility, the update demonstrates Fidelity\u2019s ongoing integration of blockchain technology into its long-term investment framework. The company\u2019s early history in crypto ranging from Bitcoin mining to extensive digital asset research has established it as a pioneer among traditional asset managers entering decentralized finance. Solana Price Action and Technical Outlook Following the announcement, Solana recorded a 5.15% daily gain, trading at around $191 with a market capitalization exceeding $104 billion. The token\u2019s trading volume reached over $7 billion within 24 hours, indicating renewed investor interest. According to analyst Daan Crypto Trades, Solana is consolidating between $170 and $200, maintaining a structure of lower highs and higher lows. The compression pattern suggests that the market is finding balance before its next significant move. Daan emphasized that support near $170\u2013$175 remains critical, while resistance between $195\u2013$200 marks the short-term ceiling. Source: X Moreover, analyst AltcoinGordon highlighted that Solana\u2019s weekly chart continues to form an ascending triangle a structure that has historically preceded major breakouts. The long-term resistance zone near $320\u2013$340 remains the key level to watch. Sustained strength above this range could confirm a breakout toward $500.",
-      "tags": "News|Crypto",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|BUSINESS|SOL|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Coinpaper",
-        "img": "https://resources.cryptocompare.com/news/93/default.png",
-        "lang": "EN"
-      },
-      "source": "coinpaper"
-    },
-    {
-      "id": "53551244",
-      "guid": "https://ambcrypto.com/?p=539812",
-      "published_on": 1761250847,
-      "imageurl": "https://images.cryptocompare.com/news/default/ambcrypto.png",
-      "title": "WazirX set to resume operations on 24 October \u2014 but trust remains fractured",
-      "url": "https://ambcrypto.com/wazirx-set-to-resume-operations-on-24-october-but-trust-remains-fractured/",
-      "body": "India\u2019s largest crypto exchange, WazirX, is making a comeback with a 24 October relaunch. Lingering skepticism over past security breaches and unresolved investigations persists.",
-      "tags": "News|News 1|Social|Trading View",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "EXCHANGE|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "AMB Crypto",
-        "img": "https://images.cryptocompare.com/news/default/ambcrypto.png",
-        "lang": "EN"
-      },
-      "source": "ambcrypto"
     }
   ],
   "ETH": [
@@ -1221,29 +1201,49 @@
         "lang": "EN"
       },
       "source": "cryptopolitan"
-    },
-    {
-      "id": "53551115",
-      "guid": "https://coinpaper.com/11858/fidelity-crypto-adds-solana-as-analysts-target-500-breakout",
-      "published_on": 1761251041,
-      "imageurl": "https://resources.cryptocompare.com/news/93/default.png",
-      "title": "Fidelity Crypto Adds Solana as Analysts Target $500 Breakout",
-      "url": "https://coinpaper.com/11858/fidelity-crypto-adds-solana-as-analysts-target-500-breakout",
-      "body": "Fidelity Digital Assets has expanded its cryptocurrency lineup by adding Solana (SOL) trading and custody services across its platforms. The expansion includes retail, institutional, and wealth management channels, positioning Fidelity among the few major financial institutions offering multi-asset crypto exposure. The new addition extends accessibility for millions of users who already trade Bitcoin, Ethereum, and Litecoin through Fidelity Crypto and its institutional platform. Solana Trading Now Live Across Fidelity Platforms Fidelity\u2019s Solana support went live on Thursday across several products, including Fidelity Crypto for retail and IRAs, Fidelity Crypto for Wealth Managers, and the firm\u2019s institutional trading suite. The move reflects Fidelity\u2019s continued focus on broadening digital asset services for both individual and professional investors. The firm\u2019s retail platform, launched in March 2023, allows users to trade major cryptocurrencies with zero commission. However, the platform applies a spread of up to 1% per trade. New users must open a Fidelity Brokerage account to gain access to crypto features, though the service is not yet available in all states. Besides enhancing accessibility, the update demonstrates Fidelity\u2019s ongoing integration of blockchain technology into its long-term investment framework. The company\u2019s early history in crypto ranging from Bitcoin mining to extensive digital asset research has established it as a pioneer among traditional asset managers entering decentralized finance. Solana Price Action and Technical Outlook Following the announcement, Solana recorded a 5.15% daily gain, trading at around $191 with a market capitalization exceeding $104 billion. The token\u2019s trading volume reached over $7 billion within 24 hours, indicating renewed investor interest. According to analyst Daan Crypto Trades, Solana is consolidating between $170 and $200, maintaining a structure of lower highs and higher lows. The compression pattern suggests that the market is finding balance before its next significant move. Daan emphasized that support near $170\u2013$175 remains critical, while resistance between $195\u2013$200 marks the short-term ceiling. Source: X Moreover, analyst AltcoinGordon highlighted that Solana\u2019s weekly chart continues to form an ascending triangle a structure that has historically preceded major breakouts. The long-term resistance zone near $320\u2013$340 remains the key level to watch. Sustained strength above this range could confirm a breakout toward $500.",
-      "tags": "News|Crypto",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|BUSINESS|SOL|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Coinpaper",
-        "img": "https://resources.cryptocompare.com/news/93/default.png",
-        "lang": "EN"
-      },
-      "source": "coinpaper"
     }
   ],
   "SOL": [
+    {
+      "id": "53554238",
+      "guid": "https://en.coinotag.com/trump-sanctions-on-rosneft-and-lukoil-may-intensify-russias-economic-strain/",
+      "published_on": 1761257922,
+      "imageurl": "https://resources.cryptocompare.com/news/77/53554238.jpeg",
+      "title": "Trump Sanctions on Rosneft and Lukoil May Intensify Russia\u2019s Economic Strain",
+      "url": "https://en.coinotag.com/trump-sanctions-on-rosneft-and-lukoil-may-intensify-russias-economic-strain/",
+      "body": "US sanctions on Russian oil giants Rosneft and Lukoil are accelerating Russia\u2019s pivot to cryptocurrency for evading trade restrictions, potentially boosting crypto adoption amid economic isolation. This move aligns US",
+      "tags": "News|BTC|Core",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "BTC|COMMODITY|MACROECONOMICS|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinOtag",
+        "img": "https://resources.cryptocompare.com/news/77/default.png",
+        "lang": "EN"
+      },
+      "source": "coinotag"
+    },
+    {
+      "id": "53554188",
+      "guid": "https://cryptonews.com/?p=442805",
+      "published_on": 1761257767,
+      "imageurl": "https://resources.cryptocompare.com/news/52/53554188.jpeg",
+      "title": "China Is Third-Largest Contributor To Global Bitcoin Mining: Why It Matters",
+      "url": "https://cryptonews.com/news/china-is-third-largest-contributor-to-global-bitcoin-mining-why-it-matters/",
+      "body": "China was once the undisputed center for Bitcoin mining. Known for its cheap power and access to leading hardware manufacturers, all of this positioned China as a leader in global Bitcoin mining. However, this changed when mining was banned by the Chinese government in 2021 . In late September 2021, the People\u2019s Bank of China (PBOC) further banned all cryptocurrency transactions. The PBOC cited the role of cryptocurrencies in facilitating financial crime as well as posing a growing risk to China\u2019s financial system. Fast-forward to today\u2014despite the government\u2019s strong efforts to weed out all crypto miners, many have found ways to continue operations . According to the Q4 2025 update of Luxor\u2019s Global Hashrate Map , China currently accounts for 14.05% of Bitcoin\u2019s total compute power, or roughly 145 exahashes per second (EH/s). This is a modest rise from 13.8% in Q3. Source: Luxor China Leads in Global Bitcoin Mining Kaan Farahani, research associate at Luxor, told Cryptonews that Luxor\u2019s Global Hashrate Map estimates the geographic distribution of Bitcoin mining activity across the world. \u201cThe map provides weighted hashrate concentration across regions by incorporating mining pool data, ASIC trading flows, and firmware adoption trends,\u201d Farahani said. Based on the recent data, China is the third-largest contributor globally to Bitcoin mining , just behind the U.S. and Russia. Luxor\u2019s findings do not show where specifically the hashrate resides. According to Miner Weekly , multiple sources across the ASIC supply chain have pointed to one possible destination, which is Xinjiang. The region\u2019s relative isolation and abundant energy resources have made it a longtime hub for Bitcoin mining before China\u2019s ban in 2021. China Reveals Underground Bitcoin Mining Operations While China\u2019s continuation of Bitcoin mining may not come as a complete shock, this illustrates the murky, underground nature of the mining industry. Kent Halliburton, CEO and co-founder of Bitcoin mining platform Sazmining, told Cryptonews that he is not surprised to see mining still occurring in China. \u201cThis is one of the beauties of Bitcoin mining. It\u2019s a cypherpunk way to generate Bitcoin, meaning that as long as you have electricity and hardware, you can generate Bitcoin for yourself. It\u2019s tough to shut down mining on the outskirts, and that is why I believe the hashrate we see in China continues to exist,\u201d Halliburton said. Other regions where Bitcoin mining is considered illegal are also showing signs of growth. For example, Farahani noted that Luxor\u2019s Hashrate Map gives insight into Iran, estimating that around 8 EH/s of hashrate is operational in the region as of Q4-2025. This represents 0.75% of global market share. According to Halliburton, Iran is another good example of where Bitcoin mining has been occurring, but has largely been illegal . Iran initially banned Bitcoin mining in May of 2021 for four months. The region\u2019s second ban took place in December 2021. Prior to this, Iran\u2019s bitcoin mining was estimated to make up between 4% and 8% of the global BTC network. \u201cEssentially, any country with stringent controls on capital outflows is likely to restrict or attempt to ban Bitcoin mining,\u201d Halliburton said. \u201cBut if you have power, you can generate Bitcoin as long as you have the right hardware to harness it. That means that if you\u2019re trying to stem the flow of capital from leaving your country, you have a way to do that with Bitcoin mining.\u201d China\u2019s Concerning Mining Infrastructure Empire In addition to mining, recent findings from Bitcoin solutions manufacturer Auradine found that over 95% of Bitcoin ASIC mining equipment is manufactured by Chinese firms like Bitmain, MicroBT, and Canaan. Auradine\u2019s report notes that Chinese equipment manufacturing poses a major threat to U.S. national security and key infrastructure. Sanjay Gupta, chief strategy officer at Auradine, told Cryptonews that China\u2019s mining infrastructure operations are concerning for a number of reasons. For instance, he mentioned that there are over a million Chinese-based Bitcoin mining machines with foreign firmware connected to the U.S. electrical grid. \u201cThis poses a potential serious cybersecurity risk to the electrical grid across multiple states,\u201d Gupta said. \u201cIf there is embedded software in these Chinese miners that is triggered for a coordinated cyber attack to drive a large number of miners to simultaneously go in rapid over- or underdrive, this could cause a catastrophic failure of the U.S. electrical grid.\u201d And they would have gotten away with it too, if not for President Xi and President Putin. China, Russia and co-operative nations within BRICS have enough control over BTC mining repositories to bring Bitcoin to ZERO. The U.S. will not get away with this. pic.twitter.com/Ylx81nBFw0 \u2014 Inevitable China (@InevitableChina) September 8, 2025 Gupta added that the BTC mining hardware supply being highly concentrated poses a major risk of a potential 51% takeover of the bitcoin protocol in a hostile geopolitical situation. This has become even more of a threat with the recent tariffs imposed on China by President Trump, which could rise to 155% in the coming weeks . \u201cThis could cause a dramatic impact on the value of BTC and ripple effect in financial markets,\u201d Gupta remarked. Is China A Threat To Bitcoin Miners? It\u2019s clear that Bitcoin mining and manufacturing continue to take place in China despite bans. So what does this mean for miners based in regions where BTC mining is considered legal? According to Farahani, Luxor is unaware of challenges or threats based on China\u2019s mining operations. On the other hand, Gupta believes that Chinese firms supplying mining equipment will create complexities for other regions. \u201cTo combat this, we need to enable strong U.S.-based Bitcoin mining suppliers that can drive continuous innovation and performance for mining operations,\u201d he said. The ongoing trade tensions between the US and China are having a significant and costly impact on the Bitcoin mining industry. According to a new report from The Miner Mag, rising tariffs on mining equipment have exposed American companies to substantial financial liabilities.\u2026 \u2014 Dr Martin Hiesboeck (@MHiesboeck) August 21, 2025 Gupta added that moving forward, Bitcoin miners should have technology that allows energy demand response with the ability to rapidly increase or decrease power consumption based on the needs of a state or region\u2019s electrical grid. In the meantime, the architecture and legacy of mining in China will likely continue to loom over the global network. In crypto\u2019s ever\u2011shifting world, China isn\u2019t gone\u2014but rather simply operating in the margins. The post China Is Third-Largest Contributor To Global Bitcoin Mining: Why It Matters appeared first on Cryptonews .",
+      "tags": "Bitcoin News|News|Bitcoin|Bitcoin Mining|China",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "ASIA|BTC|MINING|MACROECONOMICS|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "cryptonews",
+        "img": "https://images.cryptocompare.com/news/default/cryptonews.png",
+        "lang": "EN"
+      },
+      "source": "cryptonews"
+    },
     {
       "id": "53553924",
       "guid": "https://timestabloid.com/?p=87353",
@@ -1643,86 +1643,6 @@
         "lang": "EN"
       },
       "source": "bitcoinsistemi"
-    },
-    {
-      "id": "53551337",
-      "guid": "https://cryptonews.com/?p=442537",
-      "published_on": 1761251460,
-      "imageurl": "https://resources.cryptocompare.com/news/52/53551337.jpeg",
-      "title": "Turkey Leads MENA with $200B in Crypto Volume \u2013 but Chainalysis Warns It\u2019s \u2018All Speculation\u2019",
-      "url": "https://cryptonews.com/news/turkey-leads-mena-with-200b-in-crypto-volume-but-chainalysis-warns-its-all-speculation/",
-      "body": "Turkey has emerged as the Middle East and North Africa\u2019s largest cryptocurrency market, recording nearly $200 billion in annual transactions, according to new data from Chainalysis. The country\u2019s volume surpasses all others in the region, accounting for nearly four times that of the United Arab Emirates (UAE), which ranks second with $53 billion. Source: Chainalysis Despite the surge, analysts caution that much of Turkey\u2019s crypto activity appears to be driven by speculative trading rather than sustainable adoption. From Retail to Institutions\u2014Chainalysis Maps Turkey\u2019s Evolving Crypto Sector The Chainalysis 2025 Crypto Adoption report shows Turkey\u2019s growing influence across the MENA region, where overall crypto transaction volumes reached more than $60 billion in December 2024, before moderating slightly in 2025. Source: Chainalysis While the region\u2019s year-over-year growth of 33% trails behind developing markets such as Asia-Pacific (69%) and Latin America (63%), the report points to a clear trend: cryptocurrency continues to thrive in MENA despite economic instability and political uncertainty. Turkey\u2019s case stands out. Since early 2021, the country has seen gross cryptocurrency inflows surpass $878 billion by mid-2025, even as it grapples with steep currency devaluation and persistent double-digit inflation. Source: Chainalysis Chainalysis notes that crypto has become a financial refuge for many Turks seeking to preserve wealth or escape financial instability caused by the lira\u2019s depreciation. However, it also warns that the pattern of trading suggests an increasingly speculative market, particularly as retail participation declines while institutional activity remains strong. Despite the economic turmoil, Turkish crypto activity has maintained consistent momentum, suggesting that crypto has become a key outlet for both wealth preservation and speculative trading. However, the report notes a shift in participation patterns. Retail trading activity has slowed sharply, with small and large retail transactions contracting by 1.6% and 2.3%, respectively. Source: Chainalysis Professional traders also saw growth plummet from over 40% to just 4% year-over-year. In contrast, institutional trading has proven more resilient, as larger players seek inflation hedges and exposure to digital assets. Chainalysis attributes this shift to affordability issues, tightened regulations, and waning confidence among smaller investors after sustained volatility. Stricter KYC and Transfer Caps Drive Down Retail Crypto Activity in Turkey Analysts attribute the decline in retail participation to affordability challenges and tighter regulations introduced by Turkish authorities. Turkey has tightened its cryptocurrency regulations in 2024 and 2025 to align with global anti-money laundering (AML) and FATF standards, a move analysts say has contributed to declining retail participation. The new framework introduced stricter KYC rules, withdrawal limits, and reporting requirements for crypto platforms . Transactions above 15,000 Turkish lira (around $360) must include identifying details and a 20-character transaction note. Turkey is tightening crypto AML regulations! By February 2025, all transactions over 15,000 lira will require user identification. #TurkeyCrypto #AML https://t.co/krSkosCVSs \u2014 Cryptonews.com (@cryptonews) December 25, 2024 Withdrawals without full sender and recipient information face delays of up to 48 hours, while new users experience a 72-hour hold. Authorities also capped stablecoin transfers at $3,000 daily and $50,000 monthly , with higher limits only for providers fully complying with the Travel Rule. Treasury and Finance Minister Mehmet \u015eim\u015fek warned that non-compliant firms risk fines, license revocations, or outright bans. Turkey has enacted strict crypto oversight with mandatory source checks and a $3K daily stablecoin limit. #Turkey #Regulation https://t.co/zDrxu7MOV3 \u2014 Cryptonews.com (@cryptonews) June 24, 2025 The Financial Crimes Investigation Board (MASAK) has gained new powers to freeze accounts linked to suspicious activity . In March 2025, Turkey expanded its oversight further through amendments to the Capital Markets Law No. 6362 , bringing all crypto exchanges, custodians, and wallet providers under the Capital Markets Board (CMB). Two communiqu\u00e9s, III-35/B.1 and III-35/B.2, require platforms to operate as joint-stock companies, maintain minimum capital reserves of $4.1 million for exchanges and $13.7 million for custodians, and undergo proof-of-reserve audits. The reforms also set governance and transparency standards, banning conflicts of interest and mandating user protection mechanisms such as dispute resolution systems, clear risk disclosures, and segregation of customer funds. Another reason that can lead to the drop in retail activities is the big players\u2019 exit from the nation. For example, crypto exchange Coinbase has already withdrawn its pre-application to enter Turkey\u2019s crypto market. Rival exchange Binance also announced that it would terminate its retail referral program in Turkey to comply with local regulations. Crypto Still Thrives in Turkey Despite Tougher Regulations and Exchange Withdrawals Despite the heavier regulatory environment, Turkey remains one of the most active crypto markets globally, ranking 14th in Chainalysis\u2019 2025 Global Crypto Adoption Index . The government has also floated the idea of a small transaction tax of 0.03% to boost public revenues , though Finance Minister \u015eim\u015fek has stated that profits on crypto assets are not yet subject to taxation . Meanwhile, Chainalysis\u2019 analysis of trading behavior suggests that much of Turkey\u2019s market activity has shifted toward speculative altcoin trading. Source: CCData Data from CCData shows that altcoin volumes surged from roughly $50 million in late 2024 to over $240 million by mid-2025, overtaking stablecoins as the most traded asset class. Analysts view this as a sign of increasing risk-taking among investors seeking higher returns amid economic hardship and tightening regulation. Across the region, other MENA markets show contrasting patterns. The UAE\u2019s crypto sector continues to grow steadily under a regulated framework, while Israel\u2019s volumes surged after the October 2023 attacks, as citizens turned to crypto as a financial refuge. Iran, meanwhile, maintains steady growth despite sanctions, operating within a self-contained ecosystem largely cut off from global exchanges. The post Turkey Leads MENA with $200B in Crypto Volume \u2013 but Chainalysis Warns It\u2019s \u2018All Speculation\u2019 appeared first on Cryptonews .",
-      "tags": "Blockchain News|News|Chainalysis|Stablecoin|Turkey",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "EXCHANGE|MARKET|REGULATION|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "cryptonews",
-        "img": "https://images.cryptocompare.com/news/default/cryptonews.png",
-        "lang": "EN"
-      },
-      "source": "cryptonews"
-    },
-    {
-      "id": "53551632",
-      "guid": "https://www.cryptopolitan.com/?p=843771",
-      "published_on": 1761251105,
-      "imageurl": "https://resources.cryptocompare.com/news/43/53551632.jpeg",
-      "title": "Amazon launches new AI tool to assist hesitant shoppers",
-      "url": "https://www.cryptopolitan.com/amazon-ai-to-push-indecisive-shoppers/",
-      "body": "Amazon has introduced a new artificial intelligence tool designed to guide hesitant shoppers toward making purchases. The move comes as more e-commerce companies continue to add more AI solutions on their platforms to assist buyers and drive sales, driving up the competition between rivals in the industry. Amazon\u2019s new feature is called Help Me Decide The feature, called Help Me Decide, appears at the top of a product detail page when Amazon\u2019s system detects that a shopper has browsed multiple similar items without making a choice. Those who tap the button will receive a single product recommendation, complete with an explanation of why it\u2019s the best fit. The tool is initially available on Amazon\u2019s smartphone app and mobile browser for a limited group of millions of US users, with a larger rollout expected in the coming months. The feature uses large language models to match a shopper\u2019s purchase and browsing history with product descriptions and reviews. It can also present alternative options at higher and lower price points. For instance, if a user has previously bought cold-weather sleeping bags and hiking boots while browsing tents, the AI might recommend a four-person, all-season tent as the ideal choice. AI enters recommendation conversations Amazon has long used algorithms to recommend products based on browsing and buying patterns, but Help Me Decide goes a step further by distilling a sea of options into a single, decisive suggestion. The company says the tool is aimed at addressing decision fatigue, which is a common challenge for consumers overwhelmed by the sheer number of options available online. \u201cPersonalized recommendations include clear explanations of why a product is right for you based on your specific needs and preferences,\u201d Amazon said on its official blog . Amazon also has Rufus, its chatbot assistant, which powers AI-driven shopping experiences and was launched to all US customers in 2024. Rufus differs from Help Me Decide in that the former enables conversational product searches, while the latter is designed to step in when users appear stuck at the final stage, the decision to buy. Questions of transparency grow A September survey of 5,000 people by Adobe found that more than a third of shoppers had used AI tools for product research or recommendations, evidence of growing comfort with AI-driven decision-making. Walmart, Amazon\u2019s biggest rival in US retail, recently announced a partnership with OpenAI that lets users browse and purchase products directly from ChatGPT . The partnership, as expected, threatens Amazon\u2019s dominance of the e-commerce scene, and it also intensifies the competition for digital retail mindshare. The launch of Help Me Decide by Amazon may be part of a preemptive strike to ensure that it remains the default destination for product discovery and purchase decisions. Critics are concerned that the AI recommendations may be influenced by advertising or product margins, steering shoppers towards higher-profit items or Amazon\u2019s own private-label goods. Also, there are concerns about the possible impact this new AI update will have on third-party sellers. While the impact is yet to be known, if Amazon\u2019s AI disproportionately recommends certain listings, it could limit visibility for smaller merchants who rely on organic search placement. Don\u2019t just read crypto news. Understand it. Subscribe to our newsletter. It's free .",
-      "tags": "Business|Amazon",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BUSINESS|TRADING|RESEARCH|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Cryptopolitan",
-        "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
-        "lang": "EN"
-      },
-      "source": "cryptopolitan"
-    },
-    {
-      "id": "53551115",
-      "guid": "https://coinpaper.com/11858/fidelity-crypto-adds-solana-as-analysts-target-500-breakout",
-      "published_on": 1761251041,
-      "imageurl": "https://resources.cryptocompare.com/news/93/default.png",
-      "title": "Fidelity Crypto Adds Solana as Analysts Target $500 Breakout",
-      "url": "https://coinpaper.com/11858/fidelity-crypto-adds-solana-as-analysts-target-500-breakout",
-      "body": "Fidelity Digital Assets has expanded its cryptocurrency lineup by adding Solana (SOL) trading and custody services across its platforms. The expansion includes retail, institutional, and wealth management channels, positioning Fidelity among the few major financial institutions offering multi-asset crypto exposure. The new addition extends accessibility for millions of users who already trade Bitcoin, Ethereum, and Litecoin through Fidelity Crypto and its institutional platform. Solana Trading Now Live Across Fidelity Platforms Fidelity\u2019s Solana support went live on Thursday across several products, including Fidelity Crypto for retail and IRAs, Fidelity Crypto for Wealth Managers, and the firm\u2019s institutional trading suite. The move reflects Fidelity\u2019s continued focus on broadening digital asset services for both individual and professional investors. The firm\u2019s retail platform, launched in March 2023, allows users to trade major cryptocurrencies with zero commission. However, the platform applies a spread of up to 1% per trade. New users must open a Fidelity Brokerage account to gain access to crypto features, though the service is not yet available in all states. Besides enhancing accessibility, the update demonstrates Fidelity\u2019s ongoing integration of blockchain technology into its long-term investment framework. The company\u2019s early history in crypto ranging from Bitcoin mining to extensive digital asset research has established it as a pioneer among traditional asset managers entering decentralized finance. Solana Price Action and Technical Outlook Following the announcement, Solana recorded a 5.15% daily gain, trading at around $191 with a market capitalization exceeding $104 billion. The token\u2019s trading volume reached over $7 billion within 24 hours, indicating renewed investor interest. According to analyst Daan Crypto Trades, Solana is consolidating between $170 and $200, maintaining a structure of lower highs and higher lows. The compression pattern suggests that the market is finding balance before its next significant move. Daan emphasized that support near $170\u2013$175 remains critical, while resistance between $195\u2013$200 marks the short-term ceiling. Source: X Moreover, analyst AltcoinGordon highlighted that Solana\u2019s weekly chart continues to form an ascending triangle a structure that has historically preceded major breakouts. The long-term resistance zone near $320\u2013$340 remains the key level to watch. Sustained strength above this range could confirm a breakout toward $500.",
-      "tags": "News|Crypto",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|BUSINESS|SOL|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Coinpaper",
-        "img": "https://resources.cryptocompare.com/news/93/default.png",
-        "lang": "EN"
-      },
-      "source": "coinpaper"
-    },
-    {
-      "id": "53551244",
-      "guid": "https://ambcrypto.com/?p=539812",
-      "published_on": 1761250847,
-      "imageurl": "https://images.cryptocompare.com/news/default/ambcrypto.png",
-      "title": "WazirX set to resume operations on 24 October \u2014 but trust remains fractured",
-      "url": "https://ambcrypto.com/wazirx-set-to-resume-operations-on-24-october-but-trust-remains-fractured/",
-      "body": "India\u2019s largest crypto exchange, WazirX, is making a comeback with a 24 October relaunch. Lingering skepticism over past security breaches and unresolved investigations persists.",
-      "tags": "News|News 1|Social|Trading View",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "EXCHANGE|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "AMB Crypto",
-        "img": "https://images.cryptocompare.com/news/default/ambcrypto.png",
-        "lang": "EN"
-      },
-      "source": "ambcrypto"
     }
   ],
   "ADA": [

@@ -276,8 +276,10 @@ class RegimeProcessor:
             di_plus = self._wilders_smooth(dm_plus, period) / atr * 100
             di_minus = self._wilders_smooth(dm_minus, period) / atr * 100
             
-            # Calculate ADX
-            dx = np.abs(di_plus - di_minus) / (di_plus + di_minus) * 100
+            # Calculate ADX - avoid division by zero
+            denominator = di_plus + di_minus
+            denominator = np.where(denominator == 0, 1e-8, denominator)
+            dx = np.abs(di_plus - di_minus) / denominator * 100
             adx = self._wilders_smooth(dx, period)
             
             return float(adx[-1]) if len(adx) > 0 else 0.0
