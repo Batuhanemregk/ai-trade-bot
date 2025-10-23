@@ -1,6 +1,86 @@
 {
   "BTC": [
     {
+      "id": "53541388",
+      "guid": "https://en.coin-turk.com/?p=205087",
+      "published_on": 1761229760,
+      "imageurl": "https://resources.cryptocompare.com/news/79/53541388.jpeg",
+      "title": "Microstrategy Fuels a Surge in Stock Prices",
+      "url": "https://en.coin-turk.com/microstrategy-fuels-a-surge-in-stock-prices/",
+      "body": "Microstrategy's Bitcoin strategy leads to significant stock price increases. Hyperliquid emerges as a major player with plans for a $1 billion IPO. Continue Reading: Microstrategy Fuels a Surge in Stock Prices The post Microstrategy Fuels a Surge in Stock Prices appeared first on COINTURK NEWS .",
+      "tags": "Hyperliquid (HYPE)",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "BTC|BUSINESS|MARKET|TRADING|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinTurk News",
+        "img": "https://resources.cryptocompare.com/news/79/default.png",
+        "lang": "EN"
+      },
+      "source": "cointurken"
+    },
+    {
+      "id": "53541345",
+      "guid": "https://en.coinotag.com/monero-surpasses-shiba-inu-in-rankings-as-privacy-coins-show-signs-of-revival/",
+      "published_on": 1761229610,
+      "imageurl": "https://resources.cryptocompare.com/news/77/53541345.jpeg",
+      "title": "Monero Surpasses Shiba Inu in Rankings as Privacy Coins Show Signs of Revival",
+      "url": "https://en.coinotag.com/monero-surpasses-shiba-inu-in-rankings-as-privacy-coins-show-signs-of-revival/",
+      "body": "Monero (XMR) has surged 8.22% to $331.52, overtaking Shiba Inu (SHIB) in market cap rankings at $6.11 billion versus $5.87 billion, securing 21st place on CoinMarketCap. This shift highlights growing",
+      "tags": "News|SHIB|SOL|XMR|ZEC",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "SHIB|SOL|XMR|ZEC|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinOtag",
+        "img": "https://resources.cryptocompare.com/news/77/default.png",
+        "lang": "EN"
+      },
+      "source": "coinotag"
+    },
+    {
+      "id": "53541361",
+      "guid": "https://u.today/bitcoin-charlatan-canadian-billionaire-slams-strategys-saylor",
+      "published_on": 1761229559,
+      "imageurl": "https://resources.cryptocompare.com/news/64/53541361.jpeg",
+      "title": "'Bitcoin Charlatan': Canadian Billionaire Slams Strategy's Saylor",
+      "url": "https://u.today/bitcoin-charlatan-canadian-billionaire-slams-strategys-saylor",
+      "body": "The two entrepreneurs have been at loggerheads for years after taking part in the viral 2021 debate",
+      "tags": "Bitcoin News|BTC",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "BTC|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "U.Today",
+        "img": "https://images.cryptocompare.com/news/default/utoday.png",
+        "lang": "EN"
+      },
+      "source": "utoday"
+    },
+    {
+      "id": "53541239",
+      "guid": "https://seekingalpha.com/news/4507550-core-scientific-raised-to-buy-at-roth-as-coreweave-deal-unlikely?utm_source=cryptocompare.com&utm_medium=referral&feed_item_type=news",
+      "published_on": 1761229440,
+      "imageurl": "https://resources.cryptocompare.com/news/50/53541239.jpeg",
+      "title": "Core Scientific raised to Buy at Roth as CoreWeave deal unlikely",
+      "url": "https://seekingalpha.com/news/4507550-core-scientific-raised-to-buy-at-roth-as-coreweave-deal-unlikely?utm_source=cryptocompare.com&utm_medium=referral&feed_item_type=news",
+      "body": "More on Core Scientific, CoreWeave CoreWeave: 3 Reasons The Core Scientific Acquisition Is Mutually Destructive CoreWeave: A Trillion-Dollar Play In The Making CoreWeave Is Back With The Bulls (Rating Upgrade) CoreWeave CEO calls on Core Scientific shareholders to back acquisition under current terms Core Scientific rises as B. Riley upgrades to Buy",
+      "tags": "CORZ|CRWV|BTC-USD",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "OTHER",
+      "source_info": {
+        "name": "Seeking Alpha",
+        "img": "https://images.cryptocompare.com/news/default/seekingalpha.png",
+        "lang": "EN"
+      },
+      "source": "seekingalpha"
+    },
+    {
       "id": "53541053",
       "guid": "https://en.coinotag.com/trezor-safe-7-prepares-crypto-wallets-for-post-quantum-threats-as-thefts-surge/",
       "published_on": 1761229095,
@@ -39,6 +119,46 @@
         "lang": "EN"
       },
       "source": "coinotag"
+    },
+    {
+      "id": "53541335",
+      "guid": "https://www.cryptopolitan.com/?p=843439",
+      "published_on": 1761228703,
+      "imageurl": "https://resources.cryptocompare.com/news/43/53541335.jpeg",
+      "title": "Russia-linked A7A5 stablecoin, supporting cast hit in EU's latest sanctions package",
+      "url": "https://www.cryptopolitan.com/eu-russian-a7a5-stablecoin-exchange-sanction/",
+      "body": "The European Union (EU) has passed its 19th set of sanctions against Russia. For the first time since the war in Ukraine began, restrictions have been implemented on crypto platforms and crypto coins after suspicions of using the DeFi products to evade restrictions. The measures, approved on Thursday, prohibit Russia-based crypto payment providers and the distribution of related payment software across the bloc. The sanctions also target Russian energy firms, banks, and entities in China, Kyrgyzstan, Tajikistan, Hong Kong, and the United Arab Emirates, accused of helping Moscow evade previous restrictions. According to previous reports by Cryptopolitan, the blockchain analytics firm Elliptic flagged an operation linked to Russian oligarch Ilan Shor\u2019s network. Shor\u2019s group allegedly processed billions of dollars in stablecoin transactions to evade sanctions and influence political outcomes in Moldova. These operations highlight Russia\u2019s reliance on crypto for espionage, political interference, and sanctions evasion. Russian ruble-backed A7A5 stablecoin hit with sanctions The EU has introduced the package to target Russia\u2019s growing use of crypto and stablecoins to bypass existing financial restrictions linked to the war in Ukraine. According to the EU Council, the stablecoin A7A5 created with Russian state support has emerged as a prominent tool for financing activities supporting the war of aggression. To that end, sanctions will be directed to the developer of A7A5, the Kyrgyz issuer of that coin, and the operator of a platform where significant volumes of A7A5 are traded. Transactions involving this stablecoin have also been prohibited across the EU. Even after being sanctioned by Western authorities, A7A5 has become the world\u2019s largest non\u2013US dollar stablecoin by market cap , reaching $500 million in early October. Chainalysis stated that the stablecoin has been playing a central role in Russia\u2019s crypto-driven trade settlement strategy. US officials also linked A7A5 to Grinex, the successor to the blacklisted exchange Garantex, which has been accused of laundering millions in illicit funds. Additionally, Chainalysis revealed that although Europe as a whole remains one of the world\u2019s most mature crypto markets, Russia has experienced an exceptional surge in activity to the extent that Russia has more crypto users than any other market in Europe. According to on-chain data, between July 2024 and June 2025, $376.3 billion worth of transactions were conducted using cryptocurrency in Russia. The report also shows that large transfers worth more than $10 million increased by 86% in Russia between the middle of 2024 and the middle of 2025. This is almost twice as fast as the 44% growth seen in the rest of Europe. Chainalysis states that the country\u2019s crypto economy has grown beyond retail speculation. For instance, DeFi activity increased eight times in early 2025 before leveling off at three and a half times the baseline level in mid-2023. Russia\u2019s biggest gold producer is on the sanctions list The EU prohibits its operators from engaging with the Russian National Payment Card System (\u2018Mir\u2019) or the Fast Payments System (\u2018SBP\u2019). Major restrictions are also imposed on maintaining economic relationships with entities active in nine Russian special economic zones. These zones are central to Russia\u2019s industrial and technological capacity, hosting enterprises engaged in the production or development of goods contributing to the Russian war effort . Additionally, it restricts the provision of AI services, high-performance computing services, and commercial space-based services to Russian entities, including the Russian government. The EU is also adding Russia\u2019s largest gold producer to a list, which will further limit its sources of income. Additionally, the package imposed tight sanctions on twelve companies in China, one in Hong Kong, three in India, and two in Thailand that directly support Russia\u2019s military and industrial complex. The names on the list were targeted for making it possible to get around export restrictions on high-tech items such as microelectronics, unmanned aerial vehicles (UAVs), and computer numerical control (CNC) machine tools. Want your project in front of crypto\u2019s top minds? Feature it in our next industry report, where data meets impact.",
+      "tags": "News|A7A5|EUR|RUB",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "ASIA|FIAT|MARKET|MACROECONOMICS|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "Cryptopolitan",
+        "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
+        "lang": "EN"
+      },
+      "source": "cryptopolitan"
+    },
+    {
+      "id": "53541197",
+      "guid": "2271ffa2-7f67-4073-bb9d-46c90e7c631d",
+      "published_on": 1761228641,
+      "imageurl": "https://resources.cryptocompare.com/news/5/53541197.jpeg",
+      "title": "DeFi Specialist Aave Labs Acquires Stable Finance, Expands Consumer Access to Onchain Savings",
+      "url": "https://www.coindesk.com/business/2025/10/23/defi-specialist-aave-labs-acquires-stable-finance-expands-consumer-access-to-onchain-savings",
+      "body": "Acquisition brings Stable\u2019s consumer app expertise to Aave Labs as it builds mainstream DeFi products.",
+      "tags": "Finance|Aave|mergers and acquisitions|DeFi|News",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinDesk",
+        "img": "https://resources.cryptocompare.com/news/5/default.png",
+        "lang": "EN"
+      },
+      "source": "coindesk"
     },
     {
       "id": "53540874",
@@ -321,6 +441,26 @@
       "source": "coinotag"
     },
     {
+      "id": "53541195",
+      "guid": "cb4f9a97-d033-4363-928b-37ad1ff3bcf9",
+      "published_on": 1761228000,
+      "imageurl": "https://resources.cryptocompare.com/news/5/53541195.jpeg",
+      "title": "Keyrock: Crypto\u2019s Buyback Boom Tests the Industry\u2019s Financial Maturity",
+      "url": "https://www.coindesk.com/markets/2025/10/23/keyrock-crypto-s-buyback-boom-tests-the-industry-s-financial-maturity",
+      "body": "Tokenholder payouts have surged more than 400% since 2024, but Keyrock\u2019s Amir Hajian warns that most are still funded by treasuries rather than real revenue, arguing that buybacks must evolve from hype-driven spending to disciplined, valuation-aware capital policy.",
+      "tags": "Markets|Tokens|DeFi|Decentralized Finance|News",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "BUSINESS|MARKET|DIGITAL ASSET TREASURY",
+      "source_info": {
+        "name": "CoinDesk",
+        "img": "https://resources.cryptocompare.com/news/5/default.png",
+        "lang": "EN"
+      },
+      "source": "coindesk"
+    },
+    {
       "id": "53540509",
       "guid": "https://en.bitcoinsistemi.com/beware-of-this-danger-bitcoin-could-experience-its-biggest-bear-market-ever-analyst-explains/",
       "published_on": 1761227888,
@@ -447,12 +587,12 @@
       "imageurl": "https://resources.cryptocompare.com/news/43/53540780.jpeg",
       "title": "Taiwan\u2019s chipmakers cast doubts over government green energy goals",
       "url": "https://www.cryptopolitan.com/taiwan-chipmakers-question-green-energy-plan/",
-      "body": "The chip manufacturing industry in Taiwan has expressed concern about the government\u2019s plan to introduce new sources of green energy. Consequently, chipmakers doubt whether the agency can meet their energy security needs. During an event on Thursday, October 23, Taiwan Semiconductor Industry Association Chair Cliff Hou mentioned that the industry is concerned about whether the government can effectively incorporate new supplies as previously pledged. \u201cWe hope the government will share an updated schedule for green energy supplies for us to review,\u201d added Hou, who also serves as a senior vice president at Taiwan Semiconductor Manufacturing Co . Energy analysts raise concerns about Taiwan\u2019s energy supply status Earlier reports from reliable sources indicated that Taiwan faces significant challenges in accelerating the adoption of renewable energy in the manufacturing industry. To address this, the government had first pledged to ensure 20% of its energy comes from renewable sources by mid-decade. However, they later lowered this target to 15% by 2025. As of late 2024, data released from Taiwan\u2019s energy administration highlighted that the total percentage of renewables accounted for less than 12% of the overall energy mix. In May, energy analysts raised concerns about the island\u2019s energy supply status. This was after they released reports stating that the ruling party had closed Taiwan\u2019s last nuclear reactor, eliminating a power source that provided approximately 5% of the nation\u2019s electricity the previous year. Therefore, since Taiwan lacks a sufficient nuclear power supply, it may be forced to rely more on imported fuels, such as liquefied natural gas, to support industries that require a significant amount of energy, including chip manufacturing. The fuel price hikes and investments in renewable energy have created financial strain for Taipower, Taiwan\u2019s major electricity supplier. To keep prices affordable, the state-owned utility has absorbed rising expenses and reported losses surpassing NT$420 billion, equivalent to about $13.6 billion, by the end of last year. Taiwan faces significant energy issues amid nuclear vote defeat Reports dated August this year highlighted that a weekend vote to restore a crucial nuclear plant in Taiwan was defeated. Following this outcome, sources noted that the island\u2019s government is struggling to address energy security challenges and meet the increasing demands of a significant semiconductor industry . Regarding the vote conducted, approximately 74% of voters in a recent referendum favored the reopening of the Maanshan nuclear plant, which was closed earlier this year. This illustrates a big shift from 2021, when voters rejected a proposal to reopen an inactive plant in Lungmen. Still, sources close to the situation mentioned that the supportive votes did not reach the 25% of eligible voters required for the opposition-backed referendum to pass, thereby allowing for a more limited use of nuclear power in Taiwan. The entire episode also inspired analysts like William Yang from the International Crisis Group to comment on the subject at hand. Yang stated that this result still sends an important message about shifting public opinion. He further noted that while the result hadn\u2019t met legal requirements, it had shown the disconnection between what the government desires and what people actually think, \u201cIt also shows that the public is worried about Taiwan\u2019s energy security and ability to maintain a steady energy supply,\u201d Yang added. Meanwhile, the semiconductor industry in Taiwan claims it is not affected by China\u2019s new export restrictions on rare earths . Unlike in the electric vehicle and consumer electronics industries, local chipmakers stressed that their production processes do not depend on China\u2019s rare earths. The newly restricted substances are not used in chip manufacturing, the Taiwan Ministry of Economic Affairs statement said, so there will be no disruption to its semiconductor production. China recently announced that it would add five more elements to the restricted rare earth list, following Beijing\u2019s intensifying of its grip on critical materials ahead of a planned meeting between Chinese President Xi Jinping and US President Donald Trump. The smartest crypto minds already read our newsletter. Want in? Join them .",
+      "body": "The chip manufacturing industry in Taiwan has expressed concern about the government\u2019s plan to introduce new sources of green energy. Consequently, chipmakers doubt whether the agency can meet their energy security needs. During an event on Thursday, October 23, Taiwan Semiconductor Industry Association Chair Cliff Hou mentioned that the industry is concerned about whether the government can effectively incorporate new supplies as previously pledged. \u201cWe hope the government will share an updated schedule for green energy supplies for us to review,\u201d added Hou, who also serves as a senior vice president at Taiwan Semiconductor Manufacturing Co . Energy analysts raise concerns about Taiwan\u2019s energy supply status Earlier reports from reliable sources indicated that Taiwan faces significant challenges in accelerating the adoption of renewable energy in the manufacturing industry. To address this, the government had first pledged to ensure 20% of its energy comes from renewable sources by mid-decade. However, they later lowered this target to 15% by 2025. As of late 2024, data released from Taiwan\u2019s energy administration highlighted that the total percentage of renewables accounted for less than 12% of the overall energy mix. In May, energy analysts raised concerns about the island\u2019s energy supply status. This was after they released reports stating that the ruling party had closed Taiwan\u2019s last nuclear reactor, eliminating a power source that provided approximately 5% of the nation\u2019s electricity the previous year. Therefore, since Taiwan lacks a sufficient nuclear power supply, it may be forced to rely more on imported fuels, such as liquefied natural gas, to support industries that require a significant amount of energy, including chip manufacturing. The fuel price hikes and investments in renewable energy have created financial strain for Taipower, Taiwan\u2019s major electricity supplier. To keep prices affordable, the state-owned utility has absorbed rising expenses and reported losses surpassing NT$420 billion, equivalent to about $13.6 billion, by the end of last year. Taiwan faces significant energy issues amid nuclear vote defeat Reports dated August this year highlighted that a weekend vote to restore a crucial nuclear plant in Taiwan was defeated. Following this outcome, sources noted that the island\u2019s government is struggling to address energy security challenges and meet the increasing demands of a significant semiconductor industry . Regarding the vote conducted, approximately 74% of voters in a recent referendum favored the reopening of the Maanshan nuclear plant, which was closed earlier this year. This illustrates a big shift from 2021, when voters rejected a proposal to reopen an inactive plant in Lungmen. Still, sources close to the situation mentioned that the supportive votes did not reach the 25% of eligible voters required for the opposition-backed referendum to pass, thereby allowing for a more limited use of nuclear power in Taiwan. The entire episode also inspired analysts like William Yang from the International Crisis Group to comment on the subject at hand. Yang stated that this result still sends an important message about shifting public opinion. He further noted that while the result hadn\u2019t met legal requirements, it had shown the disconnection between what the government desires and what people actually think, \u201cIt also shows that the public is worried about Taiwan\u2019s energy security and ability to maintain a steady energy supply,\u201d Yang added. Meanwhile, the semiconductor industry in Taiwan claims it is not affected by China\u2019s new export restrictions on rare earths . Unlike in the electric vehicle and consumer electronics industries, local chipmakers stressed that their production processes do not depend on China\u2019s rare earths. The newly restricted substances are not used in chip manufacturing, the Taiwan Ministry of Economic Affairs statement said, so there will be no disruption to its semiconductor production. China recently announced that it would add five more elements to the restricted rare earth list, following Beijing\u2019s intensifying of its grip on critical materials ahead of a planned meeting between Chinese President Xi Jinping and US President Donald Trump. Join Bybit now and claim a $50 bonus in minutes",
       "tags": "Tech|CNY|TSMC|TWD|USD",
       "lang": "EN",
       "upvotes": "0",
       "downvotes": "0",
-      "categories": "ASIA|MARKET|REGULATION|TRADING|CRYPTOCURRENCY",
+      "categories": "ASIA|EXCHANGE|MARKET|REGULATION|TRADING|CRYPTOCURRENCY",
       "source_info": {
         "name": "Cryptopolitan",
         "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
@@ -487,7 +627,7 @@
       "imageurl": "https://resources.cryptocompare.com/news/43/53540469.jpeg",
       "title": "Quantum Solutions stakes claim at Japan\u2019s largest ETH treasury with 3,866 ETH reserve",
       "url": "https://www.cryptopolitan.com/quantum-solutions-is-largest-eth-treasury/",
-      "body": "Quantum Solutions is now the biggest ETH treasury outside the United States after buying $9 million worth of Ethereum in one week. The Tokyo-listed company currently holds 3,866 ETH, making it Japan\u2019s largest public ETH treasury and the 11th-largest in the world. The company posted on X, stating that it purchased 2,365 ETH in seven days and plans to continue buying more to build a 100,000 ETH treasury, with assistance from ARK Invest and Susquehanna International Group. Quantum Solutions increases ETH Holdings quickly Quantum Solutions spent about 150 million yen (about $983,000) each day last week to buy Ethereum. The company aims to build the largest digital asset treasuries in the world, and its founder, Francis Zhou, stated that it will continue to buy ETH until it reaches its 100,000 ETH holdings. Quantum Solutions now holds 3,866 ETH (about $14.8 million) and also has a smaller Bitcoin treasury with 11.6 BTC (nearly $1.3 million). Cathie Wood, CEO of Ark Invest, said her company is more than happy to support Quantum Solutions\u2019 mission. The investment management firm will fund Japan\u2019s first institutional-grade Ethereum digital asset treasury (DAT) to continue purchasing ETH, aiming to achieve a 100,000 ETH holding. Ark Invest will also lend the company credibility, as other investors and partners will see that a popular and well-respected global investor is backing Quantum Solutions. The investment management company also invested in BitMine earlier this year and added Quantum Solutions\u2019 stock to its innovation and fintech-focused investment funds in September. Favorable rules fuel Ethereum accumulation Companies like Quantum Solutions can easily buy and hold ETH in Japan because the country has favorable rules for digital asset treasuries, unlike neighbors like Hong Kong , India, and Australia, where regulators have started making it difficult for DATs to grow. Analysts say that fewer investors today are interested in DATs and that share prices for some of the biggest crypto holders have dropped recently. However, this hasn\u2019t stopped Quantum Solutions from buying more coins. Ethereum treasury BitMine Immersion bought the dip, acquiring 203,826 ETH last week to bring its current holdings to over 3.2 million digital coins . Originally a Bitcoin mining firm, it has transitioned to a 100% ETH treasury strategy, and now controls roughly 2.7% of the total Ethereum supply. The company stated that it now holds 3,236,014 ETH, purchased at an average price of $4,022 per coin. BitMine Immersion currently holds the largest Ethereum treasury among publicly traded firms and the second-largest overall cryptocurrency treasury. According to the firm, it owns 192 Bitcoins worth $21.3 million. Other prominent Wall Street and crypto-related firms holding substantial Ethereum positions include Sharplink Gaming, Bit Digital, Coinbase Global, and ETHZilla. Each of these firms owns at least 100,000 ETH worth hundreds of millions of dollars as of the time of writing. CoinGecko\u2019s data shows 14 firms that hold a combined total of 4,663,201 ETH worth around $18 billion. Claim your free seat in an exclusive crypto trading community - limited to 1,000 members.",
+      "body": "Quantum Solutions is now the biggest ETH treasury outside the United States after buying $9 million worth of Ethereum in one week. The Tokyo-listed company currently holds 3,866 ETH, making it Japan\u2019s largest public ETH treasury and the 11th-largest in the world. The company posted on X, stating that it purchased 2,365 ETH in seven days and plans to continue buying more to build a 100,000 ETH treasury, with assistance from ARK Invest and Susquehanna International Group. Quantum Solutions increases ETH Holdings quickly Quantum Solutions spent about 150 million yen (about $983,000) each day last week to buy Ethereum. The company aims to build the largest digital asset treasuries in the world, and its founder, Francis Zhou, stated that it will continue to buy ETH until it reaches its 100,000 ETH holdings. Quantum Solutions now holds 3,866 ETH (about $14.8 million) and also has a smaller Bitcoin treasury with 11.6 BTC (nearly $1.3 million). Cathie Wood, CEO of Ark Invest, said her company is more than happy to support Quantum Solutions\u2019 mission. The investment management firm will fund Japan\u2019s first institutional-grade Ethereum digital asset treasury (DAT) to continue purchasing ETH, aiming to achieve a 100,000 ETH holding. Ark Invest will also lend the company credibility, as other investors and partners will see that a popular and well-respected global investor is backing Quantum Solutions. The investment management company also invested in BitMine earlier this year and added Quantum Solutions\u2019 stock to its innovation and fintech-focused investment funds in September. Favorable rules fuel Ethereum accumulation Companies like Quantum Solutions can easily buy and hold ETH in Japan because the country has favorable rules for digital asset treasuries, unlike neighbors like Hong Kong , India, and Australia, where regulators have started making it difficult for DATs to grow. Analysts say that fewer investors today are interested in DATs and that share prices for some of the biggest crypto holders have dropped recently. However, this hasn\u2019t stopped Quantum Solutions from buying more coins. Ethereum treasury BitMine Immersion bought the dip, acquiring 203,826 ETH last week to bring its current holdings to over 3.2 million digital coins . Originally a Bitcoin mining firm, it has transitioned to a 100% ETH treasury strategy, and now controls roughly 2.7% of the total Ethereum supply. The company stated that it now holds 3,236,014 ETH, purchased at an average price of $4,022 per coin. BitMine Immersion currently holds the largest Ethereum treasury among publicly traded firms and the second-largest overall cryptocurrency treasury. According to the firm, it owns 192 Bitcoins worth $21.3 million. Other prominent Wall Street and crypto-related firms holding substantial Ethereum positions include Sharplink Gaming, Bit Digital, Coinbase Global, and ETHZilla. Each of these firms owns at least 100,000 ETH worth hundreds of millions of dollars as of the time of writing. CoinGecko\u2019s data shows 14 firms that hold a combined total of 4,663,201 ETH worth around $18 billion. Want your project in front of crypto\u2019s top minds? Feature it in our next industry report, where data meets impact.",
       "tags": "News|BMNR|BTC|ETH|SBET",
       "lang": "EN",
       "upvotes": "0",
@@ -547,7 +687,7 @@
       "imageurl": "https://resources.cryptocompare.com/news/43/53540141.jpeg",
       "title": "Global hedge-fund asset value hit $5 trillion record on strong inflows and returns",
       "url": "https://www.cryptopolitan.com/global-hedge%e2%80%91fund-assets-record-5-trillion/",
-      "body": "The global hedge-fund industry has reached a record $5 trillion in total asset value, as investors pushed massive amounts of money into alternative strategies while funds delivered strong gains. The figure, reported by Hedge Fund Research Inc. (HFR) on Thursday, shows nearly $34 billion in net inflows during the three months through September \u2014 the biggest quarterly inflow since 2007, before the financial crisis hit global markets. The increase wasn\u2019t just new money. Funds across all strategies posted an average return of 5.4% in the quarter, driven by equity and macro plays that capitalized on market volatility under President Donald Trump\u2019s administration. Hedge funds have thrived in a year of unpredictable markets shaped by trade policies, tariffs, and currency swings, with investors hunting for uncorrelated returns amid heightened geopolitical noise. The renewed confidence in hedge funds reflects a shift by wealthy clients and institutions toward diversification, especially as stocks and bonds move in erratic patterns. Large hedge-fund managers capture bulk of inflows The biggest hedge-fund managers took nearly all the new money in the third quarter, as investors preferred size and liquidity. Firms managing more than $5 billion in assets dominated allocations, underscoring how capital keeps concentrating in large, well-established players. At Bloomberg\u2019s Hedge Fund Forum in London on Wednesday, Adam Singleton, chief investment officer at Man Group Plc\u2019s External Alpha, said investors are desperate for protection that doesn\u2019t move with broader markets. \u201cWe\u2019re looking for things that will diversify markets right now, will not get too excited by the hype around different parts of the economic environment, and will generate alpha in ways which are uncorrelated if things are fine, but particularly, uncorrelated if things are not fine,\u201d Adam said. That mindset is exactly what drove the quarter\u2019s strong inflows; equity and macro strategies led performance, but crypto-focused hedge funds quietly became one of the strongest performers. After taking heavy losses early in 2025, crypto funds rebounded with double-digit gains in the third quarter, bringing year-to-date returns to 6.7%, according to data from HFR. Whether this surge in capital is a lasting change or just another temporary rush on the trading floor remains unclear, but hedge funds have never looked more mainstream. The sector that once symbolized \u201calternative finance\u201d has become a core part of institutional portfolios. In its report, HFR pointed out that most hedge-fund capital now comes from pension funds, university endowments, and sovereign wealth funds, all chasing new ways to strengthen their global investment strategies. Domestically, hedge funds remain limited to accredited investors (people earning at least $200,000 annually or holding a net worth of $1 million) as US regulations restrict participation to those capable of bearing higher risk. It\u2019s another reminder of how uneven the system is. On one side are Americans with enough wealth to invest in complex funds promising diversification and alpha. On the other are millions struggling to manage car payments, child-care costs, and grocery bills. For now, though, hedge funds are riding their strongest wave of momentum in almost two decades. Sign up to Bybit and start trading with $30,050 in welcome gifts",
+      "body": "The global hedge-fund industry has reached a record $5 trillion in total asset value, as investors pushed massive amounts of money into alternative strategies while funds delivered strong gains. The figure, reported by Hedge Fund Research Inc. (HFR) on Thursday, shows nearly $34 billion in net inflows during the three months through September \u2014 the biggest quarterly inflow since 2007, before the financial crisis hit global markets. The increase wasn\u2019t just new money. Funds across all strategies posted an average return of 5.4% in the quarter, driven by equity and macro plays that capitalized on market volatility under President Donald Trump\u2019s administration. Hedge funds have thrived in a year of unpredictable markets shaped by trade policies, tariffs, and currency swings, with investors hunting for uncorrelated returns amid heightened geopolitical noise. The renewed confidence in hedge funds reflects a shift by wealthy clients and institutions toward diversification, especially as stocks and bonds move in erratic patterns. Large hedge-fund managers capture bulk of inflows The biggest hedge-fund managers took nearly all the new money in the third quarter, as investors preferred size and liquidity. Firms managing more than $5 billion in assets dominated allocations, underscoring how capital keeps concentrating in large, well-established players. At Bloomberg\u2019s Hedge Fund Forum in London on Wednesday, Adam Singleton, chief investment officer at Man Group Plc\u2019s External Alpha, said investors are desperate for protection that doesn\u2019t move with broader markets. \u201cWe\u2019re looking for things that will diversify markets right now, will not get too excited by the hype around different parts of the economic environment, and will generate alpha in ways which are uncorrelated if things are fine, but particularly, uncorrelated if things are not fine,\u201d Adam said. That mindset is exactly what drove the quarter\u2019s strong inflows; equity and macro strategies led performance, but crypto-focused hedge funds quietly became one of the strongest performers. After taking heavy losses early in 2025, crypto funds rebounded with double-digit gains in the third quarter, bringing year-to-date returns to 6.7%, according to data from HFR. Whether this surge in capital is a lasting change or just another temporary rush on the trading floor remains unclear, but hedge funds have never looked more mainstream. The sector that once symbolized \u201calternative finance\u201d has become a core part of institutional portfolios. In its report, HFR pointed out that most hedge-fund capital now comes from pension funds, university endowments, and sovereign wealth funds, all chasing new ways to strengthen their global investment strategies. Domestically, hedge funds remain limited to accredited investors (people earning at least $200,000 annually or holding a net worth of $1 million) as US regulations restrict participation to those capable of bearing higher risk. It\u2019s another reminder of how uneven the system is. On one side are Americans with enough wealth to invest in complex funds promising diversification and alpha. On the other are millions struggling to manage car payments, child-care costs, and grocery bills. For now, though, hedge funds are riding their strongest wave of momentum in almost two decades. If you're reading this, you\u2019re already ahead. Stay there with our newsletter .",
       "tags": "Business|USD",
       "lang": "EN",
       "upvotes": "0",
@@ -759,40 +899,22 @@
         "lang": "EN"
       },
       "source": "coinpaper"
-    },
+    }
+  ],
+  "ETH": [
     {
-      "id": "53539709",
-      "guid": "https://www.newsbtc.com/?p=842711",
-      "published_on": 1761226246,
-      "imageurl": "https://resources.cryptocompare.com/news/21/53539709.jpeg",
-      "title": "16,000 Ancient Bitcoins Just Moved\u2014And It\u2019s Costing Whales Billions",
-      "url": "https://www.newsbtc.com/news/bitcoin/16000-ancient-bitcoins-just-moved-and-its-costing-whales-billions/",
-      "body": "A cluster of long-idle Bitcoin moved back into circulation Wednesday, raising fresh questions about selling pressure as prices slide from recent highs. Related Reading: All It Took Was A Tweet: FLOKI Jumps 27% After Musk Mentions It Sleeping Coins Stir After Years According to CryptoQuant analyst JA Maartun, exactly 15,965 BTC that had been idle for about three years were shifted earlier in the day. The coins moved while Bitcoin traded below $110,000, and at roughly $108,000 a coin the batch is worth about $1.724 billion. CryptoQuant\u2019s on-chain records show these addresses had little to no activity since late 2022 and early 2023, and the funds were sent to undisclosed destinations. Market watchers flagged the timing. Old coins waking up during a pullback can signal profit-taking, or simply internal reshuffles between private accounts and trading venues. Reports have disclosed that such moves sometimes reflect tax planning, exchange custody changes, or large holders adjusting positions \u2014 but the exact motive here is not public. 15,965 BTC aged 2\u20133 years just moved on-chain \u23f1\ufe0f This cohort has been dormant since late 2022\u20132023\u2014until now. pic.twitter.com/vw2z0fjHvv \u2014 Maartunn (@JA_Maartun) October 22, 2025 New Whales Underwater Data from market trackers point to pressure on newer large holders who bought near recent highs. Those so-called new whales carry an average cost of $113,000 per BTC, leaving many positions underwater while prices trade below that level. The unrealized losses tied to these wallets are approaching $7 billion, according to the same datasets. At the same time, accumulation by other big wallets continues. Analysts reported that about 26,500 BTC have flowed into accumulation addresses in recent days, a sign that some large players are adding quietly during the dip. This mix of selling and buying creates a tug-of-war in price action. Short-term dynamics are fragile. Support around $107,000\u2013$108,000 is one level traders are watching closely. If that zone holds, a bounce is possible; if it fails, further downside toward $100,000 could follow. Price Targets Spark Debate The big movements have intensified debate over how high Bitcoin might go next. According to public comments, the CEO of Galaxy Digital said reaching $250,000 by year-end would require \u201ca heck of a lot of crazy stuff.\u201d Other market figures keep more bullish targets in play: Fundstrat\u2019s Tom Lee and BitMEX\u2019s Arthur Hayes have each voiced conviction in $200,000\u2013$250,000 outcomes, pointing to potential policy moves and inflows as drivers. Institutional numbers are part of the backdrop. Galaxy Digital reported a record quarter with $29 billion in revenue, a figure that supporters cite as evidence of growing institutional involvement in the market. That growth is part of why some investors remain confident even as short-term charts wobble. Related Reading: Tether CEO Claims USDT Reached 500 Million Users Worldwide Open Interest Falls, Risk Eases Meanwhile, on-chain analytics provider Glassnode shows open interest has dropped by about 30%, reducing some of the excess speculative pressure that can amplify moves. Lower open interest often cools violent swings and makes price trends easier to read, at least until fresh catalysts arrive. Featured image from Pexels, chart from TradingView",
-      "tags": "Bitcoin|bitcoin|btc|btcusd|crypto|digital currency|whales",
+      "id": "53541335",
+      "guid": "https://www.cryptopolitan.com/?p=843439",
+      "published_on": 1761228703,
+      "imageurl": "https://resources.cryptocompare.com/news/43/53541335.jpeg",
+      "title": "Russia-linked A7A5 stablecoin, supporting cast hit in EU's latest sanctions package",
+      "url": "https://www.cryptopolitan.com/eu-russian-a7a5-stablecoin-exchange-sanction/",
+      "body": "The European Union (EU) has passed its 19th set of sanctions against Russia. For the first time since the war in Ukraine began, restrictions have been implemented on crypto platforms and crypto coins after suspicions of using the DeFi products to evade restrictions. The measures, approved on Thursday, prohibit Russia-based crypto payment providers and the distribution of related payment software across the bloc. The sanctions also target Russian energy firms, banks, and entities in China, Kyrgyzstan, Tajikistan, Hong Kong, and the United Arab Emirates, accused of helping Moscow evade previous restrictions. According to previous reports by Cryptopolitan, the blockchain analytics firm Elliptic flagged an operation linked to Russian oligarch Ilan Shor\u2019s network. Shor\u2019s group allegedly processed billions of dollars in stablecoin transactions to evade sanctions and influence political outcomes in Moldova. These operations highlight Russia\u2019s reliance on crypto for espionage, political interference, and sanctions evasion. Russian ruble-backed A7A5 stablecoin hit with sanctions The EU has introduced the package to target Russia\u2019s growing use of crypto and stablecoins to bypass existing financial restrictions linked to the war in Ukraine. According to the EU Council, the stablecoin A7A5 created with Russian state support has emerged as a prominent tool for financing activities supporting the war of aggression. To that end, sanctions will be directed to the developer of A7A5, the Kyrgyz issuer of that coin, and the operator of a platform where significant volumes of A7A5 are traded. Transactions involving this stablecoin have also been prohibited across the EU. Even after being sanctioned by Western authorities, A7A5 has become the world\u2019s largest non\u2013US dollar stablecoin by market cap , reaching $500 million in early October. Chainalysis stated that the stablecoin has been playing a central role in Russia\u2019s crypto-driven trade settlement strategy. US officials also linked A7A5 to Grinex, the successor to the blacklisted exchange Garantex, which has been accused of laundering millions in illicit funds. Additionally, Chainalysis revealed that although Europe as a whole remains one of the world\u2019s most mature crypto markets, Russia has experienced an exceptional surge in activity to the extent that Russia has more crypto users than any other market in Europe. According to on-chain data, between July 2024 and June 2025, $376.3 billion worth of transactions were conducted using cryptocurrency in Russia. The report also shows that large transfers worth more than $10 million increased by 86% in Russia between the middle of 2024 and the middle of 2025. This is almost twice as fast as the 44% growth seen in the rest of Europe. Chainalysis states that the country\u2019s crypto economy has grown beyond retail speculation. For instance, DeFi activity increased eight times in early 2025 before leveling off at three and a half times the baseline level in mid-2023. Russia\u2019s biggest gold producer is on the sanctions list The EU prohibits its operators from engaging with the Russian National Payment Card System (\u2018Mir\u2019) or the Fast Payments System (\u2018SBP\u2019). Major restrictions are also imposed on maintaining economic relationships with entities active in nine Russian special economic zones. These zones are central to Russia\u2019s industrial and technological capacity, hosting enterprises engaged in the production or development of goods contributing to the Russian war effort . Additionally, it restricts the provision of AI services, high-performance computing services, and commercial space-based services to Russian entities, including the Russian government. The EU is also adding Russia\u2019s largest gold producer to a list, which will further limit its sources of income. Additionally, the package imposed tight sanctions on twelve companies in China, one in Hong Kong, three in India, and two in Thailand that directly support Russia\u2019s military and industrial complex. The names on the list were targeted for making it possible to get around export restrictions on high-tech items such as microelectronics, unmanned aerial vehicles (UAVs), and computer numerical control (CNC) machine tools. Want your project in front of crypto\u2019s top minds? Feature it in our next industry report, where data meets impact.",
+      "tags": "News|A7A5|EUR|RUB",
       "lang": "EN",
       "upvotes": "0",
       "downvotes": "0",
-      "categories": "BTC|BUSINESS|MARKET|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "NewsBTC",
-        "img": "https://images.cryptocompare.com/news/default/newsbtc.png",
-        "lang": "EN"
-      },
-      "source": "newsbtc"
-    },
-    {
-      "id": "53539810",
-      "guid": "https://www.cryptopolitan.com/?p=843328",
-      "published_on": 1761226239,
-      "imageurl": "https://resources.cryptocompare.com/news/43/53539810.jpeg",
-      "title": "Crypto adoption stalls as government reforms fall short for Australians",
-      "url": "https://www.cryptopolitan.com/crypto-adoption-stalls-in-australia/",
-      "body": "Australia\u2019s cryptocurrency market stalls as investors await the implementation of new legislation governing digital assets, despite a year of extensive reforms. Swyftx crypto exchange published its fifth annual Australian Crypto Survey on Wednesday, revealing that adult ownership of digital assets remained unchanged, and trust in them continues to decline. The Swyftx report revealed that nearly 60% of Australians do not trust cryptocurrency, up from 57% the previous year. It also showed that the top three reasons Australians do not own crypto assets are a lack of regulation (46%), a lack of knowledge about the asset class (45%), and concerns related to fraud (31%). According to Swyftx, Australians believe that digital assets will play a crucial role in the nation\u2019s economic future. Swyftx data showed that 4 out of 10 (39%) believe that cryptocurrency will be necessary to the economy, while 36% disagree. The percentage of Australians under 50 who believe cryptocurrency will play a central role in the economy increases to 51%, representing roughly half of the adult population. A third (32%) of the respondents say they disagree that crypto will be important to the economy. Investment trends shift among Gen Z Jason Titman, CEO of Swyftx, said that many investors are more concerned with the actual implementation of the regulations than they are with the prospect of crypto regulation at some undefined point. Titman added that many people still see cryptocurrency as an iconoclastic asset class, which is not necessarily a desirable feature for investors with lower risk appetites. The Swyftx report revealed that Australians under 35 continue to be the most active and successful cryptocurrency investors in the nation. Approximately 82% of Gen Z traders reported making money in the previous year, with an average gain of around $9,958. Parents with children under the age of 18 have the highest ownership rate (39%), while non-parents have a rate of only 12%. Only 6% of Australians aged 50 and above currently own any digital assets. Swyftx estimates that one in five (21%) or 4.5 million Australians currently own digital assets. At least 1.6 million more people are expected to join the digital asset market in 2026. \u201cWhile there\u2019s reason to be excited about the future impact of digital assets, most of the mainstream messaging around this asset class remains cautionary on scams and risk.\u201d \u2013 Jason Titman , Chief Executive Officer of Swyftx. Titman claimed that young Australians are now investing in developing asset classes to diversify their finances. He argued that Gen Z and Millennials are undoubtedly more at ease with owning intangible assets than previous generations. The Swyftx CEO added that younger Australians are diversifying into other asset classes as a result of the exorbitant cost of real estate. Jason Titman argued that, if current trends continue, cryptocurrency will overtake stocks as the preferred investment for Gen Zs and Millennials in a few years. He explained that Gen Z and Millennials feel that to climb the property ladder, one needs a level of exposure to high-beta assets, such as a diversified portfolio. Australia expands oversight of digital assets and ATM\u2019s As previously reported by Cryptopolitan, Tony Burke, Australia\u2019s Minister for Home Affairs, announced new regulations on October 15 that allow the AUSTRAC to impose restrictions on cryptocurrency ATMs. Burke stated that the new rules will prevent money laundering and shield vulnerable Australians from financial crime and scams. The Home Affairs Minister of Australia referred to ATMs as a \u201chigh-risk product\u201d that is connected to child abuse, scams, and money laundering. Burke claimed that the change will enhance AUSTRAC\u2019s capacity to mitigate the risks associated with money laundering linked to cryptocurrency ATMs. In March, Australia\u2019s national Treasurer, Jim Chalmers, unveiled a regulatory framework for stablecoins, featuring four pillars of reform: a review of improvements to the regulatory sandbox, exchange licensing, more specific tax guidelines, and other measures. Don\u2019t just read crypto news. Understand it. Subscribe to our newsletter. It's free .",
-      "tags": "News|AUD|AUSTRAC|BTC|ETH",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|BUSINESS|ETH|REGULATION|CRYPTOCURRENCY",
+      "categories": "ASIA|FIAT|MARKET|MACROECONOMICS|CRYPTOCURRENCY",
       "source_info": {
         "name": "Cryptopolitan",
         "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
@@ -800,128 +922,6 @@
       },
       "source": "cryptopolitan"
     },
-    {
-      "id": "53539747",
-      "guid": "https://en.bitcoinsistemi.com/binance-futures-announces-delisting-of-two-altcoin-trading-pairs-from-its-platform-details-here/",
-      "published_on": 1761226207,
-      "imageurl": "https://resources.cryptocompare.com/news/81/53539747.jpeg",
-      "title": "Binance Futures Announces Delisting of Two Altcoin Trading Pairs from Its Platform! Details Here",
-      "url": "https://en.bitcoinsistemi.com/binance-futures-announces-delisting-of-two-altcoin-trading-pairs-from-its-platform-details-here/",
-      "body": "Binance has announced the removal of COIN-M GMTUSD and DOGSUSD perpetual contracts from the Binance Futures platform. According to the company, all open positions will be automatically closed and delisted at 12:00 PM on October 28, 2025. Binance Futures to Remove COIN-M GMTUSD and DOGSUSD Perpetual Contracts Following the liquidation process, the contracts in question will be permanently delisted from the platform. Binance has warned users to manually close their open positions before the specified date. Additionally, opening new positions for these contracts will be disabled starting at 11:30 AM. The company urged users to be careful during the liquidation process, especially in the last hour. During this period, the Futures Insurance Fund will not support liquidations, and potential liquidation transactions will be submitted only once via the \u201cImmediate or Cancel Order (IOCO)\u201d method. If the IOCO transaction does not reduce the position to a sufficient margin level, the remaining portion will be closed through the automatic deleveraging (ADL) process. Binance emphasized that users should actively monitor their positions, especially in the hours leading up to liquidation, due to the risk of high volatility and low liquidity. The platform stated that this step is aimed at maintaining market stability and strengthening risk management. *This is not investment advice. Continue Reading: Binance Futures Announces Delisting of Two Altcoin Trading Pairs from Its Platform! Details Here",
-      "tags": "Altcoin|News",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "ALTCOIN|EXCHANGE|TRADING|BNB|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "BitcoinSistemi",
-        "img": "https://resources.cryptocompare.com/news/81/default.png",
-        "lang": "EN"
-      },
-      "source": "bitcoinsistemi"
-    },
-    {
-      "id": "53539685",
-      "guid": "content_68fa2c4c4d5b6b9e399f8a66",
-      "published_on": 1761226164,
-      "imageurl": "https://resources.cryptocompare.com/news/94/53539685.jpeg",
-      "title": "Rethinking Privacy In Digital Asset Regulation",
-      "url": "https://www.forbes.com/sites/digital-assets/2025/10/23/rethinking-privacy-in-digital-asset-regulation/",
-      "body": "The recent White House report on digital assets discusses the value of self-Custody and privacy preserving technologies in crypto.",
-      "tags": "Forbes Digital Assets|/digital-assets|Forbes Digital Assets|/digital-assets|standard",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "REGULATION|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Forbes Digital Assets",
-        "img": "https://resources.cryptocompare.com/news/94/default.png",
-        "lang": "EN"
-      },
-      "source": "forbes"
-    },
-    {
-      "id": "53540191",
-      "guid": "https://invezz.com/?p=2938238",
-      "published_on": 1761226141,
-      "imageurl": "https://resources.cryptocompare.com/news/69/default.png",
-      "title": "Shiba Inu price forecast: analyst eyes a 670% breakout",
-      "url": "https://invezz.com/news/2025/10/23/shiba-inu-price-forecast-analyst-eyes-a-670-breakout/",
-      "body": "Shiba Inu price has entered one of its most closely watched phases of 2025, as analysts warn that the memecoin\u2019s extended consolidation may soon give way to an explosive move. Despite months of sluggish trading and persistent bearish sentiment, experts believe the \u201cdead and sleep coin,\u201d as some have called it, could awaken with a powerful late rally that catches many investors off guard. For now, Shiba Inu (SHIB) trades near $0.00000985, down roughly 52% year-to-date and 18% over the past month. But behind the weak price action lies one of the strongest communities in crypto; more than 1.54 million holders continue to show faith in the token\u2019s long-term potential. Analysts see patience paying off Market analyst MMB Trader has emerged as one of the most vocal believers in Shiba Inu\u2019s potential comeback. In his recent analysis on TradingView , he described SHIB as a \u201cdead and sleep coin\u201d that historically moves late but explosively. According to MMB, the current sideways movement is not a sign of weakness but a precursor to a major breakout. Source: MMB Trader on TradingView MMB\u2019s technical analysis identifies a multi-year descending trendline that has been suppressing the Shiba Inu price since its March 2024 peak at $0.00004567. A breakout above this neckline resistance \u2014 currently near $0.00001740 \u2014 could signal a shift in trend, unleashing what he calls \u201can impulsive bullish move.\u201d MMB Trader projected that a successful breakout and retest of the trendline could push SHIB toward three key targets: $0.00003364, $0.00005548, and $0.00007730. If achieved, the final target would represent a stunning 670% surge from current levels. Shiba Inu\u2019s growing holders, weak inflows Even as price action remains under pressure, the number of Shiba Inu holders continues to rise steadily. On-chain data shows that the total holder count now exceeds 1.54 million addresses, a sign of resilient long-term interest. SHIB POSSESSOR @SHIBpossessor \u00b7 Follow $SHIB holders now stand at 1,546,558 on chain holders with a steady growth week after week. Let\u2019s keep building and growing. momentum\u2019s on our side. #SHIB 9:59 pm \u00b7 21 Oct 2025 158 Reply Copy link Read 11 replies This is evidence that new investors are entering the ecosystem despite the volatility. However, exchange data paints a more cautious short-term picture. Inflows to exchanges have jumped by more than 56.6 billion SHIB in just 24 hours, according to CryptoQuant . Such movements often hint at potential sell pressure as traders move tokens to exchanges for liquidity. This dynamic has left the token vulnerable around its key $0.00000900 support level. If that floor gives way, SHIB\u2019s prices could slide toward $0.00000800 or even test $0.000006, especially if the descending triangle pattern visible on charts confirms a breakdown. Institutional interest adds optimism While retail investors form the backbone of Shiba Inu\u2019s market strength, institutional exposure may soon add another layer of credibility. T. Rowe Price, a $1.77 trillion asset manager, has filed with the US Securities and Exchange Commission to launch an actively managed crypto ETF. Notably, the firm\u2019s proposed \u201cT. Rowe Price Active Crypto ETF\u201d includes Shiba Inu among its list of eligible assets alongside Bitcoin, Ethereum, Solana, and other top coins. Industry analysts see this as a sign that legacy financial institutions are no longer ignoring digital assets. The move also suggests that institutional investors are preparing for a broader crypto resurgence once the US government resolves its ongoing shutdown and the SEC resumes ETF approvals. Shiba Inu price outlook for Q4 2025 Despite the near-term struggle to stay above $0.00001, optimism for a 2025 recovery remains strong. The combination of Shibarium\u2019s growing adoption, expanding DeFi use cases, and SHIB\u2019s ongoing token burn mechanism could provide the necessary foundation for a rebound. Bullish projections suggest that in a favourable market, Shiba Inu could revisit the $0.000025 to $0.00005 range, supported by reduced supply and renewed investor enthusiasm. But whether the token can replicate its past explosive runs will depend on broader market conditions and its ability to break through the stubborn resistance trendline. For now, Shiba Inu price remains in a critical consolidation zone \u2014 quiet, steady, and seemingly asleep. But as history has shown, this \u201csleeping coin\u201d often wakes suddenly and violently, reminding the market that patience in crypto can sometimes pay off spectacularly. The post Shiba Inu price forecast: analyst eyes a 670% breakout appeared first on Invezz",
-      "tags": "Crypto|Meme Coin|Shiba Inu",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BUSINESS|MARKET|SHIB|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Invezz",
-        "img": "https://resources.cryptocompare.com/news/69/default.png",
-        "lang": "EN"
-      },
-      "source": "invezz"
-    },
-    {
-      "id": "53539640",
-      "guid": "https://en.coin-turk.com/?p=205075",
-      "published_on": 1761226100,
-      "imageurl": "https://resources.cryptocompare.com/news/79/53539640.jpeg",
-      "title": "Canaan Boosts Quarterly Performance Amid Positive Market Developments",
-      "url": "https://en.coin-turk.com/canaan-boosts-quarterly-performance-amid-positive-market-developments/",
-      "body": "Canaan reported a rise in quarterly revenues, fuelled by its advanced mining hardware. Strategic focuses include market expansion and enhancing production efficiency. Continue Reading: Canaan Boosts Quarterly Performance Amid Positive Market Developments The post Canaan Boosts Quarterly Performance Amid Positive Market Developments appeared first on COINTURK NEWS .",
-      "tags": "Cryptocurrency Mining",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "MARKET|MINING",
-      "source_info": {
-        "name": "CoinTurk News",
-        "img": "https://resources.cryptocompare.com/news/79/default.png",
-        "lang": "EN"
-      },
-      "source": "cointurken"
-    },
-    {
-      "id": "53539606",
-      "guid": "https://u.today/ethereum-eth-just-smashed-bitcoin-btc-in-major-investing-metric",
-      "published_on": 1761226020,
-      "imageurl": "https://resources.cryptocompare.com/news/64/53539606.jpeg",
-      "title": "Ethereum (ETH) Just Smashed Bitcoin (BTC) in Major Investing Metric",
-      "url": "https://u.today/ethereum-eth-just-smashed-bitcoin-btc-in-major-investing-metric",
-      "body": "Ethereum (ETH) surpasses Bitcoin (BTC) in the share of the net supply held by digital asset treasuries (DATs), analyst Leon Waidmann says.",
-      "tags": "Ethereum News|ETH",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|ETH|DIGITAL ASSET TREASURY|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "U.Today",
-        "img": "https://images.cryptocompare.com/news/default/utoday.png",
-        "lang": "EN"
-      },
-      "source": "utoday"
-    },
-    {
-      "id": "53539580",
-      "guid": "https://en.coinotag.com/ex-ripple-exec-predicts-potential-bitcoin-rally-amid-fed-rate-cuts/",
-      "published_on": 1761225933,
-      "imageurl": "https://resources.cryptocompare.com/news/77/53539580.jpeg",
-      "title": "Ex-Ripple Exec Predicts Potential Bitcoin Rally Amid Fed Rate Cuts",
-      "url": "https://en.coinotag.com/ex-ripple-exec-predicts-potential-bitcoin-rally-amid-fed-rate-cuts/",
-      "body": "The Federal Reserve\u2019s anticipated rate cuts will drive trillions from money market funds into crypto assets, according to Antony Welfare, former Ripple Labs executive. This shift could boost the $3.6",
-      "tags": "Analysis|Bitcoin|News|Ripple|BTC|DOGE|ETH|SOL|XRP",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|MARKET|TRADING|MACROECONOMICS|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "CoinOtag",
-        "img": "https://resources.cryptocompare.com/news/77/default.png",
-        "lang": "EN"
-      },
-      "source": "coinotag"
-    }
-  ],
-  "ETH": [
     {
       "id": "53541197",
       "guid": "2271ffa2-7f67-4073-bb9d-46c90e7c631d",
@@ -1149,12 +1149,12 @@
       "imageurl": "https://resources.cryptocompare.com/news/43/53540780.jpeg",
       "title": "Taiwan\u2019s chipmakers cast doubts over government green energy goals",
       "url": "https://www.cryptopolitan.com/taiwan-chipmakers-question-green-energy-plan/",
-      "body": "The chip manufacturing industry in Taiwan has expressed concern about the government\u2019s plan to introduce new sources of green energy. Consequently, chipmakers doubt whether the agency can meet their energy security needs. During an event on Thursday, October 23, Taiwan Semiconductor Industry Association Chair Cliff Hou mentioned that the industry is concerned about whether the government can effectively incorporate new supplies as previously pledged. \u201cWe hope the government will share an updated schedule for green energy supplies for us to review,\u201d added Hou, who also serves as a senior vice president at Taiwan Semiconductor Manufacturing Co . Energy analysts raise concerns about Taiwan\u2019s energy supply status Earlier reports from reliable sources indicated that Taiwan faces significant challenges in accelerating the adoption of renewable energy in the manufacturing industry. To address this, the government had first pledged to ensure 20% of its energy comes from renewable sources by mid-decade. However, they later lowered this target to 15% by 2025. As of late 2024, data released from Taiwan\u2019s energy administration highlighted that the total percentage of renewables accounted for less than 12% of the overall energy mix. In May, energy analysts raised concerns about the island\u2019s energy supply status. This was after they released reports stating that the ruling party had closed Taiwan\u2019s last nuclear reactor, eliminating a power source that provided approximately 5% of the nation\u2019s electricity the previous year. Therefore, since Taiwan lacks a sufficient nuclear power supply, it may be forced to rely more on imported fuels, such as liquefied natural gas, to support industries that require a significant amount of energy, including chip manufacturing. The fuel price hikes and investments in renewable energy have created financial strain for Taipower, Taiwan\u2019s major electricity supplier. To keep prices affordable, the state-owned utility has absorbed rising expenses and reported losses surpassing NT$420 billion, equivalent to about $13.6 billion, by the end of last year. Taiwan faces significant energy issues amid nuclear vote defeat Reports dated August this year highlighted that a weekend vote to restore a crucial nuclear plant in Taiwan was defeated. Following this outcome, sources noted that the island\u2019s government is struggling to address energy security challenges and meet the increasing demands of a significant semiconductor industry . Regarding the vote conducted, approximately 74% of voters in a recent referendum favored the reopening of the Maanshan nuclear plant, which was closed earlier this year. This illustrates a big shift from 2021, when voters rejected a proposal to reopen an inactive plant in Lungmen. Still, sources close to the situation mentioned that the supportive votes did not reach the 25% of eligible voters required for the opposition-backed referendum to pass, thereby allowing for a more limited use of nuclear power in Taiwan. The entire episode also inspired analysts like William Yang from the International Crisis Group to comment on the subject at hand. Yang stated that this result still sends an important message about shifting public opinion. He further noted that while the result hadn\u2019t met legal requirements, it had shown the disconnection between what the government desires and what people actually think, \u201cIt also shows that the public is worried about Taiwan\u2019s energy security and ability to maintain a steady energy supply,\u201d Yang added. Meanwhile, the semiconductor industry in Taiwan claims it is not affected by China\u2019s new export restrictions on rare earths . Unlike in the electric vehicle and consumer electronics industries, local chipmakers stressed that their production processes do not depend on China\u2019s rare earths. The newly restricted substances are not used in chip manufacturing, the Taiwan Ministry of Economic Affairs statement said, so there will be no disruption to its semiconductor production. China recently announced that it would add five more elements to the restricted rare earth list, following Beijing\u2019s intensifying of its grip on critical materials ahead of a planned meeting between Chinese President Xi Jinping and US President Donald Trump. The smartest crypto minds already read our newsletter. Want in? Join them .",
+      "body": "The chip manufacturing industry in Taiwan has expressed concern about the government\u2019s plan to introduce new sources of green energy. Consequently, chipmakers doubt whether the agency can meet their energy security needs. During an event on Thursday, October 23, Taiwan Semiconductor Industry Association Chair Cliff Hou mentioned that the industry is concerned about whether the government can effectively incorporate new supplies as previously pledged. \u201cWe hope the government will share an updated schedule for green energy supplies for us to review,\u201d added Hou, who also serves as a senior vice president at Taiwan Semiconductor Manufacturing Co . Energy analysts raise concerns about Taiwan\u2019s energy supply status Earlier reports from reliable sources indicated that Taiwan faces significant challenges in accelerating the adoption of renewable energy in the manufacturing industry. To address this, the government had first pledged to ensure 20% of its energy comes from renewable sources by mid-decade. However, they later lowered this target to 15% by 2025. As of late 2024, data released from Taiwan\u2019s energy administration highlighted that the total percentage of renewables accounted for less than 12% of the overall energy mix. In May, energy analysts raised concerns about the island\u2019s energy supply status. This was after they released reports stating that the ruling party had closed Taiwan\u2019s last nuclear reactor, eliminating a power source that provided approximately 5% of the nation\u2019s electricity the previous year. Therefore, since Taiwan lacks a sufficient nuclear power supply, it may be forced to rely more on imported fuels, such as liquefied natural gas, to support industries that require a significant amount of energy, including chip manufacturing. The fuel price hikes and investments in renewable energy have created financial strain for Taipower, Taiwan\u2019s major electricity supplier. To keep prices affordable, the state-owned utility has absorbed rising expenses and reported losses surpassing NT$420 billion, equivalent to about $13.6 billion, by the end of last year. Taiwan faces significant energy issues amid nuclear vote defeat Reports dated August this year highlighted that a weekend vote to restore a crucial nuclear plant in Taiwan was defeated. Following this outcome, sources noted that the island\u2019s government is struggling to address energy security challenges and meet the increasing demands of a significant semiconductor industry . Regarding the vote conducted, approximately 74% of voters in a recent referendum favored the reopening of the Maanshan nuclear plant, which was closed earlier this year. This illustrates a big shift from 2021, when voters rejected a proposal to reopen an inactive plant in Lungmen. Still, sources close to the situation mentioned that the supportive votes did not reach the 25% of eligible voters required for the opposition-backed referendum to pass, thereby allowing for a more limited use of nuclear power in Taiwan. The entire episode also inspired analysts like William Yang from the International Crisis Group to comment on the subject at hand. Yang stated that this result still sends an important message about shifting public opinion. He further noted that while the result hadn\u2019t met legal requirements, it had shown the disconnection between what the government desires and what people actually think, \u201cIt also shows that the public is worried about Taiwan\u2019s energy security and ability to maintain a steady energy supply,\u201d Yang added. Meanwhile, the semiconductor industry in Taiwan claims it is not affected by China\u2019s new export restrictions on rare earths . Unlike in the electric vehicle and consumer electronics industries, local chipmakers stressed that their production processes do not depend on China\u2019s rare earths. The newly restricted substances are not used in chip manufacturing, the Taiwan Ministry of Economic Affairs statement said, so there will be no disruption to its semiconductor production. China recently announced that it would add five more elements to the restricted rare earth list, following Beijing\u2019s intensifying of its grip on critical materials ahead of a planned meeting between Chinese President Xi Jinping and US President Donald Trump. Join Bybit now and claim a $50 bonus in minutes",
       "tags": "Tech|CNY|TSMC|TWD|USD",
       "lang": "EN",
       "upvotes": "0",
       "downvotes": "0",
-      "categories": "ASIA|MARKET|REGULATION|TRADING|CRYPTOCURRENCY",
+      "categories": "ASIA|EXCHANGE|MARKET|REGULATION|TRADING|CRYPTOCURRENCY",
       "source_info": {
         "name": "Cryptopolitan",
         "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
@@ -1169,7 +1169,7 @@
       "imageurl": "https://resources.cryptocompare.com/news/43/53540469.jpeg",
       "title": "Quantum Solutions stakes claim at Japan\u2019s largest ETH treasury with 3,866 ETH reserve",
       "url": "https://www.cryptopolitan.com/quantum-solutions-is-largest-eth-treasury/",
-      "body": "Quantum Solutions is now the biggest ETH treasury outside the United States after buying $9 million worth of Ethereum in one week. The Tokyo-listed company currently holds 3,866 ETH, making it Japan\u2019s largest public ETH treasury and the 11th-largest in the world. The company posted on X, stating that it purchased 2,365 ETH in seven days and plans to continue buying more to build a 100,000 ETH treasury, with assistance from ARK Invest and Susquehanna International Group. Quantum Solutions increases ETH Holdings quickly Quantum Solutions spent about 150 million yen (about $983,000) each day last week to buy Ethereum. The company aims to build the largest digital asset treasuries in the world, and its founder, Francis Zhou, stated that it will continue to buy ETH until it reaches its 100,000 ETH holdings. Quantum Solutions now holds 3,866 ETH (about $14.8 million) and also has a smaller Bitcoin treasury with 11.6 BTC (nearly $1.3 million). Cathie Wood, CEO of Ark Invest, said her company is more than happy to support Quantum Solutions\u2019 mission. The investment management firm will fund Japan\u2019s first institutional-grade Ethereum digital asset treasury (DAT) to continue purchasing ETH, aiming to achieve a 100,000 ETH holding. Ark Invest will also lend the company credibility, as other investors and partners will see that a popular and well-respected global investor is backing Quantum Solutions. The investment management company also invested in BitMine earlier this year and added Quantum Solutions\u2019 stock to its innovation and fintech-focused investment funds in September. Favorable rules fuel Ethereum accumulation Companies like Quantum Solutions can easily buy and hold ETH in Japan because the country has favorable rules for digital asset treasuries, unlike neighbors like Hong Kong , India, and Australia, where regulators have started making it difficult for DATs to grow. Analysts say that fewer investors today are interested in DATs and that share prices for some of the biggest crypto holders have dropped recently. However, this hasn\u2019t stopped Quantum Solutions from buying more coins. Ethereum treasury BitMine Immersion bought the dip, acquiring 203,826 ETH last week to bring its current holdings to over 3.2 million digital coins . Originally a Bitcoin mining firm, it has transitioned to a 100% ETH treasury strategy, and now controls roughly 2.7% of the total Ethereum supply. The company stated that it now holds 3,236,014 ETH, purchased at an average price of $4,022 per coin. BitMine Immersion currently holds the largest Ethereum treasury among publicly traded firms and the second-largest overall cryptocurrency treasury. According to the firm, it owns 192 Bitcoins worth $21.3 million. Other prominent Wall Street and crypto-related firms holding substantial Ethereum positions include Sharplink Gaming, Bit Digital, Coinbase Global, and ETHZilla. Each of these firms owns at least 100,000 ETH worth hundreds of millions of dollars as of the time of writing. CoinGecko\u2019s data shows 14 firms that hold a combined total of 4,663,201 ETH worth around $18 billion. Claim your free seat in an exclusive crypto trading community - limited to 1,000 members.",
+      "body": "Quantum Solutions is now the biggest ETH treasury outside the United States after buying $9 million worth of Ethereum in one week. The Tokyo-listed company currently holds 3,866 ETH, making it Japan\u2019s largest public ETH treasury and the 11th-largest in the world. The company posted on X, stating that it purchased 2,365 ETH in seven days and plans to continue buying more to build a 100,000 ETH treasury, with assistance from ARK Invest and Susquehanna International Group. Quantum Solutions increases ETH Holdings quickly Quantum Solutions spent about 150 million yen (about $983,000) each day last week to buy Ethereum. The company aims to build the largest digital asset treasuries in the world, and its founder, Francis Zhou, stated that it will continue to buy ETH until it reaches its 100,000 ETH holdings. Quantum Solutions now holds 3,866 ETH (about $14.8 million) and also has a smaller Bitcoin treasury with 11.6 BTC (nearly $1.3 million). Cathie Wood, CEO of Ark Invest, said her company is more than happy to support Quantum Solutions\u2019 mission. The investment management firm will fund Japan\u2019s first institutional-grade Ethereum digital asset treasury (DAT) to continue purchasing ETH, aiming to achieve a 100,000 ETH holding. Ark Invest will also lend the company credibility, as other investors and partners will see that a popular and well-respected global investor is backing Quantum Solutions. The investment management company also invested in BitMine earlier this year and added Quantum Solutions\u2019 stock to its innovation and fintech-focused investment funds in September. Favorable rules fuel Ethereum accumulation Companies like Quantum Solutions can easily buy and hold ETH in Japan because the country has favorable rules for digital asset treasuries, unlike neighbors like Hong Kong , India, and Australia, where regulators have started making it difficult for DATs to grow. Analysts say that fewer investors today are interested in DATs and that share prices for some of the biggest crypto holders have dropped recently. However, this hasn\u2019t stopped Quantum Solutions from buying more coins. Ethereum treasury BitMine Immersion bought the dip, acquiring 203,826 ETH last week to bring its current holdings to over 3.2 million digital coins . Originally a Bitcoin mining firm, it has transitioned to a 100% ETH treasury strategy, and now controls roughly 2.7% of the total Ethereum supply. The company stated that it now holds 3,236,014 ETH, purchased at an average price of $4,022 per coin. BitMine Immersion currently holds the largest Ethereum treasury among publicly traded firms and the second-largest overall cryptocurrency treasury. According to the firm, it owns 192 Bitcoins worth $21.3 million. Other prominent Wall Street and crypto-related firms holding substantial Ethereum positions include Sharplink Gaming, Bit Digital, Coinbase Global, and ETHZilla. Each of these firms owns at least 100,000 ETH worth hundreds of millions of dollars as of the time of writing. CoinGecko\u2019s data shows 14 firms that hold a combined total of 4,663,201 ETH worth around $18 billion. Want your project in front of crypto\u2019s top minds? Feature it in our next industry report, where data meets impact.",
       "tags": "News|BMNR|BTC|ETH|SBET",
       "lang": "EN",
       "upvotes": "0",
@@ -1189,7 +1189,7 @@
       "imageurl": "https://resources.cryptocompare.com/news/43/53540141.jpeg",
       "title": "Global hedge-fund asset value hit $5 trillion record on strong inflows and returns",
       "url": "https://www.cryptopolitan.com/global-hedge%e2%80%91fund-assets-record-5-trillion/",
-      "body": "The global hedge-fund industry has reached a record $5 trillion in total asset value, as investors pushed massive amounts of money into alternative strategies while funds delivered strong gains. The figure, reported by Hedge Fund Research Inc. (HFR) on Thursday, shows nearly $34 billion in net inflows during the three months through September \u2014 the biggest quarterly inflow since 2007, before the financial crisis hit global markets. The increase wasn\u2019t just new money. Funds across all strategies posted an average return of 5.4% in the quarter, driven by equity and macro plays that capitalized on market volatility under President Donald Trump\u2019s administration. Hedge funds have thrived in a year of unpredictable markets shaped by trade policies, tariffs, and currency swings, with investors hunting for uncorrelated returns amid heightened geopolitical noise. The renewed confidence in hedge funds reflects a shift by wealthy clients and institutions toward diversification, especially as stocks and bonds move in erratic patterns. Large hedge-fund managers capture bulk of inflows The biggest hedge-fund managers took nearly all the new money in the third quarter, as investors preferred size and liquidity. Firms managing more than $5 billion in assets dominated allocations, underscoring how capital keeps concentrating in large, well-established players. At Bloomberg\u2019s Hedge Fund Forum in London on Wednesday, Adam Singleton, chief investment officer at Man Group Plc\u2019s External Alpha, said investors are desperate for protection that doesn\u2019t move with broader markets. \u201cWe\u2019re looking for things that will diversify markets right now, will not get too excited by the hype around different parts of the economic environment, and will generate alpha in ways which are uncorrelated if things are fine, but particularly, uncorrelated if things are not fine,\u201d Adam said. That mindset is exactly what drove the quarter\u2019s strong inflows; equity and macro strategies led performance, but crypto-focused hedge funds quietly became one of the strongest performers. After taking heavy losses early in 2025, crypto funds rebounded with double-digit gains in the third quarter, bringing year-to-date returns to 6.7%, according to data from HFR. Whether this surge in capital is a lasting change or just another temporary rush on the trading floor remains unclear, but hedge funds have never looked more mainstream. The sector that once symbolized \u201calternative finance\u201d has become a core part of institutional portfolios. In its report, HFR pointed out that most hedge-fund capital now comes from pension funds, university endowments, and sovereign wealth funds, all chasing new ways to strengthen their global investment strategies. Domestically, hedge funds remain limited to accredited investors (people earning at least $200,000 annually or holding a net worth of $1 million) as US regulations restrict participation to those capable of bearing higher risk. It\u2019s another reminder of how uneven the system is. On one side are Americans with enough wealth to invest in complex funds promising diversification and alpha. On the other are millions struggling to manage car payments, child-care costs, and grocery bills. For now, though, hedge funds are riding their strongest wave of momentum in almost two decades. Sign up to Bybit and start trading with $30,050 in welcome gifts",
+      "body": "The global hedge-fund industry has reached a record $5 trillion in total asset value, as investors pushed massive amounts of money into alternative strategies while funds delivered strong gains. The figure, reported by Hedge Fund Research Inc. (HFR) on Thursday, shows nearly $34 billion in net inflows during the three months through September \u2014 the biggest quarterly inflow since 2007, before the financial crisis hit global markets. The increase wasn\u2019t just new money. Funds across all strategies posted an average return of 5.4% in the quarter, driven by equity and macro plays that capitalized on market volatility under President Donald Trump\u2019s administration. Hedge funds have thrived in a year of unpredictable markets shaped by trade policies, tariffs, and currency swings, with investors hunting for uncorrelated returns amid heightened geopolitical noise. The renewed confidence in hedge funds reflects a shift by wealthy clients and institutions toward diversification, especially as stocks and bonds move in erratic patterns. Large hedge-fund managers capture bulk of inflows The biggest hedge-fund managers took nearly all the new money in the third quarter, as investors preferred size and liquidity. Firms managing more than $5 billion in assets dominated allocations, underscoring how capital keeps concentrating in large, well-established players. At Bloomberg\u2019s Hedge Fund Forum in London on Wednesday, Adam Singleton, chief investment officer at Man Group Plc\u2019s External Alpha, said investors are desperate for protection that doesn\u2019t move with broader markets. \u201cWe\u2019re looking for things that will diversify markets right now, will not get too excited by the hype around different parts of the economic environment, and will generate alpha in ways which are uncorrelated if things are fine, but particularly, uncorrelated if things are not fine,\u201d Adam said. That mindset is exactly what drove the quarter\u2019s strong inflows; equity and macro strategies led performance, but crypto-focused hedge funds quietly became one of the strongest performers. After taking heavy losses early in 2025, crypto funds rebounded with double-digit gains in the third quarter, bringing year-to-date returns to 6.7%, according to data from HFR. Whether this surge in capital is a lasting change or just another temporary rush on the trading floor remains unclear, but hedge funds have never looked more mainstream. The sector that once symbolized \u201calternative finance\u201d has become a core part of institutional portfolios. In its report, HFR pointed out that most hedge-fund capital now comes from pension funds, university endowments, and sovereign wealth funds, all chasing new ways to strengthen their global investment strategies. Domestically, hedge funds remain limited to accredited investors (people earning at least $200,000 annually or holding a net worth of $1 million) as US regulations restrict participation to those capable of bearing higher risk. It\u2019s another reminder of how uneven the system is. On one side are Americans with enough wealth to invest in complex funds promising diversification and alpha. On the other are millions struggling to manage car payments, child-care costs, and grocery bills. For now, though, hedge funds are riding their strongest wave of momentum in almost two decades. If you're reading this, you\u2019re already ahead. Stay there with our newsletter .",
       "tags": "Business|USD",
       "lang": "EN",
       "upvotes": "0",
@@ -1241,109 +1241,49 @@
         "lang": "EN"
       },
       "source": "utoday"
-    },
-    {
-      "id": "53539709",
-      "guid": "https://www.newsbtc.com/?p=842711",
-      "published_on": 1761226246,
-      "imageurl": "https://resources.cryptocompare.com/news/21/53539709.jpeg",
-      "title": "16,000 Ancient Bitcoins Just Moved\u2014And It\u2019s Costing Whales Billions",
-      "url": "https://www.newsbtc.com/news/bitcoin/16000-ancient-bitcoins-just-moved-and-its-costing-whales-billions/",
-      "body": "A cluster of long-idle Bitcoin moved back into circulation Wednesday, raising fresh questions about selling pressure as prices slide from recent highs. Related Reading: All It Took Was A Tweet: FLOKI Jumps 27% After Musk Mentions It Sleeping Coins Stir After Years According to CryptoQuant analyst JA Maartun, exactly 15,965 BTC that had been idle for about three years were shifted earlier in the day. The coins moved while Bitcoin traded below $110,000, and at roughly $108,000 a coin the batch is worth about $1.724 billion. CryptoQuant\u2019s on-chain records show these addresses had little to no activity since late 2022 and early 2023, and the funds were sent to undisclosed destinations. Market watchers flagged the timing. Old coins waking up during a pullback can signal profit-taking, or simply internal reshuffles between private accounts and trading venues. Reports have disclosed that such moves sometimes reflect tax planning, exchange custody changes, or large holders adjusting positions \u2014 but the exact motive here is not public. 15,965 BTC aged 2\u20133 years just moved on-chain \u23f1\ufe0f This cohort has been dormant since late 2022\u20132023\u2014until now. pic.twitter.com/vw2z0fjHvv \u2014 Maartunn (@JA_Maartun) October 22, 2025 New Whales Underwater Data from market trackers point to pressure on newer large holders who bought near recent highs. Those so-called new whales carry an average cost of $113,000 per BTC, leaving many positions underwater while prices trade below that level. The unrealized losses tied to these wallets are approaching $7 billion, according to the same datasets. At the same time, accumulation by other big wallets continues. Analysts reported that about 26,500 BTC have flowed into accumulation addresses in recent days, a sign that some large players are adding quietly during the dip. This mix of selling and buying creates a tug-of-war in price action. Short-term dynamics are fragile. Support around $107,000\u2013$108,000 is one level traders are watching closely. If that zone holds, a bounce is possible; if it fails, further downside toward $100,000 could follow. Price Targets Spark Debate The big movements have intensified debate over how high Bitcoin might go next. According to public comments, the CEO of Galaxy Digital said reaching $250,000 by year-end would require \u201ca heck of a lot of crazy stuff.\u201d Other market figures keep more bullish targets in play: Fundstrat\u2019s Tom Lee and BitMEX\u2019s Arthur Hayes have each voiced conviction in $200,000\u2013$250,000 outcomes, pointing to potential policy moves and inflows as drivers. Institutional numbers are part of the backdrop. Galaxy Digital reported a record quarter with $29 billion in revenue, a figure that supporters cite as evidence of growing institutional involvement in the market. That growth is part of why some investors remain confident even as short-term charts wobble. Related Reading: Tether CEO Claims USDT Reached 500 Million Users Worldwide Open Interest Falls, Risk Eases Meanwhile, on-chain analytics provider Glassnode shows open interest has dropped by about 30%, reducing some of the excess speculative pressure that can amplify moves. Lower open interest often cools violent swings and makes price trends easier to read, at least until fresh catalysts arrive. Featured image from Pexels, chart from TradingView",
-      "tags": "Bitcoin|bitcoin|btc|btcusd|crypto|digital currency|whales",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|BUSINESS|MARKET|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "NewsBTC",
-        "img": "https://images.cryptocompare.com/news/default/newsbtc.png",
-        "lang": "EN"
-      },
-      "source": "newsbtc"
-    },
-    {
-      "id": "53539810",
-      "guid": "https://www.cryptopolitan.com/?p=843328",
-      "published_on": 1761226239,
-      "imageurl": "https://resources.cryptocompare.com/news/43/53539810.jpeg",
-      "title": "Crypto adoption stalls as government reforms fall short for Australians",
-      "url": "https://www.cryptopolitan.com/crypto-adoption-stalls-in-australia/",
-      "body": "Australia\u2019s cryptocurrency market stalls as investors await the implementation of new legislation governing digital assets, despite a year of extensive reforms. Swyftx crypto exchange published its fifth annual Australian Crypto Survey on Wednesday, revealing that adult ownership of digital assets remained unchanged, and trust in them continues to decline. The Swyftx report revealed that nearly 60% of Australians do not trust cryptocurrency, up from 57% the previous year. It also showed that the top three reasons Australians do not own crypto assets are a lack of regulation (46%), a lack of knowledge about the asset class (45%), and concerns related to fraud (31%). According to Swyftx, Australians believe that digital assets will play a crucial role in the nation\u2019s economic future. Swyftx data showed that 4 out of 10 (39%) believe that cryptocurrency will be necessary to the economy, while 36% disagree. The percentage of Australians under 50 who believe cryptocurrency will play a central role in the economy increases to 51%, representing roughly half of the adult population. A third (32%) of the respondents say they disagree that crypto will be important to the economy. Investment trends shift among Gen Z Jason Titman, CEO of Swyftx, said that many investors are more concerned with the actual implementation of the regulations than they are with the prospect of crypto regulation at some undefined point. Titman added that many people still see cryptocurrency as an iconoclastic asset class, which is not necessarily a desirable feature for investors with lower risk appetites. The Swyftx report revealed that Australians under 35 continue to be the most active and successful cryptocurrency investors in the nation. Approximately 82% of Gen Z traders reported making money in the previous year, with an average gain of around $9,958. Parents with children under the age of 18 have the highest ownership rate (39%), while non-parents have a rate of only 12%. Only 6% of Australians aged 50 and above currently own any digital assets. Swyftx estimates that one in five (21%) or 4.5 million Australians currently own digital assets. At least 1.6 million more people are expected to join the digital asset market in 2026. \u201cWhile there\u2019s reason to be excited about the future impact of digital assets, most of the mainstream messaging around this asset class remains cautionary on scams and risk.\u201d \u2013 Jason Titman , Chief Executive Officer of Swyftx. Titman claimed that young Australians are now investing in developing asset classes to diversify their finances. He argued that Gen Z and Millennials are undoubtedly more at ease with owning intangible assets than previous generations. The Swyftx CEO added that younger Australians are diversifying into other asset classes as a result of the exorbitant cost of real estate. Jason Titman argued that, if current trends continue, cryptocurrency will overtake stocks as the preferred investment for Gen Zs and Millennials in a few years. He explained that Gen Z and Millennials feel that to climb the property ladder, one needs a level of exposure to high-beta assets, such as a diversified portfolio. Australia expands oversight of digital assets and ATM\u2019s As previously reported by Cryptopolitan, Tony Burke, Australia\u2019s Minister for Home Affairs, announced new regulations on October 15 that allow the AUSTRAC to impose restrictions on cryptocurrency ATMs. Burke stated that the new rules will prevent money laundering and shield vulnerable Australians from financial crime and scams. The Home Affairs Minister of Australia referred to ATMs as a \u201chigh-risk product\u201d that is connected to child abuse, scams, and money laundering. Burke claimed that the change will enhance AUSTRAC\u2019s capacity to mitigate the risks associated with money laundering linked to cryptocurrency ATMs. In March, Australia\u2019s national Treasurer, Jim Chalmers, unveiled a regulatory framework for stablecoins, featuring four pillars of reform: a review of improvements to the regulatory sandbox, exchange licensing, more specific tax guidelines, and other measures. Don\u2019t just read crypto news. Understand it. Subscribe to our newsletter. It's free .",
-      "tags": "News|AUD|AUSTRAC|BTC|ETH",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|BUSINESS|ETH|REGULATION|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Cryptopolitan",
-        "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
-        "lang": "EN"
-      },
-      "source": "cryptopolitan"
-    },
-    {
-      "id": "53539747",
-      "guid": "https://en.bitcoinsistemi.com/binance-futures-announces-delisting-of-two-altcoin-trading-pairs-from-its-platform-details-here/",
-      "published_on": 1761226207,
-      "imageurl": "https://resources.cryptocompare.com/news/81/53539747.jpeg",
-      "title": "Binance Futures Announces Delisting of Two Altcoin Trading Pairs from Its Platform! Details Here",
-      "url": "https://en.bitcoinsistemi.com/binance-futures-announces-delisting-of-two-altcoin-trading-pairs-from-its-platform-details-here/",
-      "body": "Binance has announced the removal of COIN-M GMTUSD and DOGSUSD perpetual contracts from the Binance Futures platform. According to the company, all open positions will be automatically closed and delisted at 12:00 PM on October 28, 2025. Binance Futures to Remove COIN-M GMTUSD and DOGSUSD Perpetual Contracts Following the liquidation process, the contracts in question will be permanently delisted from the platform. Binance has warned users to manually close their open positions before the specified date. Additionally, opening new positions for these contracts will be disabled starting at 11:30 AM. The company urged users to be careful during the liquidation process, especially in the last hour. During this period, the Futures Insurance Fund will not support liquidations, and potential liquidation transactions will be submitted only once via the \u201cImmediate or Cancel Order (IOCO)\u201d method. If the IOCO transaction does not reduce the position to a sufficient margin level, the remaining portion will be closed through the automatic deleveraging (ADL) process. Binance emphasized that users should actively monitor their positions, especially in the hours leading up to liquidation, due to the risk of high volatility and low liquidity. The platform stated that this step is aimed at maintaining market stability and strengthening risk management. *This is not investment advice. Continue Reading: Binance Futures Announces Delisting of Two Altcoin Trading Pairs from Its Platform! Details Here",
-      "tags": "Altcoin|News",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "ALTCOIN|EXCHANGE|TRADING|BNB|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "BitcoinSistemi",
-        "img": "https://resources.cryptocompare.com/news/81/default.png",
-        "lang": "EN"
-      },
-      "source": "bitcoinsistemi"
-    },
-    {
-      "id": "53539685",
-      "guid": "content_68fa2c4c4d5b6b9e399f8a66",
-      "published_on": 1761226164,
-      "imageurl": "https://resources.cryptocompare.com/news/94/53539685.jpeg",
-      "title": "Rethinking Privacy In Digital Asset Regulation",
-      "url": "https://www.forbes.com/sites/digital-assets/2025/10/23/rethinking-privacy-in-digital-asset-regulation/",
-      "body": "The recent White House report on digital assets discusses the value of self-Custody and privacy preserving technologies in crypto.",
-      "tags": "Forbes Digital Assets|/digital-assets|Forbes Digital Assets|/digital-assets|standard",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "REGULATION|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Forbes Digital Assets",
-        "img": "https://resources.cryptocompare.com/news/94/default.png",
-        "lang": "EN"
-      },
-      "source": "forbes"
-    },
-    {
-      "id": "53540191",
-      "guid": "https://invezz.com/?p=2938238",
-      "published_on": 1761226141,
-      "imageurl": "https://resources.cryptocompare.com/news/69/default.png",
-      "title": "Shiba Inu price forecast: analyst eyes a 670% breakout",
-      "url": "https://invezz.com/news/2025/10/23/shiba-inu-price-forecast-analyst-eyes-a-670-breakout/",
-      "body": "Shiba Inu price has entered one of its most closely watched phases of 2025, as analysts warn that the memecoin\u2019s extended consolidation may soon give way to an explosive move. Despite months of sluggish trading and persistent bearish sentiment, experts believe the \u201cdead and sleep coin,\u201d as some have called it, could awaken with a powerful late rally that catches many investors off guard. For now, Shiba Inu (SHIB) trades near $0.00000985, down roughly 52% year-to-date and 18% over the past month. But behind the weak price action lies one of the strongest communities in crypto; more than 1.54 million holders continue to show faith in the token\u2019s long-term potential. Analysts see patience paying off Market analyst MMB Trader has emerged as one of the most vocal believers in Shiba Inu\u2019s potential comeback. In his recent analysis on TradingView , he described SHIB as a \u201cdead and sleep coin\u201d that historically moves late but explosively. According to MMB, the current sideways movement is not a sign of weakness but a precursor to a major breakout. Source: MMB Trader on TradingView MMB\u2019s technical analysis identifies a multi-year descending trendline that has been suppressing the Shiba Inu price since its March 2024 peak at $0.00004567. A breakout above this neckline resistance \u2014 currently near $0.00001740 \u2014 could signal a shift in trend, unleashing what he calls \u201can impulsive bullish move.\u201d MMB Trader projected that a successful breakout and retest of the trendline could push SHIB toward three key targets: $0.00003364, $0.00005548, and $0.00007730. If achieved, the final target would represent a stunning 670% surge from current levels. Shiba Inu\u2019s growing holders, weak inflows Even as price action remains under pressure, the number of Shiba Inu holders continues to rise steadily. On-chain data shows that the total holder count now exceeds 1.54 million addresses, a sign of resilient long-term interest. SHIB POSSESSOR @SHIBpossessor \u00b7 Follow $SHIB holders now stand at 1,546,558 on chain holders with a steady growth week after week. Let\u2019s keep building and growing. momentum\u2019s on our side. #SHIB 9:59 pm \u00b7 21 Oct 2025 158 Reply Copy link Read 11 replies This is evidence that new investors are entering the ecosystem despite the volatility. However, exchange data paints a more cautious short-term picture. Inflows to exchanges have jumped by more than 56.6 billion SHIB in just 24 hours, according to CryptoQuant . Such movements often hint at potential sell pressure as traders move tokens to exchanges for liquidity. This dynamic has left the token vulnerable around its key $0.00000900 support level. If that floor gives way, SHIB\u2019s prices could slide toward $0.00000800 or even test $0.000006, especially if the descending triangle pattern visible on charts confirms a breakdown. Institutional interest adds optimism While retail investors form the backbone of Shiba Inu\u2019s market strength, institutional exposure may soon add another layer of credibility. T. Rowe Price, a $1.77 trillion asset manager, has filed with the US Securities and Exchange Commission to launch an actively managed crypto ETF. Notably, the firm\u2019s proposed \u201cT. Rowe Price Active Crypto ETF\u201d includes Shiba Inu among its list of eligible assets alongside Bitcoin, Ethereum, Solana, and other top coins. Industry analysts see this as a sign that legacy financial institutions are no longer ignoring digital assets. The move also suggests that institutional investors are preparing for a broader crypto resurgence once the US government resolves its ongoing shutdown and the SEC resumes ETF approvals. Shiba Inu price outlook for Q4 2025 Despite the near-term struggle to stay above $0.00001, optimism for a 2025 recovery remains strong. The combination of Shibarium\u2019s growing adoption, expanding DeFi use cases, and SHIB\u2019s ongoing token burn mechanism could provide the necessary foundation for a rebound. Bullish projections suggest that in a favourable market, Shiba Inu could revisit the $0.000025 to $0.00005 range, supported by reduced supply and renewed investor enthusiasm. But whether the token can replicate its past explosive runs will depend on broader market conditions and its ability to break through the stubborn resistance trendline. For now, Shiba Inu price remains in a critical consolidation zone \u2014 quiet, steady, and seemingly asleep. But as history has shown, this \u201csleeping coin\u201d often wakes suddenly and violently, reminding the market that patience in crypto can sometimes pay off spectacularly. The post Shiba Inu price forecast: analyst eyes a 670% breakout appeared first on Invezz",
-      "tags": "Crypto|Meme Coin|Shiba Inu",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BUSINESS|MARKET|SHIB|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Invezz",
-        "img": "https://resources.cryptocompare.com/news/69/default.png",
-        "lang": "EN"
-      },
-      "source": "invezz"
     }
   ],
   "SOL": [
+    {
+      "id": "53541345",
+      "guid": "https://en.coinotag.com/monero-surpasses-shiba-inu-in-rankings-as-privacy-coins-show-signs-of-revival/",
+      "published_on": 1761229610,
+      "imageurl": "https://resources.cryptocompare.com/news/77/53541345.jpeg",
+      "title": "Monero Surpasses Shiba Inu in Rankings as Privacy Coins Show Signs of Revival",
+      "url": "https://en.coinotag.com/monero-surpasses-shiba-inu-in-rankings-as-privacy-coins-show-signs-of-revival/",
+      "body": "Monero (XMR) has surged 8.22% to $331.52, overtaking Shiba Inu (SHIB) in market cap rankings at $6.11 billion versus $5.87 billion, securing 21st place on CoinMarketCap. This shift highlights growing",
+      "tags": "News|SHIB|SOL|XMR|ZEC",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "SHIB|SOL|XMR|ZEC|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinOtag",
+        "img": "https://resources.cryptocompare.com/news/77/default.png",
+        "lang": "EN"
+      },
+      "source": "coinotag"
+    },
+    {
+      "id": "53541275",
+      "guid": "https://en.coinotag.com/blockchain-com-secures-mica-license-in-malta-amid-eu-regulatory-debates/",
+      "published_on": 1761229559,
+      "imageurl": "https://resources.cryptocompare.com/news/77/default.png",
+      "title": "Blockchain.com Secures MiCA License in Malta Amid EU Regulatory Debates",
+      "url": "https://en.coinotag.com/blockchain-com-secures-mica-license-in-malta-amid-eu-regulatory-debates/",
+      "body": "Blockchain.com has secured a MiCA license from Malta\u2019s Financial Services Authority, enabling custody and wallet services across 30 EEA countries while advancing institutional offerings like treasury management in a unified",
+      "tags": "Guides|News|Regulation",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "REGULATION|DIGITAL ASSET TREASURY|MACROECONOMICS",
+      "source_info": {
+        "name": "CoinOtag",
+        "img": "https://resources.cryptocompare.com/news/77/default.png",
+        "lang": "EN"
+      },
+      "source": "coinotag"
+    },
     {
       "id": "53541041",
       "guid": "https://cointelegraph.com/news/blockchain-com-mica-eu-institutions-malta-mfsa?utm_source=rss_feed&utm_medium=rss%3F_ts%3D1761228737585%26noCache%3Dtrue%26sid%3D22028e303b9cb9dc%26_rnd%3D96ji8w&utm_campaign=rss_partner_inbound",
@@ -1363,6 +1303,46 @@
         "lang": "EN"
       },
       "source": "cointelegraph"
+    },
+    {
+      "id": "53541335",
+      "guid": "https://www.cryptopolitan.com/?p=843439",
+      "published_on": 1761228703,
+      "imageurl": "https://resources.cryptocompare.com/news/43/53541335.jpeg",
+      "title": "Russia-linked A7A5 stablecoin, supporting cast hit in EU's latest sanctions package",
+      "url": "https://www.cryptopolitan.com/eu-russian-a7a5-stablecoin-exchange-sanction/",
+      "body": "The European Union (EU) has passed its 19th set of sanctions against Russia. For the first time since the war in Ukraine began, restrictions have been implemented on crypto platforms and crypto coins after suspicions of using the DeFi products to evade restrictions. The measures, approved on Thursday, prohibit Russia-based crypto payment providers and the distribution of related payment software across the bloc. The sanctions also target Russian energy firms, banks, and entities in China, Kyrgyzstan, Tajikistan, Hong Kong, and the United Arab Emirates, accused of helping Moscow evade previous restrictions. According to previous reports by Cryptopolitan, the blockchain analytics firm Elliptic flagged an operation linked to Russian oligarch Ilan Shor\u2019s network. Shor\u2019s group allegedly processed billions of dollars in stablecoin transactions to evade sanctions and influence political outcomes in Moldova. These operations highlight Russia\u2019s reliance on crypto for espionage, political interference, and sanctions evasion. Russian ruble-backed A7A5 stablecoin hit with sanctions The EU has introduced the package to target Russia\u2019s growing use of crypto and stablecoins to bypass existing financial restrictions linked to the war in Ukraine. According to the EU Council, the stablecoin A7A5 created with Russian state support has emerged as a prominent tool for financing activities supporting the war of aggression. To that end, sanctions will be directed to the developer of A7A5, the Kyrgyz issuer of that coin, and the operator of a platform where significant volumes of A7A5 are traded. Transactions involving this stablecoin have also been prohibited across the EU. Even after being sanctioned by Western authorities, A7A5 has become the world\u2019s largest non\u2013US dollar stablecoin by market cap , reaching $500 million in early October. Chainalysis stated that the stablecoin has been playing a central role in Russia\u2019s crypto-driven trade settlement strategy. US officials also linked A7A5 to Grinex, the successor to the blacklisted exchange Garantex, which has been accused of laundering millions in illicit funds. Additionally, Chainalysis revealed that although Europe as a whole remains one of the world\u2019s most mature crypto markets, Russia has experienced an exceptional surge in activity to the extent that Russia has more crypto users than any other market in Europe. According to on-chain data, between July 2024 and June 2025, $376.3 billion worth of transactions were conducted using cryptocurrency in Russia. The report also shows that large transfers worth more than $10 million increased by 86% in Russia between the middle of 2024 and the middle of 2025. This is almost twice as fast as the 44% growth seen in the rest of Europe. Chainalysis states that the country\u2019s crypto economy has grown beyond retail speculation. For instance, DeFi activity increased eight times in early 2025 before leveling off at three and a half times the baseline level in mid-2023. Russia\u2019s biggest gold producer is on the sanctions list The EU prohibits its operators from engaging with the Russian National Payment Card System (\u2018Mir\u2019) or the Fast Payments System (\u2018SBP\u2019). Major restrictions are also imposed on maintaining economic relationships with entities active in nine Russian special economic zones. These zones are central to Russia\u2019s industrial and technological capacity, hosting enterprises engaged in the production or development of goods contributing to the Russian war effort . Additionally, it restricts the provision of AI services, high-performance computing services, and commercial space-based services to Russian entities, including the Russian government. The EU is also adding Russia\u2019s largest gold producer to a list, which will further limit its sources of income. Additionally, the package imposed tight sanctions on twelve companies in China, one in Hong Kong, three in India, and two in Thailand that directly support Russia\u2019s military and industrial complex. The names on the list were targeted for making it possible to get around export restrictions on high-tech items such as microelectronics, unmanned aerial vehicles (UAVs), and computer numerical control (CNC) machine tools. Want your project in front of crypto\u2019s top minds? Feature it in our next industry report, where data meets impact.",
+      "tags": "News|A7A5|EUR|RUB",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "ASIA|FIAT|MARKET|MACROECONOMICS|CRYPTOCURRENCY",
+      "source_info": {
+        "name": "Cryptopolitan",
+        "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
+        "lang": "EN"
+      },
+      "source": "cryptopolitan"
+    },
+    {
+      "id": "53541197",
+      "guid": "2271ffa2-7f67-4073-bb9d-46c90e7c631d",
+      "published_on": 1761228641,
+      "imageurl": "https://resources.cryptocompare.com/news/5/53541197.jpeg",
+      "title": "DeFi Specialist Aave Labs Acquires Stable Finance, Expands Consumer Access to Onchain Savings",
+      "url": "https://www.coindesk.com/business/2025/10/23/defi-specialist-aave-labs-acquires-stable-finance-expands-consumer-access-to-onchain-savings",
+      "body": "Acquisition brings Stable\u2019s consumer app expertise to Aave Labs as it builds mainstream DeFi products.",
+      "tags": "Finance|Aave|mergers and acquisitions|DeFi|News",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "CRYPTOCURRENCY",
+      "source_info": {
+        "name": "CoinDesk",
+        "img": "https://resources.cryptocompare.com/news/5/default.png",
+        "lang": "EN"
+      },
+      "source": "coindesk"
     },
     {
       "id": "53540874",
@@ -1545,6 +1525,26 @@
       "source": "cryptodaily"
     },
     {
+      "id": "53541195",
+      "guid": "cb4f9a97-d033-4363-928b-37ad1ff3bcf9",
+      "published_on": 1761228000,
+      "imageurl": "https://resources.cryptocompare.com/news/5/53541195.jpeg",
+      "title": "Keyrock: Crypto\u2019s Buyback Boom Tests the Industry\u2019s Financial Maturity",
+      "url": "https://www.coindesk.com/markets/2025/10/23/keyrock-crypto-s-buyback-boom-tests-the-industry-s-financial-maturity",
+      "body": "Tokenholder payouts have surged more than 400% since 2024, but Keyrock\u2019s Amir Hajian warns that most are still funded by treasuries rather than real revenue, arguing that buybacks must evolve from hype-driven spending to disciplined, valuation-aware capital policy.",
+      "tags": "Markets|Tokens|DeFi|Decentralized Finance|News",
+      "lang": "EN",
+      "upvotes": "0",
+      "downvotes": "0",
+      "categories": "BUSINESS|MARKET|DIGITAL ASSET TREASURY",
+      "source_info": {
+        "name": "CoinDesk",
+        "img": "https://resources.cryptocompare.com/news/5/default.png",
+        "lang": "EN"
+      },
+      "source": "coindesk"
+    },
+    {
       "id": "53540509",
       "guid": "https://en.bitcoinsistemi.com/beware-of-this-danger-bitcoin-could-experience-its-biggest-bear-market-ever-analyst-explains/",
       "published_on": 1761227888,
@@ -1611,7 +1611,7 @@
       "imageurl": "https://resources.cryptocompare.com/news/43/53540469.jpeg",
       "title": "Quantum Solutions stakes claim at Japan\u2019s largest ETH treasury with 3,866 ETH reserve",
       "url": "https://www.cryptopolitan.com/quantum-solutions-is-largest-eth-treasury/",
-      "body": "Quantum Solutions is now the biggest ETH treasury outside the United States after buying $9 million worth of Ethereum in one week. The Tokyo-listed company currently holds 3,866 ETH, making it Japan\u2019s largest public ETH treasury and the 11th-largest in the world. The company posted on X, stating that it purchased 2,365 ETH in seven days and plans to continue buying more to build a 100,000 ETH treasury, with assistance from ARK Invest and Susquehanna International Group. Quantum Solutions increases ETH Holdings quickly Quantum Solutions spent about 150 million yen (about $983,000) each day last week to buy Ethereum. The company aims to build the largest digital asset treasuries in the world, and its founder, Francis Zhou, stated that it will continue to buy ETH until it reaches its 100,000 ETH holdings. Quantum Solutions now holds 3,866 ETH (about $14.8 million) and also has a smaller Bitcoin treasury with 11.6 BTC (nearly $1.3 million). Cathie Wood, CEO of Ark Invest, said her company is more than happy to support Quantum Solutions\u2019 mission. The investment management firm will fund Japan\u2019s first institutional-grade Ethereum digital asset treasury (DAT) to continue purchasing ETH, aiming to achieve a 100,000 ETH holding. Ark Invest will also lend the company credibility, as other investors and partners will see that a popular and well-respected global investor is backing Quantum Solutions. The investment management company also invested in BitMine earlier this year and added Quantum Solutions\u2019 stock to its innovation and fintech-focused investment funds in September. Favorable rules fuel Ethereum accumulation Companies like Quantum Solutions can easily buy and hold ETH in Japan because the country has favorable rules for digital asset treasuries, unlike neighbors like Hong Kong , India, and Australia, where regulators have started making it difficult for DATs to grow. Analysts say that fewer investors today are interested in DATs and that share prices for some of the biggest crypto holders have dropped recently. However, this hasn\u2019t stopped Quantum Solutions from buying more coins. Ethereum treasury BitMine Immersion bought the dip, acquiring 203,826 ETH last week to bring its current holdings to over 3.2 million digital coins . Originally a Bitcoin mining firm, it has transitioned to a 100% ETH treasury strategy, and now controls roughly 2.7% of the total Ethereum supply. The company stated that it now holds 3,236,014 ETH, purchased at an average price of $4,022 per coin. BitMine Immersion currently holds the largest Ethereum treasury among publicly traded firms and the second-largest overall cryptocurrency treasury. According to the firm, it owns 192 Bitcoins worth $21.3 million. Other prominent Wall Street and crypto-related firms holding substantial Ethereum positions include Sharplink Gaming, Bit Digital, Coinbase Global, and ETHZilla. Each of these firms owns at least 100,000 ETH worth hundreds of millions of dollars as of the time of writing. CoinGecko\u2019s data shows 14 firms that hold a combined total of 4,663,201 ETH worth around $18 billion. Claim your free seat in an exclusive crypto trading community - limited to 1,000 members.",
+      "body": "Quantum Solutions is now the biggest ETH treasury outside the United States after buying $9 million worth of Ethereum in one week. The Tokyo-listed company currently holds 3,866 ETH, making it Japan\u2019s largest public ETH treasury and the 11th-largest in the world. The company posted on X, stating that it purchased 2,365 ETH in seven days and plans to continue buying more to build a 100,000 ETH treasury, with assistance from ARK Invest and Susquehanna International Group. Quantum Solutions increases ETH Holdings quickly Quantum Solutions spent about 150 million yen (about $983,000) each day last week to buy Ethereum. The company aims to build the largest digital asset treasuries in the world, and its founder, Francis Zhou, stated that it will continue to buy ETH until it reaches its 100,000 ETH holdings. Quantum Solutions now holds 3,866 ETH (about $14.8 million) and also has a smaller Bitcoin treasury with 11.6 BTC (nearly $1.3 million). Cathie Wood, CEO of Ark Invest, said her company is more than happy to support Quantum Solutions\u2019 mission. The investment management firm will fund Japan\u2019s first institutional-grade Ethereum digital asset treasury (DAT) to continue purchasing ETH, aiming to achieve a 100,000 ETH holding. Ark Invest will also lend the company credibility, as other investors and partners will see that a popular and well-respected global investor is backing Quantum Solutions. The investment management company also invested in BitMine earlier this year and added Quantum Solutions\u2019 stock to its innovation and fintech-focused investment funds in September. Favorable rules fuel Ethereum accumulation Companies like Quantum Solutions can easily buy and hold ETH in Japan because the country has favorable rules for digital asset treasuries, unlike neighbors like Hong Kong , India, and Australia, where regulators have started making it difficult for DATs to grow. Analysts say that fewer investors today are interested in DATs and that share prices for some of the biggest crypto holders have dropped recently. However, this hasn\u2019t stopped Quantum Solutions from buying more coins. Ethereum treasury BitMine Immersion bought the dip, acquiring 203,826 ETH last week to bring its current holdings to over 3.2 million digital coins . Originally a Bitcoin mining firm, it has transitioned to a 100% ETH treasury strategy, and now controls roughly 2.7% of the total Ethereum supply. The company stated that it now holds 3,236,014 ETH, purchased at an average price of $4,022 per coin. BitMine Immersion currently holds the largest Ethereum treasury among publicly traded firms and the second-largest overall cryptocurrency treasury. According to the firm, it owns 192 Bitcoins worth $21.3 million. Other prominent Wall Street and crypto-related firms holding substantial Ethereum positions include Sharplink Gaming, Bit Digital, Coinbase Global, and ETHZilla. Each of these firms owns at least 100,000 ETH worth hundreds of millions of dollars as of the time of writing. CoinGecko\u2019s data shows 14 firms that hold a combined total of 4,663,201 ETH worth around $18 billion. Want your project in front of crypto\u2019s top minds? Feature it in our next industry report, where data meets impact.",
       "tags": "News|BMNR|BTC|ETH|SBET",
       "lang": "EN",
       "upvotes": "0",
@@ -1643,66 +1643,6 @@
         "lang": "EN"
       },
       "source": "coinpaper"
-    },
-    {
-      "id": "53539810",
-      "guid": "https://www.cryptopolitan.com/?p=843328",
-      "published_on": 1761226239,
-      "imageurl": "https://resources.cryptocompare.com/news/43/53539810.jpeg",
-      "title": "Crypto adoption stalls as government reforms fall short for Australians",
-      "url": "https://www.cryptopolitan.com/crypto-adoption-stalls-in-australia/",
-      "body": "Australia\u2019s cryptocurrency market stalls as investors await the implementation of new legislation governing digital assets, despite a year of extensive reforms. Swyftx crypto exchange published its fifth annual Australian Crypto Survey on Wednesday, revealing that adult ownership of digital assets remained unchanged, and trust in them continues to decline. The Swyftx report revealed that nearly 60% of Australians do not trust cryptocurrency, up from 57% the previous year. It also showed that the top three reasons Australians do not own crypto assets are a lack of regulation (46%), a lack of knowledge about the asset class (45%), and concerns related to fraud (31%). According to Swyftx, Australians believe that digital assets will play a crucial role in the nation\u2019s economic future. Swyftx data showed that 4 out of 10 (39%) believe that cryptocurrency will be necessary to the economy, while 36% disagree. The percentage of Australians under 50 who believe cryptocurrency will play a central role in the economy increases to 51%, representing roughly half of the adult population. A third (32%) of the respondents say they disagree that crypto will be important to the economy. Investment trends shift among Gen Z Jason Titman, CEO of Swyftx, said that many investors are more concerned with the actual implementation of the regulations than they are with the prospect of crypto regulation at some undefined point. Titman added that many people still see cryptocurrency as an iconoclastic asset class, which is not necessarily a desirable feature for investors with lower risk appetites. The Swyftx report revealed that Australians under 35 continue to be the most active and successful cryptocurrency investors in the nation. Approximately 82% of Gen Z traders reported making money in the previous year, with an average gain of around $9,958. Parents with children under the age of 18 have the highest ownership rate (39%), while non-parents have a rate of only 12%. Only 6% of Australians aged 50 and above currently own any digital assets. Swyftx estimates that one in five (21%) or 4.5 million Australians currently own digital assets. At least 1.6 million more people are expected to join the digital asset market in 2026. \u201cWhile there\u2019s reason to be excited about the future impact of digital assets, most of the mainstream messaging around this asset class remains cautionary on scams and risk.\u201d \u2013 Jason Titman , Chief Executive Officer of Swyftx. Titman claimed that young Australians are now investing in developing asset classes to diversify their finances. He argued that Gen Z and Millennials are undoubtedly more at ease with owning intangible assets than previous generations. The Swyftx CEO added that younger Australians are diversifying into other asset classes as a result of the exorbitant cost of real estate. Jason Titman argued that, if current trends continue, cryptocurrency will overtake stocks as the preferred investment for Gen Zs and Millennials in a few years. He explained that Gen Z and Millennials feel that to climb the property ladder, one needs a level of exposure to high-beta assets, such as a diversified portfolio. Australia expands oversight of digital assets and ATM\u2019s As previously reported by Cryptopolitan, Tony Burke, Australia\u2019s Minister for Home Affairs, announced new regulations on October 15 that allow the AUSTRAC to impose restrictions on cryptocurrency ATMs. Burke stated that the new rules will prevent money laundering and shield vulnerable Australians from financial crime and scams. The Home Affairs Minister of Australia referred to ATMs as a \u201chigh-risk product\u201d that is connected to child abuse, scams, and money laundering. Burke claimed that the change will enhance AUSTRAC\u2019s capacity to mitigate the risks associated with money laundering linked to cryptocurrency ATMs. In March, Australia\u2019s national Treasurer, Jim Chalmers, unveiled a regulatory framework for stablecoins, featuring four pillars of reform: a review of improvements to the regulatory sandbox, exchange licensing, more specific tax guidelines, and other measures. Don\u2019t just read crypto news. Understand it. Subscribe to our newsletter. It's free .",
-      "tags": "News|AUD|AUSTRAC|BTC|ETH",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|BUSINESS|ETH|REGULATION|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Cryptopolitan",
-        "img": "https://images.cryptocompare.com/news/default/cryptopolitan.png",
-        "lang": "EN"
-      },
-      "source": "cryptopolitan"
-    },
-    {
-      "id": "53540191",
-      "guid": "https://invezz.com/?p=2938238",
-      "published_on": 1761226141,
-      "imageurl": "https://resources.cryptocompare.com/news/69/default.png",
-      "title": "Shiba Inu price forecast: analyst eyes a 670% breakout",
-      "url": "https://invezz.com/news/2025/10/23/shiba-inu-price-forecast-analyst-eyes-a-670-breakout/",
-      "body": "Shiba Inu price has entered one of its most closely watched phases of 2025, as analysts warn that the memecoin\u2019s extended consolidation may soon give way to an explosive move. Despite months of sluggish trading and persistent bearish sentiment, experts believe the \u201cdead and sleep coin,\u201d as some have called it, could awaken with a powerful late rally that catches many investors off guard. For now, Shiba Inu (SHIB) trades near $0.00000985, down roughly 52% year-to-date and 18% over the past month. But behind the weak price action lies one of the strongest communities in crypto; more than 1.54 million holders continue to show faith in the token\u2019s long-term potential. Analysts see patience paying off Market analyst MMB Trader has emerged as one of the most vocal believers in Shiba Inu\u2019s potential comeback. In his recent analysis on TradingView , he described SHIB as a \u201cdead and sleep coin\u201d that historically moves late but explosively. According to MMB, the current sideways movement is not a sign of weakness but a precursor to a major breakout. Source: MMB Trader on TradingView MMB\u2019s technical analysis identifies a multi-year descending trendline that has been suppressing the Shiba Inu price since its March 2024 peak at $0.00004567. A breakout above this neckline resistance \u2014 currently near $0.00001740 \u2014 could signal a shift in trend, unleashing what he calls \u201can impulsive bullish move.\u201d MMB Trader projected that a successful breakout and retest of the trendline could push SHIB toward three key targets: $0.00003364, $0.00005548, and $0.00007730. If achieved, the final target would represent a stunning 670% surge from current levels. Shiba Inu\u2019s growing holders, weak inflows Even as price action remains under pressure, the number of Shiba Inu holders continues to rise steadily. On-chain data shows that the total holder count now exceeds 1.54 million addresses, a sign of resilient long-term interest. SHIB POSSESSOR @SHIBpossessor \u00b7 Follow $SHIB holders now stand at 1,546,558 on chain holders with a steady growth week after week. Let\u2019s keep building and growing. momentum\u2019s on our side. #SHIB 9:59 pm \u00b7 21 Oct 2025 158 Reply Copy link Read 11 replies This is evidence that new investors are entering the ecosystem despite the volatility. However, exchange data paints a more cautious short-term picture. Inflows to exchanges have jumped by more than 56.6 billion SHIB in just 24 hours, according to CryptoQuant . Such movements often hint at potential sell pressure as traders move tokens to exchanges for liquidity. This dynamic has left the token vulnerable around its key $0.00000900 support level. If that floor gives way, SHIB\u2019s prices could slide toward $0.00000800 or even test $0.000006, especially if the descending triangle pattern visible on charts confirms a breakdown. Institutional interest adds optimism While retail investors form the backbone of Shiba Inu\u2019s market strength, institutional exposure may soon add another layer of credibility. T. Rowe Price, a $1.77 trillion asset manager, has filed with the US Securities and Exchange Commission to launch an actively managed crypto ETF. Notably, the firm\u2019s proposed \u201cT. Rowe Price Active Crypto ETF\u201d includes Shiba Inu among its list of eligible assets alongside Bitcoin, Ethereum, Solana, and other top coins. Industry analysts see this as a sign that legacy financial institutions are no longer ignoring digital assets. The move also suggests that institutional investors are preparing for a broader crypto resurgence once the US government resolves its ongoing shutdown and the SEC resumes ETF approvals. Shiba Inu price outlook for Q4 2025 Despite the near-term struggle to stay above $0.00001, optimism for a 2025 recovery remains strong. The combination of Shibarium\u2019s growing adoption, expanding DeFi use cases, and SHIB\u2019s ongoing token burn mechanism could provide the necessary foundation for a rebound. Bullish projections suggest that in a favourable market, Shiba Inu could revisit the $0.000025 to $0.00005 range, supported by reduced supply and renewed investor enthusiasm. But whether the token can replicate its past explosive runs will depend on broader market conditions and its ability to break through the stubborn resistance trendline. For now, Shiba Inu price remains in a critical consolidation zone \u2014 quiet, steady, and seemingly asleep. But as history has shown, this \u201csleeping coin\u201d often wakes suddenly and violently, reminding the market that patience in crypto can sometimes pay off spectacularly. The post Shiba Inu price forecast: analyst eyes a 670% breakout appeared first on Invezz",
-      "tags": "Crypto|Meme Coin|Shiba Inu",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BUSINESS|MARKET|SHIB|TRADING|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "Invezz",
-        "img": "https://resources.cryptocompare.com/news/69/default.png",
-        "lang": "EN"
-      },
-      "source": "invezz"
-    },
-    {
-      "id": "53539580",
-      "guid": "https://en.coinotag.com/ex-ripple-exec-predicts-potential-bitcoin-rally-amid-fed-rate-cuts/",
-      "published_on": 1761225933,
-      "imageurl": "https://resources.cryptocompare.com/news/77/53539580.jpeg",
-      "title": "Ex-Ripple Exec Predicts Potential Bitcoin Rally Amid Fed Rate Cuts",
-      "url": "https://en.coinotag.com/ex-ripple-exec-predicts-potential-bitcoin-rally-amid-fed-rate-cuts/",
-      "body": "The Federal Reserve\u2019s anticipated rate cuts will drive trillions from money market funds into crypto assets, according to Antony Welfare, former Ripple Labs executive. This shift could boost the $3.6",
-      "tags": "Analysis|Bitcoin|News|Ripple|BTC|DOGE|ETH|SOL|XRP",
-      "lang": "EN",
-      "upvotes": "0",
-      "downvotes": "0",
-      "categories": "BTC|MARKET|TRADING|MACROECONOMICS|CRYPTOCURRENCY",
-      "source_info": {
-        "name": "CoinOtag",
-        "img": "https://resources.cryptocompare.com/news/77/default.png",
-        "lang": "EN"
-      },
-      "source": "coinotag"
     }
   ],
   "ADA": [

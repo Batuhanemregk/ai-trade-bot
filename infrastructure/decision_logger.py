@@ -261,6 +261,19 @@ class DecisionLogger:
         details_str = ", ".join([f"{k}={v}" for k, v in details.items()])
         error_msg = f"❌ {time_str} | {symbol} | ERROR: {operation} - {error} | {details_str}"
         logger.error(error_msg)
+    
+    def log_decision(self, symbol: str, timeframe: str, signal_scores: Dict[str, float],
+                    gate_result: str, gate_details: Dict[str, Any], direction: str,
+                    size: float, leverage: float, sl_price: float, tp_price: float,
+                    risk_exp: float, tier: str, cb_status: str, state_transition: str,
+                    strategy: str, guards: Dict[str, bool], source: str) -> None:
+        """
+        Alias for log_decision_summary for backward compatibility.
+        """
+        self.log_decision_summary(symbol, timeframe, signal_scores, gate_result, 
+                                 gate_details, direction, size, leverage, sl_price, 
+                                 tp_price, risk_exp, tier, cb_status, state_transition, 
+                                 strategy, guards, source)
 
 
 # Global decision logger instance

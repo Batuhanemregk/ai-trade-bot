@@ -267,6 +267,11 @@ class RegimeProcessor:
             # Smooth with 14-period Wilder's smoothing
             period = 14
             atr = self._wilders_smooth(tr, period)
+            
+            # Avoid division by zero
+            if len(atr) == 0 or atr[-1] == 0:
+                return 0.0
+                
             di_plus = self._wilders_smooth(dm_plus, period) / atr * 100
             di_minus = self._wilders_smooth(dm_minus, period) / atr * 100
             
