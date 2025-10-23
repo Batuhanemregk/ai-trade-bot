@@ -302,6 +302,14 @@ async def trading_main(
     except Exception as e:
         logger.error(f"❌ Clean runtime trading failed: {e}")
         return 1
+    finally:
+        # Cleanup: Close exchange adapter
+        try:
+            if 'exchange_adapter' in locals() and exchange_adapter:
+                await exchange_adapter.close()
+                logger.debug("✅ Closed exchange adapter in runtime")
+        except Exception as e:
+            logger.debug(f"⚠️ Exchange adapter close warning: {e}")
 
 
 async def _fetch_multi_timeframe_data(exchange_adapter, symbol: str, live: bool) -> dict:
