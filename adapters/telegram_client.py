@@ -34,6 +34,9 @@ class TelegramClient:
         self.worker_task: Optional[asyncio.Task] = None
         self.is_running = False
         
+        # Persistent session for connection reuse
+        self._session: Optional[aiohttp.ClientSession] = None
+        
         # Validation
         self.enabled = self._validate_config()
         
@@ -59,6 +62,11 @@ class TelegramClient:
         if not self.enabled:
             return
         
+        # Initialize persistent session
+        if not self._session or self._session.closed:
+            timeout = aiohttp.ClientTimeout(total=self.timeout)
+            self._session = aiohttp.ClientSession(timeout=timeout)
+        
         self.is_running = True
         self.worker_task = asyncio.create_task(self._worker_loop())
         logger.info("🚀 Telegram client worker started")
@@ -72,6 +80,12 @@ class TelegramClient:
                 await self.worker_task
             except asyncio.CancelledError:
                 pass
+        
+        # Close persistent session
+        if self._session and not self._session.closed:
+            await self._session.close()
+            self._session = None
+        
         logger.info("🛑 Telegram client worker stopped")
     
     async def send_message(self, text: str, priority: str = "normal") -> bool:
@@ -154,7 +168,9 @@ class TelegramClient:
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         
         try:
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            # Use persistent session if available, otherwise create temporary one
+            if hasattr(self, '_session') and self._session and not self._session.closed:
+                session = self._session
                 async with session.post(url, json=payload) as response:
                     if response.status == 200:
                         logger.debug("✅ Telegram message sent successfully")
@@ -163,6 +179,17 @@ class TelegramClient:
                         error_text = await response.text()
                         logger.error(f"❌ Telegram API error {response.status}: {error_text}")
                         return False
+            else:
+                # Create temporary session for single request
+                async with aiohttp.ClientSession(timeout=timeout) as session:
+                    async with session.post(url, json=payload) as response:
+                        if response.status == 200:
+                            logger.debug("✅ Telegram message sent successfully")
+                            return True
+                        else:
+                            error_text = await response.text()
+                            logger.error(f"❌ Telegram API error {response.status}: {error_text}")
+                            return False
                         
         except asyncio.TimeoutError:
             logger.error("❌ Telegram send timeout")
