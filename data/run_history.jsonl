@@ -2120,3 +2120,14 @@
 {"name": "risk_monitor", "started_at": "2025-10-23T21:55:01.469364+00:00", "finished_at": "2025-10-23T21:55:01.469370+00:00", "status": "SUCCESS", "duration_ms": 1458, "error": null}
 {"name": "trailing_5m", "started_at": "2025-10-23T21:55:01.470185+00:00", "finished_at": "2025-10-23T21:55:01.470189+00:00", "status": "SUCCESS", "duration_ms": 1438, "error": null}
 {"name": "news_incremental_5m", "started_at": "2025-10-23T21:55:21.277456+00:00", "finished_at": "2025-10-23T21:55:21.277465+00:00", "status": "SUCCESS", "duration_ms": 21269, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T21:57:03.640903+00:00", "finished_at": "2025-10-23T21:57:03.640908+00:00", "status": "SUCCESS", "duration_ms": 3622, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T21:58:01.548403+00:00", "finished_at": "2025-10-23T21:58:01.548408+00:00", "status": "SUCCESS", "duration_ms": 1528, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T21:59:01.446759+00:00", "finished_at": "2025-10-23T21:59:01.446764+00:00", "status": "SUCCESS", "duration_ms": 1435, "error": null}
+{"name": "market_overview", "started_at": "2025-10-23T22:00:04.492786+00:00", "finished_at": "2025-10-23T22:00:04.492790+00:00", "status": "SUCCESS", "duration_ms": 4472, "error": null}
+{"name": "regime_1h", "started_at": "2025-10-23T22:00:07.489615+00:00", "finished_at": "2025-10-23T22:00:07.489620+00:00", "status": "SUCCESS", "duration_ms": 7467, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T22:00:09.438990+00:00", "finished_at": "2025-10-23T22:00:09.438994+00:00", "status": "SUCCESS", "duration_ms": 9416, "error": null}
+{"name": "telegram_summary_15m", "started_at": "2025-10-23T22:00:09.439897+00:00", "finished_at": "2025-10-23T22:00:09.439900+00:00", "status": "SUCCESS", "duration_ms": 9400, "error": null}
+{"name": "trading_analysis", "started_at": "2025-10-23T22:00:14.353785+00:00", "finished_at": "2025-10-23T22:00:14.353788+00:00", "status": "SUCCESS", "duration_ms": 14314, "error": null}
+{"name": "trailing_5m", "started_at": "2025-10-23T22:00:14.355896+00:00", "finished_at": "2025-10-23T22:00:14.355900+00:00", "status": "SUCCESS", "duration_ms": 14316, "error": null}
+{"name": "news_incremental_5m", "started_at": "2025-10-23T22:00:26.347266+00:00", "finished_at": "2025-10-23T22:00:26.347275+00:00", "status": "SUCCESS", "duration_ms": 26326, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T22:01:01.393569+00:00", "finished_at": "2025-10-23T22:01:01.393575+00:00", "status": "SUCCESS", "duration_ms": 1379, "error": null}
