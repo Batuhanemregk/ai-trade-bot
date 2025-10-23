@@ -19,12 +19,12 @@ class NewsLLMAnalyzer:
         self.client = AsyncOpenAI(api_key=api_key)
         
         # Model selection (ENV override)
-        self.model = model or os.getenv('NEWS_LLM_MODEL', 'gpt-4o-mini')  # Default: gpt-4o-mini (low cost)
+        self.model = model or os.getenv('NEWS_LLM_MODEL', 'gpt-5-nano')  # Default: gpt-5-nano (high-throughput, cost-optimized)
         self.max_output_tokens = int(os.getenv('NEWS_MAX_OUTPUT_TOKENS', '128'))
         
-        # Cost tracking (gpt-4o-mini pricing)
-        self.cost_per_mtok_in = float(os.getenv('LLM_COST_PER_MTOK_IN', '0.15'))  # gpt-4o-mini: $0.15/1M
-        self.cost_per_mtok_out = float(os.getenv('LLM_COST_PER_MTOK_OUT', '0.60'))  # gpt-4o-mini: $0.60/1M
+        # Cost tracking (gpt-5-nano pricing - estimated, will be updated with official pricing)
+        self.cost_per_mtok_in = float(os.getenv('LLM_COST_PER_MTOK_IN', '0.05'))  # gpt-5-nano: estimated $0.05/1M
+        self.cost_per_mtok_out = float(os.getenv('LLM_COST_PER_MTOK_OUT', '0.20'))  # gpt-5-nano: estimated $0.20/1M
         self.daily_budget_tokens = int(os.getenv('LLM_DAILY_BUDGET_TOKENS', '200000'))
         self.daily_budget_usd = float(os.getenv('LLM_DAILY_BUDGET_USD', '999.0'))  # High default (no limit)
         
@@ -288,8 +288,9 @@ JSON only, no explanation."""
                         {"role": "system", "content": "You are a crypto analyst. Return only valid JSON."},
                         {"role": "user", "content": prompt}
                     ],
-                    max_tokens=self.max_output_tokens,  # gpt-4o-mini uses max_tokens
-                    temperature=0.3,  # Low temperature for consistent output
+                    max_output_tokens=self.max_output_tokens,  # GPT-5 models use max_output_tokens
+                    reasoning_effort="minimal",  # GPT-5-nano optimized for minimal reasoning
+                    verbosity="low",  # Low verbosity for concise responses
                     response_format={"type": "json_object"},  # Force JSON output
                     timeout=30
                     )
