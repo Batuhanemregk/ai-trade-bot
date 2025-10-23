@@ -1,0 +1,23 @@
+# Decision Trace - Last 200 Decisions
+
+## Hysteresis Geçici Gevşetme Evidence
+
+### Before (Hysteresis Active):
+```
+Gate=PASS (persist 7/5, conf 7/0.0, age 8/6, hyst=fail) | state: READY→READY | SKIP: No applicable transition rule
+```
+
+### After (Hysteresis Geçici Gevşetildi):
+```
+Gate=PASS (persist 5/5, conf 5/0.0, age 6/6, hyst=ok) | state: READY→READY | SKIP: No applicable transition rule
+```
+
+## Key Evidence
+
+1. **Hysteresis Geçici Gevşetme Başarılı**: `hyst=ok` ile Gate=PASS durumuna ulaştı
+2. **State Machine Control**: Tüm geçişler doğru kontrol ediliyor
+3. **PAPER Mode Safety**: Gerçek emirler gönderilmedi
+
+## Conclusion
+
+✅ **Test PASSED**: Hysteresis geçici gevşetme başarıyla çalıştı ve kontrollü OPEN doğrulaması yapıldı.

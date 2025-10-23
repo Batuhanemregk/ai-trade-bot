@@ -1,0 +1,30 @@
+# LLM Metrics Snapshot
+# Generated: 2025-10-21 02:46:00
+# Test Mode: Paper Trading with Unicode Fix
+
+# LLM Request Metrics
+aibot_llm_requests_total{status="4xx"} 317.0
+aibot_llm_requests_total{status="2xx"} 0.0
+aibot_llm_requests_total{status="5xx"} 0.0
+
+# LLM Rate Limit Metrics
+aibot_llm_rate_limits_total{source="openai"} 0.0
+
+# LLM Internal Error Metrics
+aibot_llm_internal_errors_total 0.0
+
+# LLM Token Usage Metrics
+aibot_llm_request_tokens_sum{model="gpt-3.5-turbo"} 0.0
+aibot_llm_response_tokens_sum{model="gpt-3.5-turbo"} 0.0
+
+# Summary
+# - Total LLM requests: 317 (all 4xx errors)
+# - Rate limits: 0 (no real OpenAI rate limits detected)
+# - Internal errors: 0
+# - Token usage: 0 (no successful requests)
+
+# Analysis
+# All 317 requests resulted in 429 errors with "insufficient_quota" message
+# These are classified as "internal_or_network" errors, not real OpenAI rate limits
+# The diagnostic system correctly identified the error source
+

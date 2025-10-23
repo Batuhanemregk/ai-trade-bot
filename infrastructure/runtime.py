@@ -10,6 +10,9 @@ from typing import Optional
 
 from loguru import logger
 
+# Import UTF-8 configuration
+from configs.utf8_config import setup_utf8_environment
+
 from infrastructure.cli import main as cli_main
 from application.trading_orchestrator import TradingOrchestrator
 from infrastructure.bootstrap import load_env, load_policy, init_logging, validate_policy, get_config_summary
@@ -575,8 +578,79 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         from execution.prevalidation import validate_bracket_order
         from execution.okx_symbol import okx_to_ccxt_symbol
         
-        # Step 1: Generate client order ID
-        client_order_id = generate_client_id("E")
+        # Step 0: Enforcements (gate/state/once-per-bar/safety)
+        try:
+            from application.decision_tracer import get_decision_tracer
+            tracer = get_decision_tracer()
+        except Exception:
+            tracer = None
+
+        # Expect composite_signal to carry gating/state context via meta if available
+        gate_pass = getattr(composite_signal, "gate_pass", None)
+        state_before = getattr(composite_signal, "state_before", "UNKNOWN")
+        direction = getattr(composite_signal, "decision", "FLAT")
+
+        # 1) Comprehensive protection guards check
+        from application.protection_guards import protection_guards
+        
+        bar_id = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%MZ')
+        timeframe = os.getenv("TIMEFRAME", "15m")
+        
+        # Get current positions (placeholder - should be injected from state manager)
+        current_positions = {}  # TODO: Get from state manager
+        
+        # Get last entry time (placeholder - should be tracked per symbol)
+        last_entry_time = None  # TODO: Get from position history
+        
+        # Generate client order ID
+        side_tag = 'L' if direction == 'LONG' else 'S' if direction == 'SHORT' else 'F'
+        client_order_id = f"E:{symbol}:{side_tag}:{bar_id}"
+        
+        # Comprehensive protection check
+        allowed, skip_reason, details = protection_guards.comprehensive_check(
+            symbol=symbol,
+            direction=direction,
+            timeframe=timeframe,
+            bar_id=bar_id,
+            gate_result="PASS" if gate_pass else "PENDING",
+            client_order_id=client_order_id,
+            size=0.001,  # Will be updated by execution pipeline
+            min_size=0.001,
+            min_notional=5.0,
+            price=50000.0,  # Will be updated by execution pipeline
+            mode="PAPER",  # Will be updated by mode determination
+            current_positions=current_positions,
+            last_entry_time=last_entry_time
+        )
+        
+        if not allowed:
+            logger.info(f"[ENFORCE] SKIP entry: {skip_reason} sym={symbol} details={details}")
+            return False
+
+        # 4) Mode determination and safety checks (using config manager)
+        from infrastructure.config_manager import config_manager
+        
+        mode, mode_source = config_manager.get('trading.mode', 'PAPER')
+        dry_run, dry_run_source = config_manager.get('DRY_RUN', False)
+        
+        # Mode dispatch: LIVE/PAPER/DRY-RUN
+        if dry_run:
+            mode = "DRY-RUN"
+            logger.info(f"[SAFETY] DRY-RUN mode: state changes blocked (source={dry_run_source})")
+            return False
+        elif mode.upper() == "LIVE" and live:
+            mode = "LIVE"
+            effective_live = True
+        else:
+            mode = "PAPER"
+            effective_live = False
+            
+        logger.info(f"[MODE] Trading mode: {mode} (live={effective_live}, source={mode_source})")
+
+        # Step 1: Generate client order ID (deterministic with bar id)
+        bar_id = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%MZ')
+        side_tag = 'L' if direction == 'LONG' else 'S' if direction == 'SHORT' else 'F'
+        client_order_id = f"E:{symbol}:{side_tag}:{bar_id}"
         logger.info(f"📝 Generated client order ID: {client_order_id}")
         
         # Structured log for trade attempt
@@ -598,7 +672,7 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         entry_price = await _calculate_entry_price(current_price, composite_signal.decision)
         logger.info(f"🎯 Entry price: {entry_price}")
         
-        # Step 5: Ensure minimum order requirements
+        # Step 5: Min/quantize guard
         from execution.prevalidation import ensure_minimums
         try:
             # Get exchange market info
@@ -610,13 +684,26 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
             # Ensure minimum order amount
             adjusted_amount, meta, need = await ensure_minimums(exchange, symbol, entry_price, position_size)
             
-            # Always use adjusted_amount if it's different from requested
+            min_notional = meta.get('min_cost', 5.0)  # Default 5 USDT
+            min_qty = meta.get('amount_min', 0.001)   # Default 0.001
+            
+            # Check min/quantize guard using risk service
+            from application.risk_service import RiskService
+            risk_service = RiskService()
+            should_skip, reason, details = risk_service.check_min_quantize_guard(
+                adjusted_amount, min_qty, min_notional, entry_price, mode
+            )
+            
+            if should_skip:
+                logger.info(f"[MIN-GUARD] sym={symbol} size_calc={position_size} min_notional={min_notional} min_qty={min_qty} final_qty={adjusted_amount} → skip: {reason}")
+                return False
+            
+            # Use adjusted amount if valid
             if adjusted_amount != position_size:
-                logger.warning(f"⚠️ Position size adjusted for {symbol}. Requested: {position_size}, Adjusted: {adjusted_amount}")
-                logger.info(f"[OKX-LIMITS] sym={symbol} min_cost={meta.get('min_cost')}, min_amount={meta.get('amount_min')}, step={meta.get('amount_step')}, px={entry_price}, requested={position_size}, adjusted={adjusted_amount}")
+                logger.info(f"[OKX-LIMITS] sym={symbol} min_cost={min_notional}, min_amount={min_qty}, step={meta.get('amount_step')}, px={entry_price}, requested={position_size}, adjusted={adjusted_amount}")
                 position_size = adjusted_amount
             
-            logger.info(f"🔧 Adjusted position size: {position_size}")
+            logger.info(f"[SIZE] sym={symbol} size_calc={position_size} min_notional={min_notional} final_qty={position_size}")
             
         except Exception as e:
             logger.error(f"❌ Failed to ensure minimums: {e}")
@@ -666,8 +753,8 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         
         logger.info(f"✅ Bracket order validation passed")
         
-        # Step 8: Execute entry order via CCXT
-        if live:
+        # Step 8: Execute entry order (LIVE vs PAPER vs DRY-RUN)
+        if mode == "LIVE":
             logger.info(f"🚀 Executing LIVE {composite_signal.decision} order")
             # Convert decision to side: LONG -> buy, SHORT -> sell
             side = 'buy' if composite_signal.decision == 'LONG' else 'sell'
@@ -690,36 +777,114 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
                 # Order error log
                 logger.error(f"[ORDER] sym={symbol} clientId={client_order_id} status=ERROR error={str(e)}")
                 raise
-        else:
-            logger.info(f"🧪 DRY-RUN: Would execute {composite_signal.decision} order")
+                
+        elif mode == "PAPER":
+            logger.info(f"🧪 Executing PAPER {composite_signal.decision} order")
+            # Convert decision to side: LONG -> buy, SHORT -> sell
+            side = 'buy' if composite_signal.decision == 'LONG' else 'sell'
+            
+            # Use paper executor for virtual execution
+            from execution.paper_executor import PaperExecutor
+            paper_executor = PaperExecutor()
+            
+            # Create virtual order
+            virtual_order = paper_executor.create_virtual_order(
+                symbol=symbol,
+                side=side,
+                quantity=quantized_size,
+                price=quantized_price,
+                client_order_id=client_order_id
+            )
+            
+            # Create virtual position
+            virtual_position = paper_executor.create_virtual_position(virtual_order)
+            
             entry_result = {
-                'id': f"DRY_{client_order_id}",
+                'id': virtual_order.order_id,
                 'status': 'filled',
-                'side': composite_signal.decision.lower(),
+                'side': side,
                 'amount': quantized_size,
                 'price': quantized_price
             }
+            
+            logger.info(f"[PAPER] Virtual order executed: {virtual_order.order_id} {symbol} {side} {quantized_size}@{quantized_price}")
+            
+        else:  # DRY-RUN
+            logger.info(f"🔍 DRY-RUN mode: state changes blocked")
+            return False
         
         logger.info(f"📋 Entry order result: {entry_result}")
         
-        # Step 9: Execute TP/SL triggers via REST
-        if live:
+        # Step 9: Execute TP/SL triggers (LIVE vs PAPER vs DRY-RUN)
+        if mode == "LIVE":
             logger.info(f"🎯 Executing LIVE TP/SL triggers")
-            tp_result = await _create_trigger_order(
-                exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
-                tp_price, -1, True, f"A_TP_{client_order_id}"
+            tp_id = f"A_TP_{client_order_id}"
+            sl_id = f"A_SL_{client_order_id}"
+            # Check existing open algos and skip duplicate create
+            try:
+                open_algos = await exchange_adapter.fetch_open_trigger_orders(symbol)
+            except Exception:
+                open_algos = []
+            existing_ids = {o.get('clientOrderId') or o.get('algoClOrdId') for o in open_algos}
+            tp_result = {'skipped': False}
+            sl_result = {'skipped': False}
+            if tp_id in existing_ids:
+                tp_result = {'skipped': True, 'reason': 'duplicate'}
+            else:
+                tp_result = await _create_trigger_order(
+                    exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
+                    tp_price, -1, True, tp_id
+                )
+            if sl_id in existing_ids:
+                sl_result = {'skipped': True, 'reason': 'duplicate'}
+            else:
+                sl_result = await _create_trigger_order(
+                    exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
+                    sl_price, -1, True, sl_id
+                )
+                
+        elif mode == "PAPER":
+            logger.info(f"🧪 Executing PAPER TP/SL triggers")
+            # Create virtual bracket orders
+            bracket_orders = paper_executor.create_virtual_bracket_orders(
+                virtual_position, sl_price, tp_price
             )
-            sl_result = await _create_trigger_order(
-                exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
-                sl_price, -1, True, f"A_SL_{client_order_id}"
-            )
-        else:
-            logger.info(f"🧪 DRY-RUN: Would execute TP/SL triggers")
+            
+            tp_result = {'algoId': bracket_orders['tp_order_id']}
+            sl_result = {'algoId': bracket_orders['sl_order_id']}
+            
+            logger.info(f"[PAPER] Virtual bracket orders created: TP={bracket_orders['tp_order_id']}, SL={bracket_orders['sl_order_id']}")
+            
+        else:  # DRY-RUN
+            logger.info(f"🔍 DRY-RUN mode: TP/SL triggers blocked")
             tp_result = {'algoId': f"DRY_TP_{client_order_id}"}
             sl_result = {'algoId': f"DRY_SL_{client_order_id}"}
         
         logger.info(f"📋 TP trigger: {tp_result}")
         logger.info(f"📋 SL trigger: {sl_result}")
+        
+        # Step 10: Trigger state transition (READY→OPEN)
+        if mode in ('LIVE', 'PAPER'):
+            logger.info(f"🔄 Triggering state transition: READY→{composite_signal.decision}_OPEN")
+            
+            # Create updated signal dict with size and mode
+            updated_signal_dict = {
+                'final_score': composite_signal.final_score,
+                'is_valid': True,  # Gate passed
+                'direction': composite_signal.decision,
+                'size': quantized_size,
+                'mode': mode
+            }
+            
+            # Process state transition
+            from application.position_state_manager import PositionStateManager
+            state_manager = PositionStateManager({})  # Empty policy for now
+            transition = state_manager.process_signal(symbol, updated_signal_dict)
+            
+            if transition:
+                logger.info(f"✅ State transition successful: {transition.from_state}→{transition.to_state}")
+            else:
+                logger.warning(f"⚠️ State transition failed")
         
         return True
         
@@ -1411,6 +1576,9 @@ def main():
     Delegates to appropriate function based on command line arguments.
     """
     try:
+        # Setup UTF-8 encoding first
+        setup_utf8_environment()
+        
         # Initialize logging
         init_logging()
         

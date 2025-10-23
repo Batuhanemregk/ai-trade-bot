@@ -1,0 +1,800 @@
+﻿2025-10-20 02:40:26 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=XRP digest=CHANGED run=YES items=30
+2025-10-20 02:40:27 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:27 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ICP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:27 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4623 digest cache entries
+2025-10-20 02:40:27 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ICP (digest: 4dd5f79b...)
+2025-10-20 02:40:27 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ICP conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:40:27 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:27 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=XRP digest=CHANGED run=YES items=44
+2025-10-20 02:40:27 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=XRP digest=CHANGED run=YES items=30
+2025-10-20 02:40:28 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:28 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=XRP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:28 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4624 digest cache entries
+2025-10-20 02:40:28 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for XRP (digest: cbbed223...)
+2025-10-20 02:40:28 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=XRP conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:28 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:28 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CFX digest=CHANGED run=YES items=6
+2025-10-20 02:40:28 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CFX digest=CHANGED run=YES items=6
+2025-10-20 02:40:29 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:29 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=XRP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:29 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4624 digest cache entries
+2025-10-20 02:40:29 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for XRP (digest: 5293df8b...)
+2025-10-20 02:40:29 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=XRP conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:29 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:29 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CFX digest=CHANGED run=YES items=6
+2025-10-20 02:40:29 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CFX digest=CHANGED run=YES items=6
+2025-10-20 02:40:30 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:30 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=CFX analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:30 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4625 digest cache entries
+2025-10-20 02:40:30 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CFX (digest: 7a0bd1c9...)
+2025-10-20 02:40:30 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CFX conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:40:30 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:30 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BIO digest=CHANGED run=YES items=44
+2025-10-20 02:40:30 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BIO digest=CHANGED run=YES items=30
+2025-10-20 02:40:31 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:31 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=CFX analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:31 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4625 digest cache entries
+2025-10-20 02:40:31 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CFX (digest: a9e93575...)
+2025-10-20 02:40:31 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CFX conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:40:32 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:32 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BIO digest=CHANGED run=YES items=44
+2025-10-20 02:40:32 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BIO digest=CHANGED run=YES items=30
+2025-10-20 02:40:32 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:32 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=BIO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:32 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4626 digest cache entries
+2025-10-20 02:40:32 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BIO (digest: 787f1f77...)
+2025-10-20 02:40:32 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BIO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:33 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:33 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=PENGU digest=CHANGED run=YES items=44
+2025-10-20 02:40:33 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=PENGU digest=CHANGED run=YES items=30
+2025-10-20 02:40:33 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:33 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=BIO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:33 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4626 digest cache entries
+2025-10-20 02:40:33 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BIO (digest: 1fa8c296...)
+2025-10-20 02:40:33 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BIO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:34 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:34 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=PENGU digest=CHANGED run=YES items=44
+2025-10-20 02:40:34 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=PENGU digest=CHANGED run=YES items=30
+2025-10-20 02:40:35 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:35 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=PENGU analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:35 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4627 digest cache entries
+2025-10-20 02:40:35 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for PENGU (digest: 5766ea25...)
+2025-10-20 02:40:35 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=PENGU conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:35 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:35 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=46
+2025-10-20 02:40:35 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=30
+2025-10-20 02:40:36 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:36 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=PENGU analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:36 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4627 digest cache entries
+2025-10-20 02:40:36 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for PENGU (digest: 09da2d29...)
+2025-10-20 02:40:36 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=PENGU conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:36 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:36 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=46
+2025-10-20 02:40:36 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=30
+2025-10-20 02:40:37 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:37 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=CRO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:37 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4628 digest cache entries
+2025-10-20 02:40:37 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CRO (digest: bb3c4598...)
+2025-10-20 02:40:37 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CRO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:38 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:38 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-20 02:40:38 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-20 02:40:38 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:38 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=CRO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:38 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4628 digest cache entries
+2025-10-20 02:40:38 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CRO (digest: 05656f31...)
+2025-10-20 02:40:38 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CRO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:38 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:38 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-20 02:40:38 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-20 02:40:40 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:40 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=LDO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:40 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4629 digest cache entries
+2025-10-20 02:40:40 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for LDO (digest: d42095e3...)
+2025-10-20 02:40:40 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=LDO conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:40:40 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:40 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=32
+2025-10-20 02:40:40 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=30
+2025-10-20 02:40:40 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:40 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=LDO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:40 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4629 digest cache entries
+2025-10-20 02:40:40 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for LDO (digest: 218b4c68...)
+2025-10-20 02:40:40 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=LDO conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:40:41 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:41 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=32
+2025-10-20 02:40:41 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=30
+2025-10-20 02:40:42 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:42 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=TAO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:42 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4630 digest cache entries
+2025-10-20 02:40:42 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for TAO (digest: 9106009a...)
+2025-10-20 02:40:42 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=TAO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:42 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:42 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=TAO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:42 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4630 digest cache entries
+2025-10-20 02:40:42 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for TAO (digest: dab8c6cc...)
+2025-10-20 02:40:42 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=TAO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:42 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:42 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=11
+2025-10-20 02:40:42 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=11
+2025-10-20 02:40:43 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:43 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=11
+2025-10-20 02:40:43 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=11
+2025-10-20 02:40:44 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:44 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ARB analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:44 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4631 digest cache entries
+2025-10-20 02:40:44 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ARB (digest: 44a6d8ed...)
+2025-10-20 02:40:44 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ARB conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:40:45 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:45 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ARB analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:45 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4631 digest cache entries
+2025-10-20 02:40:45 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ARB (digest: 84c61b8d...)
+2025-10-20 02:40:45 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ARB conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:40:45 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:45 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=9
+2025-10-20 02:40:45 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=9
+2025-10-20 02:40:45 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:45 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=9
+2025-10-20 02:40:45 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=9
+2025-10-20 02:40:47 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:47 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=SUI analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:47 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4632 digest cache entries
+2025-10-20 02:40:47 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SUI (digest: 8fe0ed12...)
+2025-10-20 02:40:47 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SUI conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:40:47 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:47 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=SUI analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:47 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4632 digest cache entries
+2025-10-20 02:40:47 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SUI (digest: 30cb18e0...)
+2025-10-20 02:40:47 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SUI conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:40:47 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:47 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=14
+2025-10-20 02:40:47 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=14
+2025-10-20 02:40:47 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:47 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=14
+2025-10-20 02:40:47 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=14
+2025-10-20 02:40:49 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:49 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=JUP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:49 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4633 digest cache entries
+2025-10-20 02:40:49 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for JUP (digest: 8bcc236d...)
+2025-10-20 02:40:49 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=JUP conf=0.50 title="Delayed CPI report, Fed meeting loom as Big Tech, ..."
+2025-10-20 02:40:49 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:49 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=JUP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:49 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4633 digest cache entries
+2025-10-20 02:40:49 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for JUP (digest: 2c682d64...)
+2025-10-20 02:40:49 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=JUP conf=0.50 title="Delayed CPI report, Fed meeting loom as Big Tech, ..."
+2025-10-20 02:40:50 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:50 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=31
+2025-10-20 02:40:50 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=30
+2025-10-20 02:40:50 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:50 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=31
+2025-10-20 02:40:50 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=30
+2025-10-20 02:40:51 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:51 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=OP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:51 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4634 digest cache entries
+2025-10-20 02:40:51 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for OP (digest: cdc98eb3...)
+2025-10-20 02:40:51 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=OP conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:51 | INFO | application.news_service:bootstrap_all_symbols:107 | âœ… News bootstrap completed
+2025-10-20 02:40:51 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for BTC (no watermark)
+2025-10-20 02:40:52 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:52 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=OP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:52 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:52 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=46
+2025-10-20 02:40:52 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=30
+2025-10-20 02:40:52 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4634 digest cache entries
+2025-10-20 02:40:52 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for OP (digest: 551fda9c...)
+2025-10-20 02:40:52 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=OP conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:52 | INFO | application.news_service:bootstrap_all_symbols:107 | âœ… News bootstrap completed
+2025-10-20 02:40:52 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for BTC (no watermark)
+2025-10-20 02:40:52 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:52 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=46
+2025-10-20 02:40:52 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=30
+2025-10-20 02:40:54 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:54 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=BTC analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:54 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4635 digest cache entries
+2025-10-20 02:40:54 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BTC (digest: 01b1f758...)
+2025-10-20 02:40:54 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BTC conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:54 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ETH (no watermark)
+2025-10-20 02:40:54 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:54 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=BTC analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:54 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:54 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-20 02:40:54 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-20 02:40:54 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4635 digest cache entries
+2025-10-20 02:40:54 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BTC (digest: 28a46de5...)
+2025-10-20 02:40:54 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BTC conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:40:54 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ETH (no watermark)
+2025-10-20 02:40:55 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:55 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-20 02:40:55 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-20 02:40:56 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:56 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ETH analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:56 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4636 digest cache entries
+2025-10-20 02:40:56 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ETH (digest: c5a66295...)
+2025-10-20 02:40:56 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ETH conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:40:56 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for SOL (no watermark)
+2025-10-20 02:40:56 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:56 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ETH analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:56 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:56 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-20 02:40:56 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-20 02:40:56 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4636 digest cache entries
+2025-10-20 02:40:56 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ETH (digest: 529fdeac...)
+2025-10-20 02:40:56 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ETH conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:40:56 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for SOL (no watermark)
+2025-10-20 02:40:57 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:57 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-20 02:40:57 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-20 02:40:58 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:58 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=SOL analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:58 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4637 digest cache entries
+2025-10-20 02:40:58 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SOL (digest: 99a1efe9...)
+2025-10-20 02:40:58 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SOL conf=0.50 title="XRP News Today â€” Ripple Eyes ETF Momentum as Whale..."
+2025-10-20 02:40:58 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ADA (no watermark)
+2025-10-20 02:40:59 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:40:59 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=9
+2025-10-20 02:40:59 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=9
+2025-10-20 02:40:59 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:59 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=SOL analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:40:59 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4637 digest cache entries
+2025-10-20 02:40:59 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SOL (digest: 908a70b1...)
+2025-10-20 02:40:59 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SOL conf=0.50 title="XRP News Today â€” Ripple Eyes ETF Momentum as Whale..."
+2025-10-20 02:40:59 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ADA (no watermark)
+2025-10-20 02:41:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=risk_monitor status=STARTING
+2025-10-20 02:41:00 | INFO | application.jobs.risk_monitor:execute:45 | [JOB] risk_monitor starting execution
+2025-10-20 02:41:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=risk_monitor status=STARTING
+2025-10-20 02:41:00 | INFO | application.jobs.risk_monitor:execute:45 | [JOB] risk_monitor starting execution
+2025-10-20 02:41:00 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:00 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=9
+2025-10-20 02:41:00 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=9
+2025-10-20 02:41:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 796ms
+2025-10-20 02:41:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-20 02:41:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-20 02:41:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-20 02:41:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-20 02:41:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 33.1%
+2025-10-20 02:41:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 47.9%
+2025-10-20 02:41:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 835ms
+2025-10-20 02:41:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-20 02:41:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-20 02:41:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-20 02:41:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-20 02:41:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 33.1%
+2025-10-20 02:41:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 47.9%
+2025-10-20 02:41:01 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:01 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ADA analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:01 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4638 digest cache entries
+2025-10-20 02:41:01 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ADA (digest: 26a71a00...)
+2025-10-20 02:41:01 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ADA conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:41:01 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for DOT (no watermark)
+2025-10-20 02:41:01 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for AVAX (no watermark)
+2025-10-20 02:41:01 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:01 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=7
+2025-10-20 02:41:01 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=7
+2025-10-20 02:41:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-7.43 (-1.02%)
+2025-10-20 02:41:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-20 02:41:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-20 02:41:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.72s
+2025-10-20 02:41:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-7.43 (-1.02%)
+2025-10-20 02:41:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-20 02:41:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-20 02:41:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.75s
+2025-10-20 02:41:01 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:01 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ADA analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:02 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4638 digest cache entries
+2025-10-20 02:41:02 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ADA (digest: 347af88e...)
+2025-10-20 02:41:02 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ADA conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:41:02 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for DOT (no watermark)
+2025-10-20 02:41:02 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for AVAX (no watermark)
+2025-10-20 02:41:02 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:02 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=7
+2025-10-20 02:41:02 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=7
+2025-10-20 02:41:03 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:03 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=AVAX analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:03 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4639 digest cache entries
+2025-10-20 02:41:03 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for AVAX (digest: 5ecc4a5a...)
+2025-10-20 02:41:03 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=AVAX conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:41:03 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for LINK (no watermark)
+2025-10-20 02:41:04 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:04 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=LINK digest=CHANGED run=YES items=5
+2025-10-20 02:41:04 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=LINK digest=CHANGED run=YES items=5
+2025-10-20 02:41:04 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:04 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=AVAX analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:04 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4639 digest cache entries
+2025-10-20 02:41:04 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for AVAX (digest: 4117d4de...)
+2025-10-20 02:41:04 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=AVAX conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:41:04 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for LINK (no watermark)
+2025-10-20 02:41:04 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:04 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=LINK digest=CHANGED run=YES items=5
+2025-10-20 02:41:04 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=LINK digest=CHANGED run=YES items=5
+2025-10-20 02:41:06 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:06 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=LINK analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:06 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4640 digest cache entries
+2025-10-20 02:41:06 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for LINK (digest: e43a36c8...)
+2025-10-20 02:41:06 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=LINK conf=0.50 title="XRP News Today â€” Ripple Eyes ETF Momentum as Whale..."
+2025-10-20 02:41:06 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for UNI (no watermark)
+2025-10-20 02:41:06 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:06 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=UNI digest=CHANGED run=YES items=14
+2025-10-20 02:41:06 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=UNI digest=CHANGED run=YES items=14
+2025-10-20 02:41:06 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:06 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=LINK analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:07 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4640 digest cache entries
+2025-10-20 02:41:07 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for LINK (digest: 5f569793...)
+2025-10-20 02:41:07 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=LINK conf=0.50 title="XRP News Today â€” Ripple Eyes ETF Momentum as Whale..."
+2025-10-20 02:41:07 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for UNI (no watermark)
+2025-10-20 02:41:07 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:07 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=UNI digest=CHANGED run=YES items=14
+2025-10-20 02:41:07 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=UNI digest=CHANGED run=YES items=14
+2025-10-20 02:41:08 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:08 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=UNI analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:08 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4641 digest cache entries
+2025-10-20 02:41:08 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for UNI (digest: 8f9f40fa...)
+2025-10-20 02:41:08 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=UNI conf=0.50 title="XRP News Today â€” Ripple Eyes ETF Momentum as Whale..."
+2025-10-20 02:41:08 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ATOM (no watermark)
+2025-10-20 02:41:09 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:09 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=UNI analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:09 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:09 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ATOM digest=CHANGED run=YES items=6
+2025-10-20 02:41:09 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ATOM digest=CHANGED run=YES items=6
+2025-10-20 02:41:09 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4641 digest cache entries
+2025-10-20 02:41:09 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for UNI (digest: 62bc63d7...)
+2025-10-20 02:41:09 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=UNI conf=0.50 title="XRP News Today â€” Ripple Eyes ETF Momentum as Whale..."
+2025-10-20 02:41:09 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ATOM (no watermark)
+2025-10-20 02:41:09 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:09 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ATOM digest=CHANGED run=YES items=6
+2025-10-20 02:41:09 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ATOM digest=CHANGED run=YES items=6
+2025-10-20 02:41:11 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:11 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ATOM analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:11 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4642 digest cache entries
+2025-10-20 02:41:11 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ATOM (digest: 043ed250...)
+2025-10-20 02:41:11 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ATOM conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:41:11 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for NEAR (no watermark)
+2025-10-20 02:41:11 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:11 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ATOM analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:11 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:11 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=NEAR digest=CHANGED run=YES items=18
+2025-10-20 02:41:11 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=NEAR digest=CHANGED run=YES items=18
+2025-10-20 02:41:11 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4642 digest cache entries
+2025-10-20 02:41:11 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ATOM (digest: 73f3e9ce...)
+2025-10-20 02:41:11 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ATOM conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:41:11 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for NEAR (no watermark)
+2025-10-20 02:41:11 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:11 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=NEAR digest=CHANGED run=YES items=18
+2025-10-20 02:41:11 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=NEAR digest=CHANGED run=YES items=18
+2025-10-20 02:41:13 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:13 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=NEAR analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:13 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:13 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=NEAR analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:13 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4643 digest cache entries
+2025-10-20 02:41:13 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for NEAR (digest: d03809e2...)
+2025-10-20 02:41:13 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=NEAR conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:41:13 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ALGO (no watermark)
+2025-10-20 02:41:13 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4643 digest cache entries
+2025-10-20 02:41:13 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for NEAR (digest: 7c3138bc...)
+2025-10-20 02:41:13 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=NEAR conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:41:13 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ALGO (no watermark)
+2025-10-20 02:41:14 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:14 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ALGO digest=CHANGED run=YES items=6
+2025-10-20 02:41:14 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ALGO digest=CHANGED run=YES items=6
+2025-10-20 02:41:14 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:14 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ALGO digest=CHANGED run=YES items=6
+2025-10-20 02:41:14 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ALGO digest=CHANGED run=YES items=6
+2025-10-20 02:41:15 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:15 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ALGO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:15 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4644 digest cache entries
+2025-10-20 02:41:15 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ALGO (digest: c7a56721...)
+2025-10-20 02:41:15 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ALGO conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:41:15 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ICP (no watermark)
+2025-10-20 02:41:15 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:15 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ALGO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:16 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4644 digest cache entries
+2025-10-20 02:41:16 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ALGO (digest: e3f577d0...)
+2025-10-20 02:41:16 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ALGO conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:41:16 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ICP (no watermark)
+2025-10-20 02:41:16 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:16 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ICP digest=CHANGED run=YES items=6
+2025-10-20 02:41:16 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ICP digest=CHANGED run=YES items=6
+2025-10-20 02:41:16 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:16 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ICP digest=CHANGED run=YES items=6
+2025-10-20 02:41:16 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ICP digest=CHANGED run=YES items=6
+2025-10-20 02:41:18 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:18 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ICP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:18 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:18 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ICP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:18 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4645 digest cache entries
+2025-10-20 02:41:18 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ICP (digest: 49ce0e2d...)
+2025-10-20 02:41:18 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ICP conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:41:18 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for XRP (no watermark)
+2025-10-20 02:41:18 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4645 digest cache entries
+2025-10-20 02:41:18 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ICP (digest: 837eb9af...)
+2025-10-20 02:41:18 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ICP conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:41:18 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for XRP (no watermark)
+2025-10-20 02:41:18 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:18 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=XRP digest=CHANGED run=YES items=44
+2025-10-20 02:41:18 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=XRP digest=CHANGED run=YES items=30
+2025-10-20 02:41:18 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:18 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=XRP digest=CHANGED run=YES items=44
+2025-10-20 02:41:18 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=XRP digest=CHANGED run=YES items=30
+2025-10-20 02:41:20 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:20 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=XRP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:20 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:20 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=XRP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:20 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4646 digest cache entries
+2025-10-20 02:41:20 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for XRP (digest: 71c052e3...)
+2025-10-20 02:41:20 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=XRP conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:20 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for CFX (no watermark)
+2025-10-20 02:41:20 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4646 digest cache entries
+2025-10-20 02:41:20 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for XRP (digest: f237f750...)
+2025-10-20 02:41:20 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=XRP conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:20 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for CFX (no watermark)
+2025-10-20 02:41:20 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:20 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CFX digest=CHANGED run=YES items=6
+2025-10-20 02:41:20 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CFX digest=CHANGED run=YES items=6
+2025-10-20 02:41:21 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:21 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CFX digest=CHANGED run=YES items=6
+2025-10-20 02:41:21 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CFX digest=CHANGED run=YES items=6
+2025-10-20 02:41:22 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:22 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=CFX analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:22 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4647 digest cache entries
+2025-10-20 02:41:22 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CFX (digest: 8fd15bc5...)
+2025-10-20 02:41:22 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CFX conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:41:22 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for BIO (no watermark)
+2025-10-20 02:41:22 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:22 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=CFX analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:23 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4647 digest cache entries
+2025-10-20 02:41:23 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CFX (digest: bbd5db41...)
+2025-10-20 02:41:23 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CFX conf=0.50 title="Hyperliquid Dominates Fees and Trading Volume, Lea..."
+2025-10-20 02:41:23 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for BIO (no watermark)
+2025-10-20 02:41:23 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:23 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BIO digest=CHANGED run=YES items=44
+2025-10-20 02:41:23 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BIO digest=CHANGED run=YES items=30
+2025-10-20 02:41:23 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:23 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BIO digest=CHANGED run=YES items=44
+2025-10-20 02:41:23 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BIO digest=CHANGED run=YES items=30
+2025-10-20 02:41:24 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:24 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=BIO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:25 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4648 digest cache entries
+2025-10-20 02:41:25 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BIO (digest: 9ef985f2...)
+2025-10-20 02:41:25 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BIO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:25 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for PENGU (no watermark)
+2025-10-20 02:41:25 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:25 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=PENGU digest=CHANGED run=YES items=44
+2025-10-20 02:41:25 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=PENGU digest=CHANGED run=YES items=30
+2025-10-20 02:41:25 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:25 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=BIO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:26 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4648 digest cache entries
+2025-10-20 02:41:26 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BIO (digest: fb8890f7...)
+2025-10-20 02:41:26 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BIO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:26 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for PENGU (no watermark)
+2025-10-20 02:41:27 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:27 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=PENGU analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:27 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4649 digest cache entries
+2025-10-20 02:41:27 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for PENGU (digest: 73f880ec...)
+2025-10-20 02:41:27 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=PENGU conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:27 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for CRO (no watermark)
+2025-10-20 02:41:27 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:27 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=PENGU digest=CHANGED run=YES items=44
+2025-10-20 02:41:27 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=PENGU digest=CHANGED run=YES items=30
+2025-10-20 02:41:27 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:27 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=46
+2025-10-20 02:41:27 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=30
+2025-10-20 02:41:29 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:29 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=CRO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:29 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:29 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=PENGU analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:29 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4650 digest cache entries
+2025-10-20 02:41:29 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CRO (digest: 8f50294a...)
+2025-10-20 02:41:29 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CRO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:29 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for LDO (no watermark)
+2025-10-20 02:41:29 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4649 digest cache entries
+2025-10-20 02:41:29 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for PENGU (digest: 4fd96c32...)
+2025-10-20 02:41:29 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=PENGU conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:29 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for CRO (no watermark)
+2025-10-20 02:41:30 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:30 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-20 02:41:30 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-20 02:41:30 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:30 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=46
+2025-10-20 02:41:30 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=30
+2025-10-20 02:41:31 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:31 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=LDO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:31 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4651 digest cache entries
+2025-10-20 02:41:31 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for LDO (digest: 715e9635...)
+2025-10-20 02:41:31 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=LDO conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:41:31 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for TAO (no watermark)
+2025-10-20 02:41:32 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:32 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=CRO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:32 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4650 digest cache entries
+2025-10-20 02:41:32 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CRO (digest: ecad2ced...)
+2025-10-20 02:41:32 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CRO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:32 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for LDO (no watermark)
+2025-10-20 02:41:32 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:32 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=32
+2025-10-20 02:41:32 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=30
+2025-10-20 02:41:32 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:32 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-20 02:41:32 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-20 02:41:34 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:34 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=TAO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:34 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4652 digest cache entries
+2025-10-20 02:41:34 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for TAO (digest: a0f3b2bf...)
+2025-10-20 02:41:34 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=TAO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:34 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ARB (no watermark)
+2025-10-20 02:41:34 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:34 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=LDO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:34 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4651 digest cache entries
+2025-10-20 02:41:34 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for LDO (digest: f28e0967...)
+2025-10-20 02:41:34 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=LDO conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:41:34 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for TAO (no watermark)
+2025-10-20 02:41:34 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:34 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=11
+2025-10-20 02:41:34 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=11
+2025-10-20 02:41:35 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:35 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=32
+2025-10-20 02:41:35 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=30
+2025-10-20 02:41:36 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:36 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=TAO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:37 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4652 digest cache entries
+2025-10-20 02:41:37 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for TAO (digest: ac6ade88...)
+2025-10-20 02:41:37 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=TAO conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:37 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ARB (no watermark)
+2025-10-20 02:41:37 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:37 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ARB analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:37 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4653 digest cache entries
+2025-10-20 02:41:37 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ARB (digest: 89a8b134...)
+2025-10-20 02:41:37 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ARB conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:41:37 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for SUI (no watermark)
+2025-10-20 02:41:37 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:37 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=9
+2025-10-20 02:41:37 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=9
+2025-10-20 02:41:37 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:37 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=11
+2025-10-20 02:41:37 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=11
+2025-10-20 02:41:39 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:39 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=SUI analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:39 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:39 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ARB analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:39 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4654 digest cache entries
+2025-10-20 02:41:39 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SUI (digest: 6a9e989f...)
+2025-10-20 02:41:39 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SUI conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:41:39 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for JUP (no watermark)
+2025-10-20 02:41:39 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4653 digest cache entries
+2025-10-20 02:41:39 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ARB (digest: f9558e96...)
+2025-10-20 02:41:39 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ARB conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:41:39 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for SUI (no watermark)
+2025-10-20 02:41:40 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:40 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=9
+2025-10-20 02:41:40 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=9
+2025-10-20 02:41:41 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:41 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=14
+2025-10-20 02:41:41 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=14
+2025-10-20 02:41:41 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:41 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=SUI analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:41 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4654 digest cache entries
+2025-10-20 02:41:41 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SUI (digest: faf80076...)
+2025-10-20 02:41:41 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SUI conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:41:41 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for JUP (no watermark)
+2025-10-20 02:41:42 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:42 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=14
+2025-10-20 02:41:42 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=14
+2025-10-20 02:41:43 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:43 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=JUP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:43 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4655 digest cache entries
+2025-10-20 02:41:43 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for JUP (digest: 1731670b...)
+2025-10-20 02:41:43 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=JUP conf=0.50 title="Delayed CPI report, Fed meeting loom as Big Tech, ..."
+2025-10-20 02:41:43 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for OP (no watermark)
+2025-10-20 02:41:43 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:43 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=31
+2025-10-20 02:41:43 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=30
+2025-10-20 02:41:44 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:44 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=JUP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:44 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4655 digest cache entries
+2025-10-20 02:41:44 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for JUP (digest: ee8ab312...)
+2025-10-20 02:41:44 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=JUP conf=0.50 title="Delayed CPI report, Fed meeting loom as Big Tech, ..."
+2025-10-20 02:41:44 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for OP (no watermark)
+2025-10-20 02:41:44 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:41:44 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=31
+2025-10-20 02:41:44 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=30
+2025-10-20 02:41:45 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:45 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=OP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:45 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4656 digest cache entries
+2025-10-20 02:41:45 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for OP (digest: 55706358...)
+2025-10-20 02:41:45 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=OP conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:45 | INFO | application.news_service:incremental_update_symbols:178 | NEWS 5m | symbols=23 | fetched=517 | llm=0 | changed=0 | errors=0
+2025-10-20 02:41:45 | INFO | application.jobs.news_incremental_5m:execute:50 | ğŸ“Š News service stats: {'symbols_with_news': 28, 'total_articles': 517, 'watermarks': 0, 'digest_cache': {'total_entries': 4656, 'unique_symbols': 28, 'expired_entries': 4070, 'ttl_minutes': 60}, 'llm_enabled': True}
+2025-10-20 02:41:45 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=news_incremental_5m status=SUCCESS dur=105.46s
+2025-10-20 02:41:46 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:46 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=OP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:41:46 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4656 digest cache entries
+2025-10-20 02:41:46 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for OP (digest: 38337f73...)
+2025-10-20 02:41:46 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=OP conf=0.50 title="$4 Billion Buried in Brass, Silver and Gold: The U..."
+2025-10-20 02:41:46 | INFO | application.news_service:incremental_update_symbols:178 | NEWS 5m | symbols=23 | fetched=517 | llm=0 | changed=0 | errors=0
+2025-10-20 02:41:46 | INFO | application.jobs.news_incremental_5m:execute:50 | ğŸ“Š News service stats: {'symbols_with_news': 28, 'total_articles': 517, 'watermarks': 0, 'digest_cache': {'total_entries': 4656, 'unique_symbols': 28, 'expired_entries': 4070, 'ttl_minutes': 60}, 'llm_enabled': True}
+2025-10-20 02:41:46 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=news_incremental_5m status=SUCCESS dur=106.64s
+2025-10-20 02:42:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=risk_monitor status=STARTING
+2025-10-20 02:42:00 | INFO | application.jobs.risk_monitor:execute:45 | [JOB] risk_monitor starting execution
+2025-10-20 02:42:00 | INFO | application.jobs.risk_monitor:execute:45 | [JOB] risk_monitor starting execution
+2025-10-20 02:42:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 630ms
+2025-10-20 02:42:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-20 02:42:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-20 02:42:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-20 02:42:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-20 02:42:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 33.1%
+2025-10-20 02:42:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 47.9%
+2025-10-20 02:42:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 882ms
+2025-10-20 02:42:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-20 02:42:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-20 02:42:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-20 02:42:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-20 02:42:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 33.1%
+2025-10-20 02:42:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 47.9%
+2025-10-20 02:42:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-7.43 (-1.02%)
+2025-10-20 02:42:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-20 02:42:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-20 02:42:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.55s
+2025-10-20 02:42:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-7.43 (-1.02%)
+2025-10-20 02:42:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-20 02:42:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-20 02:42:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.80s
+2025-10-20 02:43:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=risk_monitor status=STARTING
+2025-10-20 02:43:00 | INFO | application.jobs.risk_monitor:execute:45 | [JOB] risk_monitor starting execution
+2025-10-20 02:43:00 | INFO | application.jobs.risk_monitor:execute:45 | [JOB] risk_monitor starting execution
+2025-10-20 02:43:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 628ms
+2025-10-20 02:43:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-20 02:43:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-20 02:43:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-20 02:43:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-20 02:43:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 33.1%
+2025-10-20 02:43:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 47.9%
+2025-10-20 02:43:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 831ms
+2025-10-20 02:43:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-20 02:43:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-20 02:43:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-20 02:43:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-20 02:43:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 33.1%
+2025-10-20 02:43:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 47.9%
+2025-10-20 02:43:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-7.43 (-1.02%)
+2025-10-20 02:43:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-20 02:43:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-20 02:43:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.52s
+2025-10-20 02:43:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-7.43 (-1.02%)
+2025-10-20 02:43:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-20 02:43:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-20 02:43:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.73s
+2025-10-20 02:44:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=risk_monitor status=STARTING
+2025-10-20 02:44:00 | INFO | application.jobs.risk_monitor:execute:45 | [JOB] risk_monitor starting execution
+2025-10-20 02:44:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 629ms
+2025-10-20 02:44:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-20 02:44:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-20 02:44:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-20 02:44:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-20 02:44:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 33.1%
+2025-10-20 02:44:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 47.9%
+2025-10-20 02:44:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 820ms
+2025-10-20 02:44:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-20 02:44:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-20 02:44:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-20 02:44:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-20 02:44:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 33.1%
+2025-10-20 02:44:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 47.9%
+2025-10-20 02:44:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-8.49 (-1.17%)
+2025-10-20 02:44:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-20 02:44:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-20 02:44:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.55s
+2025-10-20 02:44:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-8.49 (-1.17%)
+2025-10-20 02:44:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-20 02:44:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-20 02:44:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.73s
+2025-10-20 02:45:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=market_overview status=STARTING
+2025-10-20 02:45:00 | INFO | application.jobs.market_overview:execute:39 | [JOB] market_overview starting execution
+2025-10-20 02:45:00 | INFO | application.jobs.market_overview:execute:39 | [JOB] market_overview starting execution
+2025-10-20 02:45:00 | INFO | application.jobs.market_overview:execute:42 | [MARKET] Analyzing 23 symbols for market overview
+2025-10-20 02:45:00 | INFO | application.jobs.market_overview:execute:42 | [MARKET] Analyzing 23 symbols for market overview
+2025-10-20 02:45:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=news_incremental_5m status=STARTING
+2025-10-20 02:45:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=news_incremental_5m status=STARTING
+2025-10-20 02:45:00 | INFO | application.news_service:ensure_bootstrap_on_start:118 | ğŸ”„ [NEWS] On-start bootstrap for 23 symbols without watermarks
+2025-10-20 02:45:00 | INFO | application.news_service:bootstrap_all_symbols:96 | ğŸš€ Starting news bootstrap for 23 symbols
+2025-10-20 02:45:00 | INFO | application.news_service:ensure_bootstrap_on_start:118 | ğŸ”„ [NEWS] On-start bootstrap for 23 symbols without watermarks
+2025-10-20 02:45:00 | INFO | application.news_service:bootstrap_all_symbols:96 | ğŸš€ Starting news bootstrap for 23 symbols
+2025-10-20 02:45:00 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:00 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=46
+2025-10-20 02:45:00 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=30
+2025-10-20 02:45:00 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:00 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=46
+2025-10-20 02:45:00 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=30
+2025-10-20 02:45:00 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] BTC-USDT-SWAP health: spread=0.000%, liquidity=1.00
+2025-10-20 02:45:01 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] ETH-USDT-SWAP health: spread=0.000%, liquidity=1.00
+2025-10-20 02:45:02 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:02 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=BTC analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:02 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] SOL-USDT-SWAP health: spread=0.005%, liquidity=1.00
+2025-10-20 02:45:02 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:02 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=BTC analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:02 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4657 digest cache entries
+2025-10-20 02:45:02 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BTC (digest: 45cff685...)
+2025-10-20 02:45:02 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BTC conf=0.50 title="Analyst Warns Bitcoin May Face Bear Market if Pric..."
+2025-10-20 02:45:02 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4657 digest cache entries
+2025-10-20 02:45:02 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BTC (digest: c4913cfe...)
+2025-10-20 02:45:02 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BTC conf=0.50 title="Analyst Warns Bitcoin May Face Bear Market if Pric..."
+2025-10-20 02:45:03 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] ADA-USDT-SWAP high spread: 0.015%
+2025-10-20 02:45:03 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] ADA-USDT-SWAP health: spread=0.015%, liquidity=0.80
+2025-10-20 02:45:03 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:03 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-20 02:45:03 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-20 02:45:03 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] BTC-USDT-SWAP health: spread=0.000%, liquidity=1.00
+2025-10-20 02:45:03 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:03 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-20 02:45:03 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-20 02:45:03 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] DOT-USDT-SWAP high spread: 0.033%
+2025-10-20 02:45:03 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] DOT-USDT-SWAP health: spread=0.033%, liquidity=1.00
+2025-10-20 02:45:04 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] ETH-USDT-SWAP health: spread=0.000%, liquidity=1.00
+2025-10-20 02:45:05 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] SOL-USDT-SWAP health: spread=0.005%, liquidity=1.00
+2025-10-20 02:45:05 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:05 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ETH analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:05 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4658 digest cache entries
+2025-10-20 02:45:05 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ETH (digest: 362c09c6...)
+2025-10-20 02:45:05 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ETH conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:45:05 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] AVAX-USDT-SWAP health: spread=0.005%, liquidity=1.00
+2025-10-20 02:45:05 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:05 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ETH analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:06 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4658 digest cache entries
+2025-10-20 02:45:06 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ETH (digest: 5e05dea9...)
+2025-10-20 02:45:06 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ETH conf=0.50 title="Ethereum Supply Squeeze Looms as Reserves Drop to ..."
+2025-10-20 02:45:06 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] ADA-USDT-SWAP high spread: 0.015%
+2025-10-20 02:45:06 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] ADA-USDT-SWAP health: spread=0.015%, liquidity=0.80
+2025-10-20 02:45:06 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:06 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-20 02:45:06 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-20 02:45:06 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] LINK-USDT-SWAP health: spread=0.006%, liquidity=1.00
+2025-10-20 02:45:06 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] DOT-USDT-SWAP high spread: 0.033%
+2025-10-20 02:45:06 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] DOT-USDT-SWAP health: spread=0.033%, liquidity=1.00
+2025-10-20 02:45:07 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] UNI-USDT-SWAP high spread: 0.016%
+2025-10-20 02:45:07 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] UNI-USDT-SWAP health: spread=0.016%, liquidity=1.00
+2025-10-20 02:45:07 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:07 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-20 02:45:07 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-20 02:45:08 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] ATOM-USDT-SWAP high spread: 0.062%
+2025-10-20 02:45:08 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] ATOM-USDT-SWAP health: spread=0.062%, liquidity=1.00
+2025-10-20 02:45:08 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:08 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=SOL analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:08 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4659 digest cache entries
+2025-10-20 02:45:08 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SOL (digest: 8875452b...)
+2025-10-20 02:45:08 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SOL conf=0.50 title="XRP News Today â€” Ripple Eyes ETF Momentum as Whale..."
+2025-10-20 02:45:08 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] AVAX-USDT-SWAP health: spread=0.005%, liquidity=1.00
+2025-10-20 02:45:08 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:08 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=9
+2025-10-20 02:45:08 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=9
+2025-10-20 02:45:08 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] NEAR-USDT-SWAP high spread: 0.044%
+2025-10-20 02:45:08 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] NEAR-USDT-SWAP health: spread=0.044%, liquidity=1.00
+2025-10-20 02:45:09 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] LINK-USDT-SWAP health: spread=0.006%, liquidity=1.00
+2025-10-20 02:45:09 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:09 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=SOL analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:09 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4659 digest cache entries
+2025-10-20 02:45:09 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SOL (digest: 414e3c7f...)
+2025-10-20 02:45:09 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SOL conf=0.50 title="XRP News Today â€” Ripple Eyes ETF Momentum as Whale..."
+2025-10-20 02:45:10 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] UNI-USDT-SWAP high spread: 0.016%
+2025-10-20 02:45:10 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] UNI-USDT-SWAP health: spread=0.016%, liquidity=1.00
+2025-10-20 02:45:10 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:10 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=9
+2025-10-20 02:45:10 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=9
+2025-10-20 02:45:10 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:10 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ADA analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:10 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] ALGO-USDT-SWAP high spread: 0.055%
+2025-10-20 02:45:10 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] ALGO-USDT-SWAP health: spread=0.055%, liquidity=0.80
+2025-10-20 02:45:10 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4660 digest cache entries
+2025-10-20 02:45:10 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ADA (digest: 03e9dcc2...)
+2025-10-20 02:45:10 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ADA conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:45:11 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:11 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=7
+2025-10-20 02:45:11 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=7
+2025-10-20 02:45:11 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] ATOM-USDT-SWAP high spread: 0.031%
+2025-10-20 02:45:11 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] ATOM-USDT-SWAP health: spread=0.031%, liquidity=1.00
+2025-10-20 02:45:12 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] ICP-USDT-SWAP high spread: 0.033%
+2025-10-20 02:45:12 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] ICP-USDT-SWAP health: spread=0.033%, liquidity=1.00
+2025-10-20 02:45:12 | ERROR | application.news_llm_analyzer:_get_llm_analysis:149 | LLM API request failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:12 | ERROR | application.news_llm_analyzer:analyze_news_batch:59 | âŒ [LLM] sym=ADA analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-20 02:45:12 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 4660 digest cache entries
+2025-10-20 02:45:12 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ADA (digest: bbf43453...)
+2025-10-20 02:45:12 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ADA conf=0.50 title="Cardano and TRON Stage Comeback â€” Analysts Highlig..."
+2025-10-20 02:45:12 | WARNING | application.jobs.market_overview:_analyze_symbol_health:105 | [MARKET] NEAR-USDT-SWAP high spread: 0.044%
+2025-10-20 02:45:12 | DEBUG | application.jobs.market_overview:_analyze_symbol_health:110 | [MARKET] NEAR-USDT-SWAP health: spread=0.044%, liquidity=1.00
+2025-10-20 02:45:12 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-20 02:45:12 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=7
+2025-10-20 02:45:12 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=7

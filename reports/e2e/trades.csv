@@ -1,0 +1,4 @@
+symbol,entry_time,exit_time,entry_price,exit_price,side,size,pnl,fees,duration_minutes,status
+BTC-USDT-SWAP,2025-10-20T02:35:00Z,,65000.00,,long,0.001,,,10,test_entry_failed
+ETH-USDT-SWAP,2025-10-20T02:35:00Z,,3200.00,,long,0.01,,,10,test_entry_failed
+SOL-USDT-SWAP,2025-10-20T02:35:00Z,,180.00,,long,0.1,,,10,test_entry_failed

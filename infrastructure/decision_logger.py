@@ -1,237 +1,267 @@
 """
-Decision Logger - Structured logging for trading decisions
-Follows Single Responsibility Principle: Only handles decision logging
+Decision Logger - Structured Logging System
+Implements single-line summary + detailed file logging for trading decisions
 """
 
-import json
+import os
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from loguru import logger
+
+from infrastructure.config_manager import config_manager
 
 
 class DecisionLogger:
     """
-    Logs trading decisions in structured JSONL format.
-    
-    Responsibilities:
-    - Log every trading decision (OPEN, CLOSE, SKIP)
-    - Structured JSONL format for easy parsing
-    - Compact inline format for quick scanning
-    - Daily log rotation
+    Structured decision logging system.
+    Provides single-line console summaries and detailed file logs.
     """
     
-    def __init__(self, log_dir: str = 'logs/decisions'):
-        self.log_dir = Path(log_dir)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
-        logger.info(f"✅ DecisionLogger initialized: {self.log_dir}")
+    def __init__(self):
+        self.config = config_manager
+        
+        # Load configuration
+        self.log_summary_mode, _ = self.config.get('logging.summary_mode', 'line')
+        self.news_verbosity, _ = self.config.get('logging.news_verbosity', 'summary')
+        
+        # Skip reason dictionary for consistent logging
+        self.skip_reasons = {
+            'gating': 'Gate not PASS',
+            'once_per_bar': 'Already processed this bar',
+            'same_direction_block': 'Same direction position exists',
+            'below_min_size': 'Order size below minimum',
+            'below_min_notional': 'Order value below minimum',
+            'entry_cooldown': 'Entry cooldown active',
+            'idempotent_exists': 'Order already exists',
+            'no_signal': 'No valid signal',
+            'not_profitable': 'Position not profitable for scale-in',
+            'max_ladders_reached': 'Maximum ladders reached',
+            'insufficient_distance': 'Insufficient price distance',
+            'opposite_direction': 'Opposite direction signal',
+            'no_flip_allowed': 'Reversal not enabled'
+        }
+        
+        logger.info(f"[DECISION_LOGGER] Decision logger initialized:")
+        logger.info(f"  summary_mode: {self.log_summary_mode}")
+        logger.info(f"  news_verbosity: {self.news_verbosity}")
     
-    def log_decision(
-        self,
-        symbol: str,
-        composite_signal,
-        action: str,
-        position_size: float = 0.0,
-        tp_price: Optional[float] = None,
-        sl_price: Optional[float] = None,
-        reason: str = "",
-        gate_results: Optional[Dict] = None
-    ):
+    def log_decision_summary(self, symbol: str, timeframe: str, signal_scores: Dict[str, float],
+                           gate_result: str, gate_details: Dict[str, Any], direction: str,
+                           size: float, leverage: float, sl_price: float, tp_price: float,
+                           risk_exp: float, tier: str, cb_status: str, state_transition: str,
+                           strategy: str, guards: Dict[str, bool], source: str) -> None:
         """
-        Log a trading decision.
+        Log single-line decision summary.
         
         Args:
             symbol: Trading symbol
-            composite_signal: CompositeSignal object
-            action: 'OPEN', 'CLOSE', 'SKIP', 'REJECTED'
-            position_size: Position size in base currency
-            tp_price: Take profit price
+            timeframe: Timeframe
+            signal_scores: Signal scores (TA, ML, News, Risk)
+            gate_result: Gate result (PASS/PENDING/FAIL)
+            gate_details: Gate details (persist, conf, age, hyst)
+            direction: Trade direction
+            size: Position size
+            leverage: Leverage
             sl_price: Stop loss price
-            reason: Decision reason/explanation
-            gate_results: Signal gate check results
+            tp_price: Take profit price
+            risk_exp: Risk exposure
+            tier: Risk tier
+            cb_status: Circuit breaker status
+            state_transition: State transition (READY→OPEN)
+            strategy: Strategy mode
+            guards: Guard statuses
+            source: Configuration source
         """
-        try:
-            timestamp = datetime.now(timezone.utc)
-            
-            # Extract gate status
-            gate_status = self._format_gate_status(gate_results) if gate_results else "n/a"
-            
-            # Structured log entry (JSONL)
-            log_entry = {
-                # Timestamp
-                't': timestamp.isoformat(),
-                'ts_unix': int(timestamp.timestamp()),
-                
-                # Symbol
-                'sym': symbol,
-                
-                # Composite signal
-                'comp': round(composite_signal.final_score, 2),
-                'dir': composite_signal.decision,
-                'grade': composite_signal.grade,
-                'conf': round(composite_signal.confidence_pct, 2),
-                
-                # Component scores
-                'ta': round(composite_signal.technical.score, 2),
-                'ml': round(composite_signal.ml.score, 2),
-                'news': round(composite_signal.news.score, 2),
-                'risk': round(composite_signal.risk.score, 2),
-                
-                # Technical flags
-                'ta_trend': composite_signal.technical.flags.get('trend', 'n/a'),
-                'ta_meanrev': composite_signal.technical.flags.get('meanrev', 'n/a'),
-                'ta_breakout': composite_signal.technical.flags.get('breakout', 'n/a'),
-                
-                # Gate status
-                'gate': gate_status,
-                
-                # Execution
-                'action': action,
-                'size': round(position_size, 6) if position_size else 0.0,
-                'tp': round(tp_price, 2) if tp_price else None,
-                'sl': round(sl_price, 2) if sl_price else None,
-                
-                # Metadata
-                'reason': reason,
-                'timeframe': composite_signal.timeframes.get('main', '15m'),
-                'meta': composite_signal.meta
-            }
-            
-            # Write to daily JSONL file
-            self._write_jsonl(log_entry, timestamp)
-            
-            # Also log compact inline format for quick scanning
-            self._log_compact(log_entry)
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to log decision: {e}")
+        # Format time
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        # Format signal scores
+        ta_score = signal_scores.get('ta', 0.0)
+        ml_score = signal_scores.get('ml', 0.0)
+        news_score = signal_scores.get('news', 0.0)
+        risk_score = signal_scores.get('risk', 0.0)
+        final_score = signal_scores.get('final', 0.0)
+        
+        # Format gate details
+        persist_info = gate_details.get('persist', '')
+        conf_info = gate_details.get('conf', '')
+        age_info = gate_details.get('age', '')
+        hyst_info = gate_details.get('hyst', '')
+        
+        # Format guards
+        once_ok = "OK" if guards.get('once_per_bar', True) else "HIT"
+        cooldown_ok = "OK" if guards.get('cooldown', True) else "HIT"
+        
+        # Single-line summary
+        summary = (
+            f"ℹ️ {time_str} | {symbol} | tf={timeframe} | "
+            f"TA={ta_score:.1f} ML={ml_score:.1f} News={news_score:.1f} Risk={risk_score:.1f} | "
+            f"Final={final_score:.1f} ({gate_result}) | "
+            f"Dir={direction} | Gate={gate_result} "
+            f"(persist {persist_info}, conf {conf_info}, age {age_info}, hyst={hyst_info}) | "
+            f"size={size:.1%} lev={leverage:.0f}x SL={sl_price:.0f} TP={tp_price:.0f} | "
+            f"risk: exp={risk_exp:.0%} tier={tier} cb={cb_status} | "
+            f"state: {state_transition} | strategy={strategy} | "
+            f"once={once_ok} cooldown={cooldown_ok} | src={source}"
+        )
+        
+        logger.info(summary)
     
-    def _write_jsonl(self, entry: Dict, timestamp: datetime):
-        """Write decision to JSONL file."""
-        try:
-            # Daily file rotation
-            date_str = timestamp.strftime('%Y-%m-%d')
-            log_file = self.log_dir / f"decisions_{date_str}.jsonl"
-            
-            with open(log_file, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(entry) + '\n')
-                
-        except Exception as e:
-            logger.error(f"❌ Failed to write JSONL: {e}")
-    
-    def _log_compact(self, entry: Dict):
-        """Log compact inline format for quick scanning."""
-        try:
-            # Compact format: t=... sym=... comp=... dir=... ta=... ml=... news=... risk=... gate=... action=... size=...
-            compact = (
-                f"t={entry['t'][11:19]} "  # HH:MM:SS only
-                f"sym={entry['sym']:15} "
-                f"comp={entry['comp']:5.1f} "
-                f"dir={entry['dir']:5} "
-                f"ta={entry['ta']:4.0f} "
-                f"ml={entry['ml']:4.0f} "
-                f"news={entry['news']:4.0f} "
-                f"risk={entry['risk']:4.0f} "
-                f"gate={entry['gate']:15} "
-                f"action={entry['action']:8} "
-                f"size={entry['size']:.6f}"
-            )
-            
-            if entry.get('tp'):
-                compact += f" tp={entry['tp']:.2f}"
-            if entry.get('sl'):
-                compact += f" sl={entry['sl']:.2f}"
-            
-            logger.info(f"[DECISION] {compact}")
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to log compact format: {e}")
-    
-    def _format_gate_status(self, gate_results: Dict) -> str:
-        """Format gate check results compactly."""
-        try:
-            if not gate_results:
-                return "n/a"
-            
-            checks = []
-            
-            # Persistence
-            if 'persistence' in gate_results:
-                result = gate_results['persistence']
-                checks.append(f"pers={result.get('passed', False)}")
-            
-            # Bias filters
-            if 'bias' in gate_results:
-                result = gate_results['bias']
-                checks.append(f"bias={result.get('passed', False)}")
-            
-            # Reversal
-            if 'reversal' in gate_results:
-                result = gate_results['reversal']
-                checks.append(f"rev={result.get('approved', False)}")
-            
-            return ','.join(checks) if checks else "pass"
-            
-        except Exception as e:
-            logger.error(f"❌ Gate status formatting error: {e}")
-            return "error"
-    
-    def get_recent_decisions(self, symbol: Optional[str] = None, limit: int = 10) -> list:
+    def log_skip_decision(self, symbol: str, reason: str, details: Dict[str, Any]) -> None:
         """
-        Get recent decisions from log.
+        Log skip decision with reason.
         
         Args:
-            symbol: Filter by symbol (optional)
-            limit: Max number of decisions to return
-            
-        Returns:
-            List of decision entries
+            symbol: Trading symbol
+            reason: Skip reason
+            details: Skip details
         """
-        try:
-            decisions = []
-            
-            # Get today's and yesterday's files
-            today = datetime.now(timezone.utc)
-            files_to_check = [
-                self.log_dir / f"decisions_{today.strftime('%Y-%m-%d')}.jsonl",
-                self.log_dir / f"decisions_{(today.replace(hour=0, minute=0) - timedelta(days=1)).strftime('%Y-%m-%d')}.jsonl"
-            ]
-            
-            for log_file in files_to_check:
-                if not log_file.exists():
-                    continue
-                
-                with open(log_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        try:
-                            entry = json.loads(line.strip())
-                            
-                            # Filter by symbol if specified
-                            if symbol and entry.get('sym') != symbol:
-                                continue
-                            
-                            decisions.append(entry)
-                            
-                        except json.JSONDecodeError:
-                            continue
-            
-            # Return most recent
-            decisions.sort(key=lambda x: x.get('ts_unix', 0), reverse=True)
-            return decisions[:limit]
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to get recent decisions: {e}")
-            return []
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        # Get human-readable reason
+        human_reason = self.skip_reasons.get(reason, reason)
+        
+        # Format details
+        details_str = ", ".join([f"{k}={v}" for k, v in details.items()])
+        
+        skip_msg = f"⏭️ {time_str} | {symbol} | SKIP: {human_reason} | {details_str}"
+        logger.info(skip_msg)
+    
+    def log_entry_decision(self, symbol: str, direction: str, quantity: float,
+                          price: float, mode: str, strategy: str) -> None:
+        """
+        Log entry decision.
+        
+        Args:
+            symbol: Trading symbol
+            direction: Trade direction
+            quantity: Position quantity
+            price: Entry price
+            mode: Trading mode
+            strategy: Strategy mode
+        """
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        entry_msg = (
+            f"🚀 {time_str} | {symbol} | ENTRY: {direction} "
+            f"qty={quantity:.4f} price={price:.2f} mode={mode} strategy={strategy}"
+        )
+        logger.info(entry_msg)
+    
+    def log_flip_decision(self, symbol: str, old_direction: str, new_direction: str,
+                         quantity: float, price: float, mode: str) -> None:
+        """
+        Log flip decision.
+        
+        Args:
+            symbol: Trading symbol
+            old_direction: Old position direction
+            new_direction: New position direction
+            quantity: Position quantity
+            price: Entry price
+            mode: Trading mode
+        """
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        flip_msg = (
+            f"🔄 {time_str} | {symbol} | FLIP: {old_direction}→{new_direction} "
+            f"qty={quantity:.4f} price={price:.2f} mode={mode}"
+        )
+        logger.info(flip_msg)
+    
+    def log_scale_in_decision(self, symbol: str, direction: str, quantity: float,
+                             price: float, ladder: int, mode: str) -> None:
+        """
+        Log scale-in decision.
+        
+        Args:
+            symbol: Trading symbol
+            direction: Trade direction
+            quantity: Position quantity
+            price: Entry price
+            ladder: Ladder number
+            mode: Trading mode
+        """
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        scale_msg = (
+            f"📈 {time_str} | {symbol} | SCALE-IN: {direction} "
+            f"qty={quantity:.4f} price={price:.2f} ladder={ladder} mode={mode}"
+        )
+        logger.info(scale_msg)
+    
+    def log_position_tpsl(self, symbol: str, sl_order_id: str, tp_order_id: str,
+                         sl_price: float, tp_price: float, mode: str) -> None:
+        """
+        Log position-level TP/SL creation.
+        
+        Args:
+            symbol: Trading symbol
+            sl_order_id: Stop loss order ID
+            tp_order_id: Take profit order ID
+            sl_price: Stop loss price
+            tp_price: Take profit price
+            mode: Trading mode
+        """
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        tpsl_msg = (
+            f"🎯 {time_str} | {symbol} | POSITION-TP/SL: "
+            f"SL={sl_order_id}@{sl_price:.2f} TP={tp_order_id}@{tp_price:.2f} mode={mode}"
+        )
+        logger.info(tpsl_msg)
+    
+    def log_trailing_modify(self, symbol: str, position_id: str, old_sl: float,
+                           new_sl: float, modifications: int, mode: str) -> None:
+        """
+        Log trailing stop modification.
+        
+        Args:
+            symbol: Trading symbol
+            position_id: Position ID
+            old_sl: Old stop loss price
+            new_sl: New stop loss price
+            modifications: Number of modifications
+            mode: Trading mode
+        """
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        trail_msg = (
+            f"📊 {time_str} | {symbol} | TRAILING-MODIFY: "
+            f"pos={position_id} {old_sl:.2f}→{new_sl:.2f} mod#{modifications} mode={mode}"
+        )
+        logger.info(trail_msg)
+    
+    def log_safety_block(self, symbol: str, mode: str, reason: str) -> None:
+        """
+        Log safety block (non-LIVE mode).
+        
+        Args:
+            symbol: Trading symbol
+            mode: Trading mode
+            reason: Block reason
+        """
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        safety_msg = f"🛡️ {time_str} | {symbol} | SAFETY: {mode} mode - {reason}"
+        logger.info(safety_msg)
+    
+    def log_error(self, symbol: str, operation: str, error: str, details: Dict[str, Any]) -> None:
+        """
+        Log error with details.
+        
+        Args:
+            symbol: Trading symbol
+            operation: Operation that failed
+            error: Error message
+            details: Error details
+        """
+        time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        
+        details_str = ", ".join([f"{k}={v}" for k, v in details.items()])
+        error_msg = f"❌ {time_str} | {symbol} | ERROR: {operation} - {error} | {details_str}"
+        logger.error(error_msg)
 
 
-# Global instance
-_decision_logger = None
-
-
-def get_decision_logger() -> DecisionLogger:
-    """Get global decision logger instance."""
-    global _decision_logger
-    if _decision_logger is None:
-        _decision_logger = DecisionLogger()
-    return _decision_logger
-
+# Global decision logger instance
+decision_logger = DecisionLogger()

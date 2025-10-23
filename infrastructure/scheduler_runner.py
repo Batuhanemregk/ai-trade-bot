@@ -418,6 +418,28 @@ async def main():
     except Exception as e:
         logger.error(f"❌ Scheduler runner failed: {e}")
         sys.exit(1)
+    finally:
+        # Cleanup: Close all sessions
+        logger.info("🧹 Cleaning up resources...")
+        try:
+            if runner and hasattr(runner, 'jobs'):
+                for job_name, job_instance in runner.jobs.items():
+                    # Close news service
+                    if hasattr(job_instance, 'news_service') and job_instance.news_service:
+                        await job_instance.news_service.close()
+                        logger.debug(f"✅ Closed news service for {job_name}")
+                    
+                    # Close exchange adapter
+                    if hasattr(job_instance, 'exchange_adapter') and job_instance.exchange_adapter:
+                        try:
+                            await job_instance.exchange_adapter.close()
+                            logger.debug(f"✅ Closed exchange adapter for {job_name}")
+                        except Exception as e:
+                            logger.debug(f"⚠️ Exchange adapter close warning: {e}")
+            
+            logger.info("✅ Cleanup completed")
+        except Exception as e:
+            logger.error(f"❌ Cleanup error: {e}")
 
 
 if __name__ == "__main__":

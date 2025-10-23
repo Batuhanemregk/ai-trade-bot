@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Any
 from loguru import logger
 
-from application.jobs.base import BaseJob
+from application.jobs.base_job import BaseJob
 from application.portfolio_reporter import PortfolioReporter
 
 

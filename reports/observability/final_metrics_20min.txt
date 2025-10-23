@@ -1,0 +1,231 @@
+﻿
+# HELP aibot_trades_total Total number of trades executed
+# TYPE aibot_trades_total counter
+# HELP aibot_pnl_realized_usd Realized PnL in USD
+# TYPE aibot_pnl_realized_usd gauge
+# HELP aibot_portfolio_pnl_usd Total portfolio PnL in USD
+# TYPE aibot_portfolio_pnl_usd gauge
+aibot_portfolio_pnl_usd 0.0
+# HELP aibot_win_rate Win rate percentage
+# TYPE aibot_win_rate gauge
+# HELP aibot_avg_trade_pnl_usd Average PnL per trade in USD
+# TYPE aibot_avg_trade_pnl_usd gauge
+# HELP aibot_trade_duration_minutes Trade duration in minutes
+# TYPE aibot_trade_duration_minutes histogram
+# HELP aibot_composite_score Latest composite score (0-100)
+# TYPE aibot_composite_score gauge
+aibot_composite_score{symbol="BTC-USDT-SWAP"} 47.912499999999994
+aibot_composite_score{symbol="ETH-USDT-SWAP"} 53.662499999999994
+aibot_composite_score{symbol="SOL-USDT-SWAP"} 61.5875
+# HELP aibot_ta_score Technical analysis score (0-100)
+# TYPE aibot_ta_score gauge
+aibot_ta_score{symbol="BTC-USDT-SWAP"} 29.5
+aibot_ta_score{symbol="ETH-USDT-SWAP"} 29.5
+aibot_ta_score{symbol="SOL-USDT-SWAP"} 48.75
+# HELP aibot_ml_score Machine learning score (0-100)
+# TYPE aibot_ml_score gauge
+aibot_ml_score{symbol="BTC-USDT-SWAP"} 77.0
+aibot_ml_score{symbol="ETH-USDT-SWAP"} 100.0
+aibot_ml_score{symbol="SOL-USDT-SWAP"} 100.0
+# HELP aibot_news_score News sentiment score (0-100)
+# TYPE aibot_news_score gauge
+aibot_news_score{symbol="BTC-USDT-SWAP"} 50.0
+aibot_news_score{symbol="ETH-USDT-SWAP"} 50.0
+aibot_news_score{symbol="SOL-USDT-SWAP"} 50.0
+# HELP aibot_risk_score Risk assessment score (0-100)
+# TYPE aibot_risk_score gauge
+aibot_risk_score{symbol="BTC-USDT-SWAP"} 45.75
+aibot_risk_score{symbol="ETH-USDT-SWAP"} 45.75
+aibot_risk_score{symbol="SOL-USDT-SWAP"} 47.25
+# HELP aibot_ml_confidence ML model confidence (0=low, 1=medium, 2=high)
+# TYPE aibot_ml_confidence gauge
+# HELP aibot_last_signal Last trading signal score with direction
+# TYPE aibot_last_signal gauge
+aibot_last_signal{direction="flat",symbol="BTC-USDT-SWAP"} 55.6125
+aibot_last_signal{direction="long",symbol="ETH-USDT-SWAP"} 53.662499999999994
+aibot_last_signal{direction="long",symbol="SOL-USDT-SWAP"} 61.5875
+aibot_last_signal{direction="long",symbol="BTC-USDT-SWAP"} 61.6375
+aibot_last_signal{direction="short",symbol="BTC-USDT-SWAP"} 47.912499999999994
+# HELP aibot_analysis_total Total analyses performed
+# TYPE aibot_analysis_total counter
+aibot_analysis_total{direction="flat",symbol="BTC-USDT-SWAP"} 3.0
+aibot_analysis_total{direction="long",symbol="ETH-USDT-SWAP"} 17.0
+aibot_analysis_total{direction="long",symbol="SOL-USDT-SWAP"} 17.0
+aibot_analysis_total{direction="long",symbol="BTC-USDT-SWAP"} 12.0
+aibot_analysis_total{direction="short",symbol="BTC-USDT-SWAP"} 2.0
+# HELP aibot_analysis_created Total analyses performed
+# TYPE aibot_analysis_created gauge
+aibot_analysis_created{direction="flat",symbol="BTC-USDT-SWAP"} 1.76108682364125e+09
+aibot_analysis_created{direction="long",symbol="ETH-USDT-SWAP"} 1.761086828779267e+09
+aibot_analysis_created{direction="long",symbol="SOL-USDT-SWAP"} 1.7610868334310167e+09
+aibot_analysis_created{direction="long",symbol="BTC-USDT-SWAP"} 1.7610870013341758e+09
+aibot_analysis_created{direction="short",symbol="BTC-USDT-SWAP"} 1.7610885057078266e+09
+# HELP aibot_analysis_duration_seconds Analysis execution duration in seconds
+# TYPE aibot_analysis_duration_seconds histogram
+aibot_analysis_duration_seconds_bucket{le="0.005",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.01",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.025",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.05",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.075",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.1",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.25",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.5",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.75",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="1.0",symbol="BTC-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="2.5",symbol="BTC-USDT-SWAP"} 16.0
+aibot_analysis_duration_seconds_bucket{le="5.0",symbol="BTC-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="7.5",symbol="BTC-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="10.0",symbol="BTC-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="+Inf",symbol="BTC-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_count{symbol="BTC-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_sum{symbol="BTC-USDT-SWAP"} 25.825174570083618
+aibot_analysis_duration_seconds_bucket{le="0.005",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.01",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.025",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.05",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.075",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.1",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.25",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.5",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.75",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="1.0",symbol="ETH-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="2.5",symbol="ETH-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="5.0",symbol="ETH-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="7.5",symbol="ETH-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="10.0",symbol="ETH-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="+Inf",symbol="ETH-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_count{symbol="ETH-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_sum{symbol="ETH-USDT-SWAP"} 22.022098064422607
+aibot_analysis_duration_seconds_bucket{le="0.005",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.01",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.025",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.05",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.075",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.1",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.25",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.5",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="0.75",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="1.0",symbol="SOL-USDT-SWAP"} 0.0
+aibot_analysis_duration_seconds_bucket{le="2.5",symbol="SOL-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="5.0",symbol="SOL-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="7.5",symbol="SOL-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="10.0",symbol="SOL-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_bucket{le="+Inf",symbol="SOL-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_count{symbol="SOL-USDT-SWAP"} 17.0
+aibot_analysis_duration_seconds_sum{symbol="SOL-USDT-SWAP"} 20.97583317756653
+# HELP aibot_analysis_duration_seconds_created Analysis execution duration in seconds
+# TYPE aibot_analysis_duration_seconds_created gauge
+aibot_analysis_duration_seconds_created{symbol="BTC-USDT-SWAP"} 1.761086823641276e+09
+aibot_analysis_duration_seconds_created{symbol="ETH-USDT-SWAP"} 1.7610868287792923e+09
+aibot_analysis_duration_seconds_created{symbol="SOL-USDT-SWAP"} 1.7610868334310365e+09
+# HELP aibot_drawdown_current Current drawdown percentage
+# TYPE aibot_drawdown_current gauge
+aibot_drawdown_current 0.0
+# HELP aibot_drawdown_max Maximum drawdown percentage
+# TYPE aibot_drawdown_max gauge
+aibot_drawdown_max 0.0
+# HELP aibot_exposure_percentage Portfolio exposure percentage
+# TYPE aibot_exposure_percentage gauge
+aibot_exposure_percentage 0.0
+# HELP aibot_exposure_usd Total exposure in USD
+# TYPE aibot_exposure_usd gauge
+aibot_exposure_usd 0.0
+# HELP aibot_positions_open Number of open positions
+# TYPE aibot_positions_open gauge
+aibot_positions_open 0.0
+# HELP aibot_position_size_usd Position size in USD
+# TYPE aibot_position_size_usd gauge
+# HELP aibot_leverage_used Leverage multiplier used
+# TYPE aibot_leverage_used gauge
+# HELP aibot_job_duration_seconds Job execution duration in seconds
+# TYPE aibot_job_duration_seconds histogram
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.005"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.01"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.025"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.05"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.075"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.1"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.25"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.5"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="0.75"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="1.0"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="2.5"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="5.0"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="7.5"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="10.0"} 0.0
+aibot_job_duration_seconds_bucket{job_name="trading_analysis_15m",le="+Inf"} 17.0
+aibot_job_duration_seconds_count{job_name="trading_analysis_15m"} 17.0
+aibot_job_duration_seconds_sum{job_name="trading_analysis_15m"} 225.05390977859497
+# HELP aibot_job_duration_seconds_created Job execution duration in seconds
+# TYPE aibot_job_duration_seconds_created gauge
+aibot_job_duration_seconds_created{job_name="trading_analysis_15m"} 1.761086838483961e+09
+# HELP aibot_job_executions_total Total job executions
+# TYPE aibot_job_executions_total counter
+aibot_job_executions_total{job_name="trading_analysis_15m",status="success"} 17.0
+# HELP aibot_job_executions_created Total job executions
+# TYPE aibot_job_executions_created gauge
+aibot_job_executions_created{job_name="trading_analysis_15m",status="success"} 1.7610868384840093e+09
+# HELP aibot_errors_total Total errors encountered
+# TYPE aibot_errors_total counter
+# HELP aibot_api_calls_total Total API calls made
+# TYPE aibot_api_calls_total counter
+# HELP aibot_api_latency_seconds API call latency in seconds
+# TYPE aibot_api_latency_seconds histogram
+# HELP aibot_circuit_breaker_state Circuit breaker state (0=normal, 1=warning, 2=emergency, 3=paused)
+# TYPE aibot_circuit_breaker_state gauge
+aibot_circuit_breaker_state 0.0
+# HELP aibot_info_info Bot version and configuration info
+# TYPE aibot_info_info gauge
+aibot_info_info{mode="live",symbols="default_quote, supported_pairs, trading_pairs",version="2.0.0"} 1.0
+# HELP aibot_uptime_seconds Bot uptime in seconds
+# TYPE aibot_uptime_seconds gauge
+aibot_uptime_seconds 0.0
+# HELP aibot_llm_requests_total Total LLM requests made
+# TYPE aibot_llm_requests_total counter
+aibot_llm_requests_total{status="2xx"} 83.0
+# HELP aibot_llm_requests_created Total LLM requests made
+# TYPE aibot_llm_requests_created gauge
+aibot_llm_requests_created{status="2xx"} 1.7610868262958376e+09
+# HELP aibot_llm_rate_limits_total Total LLM rate limit hits
+# TYPE aibot_llm_rate_limits_total counter
+# HELP aibot_llm_internal_errors_total Total LLM internal/network errors
+# TYPE aibot_llm_internal_errors_total counter
+aibot_llm_internal_errors_total 0.0
+# HELP aibot_llm_internal_errors_created Total LLM internal/network errors
+# TYPE aibot_llm_internal_errors_created gauge
+aibot_llm_internal_errors_created 1.7610867995568318e+09
+# HELP aibot_llm_request_tokens_sum_total Total LLM request tokens used
+# TYPE aibot_llm_request_tokens_sum_total counter
+aibot_llm_request_tokens_sum_total{model="gpt-5-nano"} 124804.0
+# HELP aibot_llm_request_tokens_sum_created Total LLM request tokens used
+# TYPE aibot_llm_request_tokens_sum_created gauge
+aibot_llm_request_tokens_sum_created{model="gpt-5-nano"} 1.7610868262958505e+09
+# HELP aibot_llm_response_tokens_sum_total Total LLM response tokens used
+# TYPE aibot_llm_response_tokens_sum_total counter
+aibot_llm_response_tokens_sum_total{model="gpt-5-nano"} 10624.0
+# HELP aibot_llm_response_tokens_sum_created Total LLM response tokens used
+# TYPE aibot_llm_response_tokens_sum_created gauge
+aibot_llm_response_tokens_sum_created{model="gpt-5-nano"} 1.761086826295857e+09
+# HELP aibot_llm_cost_usd_total Total LLM cost in USD
+# TYPE aibot_llm_cost_usd_total counter
+aibot_llm_cost_usd_total 0.010489800000000006
+# HELP aibot_llm_cost_usd_created Total LLM cost in USD
+# TYPE aibot_llm_cost_usd_created gauge
+aibot_llm_cost_usd_created 1.7610867995568528e+09
+# HELP aibot_llm_budget_trips_total Total budget limit trips
+# TYPE aibot_llm_budget_trips_total counter
+# HELP aibot_news_items_total Total news items processed
+# TYPE aibot_news_items_total counter
+aibot_news_items_total{sent_to_llm="true"} 2369.0
+# HELP aibot_news_items_created Total news items processed
+# TYPE aibot_news_items_created gauge
+aibot_news_items_created{sent_to_llm="true"} 1.761086826296085e+09
+# HELP aibot_news_digest_hits_total Total news digest cache hits
+# TYPE aibot_news_digest_hits_total counter
+aibot_news_digest_hits_total 0.0
+# HELP aibot_news_digest_hits_created Total news digest cache hits
+# TYPE aibot_news_digest_hits_created gauge
+aibot_news_digest_hits_created 1.7610867995568714e+09
+
+
+

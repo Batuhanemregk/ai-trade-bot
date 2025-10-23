@@ -44,7 +44,6 @@ class NewsService:
         # Initialize LLM analyzer if enabled
         self.llm_analyzer = None
         if self.llm_config.get('enabled', True):
-            import os
             openai_key = os.getenv('OPENAI_API_KEY')
             if openai_key:
                 self.llm_analyzer = NewsLLMAnalyzer(openai_key)
