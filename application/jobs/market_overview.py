@@ -33,6 +33,15 @@ class MarketOverviewJob(BaseJob):
             logger.error(f"❌ Failed to initialize MarketOverviewJob: {e}")
             raise
     
+    async def cleanup(self):
+        """Cleanup market overview resources"""
+        try:
+            if hasattr(self, 'exchange_adapter') and self.exchange_adapter:
+                await self.exchange_adapter.close()
+                logger.debug("✅ Closed exchange adapter for MarketOverviewJob")
+        except Exception as e:
+            logger.error(f"❌ MarketOverviewJob cleanup failed: {e}")
+    
     async def execute(self):
         """Execute 15-minute market overview."""
         try:

@@ -94,6 +94,15 @@ class TradingAnalysisJob(BaseJob):
             logger.error(f"❌ Failed to initialize TradingAnalysisJob: {e}")
             raise
     
+    async def cleanup(self):
+        """Cleanup trading analysis resources"""
+        try:
+            if hasattr(self, 'exchange_adapter') and self.exchange_adapter:
+                await self.exchange_adapter.close()
+                logger.debug("✅ Closed exchange adapter for TradingAnalysisJob")
+        except Exception as e:
+            logger.error(f"❌ TradingAnalysisJob cleanup failed: {e}")
+    
     async def execute(self):
         """Execute 15-minute trading analysis."""
         start_time = time.time()
