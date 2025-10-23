@@ -268,8 +268,9 @@ class RegimeProcessor:
             period = 14
             atr = self._wilders_smooth(tr, period)
             
-            # Avoid division by zero
-            if len(atr) == 0 or atr[-1] == 0:
+            # Avoid division by zero - replace zeros with small values
+            atr = np.where(atr == 0, 1e-8, atr)
+            if len(atr) == 0:
                 return 0.0
                 
             di_plus = self._wilders_smooth(dm_plus, period) / atr * 100
