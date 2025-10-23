@@ -288,7 +288,7 @@ JSON only, no explanation."""
                         {"role": "system", "content": "You are a crypto analyst. Return only valid JSON."},
                         {"role": "user", "content": prompt}
                     ],
-                    max_output_tokens=self.max_output_tokens,  # GPT-5 models use max_output_tokens
+                    max_tokens=self.max_output_tokens,  # GPT-5 models in Chat Completions use max_tokens
                     reasoning_effort="minimal",  # GPT-5-nano optimized for minimal reasoning
                     verbosity="low",  # Low verbosity for concise responses
                     response_format={"type": "json_object"},  # Force JSON output
