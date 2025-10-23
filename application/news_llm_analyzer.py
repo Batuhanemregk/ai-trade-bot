@@ -19,12 +19,12 @@ class NewsLLMAnalyzer:
         self.client = AsyncOpenAI(api_key=api_key)
         
         # Model selection (ENV override)
-        self.model = model or os.getenv('NEWS_LLM_MODEL', 'gpt-5-nano')  # Default: gpt-5-nano (ultra-low cost)
+        self.model = model or os.getenv('NEWS_LLM_MODEL', 'gpt-4o-mini')  # Default: gpt-4o-mini (low cost)
         self.max_output_tokens = int(os.getenv('NEWS_MAX_OUTPUT_TOKENS', '128'))
         
-        # Cost tracking (gpt-5-nano pricing)
-        self.cost_per_mtok_in = float(os.getenv('LLM_COST_PER_MTOK_IN', '0.05'))  # gpt-5-nano: $0.05/1M
-        self.cost_per_mtok_out = float(os.getenv('LLM_COST_PER_MTOK_OUT', '0.40'))  # gpt-5-nano: $0.40/1M
+        # Cost tracking (gpt-4o-mini pricing)
+        self.cost_per_mtok_in = float(os.getenv('LLM_COST_PER_MTOK_IN', '0.15'))  # gpt-4o-mini: $0.15/1M
+        self.cost_per_mtok_out = float(os.getenv('LLM_COST_PER_MTOK_OUT', '0.60'))  # gpt-4o-mini: $0.60/1M
         self.daily_budget_tokens = int(os.getenv('LLM_DAILY_BUDGET_TOKENS', '200000'))
         self.daily_budget_usd = float(os.getenv('LLM_DAILY_BUDGET_USD', '999.0'))  # High default (no limit)
         
@@ -288,8 +288,8 @@ JSON only, no explanation."""
                         {"role": "system", "content": "You are a crypto analyst. Return only valid JSON."},
                         {"role": "user", "content": prompt}
                     ],
-                    max_completion_tokens=self.max_output_tokens,  # gpt-5 models use max_completion_tokens
-                    # temperature=0.3,  # gpt-5-nano only supports default (1.0)
+                    max_tokens=self.max_output_tokens,  # gpt-4o-mini uses max_tokens
+                    temperature=0.3,  # Low temperature for consistent output
                     response_format={"type": "json_object"},  # Force JSON output
                     timeout=30
                     )
