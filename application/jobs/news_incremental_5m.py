@@ -52,3 +52,12 @@ class NewsIncremental5mJob(BaseJob):
         except Exception as e:
             logger.error(f"❌ NewsIncremental5mJob execution failed: {e}")
             raise
+    
+    async def cleanup(self):
+        """Cleanup news service resources"""
+        try:
+            if self.news_service:
+                await self.news_service.close()
+                logger.debug("✅ NewsIncremental5mJob cleanup completed")
+        except Exception as e:
+            logger.error(f"❌ NewsIncremental5mJob cleanup failed: {e}")

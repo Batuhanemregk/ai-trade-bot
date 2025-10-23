@@ -431,7 +431,15 @@ async def main():
         try:
             if 'runner' in locals() and runner and hasattr(runner, 'jobs'):
                 for job_name, job_instance in runner.jobs.items():
-                    # Close news service
+                    # Call job cleanup method
+                    try:
+                        if hasattr(job_instance, 'cleanup'):
+                            await job_instance.cleanup()
+                            logger.debug(f"✅ Job cleanup completed for {job_name}")
+                    except Exception as e:
+                        logger.debug(f"⚠️ Job cleanup warning for {job_name}: {e}")
+                    
+                    # Legacy cleanup for backward compatibility
                     if hasattr(job_instance, 'news_service') and job_instance.news_service:
                         try:
                             await job_instance.news_service.close()
@@ -439,7 +447,6 @@ async def main():
                         except Exception as e:
                             logger.debug(f"⚠️ News service close warning: {e}")
                     
-                    # Close exchange adapter
                     if hasattr(job_instance, 'exchange_adapter') and job_instance.exchange_adapter:
                         try:
                             await job_instance.exchange_adapter.close()
@@ -447,7 +454,6 @@ async def main():
                         except Exception as e:
                             logger.debug(f"⚠️ Exchange adapter close warning: {e}")
                     
-                    # Close any aiohttp sessions
                     if hasattr(job_instance, 'session') and job_instance.session:
                         try:
                             await job_instance.session.close()
