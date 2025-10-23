@@ -2042,3 +2042,15 @@
 {"name": "risk_monitor", "started_at": "2025-10-23T14:26:01.318360+00:00", "finished_at": "2025-10-23T14:26:01.318366+00:00", "status": "SUCCESS", "duration_ms": 1303, "error": null}
 {"name": "risk_monitor", "started_at": "2025-10-23T14:27:01.303340+00:00", "finished_at": "2025-10-23T14:27:01.303345+00:00", "status": "SUCCESS", "duration_ms": 1300, "error": null}
 {"name": "risk_monitor", "started_at": "2025-10-23T14:28:01.322449+00:00", "finished_at": "2025-10-23T14:28:01.322454+00:00", "status": "SUCCESS", "duration_ms": 1307, "error": null}
+{"name": "market_overview", "started_at": "2025-10-23T14:30:04.571295+00:00", "finished_at": "2025-10-23T14:30:04.571298+00:00", "status": "SUCCESS", "duration_ms": 4566, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T14:30:08.599980+00:00", "finished_at": "2025-10-23T14:30:08.599985+00:00", "status": "SUCCESS", "duration_ms": 8588, "error": null}
+{"name": "telegram_summary_15m", "started_at": "2025-10-23T14:30:08.600755+00:00", "finished_at": "2025-10-23T14:30:08.600757+00:00", "status": "SUCCESS", "duration_ms": 8572, "error": null}
+{"name": "trading_analysis", "started_at": "2025-10-23T14:30:13.241147+00:00", "finished_at": "2025-10-23T14:30:13.241150+00:00", "status": "SUCCESS", "duration_ms": 13212, "error": null}
+{"name": "trailing_5m", "started_at": "2025-10-23T14:30:13.243684+00:00", "finished_at": "2025-10-23T14:30:13.243688+00:00", "status": "SUCCESS", "duration_ms": 13215, "error": null}
+{"name": "news_incremental_5m", "started_at": "2025-10-23T14:30:22.431443+00:00", "finished_at": "2025-10-23T14:30:22.431450+00:00", "status": "SUCCESS", "duration_ms": 22426, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T14:31:01.426347+00:00", "finished_at": "2025-10-23T14:31:01.426351+00:00", "status": "SUCCESS", "duration_ms": 1420, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T14:32:01.499907+00:00", "finished_at": "2025-10-23T14:32:01.499912+00:00", "status": "SUCCESS", "duration_ms": 1484, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T14:33:01.488694+00:00", "finished_at": "2025-10-23T14:33:01.488701+00:00", "status": "SUCCESS", "duration_ms": 1476, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T14:34:01.443721+00:00", "finished_at": "2025-10-23T14:34:01.443725+00:00", "status": "SUCCESS", "duration_ms": 1427, "error": null}
+{"name": "risk_monitor", "started_at": "2025-10-23T14:35:01.484972+00:00", "finished_at": "2025-10-23T14:35:01.484977+00:00", "status": "SUCCESS", "duration_ms": 1476, "error": null}
+{"name": "trailing_5m", "started_at": "2025-10-23T14:35:01.485702+00:00", "finished_at": "2025-10-23T14:35:01.485706+00:00", "status": "SUCCESS", "duration_ms": 1461, "error": null}
