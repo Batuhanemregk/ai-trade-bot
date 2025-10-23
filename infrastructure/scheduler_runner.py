@@ -13,14 +13,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-# Windows signal handling
-if sys.platform == "win32":
-    import win32api
-    import win32con
-
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from loguru import logger
+
+# Cross-platform signal handling (Windows compatible)
 
 from infrastructure.bootstrap import load_env, load_policy, init_logging
 from application.jobs.trading_analysis import TradingAnalysisJob
@@ -383,17 +380,13 @@ class SchedulerRunner:
             asyncio.create_task(self.stop())
             self.shutdown_event.set()
         
-        if sys.platform == "win32":
-            # Windows signal handling
-            signal.signal(signal.SIGINT, signal_handler)
-            signal.signal(signal.SIGTERM, signal_handler)
-            # Windows specific signals
-            if hasattr(signal, 'SIGBREAK'):
-                signal.signal(signal.SIGBREAK, signal_handler)
-        else:
-            # Unix signal handling
-            signal.signal(signal.SIGINT, signal_handler)
-            signal.signal(signal.SIGTERM, signal_handler)
+        # Cross-platform signal handling
+        signal.signal(signal.SIGINT, signal_handler)   # Ctrl+C
+        signal.signal(signal.SIGTERM, signal_handler)  # Termination
+        
+        # Windows specific signals (if available)
+        if hasattr(signal, 'SIGBREAK'):
+            signal.signal(signal.SIGBREAK, signal_handler)  # Ctrl+Break
     
     async def _send_startup_message(self):
         """Send startup message to Telegram"""
