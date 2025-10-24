@@ -1,0 +1,63 @@
+{
+  "version": "lgb_v1",
+  "created_at": "2025-10-24T19:52:41.319642",
+  "model_type": "LightGBMClassifier",
+  "calibrated": true,
+  "calibration_method": "isotonic",
+  "features": [
+    "timeframe",
+    "rsi_14",
+    "macd_hist",
+    "atr_pct",
+    "bb_pos",
+    "ret_1",
+    "ret_4",
+    "ret_16",
+    "sma_diff",
+    "sma_ratio",
+    "hour_sin",
+    "hour_cos",
+    "dow_sin",
+    "dow_cos",
+    "volume_sma_20",
+    "volume_sma_ratio",
+    "volume_momentum",
+    "volume_volatility",
+    "price_momentum_5",
+    "price_momentum_20",
+    "volatility_20",
+    "volatility_regime",
+    "trend_strength"
+  ],
+  "n_features": 23,
+  "training_period": "2025-04-27 17:00:00 to 2025-10-24 16:45:00",
+  "symbols": [
+    "BTC/USDT",
+    "ETH/USDT",
+    "SOL/USDT"
+  ],
+  "metrics": {
+    "auc": 0.9726028146887854,
+    "accuracy": 0.8907134667960138,
+    "precision": 0.8318732694801758,
+    "recall": 0.8932654958050618,
+    "f1_score": 0.8596897772528592,
+    "confusion_matrix": 2834.75,
+    "test_samples": 11339.0
+  },
+  "hyperparameters": {
+    "objective": "binary",
+    "metric": "auc",
+    "boosting_type": "gbdt",
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": -1,
+    "seed": 42,
+    "n_jobs": -1,
+    "colsample_bytree": 0.7,
+    "subsample": 0.7,
+    "reg_alpha": 0.1,
+    "reg_lambda": 0.1
+  }
+}

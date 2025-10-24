@@ -451,15 +451,33 @@ class TradingAnalysisJob(BaseJob):
                         'reversal': {'approved': transition.action not in ['IGNORED', 'COOLDOWN']}
                     }
                     
+                    # Decision logging - use getattr for backwards compatibility
+                    signal_scores = {
+                        'ta': getattr(composite_signal, 'ta_score', getattr(composite_signal.technical, 'score', 0.0)),
+                        'ml': getattr(composite_signal, 'ml_score', getattr(composite_signal.ml, 'score', 0.0)),
+                        'news': getattr(composite_signal, 'news_score', getattr(composite_signal.news, 'score', 0.0)),
+                        'risk': getattr(composite_signal, 'risk_score', getattr(composite_signal.risk, 'score', 0.0)),
+                        'final': composite_signal.final_score
+                    }
+                    
                     self.decision_logger.log_decision(
                         symbol=symbol,
-                        composite_signal=composite_signal,
-                        action=action.upper(),
-                        position_size=0.0,  # Will be set during execution
-                        tp_price=None,
-                        sl_price=None,
-                        reason=transition.reason,
-                        gate_results=gate_results
+                        timeframe='15m',
+                        signal_scores=signal_scores,
+                        gate_result='PASS' if gated_signal.is_valid else 'FAIL',
+                        gate_details=gate_results,
+                        direction=composite_signal.decision,
+                        size=0.0,  # Will be set during execution
+                        leverage=1.0,
+                        sl_price=0.0,
+                        tp_price=0.0,
+                        risk_exp=0.0,
+                        tier='T1',
+                        cb_status='OK',
+                        state_transition=f"{transition.from_state.value}→{transition.to_state.value}",
+                        strategy='single_flip',
+                        guards=gate_results,
+                        source='trading_analysis'
                     )
                 except Exception as log_err:
                     logger.warning(f"⚠️ Decision logging failed for {symbol}: {log_err}")

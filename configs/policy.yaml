@@ -124,19 +124,19 @@ trading:
   
   # Scoring
   scoring:
-    ta_weight: 0.4          # Technical Analysis weight
-    ml_weight: 0.25         # Machine Learning weight
-    news_weight: 0.2        # News sentiment weight
-    risk_weight: 0.15       # Risk score weight
+    ta_weight: 0.7          # Technical Analysis weight (increased)
+    ml_weight: 0.1          # Machine Learning weight (reduced)
+    news_weight: 0.1        # News sentiment weight (reduced)
+    risk_weight: 0.1        # Risk score weight (reduced)
     min_composite_score: 0.6  # Minimum score to execute trade
     
-    # Signal Thresholds (Single Source of Truth)
+    # Signal Thresholds (Single Source of Truth) - Enhanced Hysteresis
     decision_thresholds:
       enter_long: 60        # Score >= 60: LONG entry
       exit_long: 45         # Score <= 45: LONG exit/reversal
       enter_short: 40       # Score <= 40: SHORT entry
       exit_short: 55        # Score >= 55: SHORT exit/reversal
-      flat_range: [45, 55]  # 45-55 arası: FLAT (neutral zone)
+      flat_range: [47, 53]  # 47-53 arası: FLAT (narrower neutral zone - reduced from 45-55)
     
     # Signal Gating
     signal:

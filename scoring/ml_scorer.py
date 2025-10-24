@@ -34,23 +34,27 @@ class MLScorer:
     def _load_model(self):
         """Load trained ML model if available."""
         try:
-            model_path = Path("models/rf_v1.pkl")
-            metadata_path = Path("models/rf_v1_version.json")
+            # Use Model Version Manager to get active model
+            from ml.model_version_manager import MLModelVersionManager
+            manager = MLModelVersionManager()
             
-            if not model_path.exists():
-                logger.info("ℹ️ ML model not found, will use fallback scoring")
+            # Get active model
+            active_version = manager.get_active_model_version()
+            if not active_version:
+                logger.info("ℹ️ No active ML model found, will use fallback scoring")
                 self.model = None
                 return
             
-            # Load model
-            with open(model_path, 'rb') as f:
-                self.model = pickle.load(f)
+            # Load active model
+            self.model = manager.get_active_model()
+            if not self.model:
+                logger.info("ℹ️ Active ML model could not be loaded, will use fallback scoring")
+                self.model = None
+                return
             
-            # Load metadata
-            if metadata_path.exists():
-                with open(metadata_path, 'r') as f:
-                    self.metadata = json.load(f)
-                    self.model_version = self.metadata.get('version', 'unknown')
+            # Get metadata
+            self.metadata = manager.get_model_metadata(active_version)
+            self.model_version = active_version
             
             logger.info(f"✅ ML model loaded: {self.model_version}")
             logger.info(f"   Features: {self.metadata.get('n_features', 'unknown')}")

@@ -1,0 +1,84 @@
+SMOKE TEST METRICS SNAPSHOT
+============================
+
+Test Tarihi: 2025-10-24 02:20:47
+Prometheus Endpoint: http://localhost:8000/metrics
+
+=== TEMEL METRİKLER ===
+
+Sistem Durumu:
+- Bot Uptime: ~8 saniye
+- Prometheus Port: 8000 (aktif)
+- Exit Code: 0 (başarılı)
+
+=== TRADING METRİKLERİ ===
+
+Pozisyon Durumu:
+- Açık Pozisyon: 0 (PAPER modu)
+- Pozisyon Açma: 0 (gate pending)
+- Pozisyon Çevirme: 0
+- Giriş Atlama: 0
+
+Skorlar (Son Değerler):
+- BTC-USDT-SWAP Composite: 61.5
+- ETH-USDT-SWAP Composite: 46.3
+- SOL-USDT-SWAP Composite: 46.5
+
+=== SİSTEM METRİKLERİ ===
+
+Job Execution:
+- risk_monitor: SUCCESS (1.75s)
+- trading_analysis: Çalışmadı (tek seferlik test)
+
+API Calls:
+- OKX Exchange: Başarılı bağlantı
+- News Service: 5882 digest cache entries yüklendi
+- LLM Service: Hazır (kullanılmadı)
+
+=== KONFİGÜRASYON METRİKLERİ ===
+
+Aktif Ayarlar:
+- Trading Mode: PAPER
+- Strategy Mode: single_flip
+- Position TP/SL: Enabled
+- Reduce Only: Enabled
+- Entry Cooldown: 2 bars
+- Once Per Bar: Enabled
+- Same Direction Block: Enabled
+- Reversal: Enabled
+
+Risk Limitleri:
+- Max Position Size: 1%
+- Max Total Risk: 60%
+- Max Leverage: 3.0x
+
+=== PERFORMANS METRİKLERİ ===
+
+İşlem Süreleri:
+- Sistem Başlatma: ~2 saniye
+- Market Data Fetch: ~3 saniye (3 sembol)
+- ML Model Loading: ~0.5 saniye
+- Risk Analysis: ~0.1 saniye
+- Toplam Analiz: ~5 saniye
+
+Memory Usage:
+- ML Model: rf_v1 (13 features)
+- News Cache: 5882 entries
+- Market Data: 200 bars per symbol
+
+=== HATA DURUMU ===
+
+Hatalar: Yok
+Uyarılar: 
+- Volatility risk: Default değer kullanıldı (ilk çalıştırma)
+- Liquidity risk: Default değer kullanıldı (ilk çalıştırma)
+
+=== SONUÇ ===
+
+✅ Smoke Test BAŞARILI
+- Sistem sorunsuz çalıştı
+- Tüm bileşenler başlatıldı
+- PAPER modu güvenli şekilde aktif
+- Gerçek emir gönderilmedi
+- Konfigürasyon doğru yüklendi
+

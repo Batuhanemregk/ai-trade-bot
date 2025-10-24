@@ -306,6 +306,20 @@ def _calculate_price_levels(df: pd.DataFrame) -> pd.DataFrame:
     return result_df
 
 
+def _calculate_stochastic_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate Stochastic indicators."""
+    result_df = df.copy()
+    
+    # Stochastic %K and %D (14-period)
+    low_14 = df['low'].rolling(window=14).min()
+    high_14 = df['high'].rolling(window=14).max()
+    
+    result_df['stoch_k'] = 100 * (df['close'] - low_14) / (high_14 - low_14)
+    result_df['stoch_d'] = result_df['stoch_k'].rolling(window=3).mean()
+    
+    return result_df
+
+
 def calculate_fibonacci_levels(df: pd.DataFrame, lookback: int = None) -> Dict[str, float]:
     """Calculate Fibonacci retracement levels."""
     if lookback is None:
@@ -378,6 +392,9 @@ def calculate_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df = _calculate_sma_indicators(df)
     df = _calculate_volume_indicators(df)
     df = _calculate_price_levels(df)
+    
+    # Add missing indicators for new scoring methods
+    df = _calculate_stochastic_indicators(df)
     
     return df
 

@@ -9,6 +9,7 @@ import pandas as pd
 from loguru import logger
 
 from .strategy_scorer import calculate_all_indicators
+from .columns import COL
 
 
 class TAScorer:
@@ -17,6 +18,26 @@ class TAScorer:
     def __init__(self):
         self.indicators = {}
         self.strategy_flags = {}
+        self._skip_warnings = set()  # Track which warnings we've already logged
+
+    def _col_or_none(self, indicators: dict, col_name: str, symbol: str = "") -> "pd.Series|None":
+        """Safely get column or None if missing/NaN-only."""
+        if col_name not in indicators:
+            warning_key = f"{symbol}:{col_name}"
+            if warning_key not in self._skip_warnings:
+                logger.warning(f"⚠️ Missing indicator column '{col_name}' for {symbol}")
+                self._skip_warnings.add(warning_key)
+            return None
+        
+        s = indicators[col_name]
+        if hasattr(s, "isna") and s.isna().all():
+            warning_key = f"{symbol}:{col_name}:nan"
+            if warning_key not in self._skip_warnings:
+                logger.warning(f"⚠️ Indicator '{col_name}' is all NaN for {symbol} (warmup period)")
+                self._skip_warnings.add(warning_key)
+            return None
+        
+        return s
 
     def score(self, df: pd.DataFrame, symbol: str) -> tuple[float, str, dict[str, Any]]:
         """
@@ -45,12 +66,19 @@ class TAScorer:
             volatility_score = self._score_volatility(indicators)
             volume_score = self._score_volume(indicators)
 
-            # Weighted composite score
+            # Enhanced weighted composite score with more active features
+            adx_score = self._score_adx(indicators)
+            ema_score = self._score_ema(indicators)
+            stoch_score = self._score_stochastic(indicators)
+            
             technical_score = (
-                0.35 * trend_score +
-                0.30 * momentum_score +
-                0.20 * volatility_score +
-                0.15 * volume_score
+                0.25 * trend_score +      # Trend analysis (reduced weight)
+                0.20 * momentum_score +   # Momentum analysis (reduced weight)
+                0.15 * volatility_score + # Volatility analysis (reduced weight)
+                0.10 * volume_score +     # Volume analysis (reduced weight)
+                0.15 * adx_score +        # ADX trend strength (new)
+                0.10 * ema_score +        # EMA analysis (new)
+                0.05 * stoch_score        # Stochastic analysis (new)
             )
 
             # Determine strategy flags
@@ -245,6 +273,109 @@ class TAScorer:
 
         except Exception as e:
             logger.error(f"Volume scoring error: {e}")
+            return 50.0
+
+    def _score_adx(self, indicators: dict[str, Any]) -> float:
+        """Score ADX trend strength."""
+        try:
+            adx_series = self._col_or_none(indicators, COL["ADX"])
+            if adx_series is None:
+                return 50.0  # Neutral score for missing indicator
+            
+            adx = adx_series.iloc[-1]
+            
+            if pd.isna(adx):
+                return 50.0
+            
+            # ADX scoring (0-100 scale)
+            if adx > 50:
+                adx_score = 80.0  # Strong trend
+            elif adx > 25:
+                adx_score = 60.0  # Moderate trend
+            elif adx > 20:
+                adx_score = 50.0  # Weak trend
+            else:
+                adx_score = 30.0  # No trend
+            
+            return max(0.0, min(100.0, adx_score))
+            
+        except Exception as e:
+            logger.error(f"ADX scoring error: {e}")
+            return 50.0
+
+    def _score_ema(self, indicators: dict[str, Any]) -> float:
+        """Score EMA analysis."""
+        try:
+            ema_20_series = self._col_or_none(indicators, COL["EMA20"])
+            ema_50_series = self._col_or_none(indicators, COL["EMA50"])
+            ema_200_series = self._col_or_none(indicators, COL["EMA200"])
+            current_price_series = self._col_or_none(indicators, COL["CURRENT_PRICE"])
+            
+            if any(series is None for series in [ema_20_series, ema_50_series, ema_200_series, current_price_series]):
+                return 50.0  # Neutral score for missing indicators
+            
+            ema_20 = ema_20_series.iloc[-1]
+            ema_50 = ema_50_series.iloc[-1]
+            ema_200 = ema_200_series.iloc[-1]
+            current_price = current_price_series.iloc[-1]
+            
+            if any(pd.isna([ema_20, ema_50, ema_200, current_price])):
+                return 50.0
+            
+            # EMA scoring based on alignment and position
+            score = 50.0
+            
+            # EMA alignment bonus
+            if ema_20 > ema_50 > ema_200:
+                score += 20.0  # Bullish alignment
+            elif ema_20 < ema_50 < ema_200:
+                score -= 20.0  # Bearish alignment
+            
+            # Price position relative to EMAs
+            if current_price > ema_20:
+                score += 10.0
+            if current_price > ema_50:
+                score += 10.0
+            if current_price > ema_200:
+                score += 10.0
+            
+            return max(0.0, min(100.0, score))
+            
+        except Exception as e:
+            logger.error(f"EMA scoring error: {e}")
+            return 50.0
+
+    def _score_stochastic(self, indicators: dict[str, Any]) -> float:
+        """Score Stochastic analysis."""
+        try:
+            stoch_k_series = self._col_or_none(indicators, COL["STOCH_K"])
+            stoch_d_series = self._col_or_none(indicators, COL["STOCH_D"])
+            
+            if stoch_k_series is None or stoch_d_series is None:
+                return 50.0  # Neutral score for missing indicators
+            
+            stoch_k = stoch_k_series.iloc[-1]
+            stoch_d = stoch_d_series.iloc[-1]
+            
+            if pd.isna(stoch_k) or pd.isna(stoch_d):
+                return 50.0
+            
+            # Stochastic scoring
+            if stoch_k > 80 and stoch_d > 80:
+                stoch_score = 30.0  # Overbought
+            elif stoch_k < 20 and stoch_d < 20:
+                stoch_score = 70.0  # Oversold (bullish)
+            elif stoch_k > stoch_d:
+                stoch_score = 60.0  # Bullish crossover
+            elif stoch_k < stoch_d:
+                stoch_score = 40.0  # Bearish crossover
+            else:
+                stoch_score = 50.0  # Neutral
+            
+            return max(0.0, min(100.0, stoch_score))
+            
+        except Exception as e:
+            logger.error(f"Stochastic scoring error: {e}")
             return 50.0
 
     def _determine_strategy_flags(self, indicators: dict[str, Any]) -> dict[str, Any]:

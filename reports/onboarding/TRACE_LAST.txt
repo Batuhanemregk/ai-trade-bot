@@ -1,0 +1,90 @@
+SMOKE TEST TRACE - Son 200 Karar
+=====================================
+
+Test Tarihi: 2025-10-24 02:20:45
+Mod: PAPER
+Strateji: single_flip
+Semboller: BTC-USDT-SWAP, ETH-USDT-SWAP, SOL-USDT-SWAP
+
+=== ANALİZ SONUÇLARI ===
+
+1. BTC-USDT-SWAP:
+   - Zaman: 23:20:45
+   - Timeframe: 15m
+   - TA Skor: 51.8
+   - ML Skor: 95.9
+   - News Skor: 50.0
+   - Risk Skor: 45.8
+   - Final Skor: 61.5 (C)
+   - Yön: long
+   - Yaş: 1/6
+   - Gate: PENDING (persist 0/5, conf 0.00/0.00)
+
+2. ETH-USDT-SWAP:
+   - Zaman: 23:20:46
+   - Timeframe: 15m
+   - TA Skor: 44.5
+   - ML Skor: 46.4
+   - News Skor: 50.0
+   - Risk Skor: 45.8
+   - Final Skor: 46.3 (D)
+   - Yön: flat
+   - Yaş: 1/6
+   - Gate: PENDING (persist 0/5, conf 0.00/0.00)
+
+3. SOL-USDT-SWAP:
+   - Zaman: 23:20:47
+   - Timeframe: 15m
+   - TA Skor: 41.4
+   - ML Skor: 51.6
+   - News Skor: 50.0
+   - Risk Skor: 47.2
+   - Final Skor: 46.5 (D)
+   - Yön: flat
+   - Yaş: 1/6
+   - Gate: PENDING (persist 0/5, conf 0.00/0.00)
+
+=== SİSTEM DURUMU ===
+
+✅ Sistem Başarıyla Çalıştı
+- Konfigürasyon yüklendi
+- Prometheus metrics başlatıldı (port 8000)
+- News service LLM analizi ile başlatıldı
+- OKX exchange bağlantısı kuruldu
+- ML modeli yüklendi (rf_v1, 13 features)
+- Position state manager başlatıldı
+- Signal gate başlatıldı
+- Reversal manager başlatıldı
+
+✅ Risk Monitor Job Çalıştı
+- Job: risk_monitor
+- Durum: SUCCESS
+- Süre: 1.75s
+
+=== KONFİGÜRASYON BANNER ===
+
+MODE: PAPER (source=ENV)
+STRATEGY: single_flip (source=policy.yaml)
+USE_POSITION_TPSL: True (source=policy.yaml)
+REDUCE_ONLY: True (source=policy.yaml)
+ENTRY_COOLDOWN_BARS: 2 (source=policy.yaml)
+ONCE_PER_BAR: True (source=policy.yaml)
+SAME_DIRECTION_BLOCK: True (source=policy.yaml)
+REVERSAL_ENABLED: True (source=policy.yaml)
+
+RISK LIMITS:
+  max_position_size_pct: 0.01 (source=policy.yaml)
+  max_total_risk_pct: 0.6 (source=policy.yaml)
+  max_leverage: 3.0 (source=policy.yaml)
+
+SYMBOLS:
+  supported_pairs: ['BTC-USDT-SWAP'] (source=ENV)
+  timeframe: 15m (source=default)
+
+SCALE-IN CONFIG (if enabled):
+  enabled: False (source=policy.yaml)
+  max_ladders: 2 (source=policy.yaml)
+  ladder_size_usdt: 5 (source=policy.yaml)
+  min_dist_pct: 0.5 (source=policy.yaml)
+  add_on_profit_only: True (source=policy.yaml)
+
