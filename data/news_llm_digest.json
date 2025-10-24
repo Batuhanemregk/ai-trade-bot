@@ -16,19 +16,19 @@
     "digest": "e3c405d95860f6f9"
   },
   "BTC_last": {
-    "timestamp": "2025-10-23T23:05:10.116094+00:00",
+    "timestamp": "2025-10-24T22:45:09.109301+00:00",
     "result": {
-      "score": 55.0,
+      "score": 50.0,
       "categories": [
         "MARKET",
-        "GENERAL",
-        "REG"
+        "TECH",
+        "GENERAL"
       ],
-      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.45)",
-      "volatility_impact": 0.45,
-      "timestamp": "2025-10-23T23:05:10.116087+00:00"
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:45:09.109293+00:00"
     },
-    "digest": "4b5f100197ac90c1"
+    "digest": "7dd4e6898d888699"
   },
   "ETH_3a104a71c653b991": {
     "timestamp": "2025-09-04T21:30:07.128380+00:00",
@@ -47,19 +47,19 @@
     "digest": "3a104a71c653b991"
   },
   "ETH_last": {
-    "timestamp": "2025-10-23T23:05:12.163739+00:00",
+    "timestamp": "2025-10-24T22:45:10.531296+00:00",
     "result": {
-      "score": 45.0,
+      "score": 40.0,
       "categories": [
-        "GENERAL",
         "MARKET",
-        "ETH"
+        "REG",
+        "GENERAL"
       ],
-      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.25)",
-      "volatility_impact": 0.25,
-      "timestamp": "2025-10-23T23:05:12.163730+00:00"
+      "rationale": "SHORT sentiment (score: 40.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-24T22:45:10.531286+00:00"
     },
-    "digest": "95711e00ba0e6b17"
+    "digest": "ae6a01a304b4e314"
   },
   "SOL_adf39c8103219ddd": {
     "timestamp": "2025-09-04T21:30:12.396623+00:00",
@@ -78,19 +78,19 @@
     "digest": "adf39c8103219ddd"
   },
   "SOL_last": {
-    "timestamp": "2025-10-23T23:05:13.983744+00:00",
+    "timestamp": "2025-10-24T22:45:12.134476+00:00",
     "result": {
       "score": 50.0,
       "categories": [
         "MARKET",
-        "REG",
-        "GENERAL"
+        "GENERAL",
+        "TECH"
       ],
-      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.35)",
-      "volatility_impact": 0.35,
-      "timestamp": "2025-10-23T23:05:13.983735+00:00"
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.15)",
+      "volatility_impact": 0.15,
+      "timestamp": "2025-10-24T22:45:12.134468+00:00"
     },
-    "digest": "028c4a1ca22566fd"
+    "digest": "e1f162fb57f6d8de"
   },
   "ADA_cdab36016bed0bec": {
     "timestamp": "2025-09-04T21:30:14.676658+00:00",
@@ -88926,5 +88926,1977 @@
       "timestamp": "2025-10-23T23:05:13.983735+00:00"
     },
     "digest": "028c4a1ca22566fd"
+  },
+  "BTC_aabfddcaf1236eb6": {
+    "timestamp": "2025-10-23T23:10:02.067669+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:10:02.067660+00:00"
+    },
+    "digest": "aabfddcaf1236eb6"
+  },
+  "ETH_1ae0a456f2c6f903": {
+    "timestamp": "2025-10-23T23:10:03.894714+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:10:03.894705+00:00"
+    },
+    "digest": "1ae0a456f2c6f903"
+  },
+  "SOL_a3df0f1b46ffcd50": {
+    "timestamp": "2025-10-23T23:10:06.201189+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:10:06.201180+00:00"
+    },
+    "digest": "a3df0f1b46ffcd50"
+  },
+  "BTC_6033d63120e24740": {
+    "timestamp": "2025-10-23T23:10:07.995444+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.60)",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-10-23T23:10:07.995437+00:00"
+    },
+    "digest": "6033d63120e24740"
+  },
+  "ETH_99bdf28515d37dbe": {
+    "timestamp": "2025-10-23T23:10:09.525373+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:10:09.525365+00:00"
+    },
+    "digest": "99bdf28515d37dbe"
+  },
+  "SOL_86d31c4693b8844e": {
+    "timestamp": "2025-10-23T23:10:11.843485+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:10:11.843477+00:00"
+    },
+    "digest": "86d31c4693b8844e"
+  },
+  "BTC_2725030af505d20f": {
+    "timestamp": "2025-10-23T23:15:02.873820+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:15:02.873808+00:00"
+    },
+    "digest": "2725030af505d20f"
+  },
+  "ETH_8a02894aeebd8099": {
+    "timestamp": "2025-10-23T23:15:04.932143+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "ETH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:15:04.932130+00:00"
+    },
+    "digest": "8a02894aeebd8099"
+  },
+  "SOL_ca19b7c99d994981": {
+    "timestamp": "2025-10-23T23:15:06.751964+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "SEC"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:15:06.751955+00:00"
+    },
+    "digest": "ca19b7c99d994981"
+  },
+  "BTC_8b499491dec9c07f": {
+    "timestamp": "2025-10-23T23:15:08.480926+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.65)",
+      "volatility_impact": 0.65,
+      "timestamp": "2025-10-23T23:15:08.480918+00:00"
+    },
+    "digest": "8b499491dec9c07f"
+  },
+  "ETH_e56359ebc3469b1b": {
+    "timestamp": "2025-10-23T23:15:10.237713+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:15:10.237704+00:00"
+    },
+    "digest": "e56359ebc3469b1b"
+  },
+  "SOL_5c90b6d7214cf085": {
+    "timestamp": "2025-10-23T23:15:12.394714+00:00",
+    "result": {
+      "score": 40.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 40.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:15:12.394703+00:00"
+    },
+    "digest": "5c90b6d7214cf085"
+  },
+  "BTC_c00be6d74d654071": {
+    "timestamp": "2025-10-23T23:20:01.899605+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:20:01.899593+00:00"
+    },
+    "digest": "c00be6d74d654071"
+  },
+  "ETH_450fefff942b4bf1": {
+    "timestamp": "2025-10-23T23:20:04.337898+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:20:04.337886+00:00"
+    },
+    "digest": "450fefff942b4bf1"
+  },
+  "SOL_b81fd881d27b0105": {
+    "timestamp": "2025-10-23T23:20:06.177188+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.15)",
+      "volatility_impact": 0.15,
+      "timestamp": "2025-10-23T23:20:06.177179+00:00"
+    },
+    "digest": "b81fd881d27b0105"
+  },
+  "BTC_ce1c276f330e2e41": {
+    "timestamp": "2025-10-23T23:20:08.882951+00:00",
+    "result": {
+      "score": 52.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 52.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:20:08.882938+00:00"
+    },
+    "digest": "ce1c276f330e2e41"
+  },
+  "ETH_b6a52e76f597a8e3": {
+    "timestamp": "2025-10-23T23:20:11.364616+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "ETH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:20:11.364609+00:00"
+    },
+    "digest": "b6a52e76f597a8e3"
+  },
+  "SOL_be2178e725a89046": {
+    "timestamp": "2025-10-23T23:20:12.735985+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:20:12.735977+00:00"
+    },
+    "digest": "be2178e725a89046"
+  },
+  "BTC_811abad269e9d353": {
+    "timestamp": "2025-10-23T23:25:01.662970+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.60)",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-10-23T23:25:01.662958+00:00"
+    },
+    "digest": "811abad269e9d353"
+  },
+  "ETH_1f0744234dd7b8ab": {
+    "timestamp": "2025-10-23T23:25:03.240498+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:25:03.240490+00:00"
+    },
+    "digest": "1f0744234dd7b8ab"
+  },
+  "SOL_5e4ebb1d6ea3167f": {
+    "timestamp": "2025-10-23T23:25:05.300532+00:00",
+    "result": {
+      "score": 40.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "SEC"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 40.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-23T23:25:05.300525+00:00"
+    },
+    "digest": "5e4ebb1d6ea3167f"
+  },
+  "BTC_c4efd60449e14c5c": {
+    "timestamp": "2025-10-23T23:25:07.035771+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-23T23:25:07.035764+00:00"
+    },
+    "digest": "c4efd60449e14c5c"
+  },
+  "ETH_ed80e27fae8add80": {
+    "timestamp": "2025-10-23T23:25:09.278503+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:25:09.278496+00:00"
+    },
+    "digest": "ed80e27fae8add80"
+  },
+  "SOL_99b05b6e7691ab55": {
+    "timestamp": "2025-10-23T23:25:11.250885+00:00",
+    "result": {
+      "score": 42.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 42.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:25:11.250878+00:00"
+    },
+    "digest": "99b05b6e7691ab55"
+  },
+  "BTC_4bc0ebca64719be0": {
+    "timestamp": "2025-10-23T23:30:02.871938+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:30:02.871931+00:00"
+    },
+    "digest": "4bc0ebca64719be0"
+  },
+  "ETH_4e4af2663a755a6c": {
+    "timestamp": "2025-10-23T23:30:04.739295+00:00",
+    "result": {
+      "score": 52.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 52.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:30:04.739286+00:00"
+    },
+    "digest": "4e4af2663a755a6c"
+  },
+  "SOL_98ab25fdda0d0105": {
+    "timestamp": "2025-10-23T23:30:08.198047+00:00",
+    "result": {
+      "score": 40.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 40.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:30:08.198040+00:00"
+    },
+    "digest": "98ab25fdda0d0105"
+  },
+  "BTC_345fa8b225c0d3d4": {
+    "timestamp": "2025-10-23T23:30:11.323450+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:30:11.323443+00:00"
+    },
+    "digest": "345fa8b225c0d3d4"
+  },
+  "ETH_caf955f592b588af": {
+    "timestamp": "2025-10-23T23:30:13.642895+00:00",
+    "result": {
+      "score": 52.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 52.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-23T23:30:13.642887+00:00"
+    },
+    "digest": "caf955f592b588af"
+  },
+  "SOL_fe6c888806d3044f": {
+    "timestamp": "2025-10-23T23:30:15.326076+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.30)",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-10-23T23:30:15.326069+00:00"
+    },
+    "digest": "fe6c888806d3044f"
+  },
+  "BTC_930ace3fb579d620": {
+    "timestamp": "2025-10-23T23:35:01.462741+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "REG",
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-23T23:35:01.462735+00:00"
+    },
+    "digest": "930ace3fb579d620"
+  },
+  "ETH_00d2b88107da264d": {
+    "timestamp": "2025-10-23T23:35:03.263749+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:35:03.263742+00:00"
+    },
+    "digest": "00d2b88107da264d"
+  },
+  "SOL_e77beeef23ddbf53": {
+    "timestamp": "2025-10-23T23:35:04.664033+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "SEC"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-23T23:35:04.664025+00:00"
+    },
+    "digest": "e77beeef23ddbf53"
+  },
+  "BTC_5678e245cff5a5a5": {
+    "timestamp": "2025-10-23T23:35:06.831122+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 60.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-23T23:35:06.831114+00:00"
+    },
+    "digest": "5678e245cff5a5a5"
+  },
+  "ETH_8f569b3b11019310": {
+    "timestamp": "2025-10-23T23:35:08.551508+00:00",
+    "result": {
+      "score": 40.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 40.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:35:08.551499+00:00"
+    },
+    "digest": "8f569b3b11019310"
+  },
+  "SOL_8ba276bd0faace68": {
+    "timestamp": "2025-10-23T23:35:10.864022+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-23T23:35:10.864015+00:00"
+    },
+    "digest": "8ba276bd0faace68"
+  },
+  "BTC_1f9ad4fd843ff336": {
+    "timestamp": "2025-10-23T23:40:02.486284+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:40:02.486276+00:00"
+    },
+    "digest": "1f9ad4fd843ff336"
+  },
+  "ETH_4bacdb1fd8256674": {
+    "timestamp": "2025-10-23T23:40:05.654593+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "ETH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:40:05.654585+00:00"
+    },
+    "digest": "4bacdb1fd8256674"
+  },
+  "SOL_7a8f5cc60d9b76b8": {
+    "timestamp": "2025-10-23T23:40:08.293518+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:40:08.293510+00:00"
+    },
+    "digest": "7a8f5cc60d9b76b8"
+  },
+  "BTC_bf2e7e37653c8ac9": {
+    "timestamp": "2025-10-23T23:40:10.172636+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:40:10.172629+00:00"
+    },
+    "digest": "bf2e7e37653c8ac9"
+  },
+  "ETH_297513c88318f0e0": {
+    "timestamp": "2025-10-23T23:40:11.910922+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "SHORT sentiment (score: 60.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-23T23:40:11.910915+00:00"
+    },
+    "digest": "297513c88318f0e0"
+  },
+  "SOL_d4009aec7c53cf8a": {
+    "timestamp": "2025-10-23T23:40:13.658474+00:00",
+    "result": {
+      "score": 40.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 40.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:40:13.658466+00:00"
+    },
+    "digest": "d4009aec7c53cf8a"
+  },
+  "BTC_cefc37fd5c99613e": {
+    "timestamp": "2025-10-23T23:54:02.423240+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:54:02.423232+00:00"
+    },
+    "digest": "cefc37fd5c99613e"
+  },
+  "ETH_c05a3eb1a0f47346": {
+    "timestamp": "2025-10-23T23:54:05.203242+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-23T23:54:05.203232+00:00"
+    },
+    "digest": "c05a3eb1a0f47346"
+  },
+  "SOL_a976fc786e5a61ac": {
+    "timestamp": "2025-10-23T23:54:06.714187+00:00",
+    "result": {
+      "score": 52.0,
+      "categories": [
+        "REG",
+        "GENERAL",
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 52.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-23T23:54:06.714179+00:00"
+    },
+    "digest": "a976fc786e5a61ac"
+  },
+  "BTC_f0e336093b59e901": {
+    "timestamp": "2025-10-23T23:54:08.747663+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:54:08.747656+00:00"
+    },
+    "digest": "f0e336093b59e901"
+  },
+  "ETH_ad979d9e4adc97f1": {
+    "timestamp": "2025-10-23T23:54:11.053615+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-23T23:54:11.053608+00:00"
+    },
+    "digest": "ad979d9e4adc97f1"
+  },
+  "SOL_3974cc931363cdf8": {
+    "timestamp": "2025-10-23T23:54:12.602171+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:54:12.602163+00:00"
+    },
+    "digest": "3974cc931363cdf8"
+  },
+  "BTC_2f308139f50100b0": {
+    "timestamp": "2025-10-23T23:55:02.996012+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-23T23:55:02.996004+00:00"
+    },
+    "digest": "2f308139f50100b0"
+  },
+  "ETH_15cafa5d2e036510": {
+    "timestamp": "2025-10-23T23:55:04.537896+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:55:04.537889+00:00"
+    },
+    "digest": "15cafa5d2e036510"
+  },
+  "SOL_e105f40dfdfb6432": {
+    "timestamp": "2025-10-23T23:55:06.272415+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 60.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:55:06.272405+00:00"
+    },
+    "digest": "e105f40dfdfb6432"
+  },
+  "BTC_710e3fdf6fbddb26": {
+    "timestamp": "2025-10-23T23:55:07.968798+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-23T23:55:07.968790+00:00"
+    },
+    "digest": "710e3fdf6fbddb26"
+  },
+  "ETH_ec1421b19498d2f0": {
+    "timestamp": "2025-10-23T23:55:10.204322+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "REG",
+        "GENERAL",
+        "MARKET"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.60)",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-10-23T23:55:10.204313+00:00"
+    },
+    "digest": "ec1421b19498d2f0"
+  },
+  "SOL_53f2f9624d2c423c": {
+    "timestamp": "2025-10-23T23:55:11.987327+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:55:11.987318+00:00"
+    },
+    "digest": "53f2f9624d2c423c"
+  },
+  "ETH_2818565d43402414": {
+    "timestamp": "2025-10-23T23:55:31.663564+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "REG",
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-23T23:55:31.663556+00:00"
+    },
+    "digest": "2818565d43402414"
+  },
+  "SOL_4074919cc96e0e9b": {
+    "timestamp": "2025-10-23T23:55:33.079819+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:55:33.079812+00:00"
+    },
+    "digest": "4074919cc96e0e9b"
+  },
+  "BTC_304d0c79c4aa9ba3": {
+    "timestamp": "2025-10-23T23:55:34.543473+00:00",
+    "result": {
+      "score": 58.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 58.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-23T23:55:34.543461+00:00"
+    },
+    "digest": "304d0c79c4aa9ba3"
+  },
+  "ETH_92bfa1470360ab90": {
+    "timestamp": "2025-10-23T23:55:36.766863+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "REG",
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.65)",
+      "volatility_impact": 0.65,
+      "timestamp": "2025-10-23T23:55:36.766854+00:00"
+    },
+    "digest": "92bfa1470360ab90"
+  },
+  "SOL_a19dd4582543447a": {
+    "timestamp": "2025-10-23T23:55:38.833088+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-23T23:55:38.833076+00:00"
+    },
+    "digest": "a19dd4582543447a"
+  },
+  "BTC_8f01687a82e6eab7": {
+    "timestamp": "2025-10-24T00:00:02.971487+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T00:00:02.971480+00:00"
+    },
+    "digest": "8f01687a82e6eab7"
+  },
+  "ETH_a5440c4207138483": {
+    "timestamp": "2025-10-24T00:00:06.183810+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "REG",
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T00:00:06.183801+00:00"
+    },
+    "digest": "a5440c4207138483"
+  },
+  "SOL_3751c4822e3964c9": {
+    "timestamp": "2025-10-24T00:00:08.384852+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T00:00:08.384844+00:00"
+    },
+    "digest": "3751c4822e3964c9"
+  },
+  "BTC_d54dcd2ada5669d7": {
+    "timestamp": "2025-10-24T00:00:10.592028+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T00:00:10.592017+00:00"
+    },
+    "digest": "d54dcd2ada5669d7"
+  },
+  "ETH_5f620369cd94d526": {
+    "timestamp": "2025-10-24T00:00:12.900980+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.60)",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-10-24T00:00:12.900972+00:00"
+    },
+    "digest": "5f620369cd94d526"
+  },
+  "SOL_fc46f5e6a21bc258": {
+    "timestamp": "2025-10-24T00:00:15.721201+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "REG",
+        "GENERAL",
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 60.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T00:00:15.721193+00:00"
+    },
+    "digest": "fc46f5e6a21bc258"
+  },
+  "BTC_6393fa8f965c5c60": {
+    "timestamp": "2025-10-24T00:05:02.435692+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T00:05:02.435683+00:00"
+    },
+    "digest": "6393fa8f965c5c60"
+  },
+  "ETH_8525592465e5202a": {
+    "timestamp": "2025-10-24T00:05:04.428443+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.60)",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-10-24T00:05:04.428434+00:00"
+    },
+    "digest": "8525592465e5202a"
+  },
+  "SOL_1e25fc74b813176c": {
+    "timestamp": "2025-10-24T00:05:06.123105+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T00:05:06.123098+00:00"
+    },
+    "digest": "1e25fc74b813176c"
+  },
+  "BTC_23128d2a1c2272d7": {
+    "timestamp": "2025-10-24T00:05:08.048552+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T00:05:08.048545+00:00"
+    },
+    "digest": "23128d2a1c2272d7"
+  },
+  "ETH_3cdcc28c98c57d78": {
+    "timestamp": "2025-10-24T00:05:10.581714+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "TECH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-24T00:05:10.581706+00:00"
+    },
+    "digest": "3cdcc28c98c57d78"
+  },
+  "SOL_5ee1e1f1423b4627": {
+    "timestamp": "2025-10-24T00:05:12.431351+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.15)",
+      "volatility_impact": 0.15,
+      "timestamp": "2025-10-24T00:05:12.431344+00:00"
+    },
+    "digest": "5ee1e1f1423b4627"
+  },
+  "BTC_7efe791deac403b6": {
+    "timestamp": "2025-10-24T00:10:02.749850+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "TECH"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.60)",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-10-24T00:10:02.749842+00:00"
+    },
+    "digest": "7efe791deac403b6"
+  },
+  "ETH_7c41fb10bfdd4e19": {
+    "timestamp": "2025-10-24T00:10:04.532524+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T00:10:04.532515+00:00"
+    },
+    "digest": "7c41fb10bfdd4e19"
+  },
+  "SOL_cbcba1d1aaf7daa7": {
+    "timestamp": "2025-10-24T00:10:06.988199+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.15)",
+      "volatility_impact": 0.15,
+      "timestamp": "2025-10-24T00:10:06.988191+00:00"
+    },
+    "digest": "cbcba1d1aaf7daa7"
+  },
+  "BTC_c0f4fe04161c7bdc": {
+    "timestamp": "2025-10-24T00:10:08.652492+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T00:10:08.652484+00:00"
+    },
+    "digest": "c0f4fe04161c7bdc"
+  },
+  "ETH_b3139aa504a18eff": {
+    "timestamp": "2025-10-24T00:10:10.170897+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.55)",
+      "volatility_impact": 0.55,
+      "timestamp": "2025-10-24T00:10:10.170890+00:00"
+    },
+    "digest": "b3139aa504a18eff"
+  },
+  "SOL_83500464a26398a1": {
+    "timestamp": "2025-10-24T00:10:11.891753+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T00:10:11.891746+00:00"
+    },
+    "digest": "83500464a26398a1"
+  },
+  "BTC_6b3afbccf2096690": {
+    "timestamp": "2025-10-24T22:21:03.335416+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "REG",
+        "SEC",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-24T22:21:03.335407+00:00"
+    },
+    "digest": "6b3afbccf2096690"
+  },
+  "ETH_0add87fa64b4992b": {
+    "timestamp": "2025-10-24T22:21:05.694183+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "REG"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T22:21:05.694172+00:00"
+    },
+    "digest": "0add87fa64b4992b"
+  },
+  "SOL_dbaab413db7b1097": {
+    "timestamp": "2025-10-24T22:21:07.908452+00:00",
+    "result": {
+      "score": 40.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 40.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:21:07.908443+00:00"
+    },
+    "digest": "dbaab413db7b1097"
+  },
+  "BTC_dada85e04354403c": {
+    "timestamp": "2025-10-24T22:21:09.929469+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "REG",
+        "GENERAL",
+        "SEC"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-24T22:21:09.929461+00:00"
+    },
+    "digest": "dada85e04354403c"
+  },
+  "ETH_02e6af8774f9b14b": {
+    "timestamp": "2025-10-24T22:21:11.463291+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:21:11.463283+00:00"
+    },
+    "digest": "02e6af8774f9b14b"
+  },
+  "SOL_7fb65ce308a2b880": {
+    "timestamp": "2025-10-24T22:21:14.237612+00:00",
+    "result": {
+      "score": 46.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 46.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:21:14.237606+00:00"
+    },
+    "digest": "7fb65ce308a2b880"
+  },
+  "BTC_796dcf0646c9396a": {
+    "timestamp": "2025-10-24T22:22:02.227195+00:00",
+    "result": {
+      "score": 52.0,
+      "categories": [
+        "REG",
+        "SEC",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 52.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-24T22:22:02.227188+00:00"
+    },
+    "digest": "796dcf0646c9396a"
+  },
+  "ETH_5cbd30df914826e3": {
+    "timestamp": "2025-10-24T22:22:05.788578+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:22:05.788570+00:00"
+    },
+    "digest": "5cbd30df914826e3"
+  },
+  "SOL_b1a1b6c394faa7f6": {
+    "timestamp": "2025-10-24T22:22:08.023724+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:22:08.023715+00:00"
+    },
+    "digest": "b1a1b6c394faa7f6"
+  },
+  "BTC_32f192da18a2e05b": {
+    "timestamp": "2025-10-24T22:22:09.844289+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "REG",
+        "GENERAL",
+        "SEC"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.30)",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-10-24T22:22:09.844282+00:00"
+    },
+    "digest": "32f192da18a2e05b"
+  },
+  "ETH_7ae73deb37c79be1": {
+    "timestamp": "2025-10-24T22:22:11.318970+00:00",
+    "result": {
+      "score": 52.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 52.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:22:11.318962+00:00"
+    },
+    "digest": "7ae73deb37c79be1"
+  },
+  "SOL_a864f388911a9f6b": {
+    "timestamp": "2025-10-24T22:22:12.904968+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:22:12.904947+00:00"
+    },
+    "digest": "a864f388911a9f6b"
+  },
+  "BTC_8dcf079ab587845b": {
+    "timestamp": "2025-10-24T22:23:02.430023+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "REG",
+        "GENERAL",
+        "SEC"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T22:23:02.430016+00:00"
+    },
+    "digest": "8dcf079ab587845b"
+  },
+  "ETH_d71835ca0858317c": {
+    "timestamp": "2025-10-24T22:23:04.634016+00:00",
+    "result": {
+      "score": 40.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 40.0, impact: 0.30)",
+      "volatility_impact": 0.3,
+      "timestamp": "2025-10-24T22:23:04.634009+00:00"
+    },
+    "digest": "d71835ca0858317c"
+  },
+  "SOL_0158ce3df956d848": {
+    "timestamp": "2025-10-24T22:23:07.492906+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:23:07.492899+00:00"
+    },
+    "digest": "0158ce3df956d848"
+  },
+  "BTC_196ca11e913b29a8": {
+    "timestamp": "2025-10-24T22:23:09.021249+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "REG",
+        "SEC",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-24T22:23:09.021242+00:00"
+    },
+    "digest": "196ca11e913b29a8"
+  },
+  "ETH_6c5c954fac2a1fb1": {
+    "timestamp": "2025-10-24T22:23:10.693341+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:23:10.693333+00:00"
+    },
+    "digest": "6c5c954fac2a1fb1"
+  },
+  "SOL_995958e7940ecc8f": {
+    "timestamp": "2025-10-24T22:23:12.768172+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-24T22:23:12.768164+00:00"
+    },
+    "digest": "995958e7940ecc8f"
+  },
+  "BTC_42ed8b7b616d136e": {
+    "timestamp": "2025-10-24T22:24:02.259177+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "TECH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:24:02.259169+00:00"
+    },
+    "digest": "42ed8b7b616d136e"
+  },
+  "ETH_946306c933a3ae23": {
+    "timestamp": "2025-10-24T22:24:04.244310+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T22:24:04.244303+00:00"
+    },
+    "digest": "946306c933a3ae23"
+  },
+  "SOL_254428130704a818": {
+    "timestamp": "2025-10-24T22:24:05.929871+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:24:05.929863+00:00"
+    },
+    "digest": "254428130704a818"
+  },
+  "BTC_58891b6734ce01fb": {
+    "timestamp": "2025-10-24T22:24:08.122760+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:24:08.122752+00:00"
+    },
+    "digest": "58891b6734ce01fb"
+  },
+  "ETH_624bc398fa34827f": {
+    "timestamp": "2025-10-24T22:24:09.468644+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T22:24:09.468636+00:00"
+    },
+    "digest": "624bc398fa34827f"
+  },
+  "SOL_67e75049b562890b": {
+    "timestamp": "2025-10-24T22:24:10.922749+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.15)",
+      "volatility_impact": 0.15,
+      "timestamp": "2025-10-24T22:24:10.922740+00:00"
+    },
+    "digest": "67e75049b562890b"
+  },
+  "BTC_4189d73005f92b64": {
+    "timestamp": "2025-10-24T22:25:02.635766+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-24T22:25:02.635759+00:00"
+    },
+    "digest": "4189d73005f92b64"
+  },
+  "ETH_6ea99a91a0c6f18c": {
+    "timestamp": "2025-10-24T22:25:02.976143+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "TECH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:25:02.976135+00:00"
+    },
+    "digest": "6ea99a91a0c6f18c"
+  },
+  "ETH_ec157506d8921b43": {
+    "timestamp": "2025-10-24T22:25:04.981342+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "TECH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T22:25:04.981332+00:00"
+    },
+    "digest": "ec157506d8921b43"
+  },
+  "BTC_35328e18356cc164": {
+    "timestamp": "2025-10-24T22:25:05.264289+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-24T22:25:05.264282+00:00"
+    },
+    "digest": "35328e18356cc164"
+  },
+  "SOL_4a619852b6e36f67": {
+    "timestamp": "2025-10-24T22:25:06.405415+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL",
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:25:06.405407+00:00"
+    },
+    "digest": "4a619852b6e36f67"
+  },
+  "SOL_e5388efeaf5f4189": {
+    "timestamp": "2025-10-24T22:25:07.364009+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:25:07.364001+00:00"
+    },
+    "digest": "e5388efeaf5f4189"
+  },
+  "BTC_720a995ccbf212db": {
+    "timestamp": "2025-10-24T22:25:07.859835+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-24T22:25:07.859827+00:00"
+    },
+    "digest": "720a995ccbf212db"
+  },
+  "ETH_db169b20d1d3196c": {
+    "timestamp": "2025-10-24T22:25:10.289987+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:25:10.289979+00:00"
+    },
+    "digest": "db169b20d1d3196c"
+  },
+  "SOL_657dcf29911ec50c": {
+    "timestamp": "2025-10-24T22:25:12.504570+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:25:12.504562+00:00"
+    },
+    "digest": "657dcf29911ec50c"
+  },
+  "BTC_c3e3802ab437ffb1": {
+    "timestamp": "2025-10-24T22:30:02.244054+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.60)",
+      "volatility_impact": 0.6,
+      "timestamp": "2025-10-24T22:30:02.244046+00:00"
+    },
+    "digest": "c3e3802ab437ffb1"
+  },
+  "ETH_1f7b8e940bd2974b": {
+    "timestamp": "2025-10-24T22:30:05.704461+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "TECH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:30:05.704453+00:00"
+    },
+    "digest": "1f7b8e940bd2974b"
+  },
+  "SOL_ab83f4d6228610e3": {
+    "timestamp": "2025-10-24T22:30:07.643158+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:30:07.643147+00:00"
+    },
+    "digest": "ab83f4d6228610e3"
+  },
+  "BTC_ea4949a4f2e3e6fe": {
+    "timestamp": "2025-10-24T22:30:09.034313+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.55)",
+      "volatility_impact": 0.55,
+      "timestamp": "2025-10-24T22:30:09.034306+00:00"
+    },
+    "digest": "ea4949a4f2e3e6fe"
+  },
+  "ETH_0c61025552c1e74d": {
+    "timestamp": "2025-10-24T22:30:10.796550+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:30:10.796542+00:00"
+    },
+    "digest": "0c61025552c1e74d"
+  },
+  "SOL_2d7680a9984dfa9d": {
+    "timestamp": "2025-10-24T22:30:12.556178+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:30:12.556169+00:00"
+    },
+    "digest": "2d7680a9984dfa9d"
+  },
+  "BTC_006003c085333d62": {
+    "timestamp": "2025-10-24T22:35:01.494033+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-24T22:35:01.494022+00:00"
+    },
+    "digest": "006003c085333d62"
+  },
+  "ETH_63f35dc4efb26fb4": {
+    "timestamp": "2025-10-24T22:35:03.393704+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:35:03.393696+00:00"
+    },
+    "digest": "63f35dc4efb26fb4"
+  },
+  "SOL_80733e81289ebab1": {
+    "timestamp": "2025-10-24T22:35:04.807737+00:00",
+    "result": {
+      "score": 45.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 45.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T22:35:04.807729+00:00"
+    },
+    "digest": "80733e81289ebab1"
+  },
+  "BTC_9bb1e89b68dac519": {
+    "timestamp": "2025-10-24T22:35:06.415724+00:00",
+    "result": {
+      "score": 52.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "TECH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 52.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:35:06.415712+00:00"
+    },
+    "digest": "9bb1e89b68dac519"
+  },
+  "ETH_b10e3ec8c22eeddd": {
+    "timestamp": "2025-10-24T22:35:07.938948+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:35:07.938939+00:00"
+    },
+    "digest": "b10e3ec8c22eeddd"
+  },
+  "SOL_e3aa55c36af92449": {
+    "timestamp": "2025-10-24T22:35:11.697346+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.20)",
+      "volatility_impact": 0.2,
+      "timestamp": "2025-10-24T22:35:11.697336+00:00"
+    },
+    "digest": "e3aa55c36af92449"
+  },
+  "BTC_1b5717e69939d213": {
+    "timestamp": "2025-10-24T22:40:02.450709+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.45)",
+      "volatility_impact": 0.45,
+      "timestamp": "2025-10-24T22:40:02.450699+00:00"
+    },
+    "digest": "1b5717e69939d213"
+  },
+  "ETH_2941538eba199f73": {
+    "timestamp": "2025-10-24T22:40:04.712809+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:40:04.712801+00:00"
+    },
+    "digest": "2941538eba199f73"
+  },
+  "SOL_034a787c49d3629c": {
+    "timestamp": "2025-10-24T22:40:07.193381+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:40:07.193373+00:00"
+    },
+    "digest": "034a787c49d3629c"
+  },
+  "BTC_eb3fdcfa8d2a3ce8": {
+    "timestamp": "2025-10-24T22:40:08.878288+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "LONG sentiment (score: 60.0, impact: 0.65)",
+      "volatility_impact": 0.65,
+      "timestamp": "2025-10-24T22:40:08.878280+00:00"
+    },
+    "digest": "eb3fdcfa8d2a3ce8"
+  },
+  "ETH_0adc01aefd6c5575": {
+    "timestamp": "2025-10-24T22:40:11.099502+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:40:11.099494+00:00"
+    },
+    "digest": "0adc01aefd6c5575"
+  },
+  "SOL_65d864f276025b7d": {
+    "timestamp": "2025-10-24T22:40:12.556286+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:40:12.556279+00:00"
+    },
+    "digest": "65d864f276025b7d"
+  },
+  "BTC_e252da2ad51b9f0c": {
+    "timestamp": "2025-10-24T22:45:01.536080+00:00",
+    "result": {
+      "score": 60.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 60.0, impact: 0.40)",
+      "volatility_impact": 0.4,
+      "timestamp": "2025-10-24T22:45:01.536070+00:00"
+    },
+    "digest": "e252da2ad51b9f0c"
+  },
+  "ETH_452ec7947d97e5d5": {
+    "timestamp": "2025-10-24T22:45:03.287494+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "GENERAL",
+        "MARKET",
+        "REG"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:45:03.287487+00:00"
+    },
+    "digest": "452ec7947d97e5d5"
+  },
+  "SOL_a93c092fd5817be6": {
+    "timestamp": "2025-10-24T22:45:06.781585+00:00",
+    "result": {
+      "score": 55.0,
+      "categories": [
+        "MARKET"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 55.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:45:06.781575+00:00"
+    },
+    "digest": "a93c092fd5817be6"
+  },
+  "BTC_7dd4e6898d888699": {
+    "timestamp": "2025-10-24T22:45:09.109301+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "TECH",
+        "GENERAL"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.25)",
+      "volatility_impact": 0.25,
+      "timestamp": "2025-10-24T22:45:09.109293+00:00"
+    },
+    "digest": "7dd4e6898d888699"
+  },
+  "ETH_ae6a01a304b4e314": {
+    "timestamp": "2025-10-24T22:45:10.531296+00:00",
+    "result": {
+      "score": 40.0,
+      "categories": [
+        "MARKET",
+        "REG",
+        "GENERAL"
+      ],
+      "rationale": "SHORT sentiment (score: 40.0, impact: 0.35)",
+      "volatility_impact": 0.35,
+      "timestamp": "2025-10-24T22:45:10.531286+00:00"
+    },
+    "digest": "ae6a01a304b4e314"
+  },
+  "SOL_e1f162fb57f6d8de": {
+    "timestamp": "2025-10-24T22:45:12.134476+00:00",
+    "result": {
+      "score": 50.0,
+      "categories": [
+        "MARKET",
+        "GENERAL",
+        "TECH"
+      ],
+      "rationale": "NEUTRAL sentiment (score: 50.0, impact: 0.15)",
+      "volatility_impact": 0.15,
+      "timestamp": "2025-10-24T22:45:12.134468+00:00"
+    },
+    "digest": "e1f162fb57f6d8de"
   }
 }

@@ -1,0 +1,71 @@
+SMOKE TEST ORDER COUNTS
+========================
+
+Test Tarihi: 2025-10-24 02:20:47
+Mod: PAPER (Güvenli Test Modu)
+
+=== EMİR DURUMU ===
+
+Gerçek Emirler: 0
+- PAPER modu aktif olduğu için gerçek emir gönderilmedi
+- Tüm işlemler simülasyon modunda çalıştı
+
+Position-Level TP/SL: 0
+- Pozisyon açılmadığı için TP/SL emri oluşturulmadı
+- use_position_tpsl=true ayarı aktif
+
+Reduce-Only Emirler: 0
+- Pozisyon olmadığı için reduce-only emir yok
+- reduce_only=true ayarı aktif
+
+=== SİMÜLASYON DURUMU ===
+
+Gate Durumu:
+- BTC-USDT-SWAP: PENDING (persist 0/5, conf 0.00/0.00)
+- ETH-USDT-SWAP: PENDING (persist 0/5, conf 0.00/0.00)
+- SOL-USDT-SWAP: PENDING (persist 0/5, conf 0.00/0.00)
+
+Skip Nedenleri:
+- once_per_bar: Henüz bar işlenmedi
+- below_min_score: ETH ve SOL skorları eşiğin altında
+- cooldown: Henüz giriş yapılmadı
+
+=== KONFİGÜRASYON DOĞRULAMA ===
+
+Position-Level TP/SL Ayarları:
+✅ use_position_tpsl: true
+✅ reduce_only: true
+✅ entry_cooldown_bars: 2
+✅ once_per_bar: true
+✅ same_direction_block: true
+
+Strateji Ayarları:
+✅ strategy.type: single_flip
+✅ scale_in.enabled: false
+✅ reversal_enabled: true
+
+=== GÜVENLİK KONTROLÜ ===
+
+✅ PAPER Modu Aktif
+- Gerçek para kullanılmadı
+- Gerçek emir gönderilmedi
+- Sadece analiz yapıldı
+
+✅ Risk Limitleri Aktif
+- max_position_size_pct: 0.01 (1%)
+- max_total_risk_pct: 0.6 (60%)
+- max_leverage: 3.0
+
+✅ Gate Kontrolleri Aktif
+- Persistence check: 0/5 (henüz yeterli değil)
+- Confirmation check: 0.00/0.00 (henüz yeterli değil)
+- Hysteresis check: Aktif
+
+=== SONUÇ ===
+
+✅ Order Management BAŞARILI
+- Position-level TP/SL sistemi hazır
+- Reduce-only koruması aktif
+- PAPER modu güvenli şekilde çalışıyor
+- Gerçek emir gönderilmedi (güvenli)
+

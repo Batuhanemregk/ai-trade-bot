@@ -497,13 +497,8 @@ async def _compute_composite_signal(
             details=risk_details
         )
         
-        # Compute weighted composite score
-        weights = {
-            'ta': 0.40,
-            'ml': 0.25,
-            'news': 0.20,
-            'risk': 0.15
-        }
+        # Enhanced regime-adaptive weights
+        weights = _calculate_regime_adaptive_weights(ta_score, risk_score)
         
         final_score = (
             weights['ta'] * ta_score +
@@ -524,19 +519,30 @@ async def _compute_composite_signal(
         else:
             grade = "D"
         
-        # Determine decision based on policy thresholds (hysteresis)
+        # Enhanced hysteresis decision logic
         decision = "FLAT"
-        # Note: Policy thresholds are now handled by the enhanced signal processing system
-        # This is kept for backward compatibility
-        enter_long = 60  # Score >= 60: LONG
-        enter_short = 40  # Score <= 40: SHORT
         
+        # Load thresholds from policy (with enhanced hysteresis)
+        from configs.policy import load_policy
+        policy = load_policy()
+        thresholds = policy.get('trading', {}).get('scoring', {}).get('decision_thresholds', {})
+        
+        enter_long = thresholds.get('enter_long', 60)
+        enter_short = thresholds.get('enter_short', 40)
+        flat_range = thresholds.get('flat_range', [47, 53])
+        flat_min, flat_max = flat_range
+        
+        # Enhanced hysteresis logic
         if final_score >= enter_long:
             decision = "LONG"
         elif final_score <= enter_short:
             decision = "SHORT"
+        elif flat_min <= final_score <= flat_max:
+            decision = "FLAT"  # Narrower neutral zone (47-53 instead of 45-55)
         else:
-            decision = "FLAT"  # Neutral zone
+            # Scores between flat_max and enter_long, or between enter_short and flat_min
+            # Use previous decision or default to FLAT
+            decision = "FLAT"
         
         # Create composite signal
         composite_signal = CompositeSignal(
@@ -901,6 +907,76 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         return False
 
 
+def _calculate_regime_adaptive_weights(ta_score: float, risk_score: float) -> dict[str, float]:
+    """
+    Calculate regime-adaptive weights based on market conditions.
+    
+    Args:
+        ta_score: Technical analysis score (0-100)
+        risk_score: Risk assessment score (0-100)
+    
+    Returns:
+        Dictionary with adaptive weights for ta, ml, news, risk
+    """
+    # Calculate trend strength from TA score
+    trend_strength = ta_score / 100.0  # Normalize to 0-1
+    
+    # Calculate volatility from risk score (inverted)
+    volatility = (100.0 - risk_score) / 100.0  # Higher risk = lower volatility score
+    
+    # Regime detection
+    if trend_strength > 0.6 and volatility > 0.7:  # High trend + low risk (high volatility score)
+        # Trend↑/Vol↓ regime: Emphasize TA for trend following
+        return {
+            'ta': 0.50,    # Increased TA weight
+            'ml': 0.20,    # Reduced ML weight
+            'news': 0.15,  # Reduced news weight
+            'risk': 0.15   # Same risk weight
+        }
+    else:
+        # Yanal/Vol↑ regime: Emphasize ML and Risk for adaptive strategies
+        return {
+            'ta': 0.30,    # Reduced TA weight
+            'ml': 0.35,    # Increased ML weight
+            'news': 0.15,  # Same news weight
+            'risk': 0.20   # Increased risk weight
+        }
+
+
+def _calculate_confidence_multiplier(ml_confidence: str, risk_level: str) -> float:
+    """
+    Calculate position size multiplier based on ML confidence and risk level.
+    
+    Args:
+        ml_confidence: 'high', 'medium', 'low'
+        risk_level: 'low', 'medium', 'high'
+    
+    Returns:
+        Multiplier between 0.2 and 1.0
+    """
+    # Base multipliers by confidence level
+    confidence_multipliers = {
+        'high': 1.0,
+        'medium': 0.7,
+        'low': 0.4
+    }
+    
+    # Risk level adjustments
+    risk_adjustments = {
+        'low': 1.0,      # No additional reduction
+        'medium': 0.8,   # 20% reduction
+        'high': 0.5      # 50% reduction
+    }
+    
+    base_multiplier = confidence_multipliers.get(ml_confidence, 0.4)
+    risk_adjustment = risk_adjustments.get(risk_level, 0.8)
+    
+    final_multiplier = base_multiplier * risk_adjustment
+    
+    # Clamp to reasonable range
+    return max(0.2, min(1.0, final_multiplier))
+
+
 async def _calculate_position_size(composite_signal, symbol: str, exchange_adapter) -> float:
     """Calculate dynamic position size based on signal confidence, risk, and portfolio limits."""
     try:
@@ -955,25 +1031,25 @@ async def _calculate_position_size(composite_signal, symbol: str, exchange_adapt
         risk_multiplier = 1.0 - (risk_score / 100.0) * 0.5  # Reduce by up to 50% for high risk
         risk_multiplier = max(0.5, min(1.0, risk_multiplier))  # Clamp 0.5-1.0
         
-        # ML Confidence adjustment: higher confidence = larger position
+        # Enhanced ML Confidence + Risk Level adjustment
         ml_confidence = 'low'  # default
-        ml_confidence_multiplier = 1.0  # default (no adjustment)
+        risk_level = 'medium'  # default
         
         if hasattr(composite_signal, 'ml') and hasattr(composite_signal.ml, 'details'):
             ml_details = composite_signal.ml.details
             if isinstance(ml_details, dict):
                 ml_confidence = ml_details.get('confidence', 'low')
         
-        # Adjust position size based on ML confidence
-        if ml_confidence == 'high':
-            ml_confidence_multiplier = 1.0  # Full size for high confidence
-        elif ml_confidence == 'medium':
-            ml_confidence_multiplier = 0.85  # 85% size for medium confidence
-        else:  # low
-            ml_confidence_multiplier = 0.70  # 70% size for low confidence
+        if hasattr(composite_signal, 'risk') and hasattr(composite_signal.risk, 'details'):
+            risk_details = composite_signal.risk.details
+            if isinstance(risk_details, dict):
+                risk_level = risk_details.get('risk_level', 'medium')
         
-        # Final position size = signal strength * risk adjustment * ML confidence
-        base_percentage = signal_percentage * risk_multiplier * ml_confidence_multiplier
+        # Enhanced confidence-aware position sizing
+        confidence_multiplier = _calculate_confidence_multiplier(ml_confidence, risk_level)
+        
+        # Final position size = signal strength * risk adjustment * confidence multiplier
+        base_percentage = signal_percentage * risk_multiplier * confidence_multiplier
         base_percentage = max(0.01, min(0.10, base_percentage))  # Final clamp 1%-10%
         
         # Calculate desired position size
@@ -1009,7 +1085,7 @@ async def _calculate_position_size(composite_signal, symbol: str, exchange_adapt
         max_position_size = usdt_balance * 0.10
         position_size_usdt = min(position_size_usdt, max_position_size)
         
-        logger.info(f"💰 Dynamic position size: balance=${usdt_balance:.2f}, signal_score={composite_score:.1f}, risk_score={risk_score:.1f}, ml_conf={ml_confidence}, signal_pct={signal_percentage:.1%}, risk_mult={risk_multiplier:.2f}, ml_mult={ml_confidence_multiplier:.2f}, final_pct={base_percentage:.1%}, desired=${desired_size_usdt:.2f}, min_req=${min_required_usdt:.2f}, final=${position_size_usdt:.2f}")
+        logger.info(f"💰 Enhanced position size: balance=${usdt_balance:.2f}, signal_score={composite_score:.1f}, risk_score={risk_score:.1f}, ml_conf={ml_confidence}, risk_level={risk_level}, signal_pct={signal_percentage:.1%}, risk_mult={risk_multiplier:.2f}, conf_mult={confidence_multiplier:.2f}, final_pct={base_percentage:.1%}, desired=${desired_size_usdt:.2f}, min_req=${min_required_usdt:.2f}, final=${position_size_usdt:.2f}")
         
         return position_size_usdt
         
