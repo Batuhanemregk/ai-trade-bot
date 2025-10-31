@@ -1,6 +1,6 @@
 """
-ML Scorer - Real Machine Learning Predictions
-Uses trained RandomForest model for direction probability scoring.
+ML Scorer - LightGBM-Based Scoring (LGBM-Only)
+Uses trained LightGBM models for direction probability scoring.
 """
 
 import pickle
@@ -11,118 +11,144 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 from loguru import logger
 
-from ml.feature_engineering import FeatureEngineer
+from ml.features import FeatureBuilder
 
 
 class MLScorer:
     """
-    ML-based scoring using trained RandomForest model.
+    ML-based scoring using trained LightGBM models.
     
-    - Loads model from models/rf_v1.pkl
+    - Loads 9 separate models (3 symbols × 3 TFs)
+    - Uses expanded feature set (60+ features) with multi-timeframe support
     - Generates p_up (probability of price going up)
     - Converts to score: 0-100 scale
     - Falls back to neutral if model unavailable
     """
     
     def __init__(self):
-        self.model = None
-        self.model_version = None
-        self.metadata = {}
-        self.feature_engineer = None  # Will be created when needed
-        self._load_model()
+        self.models = {}  # {symbol_tf: model}
+        self.metadata = {}  # {symbol_tf: metadata}
+        self.feature_builder = FeatureBuilder()
+        self._load_all_models()
     
-    def _load_model(self):
-        """Load trained ML model if available."""
-        try:
-            # Use Model Version Manager to get active model
-            from ml.model_version_manager import MLModelVersionManager
-            manager = MLModelVersionManager()
-            
-            # Get active model
-            active_version = manager.get_active_model_version()
-            if not active_version:
-                logger.info("ℹ️ No active ML model found, will use fallback scoring")
-                self.model = None
-                return
-            
-            # Load active model
-            self.model = manager.get_active_model()
-            if not self.model:
-                logger.info("ℹ️ Active ML model could not be loaded, will use fallback scoring")
-                self.model = None
-                return
-            
-            # Get metadata
-            self.metadata = manager.get_model_metadata(active_version)
-            self.model_version = active_version
-            
-            logger.info(f"✅ ML model loaded: {self.model_version}")
-            logger.info(f"   Features: {self.metadata.get('n_features', 'unknown')}")
-            logger.info(f"   AUC: {self.metadata.get('metrics', {}).get('auc', 'unknown')}")
-            logger.info(f"   Calibrated: {self.metadata.get('calibrated', False)}")
-            
-        except Exception as e:
-            logger.warning(f"⚠️ Failed to load ML model: {e}")
-            self.model = None
+    def _load_all_models(self):
+        """Load all 9 LightGBM models (3 symbols × 3 TFs)."""
+        symbols = ['BTC', 'ETH', 'SOL']
+        timeframes = ['15m', '1h', '4h']
+        
+        logger.info("Loading LightGBM models...")
+        
+        for symbol in symbols:
+            for tf in timeframes:
+                key = f"{symbol}_{tf}"
+                model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m.pkl")
+                metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m_metadata.json")
+                
+                try:
+                    if not model_path.exists():
+                        logger.debug(f"Model not found: {model_path}, will use fallback")
+                        continue
+                    
+                    # Load model
+                    with open(model_path, 'rb') as f:
+                        self.models[key] = pickle.load(f)
+                    
+                    # Load metadata
+                    if metadata_path.exists():
+                        with open(metadata_path, 'r') as f:
+                            self.metadata[key] = json.load(f)
+                    else:
+                        self.metadata[key] = {}
+                    
+                    auc = self.metadata[key].get('metrics', {}).get('auc_mean', 'unknown')
+                    n_features = self.metadata[key].get('n_features', 'unknown')
+                    
+                    logger.info(f"✅ Loaded LGBM model: {key} (AUC={auc}, Features={n_features})")
+                    
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to load {key}: {e}")
+                    continue
+        
+        loaded_count = len(self.models)
+        logger.info(f"Loaded {loaded_count}/9 LightGBM models")
+        
+        if loaded_count == 0:
+            logger.warning("⚠️ No LightGBM models loaded, will use fallback scoring")
     
     def score(self, symbol: str, ohlcv_bundle: Dict[str, pd.DataFrame]) -> Tuple[float, str, Dict[str, Any]]:
         """
-        Compute ML score for a symbol.
+        Compute ML score using appropriate LightGBM model.
         
         Args:
-            symbol: Trading symbol
+            symbol: Trading symbol (e.g., 'BTC-USDT-SWAP')
             ohlcv_bundle: Dictionary with timeframes as keys and DataFrames as values
-            
+                         Expected keys: 'main' (or '15m'), '1h', '4h'
+        
         Returns:
             Tuple of (score: float, rationale: str, details: dict)
             - score: 0-100 (0=strong down, 50=neutral, 100=strong up)
             - rationale: Explanation
-            - details: Additional info (p_up, confidence, source)
+            - details: Additional info (p_up, confidence, model_key)
         """
         try:
-            # If no model, use fallback
-            if self.model is None:
+            # Extract symbol and timeframe
+            symbol_short = self._extract_symbol(symbol)
+            tf = self._extract_timeframe(ohlcv_bundle)
+            
+            if not symbol_short or not tf:
+                logger.warning(f"Could not determine symbol/TF for {symbol}, using fallback")
                 return self._fallback_score(symbol)
             
-            # Initialize feature engineer if not done yet
-            if self.feature_engineer is None:
-                self.feature_engineer = FeatureEngineer()
+            model_key = f"{symbol_short}_{tf}"
             
-            # Get main timeframe data (use 'is None' to avoid DataFrame ambiguity)
-            main_df = ohlcv_bundle.get('main')
-            if main_df is None:
-                main_df = ohlcv_bundle.get('15m')
-            if main_df is None:
+            # Check if model exists
+            if model_key not in self.models:
+                logger.warning(f"No LGBM model for {model_key}, using fallback")
+                return self._fallback_score(symbol)
+            
+            # Get OHLCV data
+            df_main = ohlcv_bundle.get('main')
+            if df_main is None:
+                df_main = ohlcv_bundle.get(tf)
+            if df_main is None:
+                df_main = ohlcv_bundle.get('15m')  # Default to 15m
+            
+            if df_main is None or len(df_main) == 0:
                 logger.warning(f"No data for ML scoring: {symbol}")
                 return self._fallback_score(symbol)
-            if len(main_df) == 0:
-                logger.warning(f"Empty data for ML scoring: {symbol}")
+            
+            # Get multi-timeframe data
+            df_1h = ohlcv_bundle.get('1h') if tf != '1h' else None
+            df_4h = ohlcv_bundle.get('4h') if tf != '4h' else None
+            
+            # Build features
+            df = self.feature_builder.build_features(df_main, df_1h, df_4h)
+            
+            if len(df) == 0:
+                logger.warning(f"Empty features for {symbol}")
                 return self._fallback_score(symbol)
             
-            # Create features (same pipeline as training)
-            df_with_features = self.feature_engineer.create_features(main_df)
+            # Get feature columns from model metadata
+            model_features = self.metadata.get(model_key, {}).get('features', [])
+            if not model_features:
+                # Fallback: use feature builder columns
+                model_features = self.feature_builder.feature_columns
             
-            # Get latest row features
-            if len(df_with_features) == 0:
+            if not model_features:
+                logger.warning(f"No feature columns for {model_key}")
                 return self._fallback_score(symbol)
             
-            # Get feature columns AFTER creating features (they're set during create_features)
-            feature_cols = self.feature_engineer.get_feature_columns()
-            if feature_cols is None or len(feature_cols) == 0:
-                logger.warning(f"No feature columns available for {symbol}")
-                return self._fallback_score(symbol)
+            # Get latest features
+            latest_features = df[model_features].iloc[-1:].values
             
-            latest_features = df_with_features[feature_cols].iloc[-1:]
-            
-            # Ensure no NaN/inf in features
-            has_nan = latest_features.isnull().values.any()
-            has_inf = np.isinf(latest_features.values).any()
-            if has_nan or has_inf:
+            # Check for NaN/inf
+            if np.isnan(latest_features).any() or np.isinf(latest_features).any():
                 logger.warning(f"Invalid features for {symbol}, using fallback")
                 return self._fallback_score(symbol)
             
-            # Predict probability
-            p_up = self.model.predict_proba(latest_features)[0, 1]  # Probability of UP
+            # Predict
+            model = self.models[model_key]
+            p_up = model.predict_proba(latest_features)[0, 1]
             
             # Convert to 0-100 score
             ml_score = round(p_up * 100, 1)
@@ -131,32 +157,63 @@ class MLScorer:
             confidence = self._calculate_confidence(p_up)
             
             # Rationale
-            rationale = f"ML prediction: {p_up:.3f} -> {ml_score:.1f}/100 (confidence={confidence})"
+            rationale = f"LGBM {model_key}: p_up={p_up:.3f} -> {ml_score:.1f}/100 (confidence={confidence})"
             
             # Details
+            auc = self.metadata[model_key].get('metrics', {}).get('auc_mean', 0)
+            
             details = {
-                'source': self.model_version,
+                'model': model_key,
                 'p_up': float(p_up),
                 'p_down': float(1 - p_up),
                 'ml_score': float(ml_score),
                 'confidence': confidence,
-                'model_type': 'RandomForest',
-                'calibrated': self.metadata.get('calibrated', False)
+                'model_type': 'LightGBM',
+                'auc': float(auc) if auc else None,
+                'n_features': len(model_features)
             }
             
-            logger.debug(f"✅ ML scoring for {symbol}: p_up={p_up:.3f}, score={ml_score:.1f}")
+            logger.debug(f"✅ ML scoring for {symbol} ({model_key}): p_up={p_up:.3f}, score={ml_score:.1f}")
             
             return ml_score, rationale, details
             
         except Exception as e:
             logger.error(f"❌ ML scoring failed for {symbol}: {e}")
+            import traceback
+            logger.debug(traceback.format_exc())
             return self._fallback_score(symbol)
+    
+    def _extract_symbol(self, symbol: str) -> Optional[str]:
+        """Extract short symbol from full symbol string."""
+        # Examples: 'BTC-USDT-SWAP' -> 'BTC', 'BTCUSDT' -> 'BTC'
+        if '-' in symbol:
+            parts = symbol.split('-')
+            return parts[0]
+        elif 'USDT' in symbol:
+            return symbol.replace('USDT', '').replace('_USDT', '')
+        else:
+            return symbol[:3]  # Assume first 3 chars are symbol
+    
+    def _extract_timeframe(self, ohlcv_bundle: Dict) -> Optional[str]:
+        """Extract timeframe from OHLCV bundle."""
+        # Priority: main, then explicit TF, then default to 15m
+        if 'main' in ohlcv_bundle:
+            # Assume main is 15m (could be improved with metadata)
+            return '15m'
+        elif '15m' in ohlcv_bundle:
+            return '15m'
+        elif '1h' in ohlcv_bundle:
+            return '1h'
+        elif '4h' in ohlcv_bundle:
+            return '4h'
+        else:
+            # Default to 15m
+            return '15m'
     
     def _calculate_confidence(self, p_up: float) -> str:
         """
         Determine confidence level from probability.
         
-        As per plan:
         - [0.48, 0.52]: neutral band → low confidence
         - [0.55, 0.70]: moderate confidence
         - >= 0.70: high confidence

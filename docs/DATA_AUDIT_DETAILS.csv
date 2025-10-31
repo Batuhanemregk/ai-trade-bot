@@ -1,0 +1,10 @@
+file,symbol,timeframe,bars,expected_bars,missing_estimate,missing_pct,gaps,start,end,days,has_ohlcv,n_nan,quality
+BTC_USDT_15m_6months_binance,BTC,15m,17280,17279,-1,-0.01,0,2025-04-27 17:00,2025-10-24 16:45,180.0,True,0,PASS
+BTC_USDT_1h_6months_binance,BTC,1h,4320,4319,-1,-0.02,0,2025-04-27 17:00,2025-10-24 16:00,180.0,True,0,PASS
+BTC_USDT_4h_6months_binance,BTC,4h,1080,1079,-1,-0.09,0,2025-04-27 20:00,2025-10-24 16:00,179.8,True,0,PASS
+ETH_USDT_15m_6months_binance,ETH,15m,17280,17279,-1,-0.01,0,2025-04-27 17:00,2025-10-24 16:45,180.0,True,0,PASS
+ETH_USDT_1h_6months_binance,ETH,1h,4320,4319,-1,-0.02,0,2025-04-27 17:00,2025-10-24 16:00,180.0,True,0,PASS
+ETH_USDT_4h_6months_binance,ETH,4h,1080,1079,-1,-0.09,0,2025-04-27 20:00,2025-10-24 16:00,179.8,True,0,PASS
+SOL_USDT_15m_6months_binance,SOL,15m,17280,17279,-1,-0.01,0,2025-04-27 17:00,2025-10-24 16:45,180.0,True,0,PASS
+SOL_USDT_1h_6months_binance,SOL,1h,4320,4319,-1,-0.02,0,2025-04-27 17:00,2025-10-24 16:00,180.0,True,0,PASS
+SOL_USDT_4h_6months_binance,SOL,4h,1080,1079,-1,-0.09,0,2025-04-27 20:00,2025-10-24 16:00,179.8,True,0,PASS
