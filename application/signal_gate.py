@@ -206,15 +206,30 @@ class ConfirmationProcessor(SignalProcessor):
             return 'flat'
     
     def _count_confirmation(self, history: List[SignalHistory], direction: str) -> int:
-        """Count confirmation bars for direction."""
+        """Count confirmation bars for direction with threshold + margin check."""
         if not history:
             return 0
         
+        enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
+        enter_short = self.policy['trading']['scoring']['decision_thresholds']['enter_short']
+        margin = self.policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('confirmation_margin', 2.0)
+        
         count = 0
         for signal in reversed(history):
+            # Check if direction matches AND score meets threshold + margin
             if signal.direction == direction:
-                count += 1
+                # Verify score meets threshold + margin for confirmation
+                score_meets_threshold_margin = (
+                    (direction == 'long' and signal.final_score >= (enter_long + margin)) or
+                    (direction == 'short' and signal.final_score <= (enter_short - margin))
+                )
+                if score_meets_threshold_margin:
+                    count += 1
+                else:
+                    # Score dropped below threshold + margin, reset
+                    break
             else:
+                # Direction changed, reset
                 break
         
         return count
@@ -517,29 +532,59 @@ class SignalGate:
         )
     
     def _update_history(self, symbol: str, signal: Dict, gated_signal: GatedSignal):
-        """Update signal history."""
+        """Update signal history with bar-based deduplication."""
         if symbol not in self.signal_history:
             self.signal_history[symbol] = []
         
-        # Add new signal to history
-        new_signal = SignalHistory(
-            timestamp=datetime.now(),
-            final_score=signal.get('final_score', 0),
-            direction=gated_signal.direction,
-            strength=gated_signal.strength,
-            age_bars=0
-        )
+        # Extract bar_timestamp for deduplication
+        bar_timestamp = signal.get('bar_timestamp')
+        bar_id = round_to_bar(bar_timestamp) if bar_timestamp else None
         
-        self.signal_history[symbol].append(new_signal)
+        if bar_id is None:
+            logger.warning(f"[COUNTER] {symbol} bar_id is None, using current time")
+            bar_id = round_to_bar(datetime.now())
         
-        # Age existing signals
-        for hist_signal in self.signal_history[symbol]:
-            hist_signal.age_bars += 1
+        # Check if this bar already processed (deduplication)
+        history = self.signal_history[symbol]
+        existing_entry_idx = None
+        
+        if history:
+            # Find entry with same bar_id
+            for idx, hist_entry in enumerate(reversed(history)):
+                if hasattr(hist_entry, 'bar_id') and hist_entry.bar_id == bar_id:
+                    existing_entry_idx = len(history) - 1 - idx
+                    break
+        
+        if existing_entry_idx is not None:
+            # Update existing entry for this bar
+            logger.debug(f"[COUNTER] {symbol} Updating existing bar_id={bar_id} entry")
+            history[existing_entry_idx].final_score = signal.get('final_score', 0)
+            history[existing_entry_idx].direction = gated_signal.direction
+            history[existing_entry_idx].strength = gated_signal.strength
+        else:
+            # Add new signal to history
+            new_signal = SignalHistory(
+                timestamp=bar_timestamp if bar_timestamp else datetime.now(),
+                final_score=signal.get('final_score', 0),
+                direction=gated_signal.direction,
+                strength=gated_signal.strength,
+                age_bars=0
+            )
+            # Add bar_id for deduplication
+            new_signal.bar_id = bar_id
+            history.append(new_signal)
+        
+        # Calculate and log counters
+        persist_count = self.persistence_processor._count_persistence(history, gated_signal.direction)
+        conf_count = self.confirmation_processor._count_confirmation(history, gated_signal.direction)
+        age_count = len(history)
+        
+        logger.debug(f"[COUNTER] {symbol} bar_id={bar_id} persist={persist_count} conf={conf_count} age={age_count}")
         
         # Keep only recent history (last 20 bars)
         max_history = 20
-        if len(self.signal_history[symbol]) > max_history:
-            self.signal_history[symbol] = self.signal_history[symbol][-max_history:]
+        if len(history) > max_history:
+            self.signal_history[symbol] = history[-max_history:]
     
     def get_signal_history(self, symbol: str) -> List[SignalHistory]:
         """Get signal history for symbol."""

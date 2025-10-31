@@ -165,12 +165,20 @@ async def trading_main(
                 )
                 
                 # Step 7: Enhanced Signal Processing
+                # Extract bar_timestamp from main timeframe for bar-based deduplication
+                bar_timestamp = None
+                if 'main' in ohlcv_data and ohlcv_data['main'] is not None and not ohlcv_data['main'].empty:
+                    bar_timestamp = ohlcv_data['main'].index[-1]  # Latest bar timestamp
+                else:
+                    logger.warning(f"[COUNTER] {symbol} No bar_timestamp in signal, using current time (may cause same-bar duplicates)")
+                
                 gated_signal = signal_gate.process_signal(symbol, {
                     'final_score': composite_signal.final_score,
                     'ta_score': ta_score,
                     'ml_score': ml_score,
                     'news_score': news_score,
-                    'risk_score': risk_score
+                    'risk_score': risk_score,
+                    'bar_timestamp': bar_timestamp
                 }, ohlcv_data.get('1h', []))
                 
                 # Step 8: State Management & Decision
