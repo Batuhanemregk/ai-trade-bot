@@ -336,7 +336,8 @@ async def _fetch_multi_timeframe_data(exchange_adapter, symbol: str, live: bool)
         timeframes = {
             'trend': '1h',    # trend filter
             'main': '15m',    # primary signal
-            'entry': '5m'     # entry confirm
+            'entry': '5m',    # entry confirm
+            '4h': '4h'        # ML features
         }
         
         ohlcv_data = {}
@@ -354,7 +355,7 @@ async def _fetch_multi_timeframe_data(exchange_adapter, symbol: str, live: bool)
                 
                 # Ensure we have enough data (≥ 50 bars)
                 if len(df) >= 50:
-                    ohlcv_data[tf_name] = df
+                    ohlcv_data[tf_name] = df.copy(deep=True)  # Deep copy to prevent sharing
                     logger.info(f"✅ Fetched {len(df)} bars for {tf}")
                 else:
                     logger.warning(f"⚠️ Insufficient data for {tf}: {len(df)} bars")
@@ -405,13 +406,25 @@ async def _compute_ta_analysis(ta_scorer, ohlcv_data: dict, symbol: str) -> tupl
 async def _compute_ml_analysis(ml_scorer, ohlcv_data: dict, symbol: str) -> tuple[float, str, dict]:
     """Compute machine learning scores."""
     try:
-        # Use main timeframe for ML analysis
+        # Prepare multi-timeframe bundle for ML
         main_df = ohlcv_data.get('main')
+        trend_df = ohlcv_data.get('trend')
+        fourh_df = ohlcv_data.get('4h')
+        
         if main_df is None or main_df.empty:
             return 50.0, "No main timeframe data for ML", {}
         
+        # Create ML bundle with all available timeframes
+        ml_bundle = {'main': main_df.copy(deep=True) if main_df is not None else None}
+        if trend_df is not None and not trend_df.empty:
+            ml_bundle['1h'] = trend_df.copy(deep=True)
+        if fourh_df is not None and not fourh_df.empty:
+            ml_bundle['4h'] = fourh_df.copy(deep=True)
+        
+        logger.debug(f"[ML_BUNDLE] {symbol}: timeframes={list(ml_bundle.keys())}")
+        
         # Compute ML score
-        score, rationale, details = ml_scorer.score(symbol, {'main': main_df})
+        score, rationale, details = ml_scorer.score(symbol, ml_bundle)
         
         return score, rationale, details
         

@@ -16,6 +16,9 @@ from telegram.ext import ContextTypes
 from .commands import command_handler
 from .keyboards import keyboard_builder
 from infrastructure.logger import get_agent_logger
+from adapters.telegram.state_manager import get_state_manager
+from adapters.telegram.inline_expander import get_inline_expander
+from adapters.telegram.callback_registry import get_callback_registry
 
 
 class TelegramBot:
@@ -26,6 +29,11 @@ class TelegramBot:
         self.logger = get_agent_logger("telegram_bot")
         self.application: Optional[Application] = None
         self._shutdown_event = asyncio.Event()
+        
+        # Initialize inline expansion components
+        self.state_manager = get_state_manager()
+        self.inline_expander = get_inline_expander()
+        self.callback_registry = get_callback_registry()
         
         # Setup signal handlers
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -268,8 +276,15 @@ Use /help to see all available commands, or use the menu below to navigate."""
         query = update.callback_query
         await query.answer()
         
-        callback_data = query.data
+        # Resolve callback data through registry
+        callback_data_raw = query.data
+        callback_data = self.callback_registry.resolve(callback_data_raw)
         self.logger.info(f"Callback query: {callback_data}")
+        
+        # Handle back button
+        if callback_data == "back":
+            await self._handle_back_button(query)
+            return
         
         # Handle menu navigation
         if callback_data == "menu_main":
@@ -322,6 +337,37 @@ Use /help to see all available commands, or use the menu below to navigate."""
             await query.edit_message_text(agents_text, parse_mode='Markdown')
         else:
             await query.edit_message_text(f"Unknown callback: {callback_data}")
+    
+    async def _handle_back_button(self, query):
+        """Handle back button callback to restore original card."""
+        try:
+            message_id = query.message.message_id
+            
+            # Get saved state
+            state = self.state_manager.get_state(message_id)
+            if not state or 'original' not in state:
+                self.logger.warning(f"[BACK_BUTTON] No saved state for message_id={message_id}")
+                await query.answer("No previous state to restore", show_alert=False)
+                return
+            
+            # Restore original card
+            original_card = state['original']
+            from telegram import InlineKeyboardMarkup
+            await query.edit_message_text(
+                text=original_card,
+                parse_mode='Markdown',
+                reply_markup=None  # Remove buttons for now
+            )
+            
+            # Clear state
+            self.state_manager.update_expansion(message_id, None)
+            
+            self.logger.debug(f"[BACK_BUTTON] Restored original card for message_id={message_id}")
+            await query.answer()
+            
+        except Exception as e:
+            self.logger.error(f"Error handling back button: {e}")
+            await query.answer("Error restoring state", show_alert=False)
     
     async def _handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle text messages."""
