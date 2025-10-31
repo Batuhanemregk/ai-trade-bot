@@ -5,10 +5,30 @@ Handles signal persistence, confirmation, hysteresis, and regime filtering.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 from loguru import logger
+
+
+def round_to_bar(ts, bar_minutes=15):
+    """Round timestamp to bar boundary (15-minute default)."""
+    if ts is None:
+        return None
+    
+    # Handle pandas Timestamp
+    if hasattr(ts, 'to_pydatetime'):
+        ts = ts.to_pydatetime()
+    
+    # Ensure timezone aware
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+    
+    # Round to bar boundary
+    epoch = int(ts.timestamp())
+    bar_seconds = bar_minutes * 60
+    rounded = (epoch // bar_seconds) * bar_seconds
+    return datetime.fromtimestamp(rounded, tz=timezone.utc)
 
 
 @dataclass
@@ -102,15 +122,29 @@ class PersistenceProcessor(SignalProcessor):
             return 'flat'
     
     def _count_persistence(self, history: List[SignalHistory], direction: str) -> int:
-        """Count consecutive bars with same direction."""
+        """Count consecutive bars with same direction and threshold met."""
         if not history:
             return 0
         
+        enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
+        enter_short = self.policy['trading']['scoring']['decision_thresholds']['enter_short']
+        
         count = 0
         for signal in reversed(history):
+            # Check if direction matches AND threshold met
             if signal.direction == direction:
-                count += 1
+                # Verify score meets threshold
+                score_meets_threshold = (
+                    (direction == 'long' and signal.final_score >= enter_long) or
+                    (direction == 'short' and signal.final_score <= enter_short)
+                )
+                if score_meets_threshold:
+                    count += 1
+                else:
+                    # Score dropped below threshold, reset
+                    break
             else:
+                # Direction changed, reset
                 break
         
         return count

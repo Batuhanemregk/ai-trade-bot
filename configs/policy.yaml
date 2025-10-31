@@ -144,6 +144,7 @@ trading:
       rev_confirm_bars: 2     # Reversal confirmation bars
       rev_strength_min: 0.6   # Minimum reversal strength (0-1)
       max_signal_age_bars: 6  # Maximum signal age
+      confirmation_margin: 2.0  # Extra points for confirmation counter
       
     # Position Sizing
     position_sizing:

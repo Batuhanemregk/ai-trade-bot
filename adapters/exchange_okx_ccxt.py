@@ -412,8 +412,6 @@ class OKXCCXTAdapter:
                 'apiKey': api_key,
                 'secret': secret,
                 'password': passphrase,
-                'sandbox': testnet,
-                'testnet': testnet,
                 'enableRateLimit': True,
                 'rateLimit': 100,  # 100ms between requests
                 'timeout': self._timeout_seconds * 1000,
@@ -423,6 +421,11 @@ class OKXCCXTAdapter:
                     'recvWindow': 5000,
                 }
             }
+            
+            # Only add sandbox/testnet if explicitly enabled (OKX doesn't support it well in CCXT)
+            if testnet:
+                logger.warning("⚠️ Testnet mode requested but OKX testnet support in CCXT is limited")
+                # Don't set sandbox/testnet params as they cause hostname to be None
             
             logger.info(f"🔑 Initializing OKX client with API key: {api_key[:8]}...")
             logger.info(f"🔑 Testnet mode: {testnet}, Default type: {default_type}")

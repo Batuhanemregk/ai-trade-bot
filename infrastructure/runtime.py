@@ -100,6 +100,24 @@ async def trading_main(
         
         exchange_adapter = OKXCCXTAdapter(exchange_config)
         
+        # Log trading configuration
+        logger.info("=" * 80)
+        logger.info("TRADING CONFIGURATION")
+        logger.info("=" * 80)
+        logger.info(f"Exchange: OKX")
+        logger.info(f"Mode: {'LIVE' if live else 'DRY-RUN'}")
+        logger.info(f"Sandbox/Testnet: {exchange_config.get('sandbox', False)}")
+        api_key = exchange_config.get('api_key', '')
+        api_secret = exchange_config.get('secret', '')
+        passphrase = exchange_config.get('passphrase', '')
+        logger.info(f"API Key: {'✅ SET' if api_key else '❌ MISSING'}")
+        logger.info(f"API Secret: {'✅ SET' if api_secret else '❌ MISSING'}")
+        logger.info(f"Passphrase: {'✅ SET' if passphrase else '❌ MISSING'}")
+        logger.info(f"Symbols: {', '.join(symbols)}")
+        if live:
+            logger.warning("🔴 LIVE TRADING ENABLED - Real money at risk!")
+        logger.info("=" * 80)
+        
         # Create scoring services
         ta_scorer = TAScorer()
         ml_scorer = MLScorer()

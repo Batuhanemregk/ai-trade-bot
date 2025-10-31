@@ -50,50 +50,60 @@ class TAScorer:
         Returns:
             Tuple of (score: float, rationale: str, flags: dict)
         """
-        try:
-            if df.empty or len(df) < 50:
-                return 50.0, "Insufficient data for analysis", {"dir_hint": "FLAT"}
+        if df.empty or len(df) < 50:
+            return 50.0, "Insufficient data for analysis", {"dir_hint": "FLAT"}
 
-            # Calculate all required indicators using strategy_scorer
-            indicators_df = calculate_all_indicators(df)
+        # Calculate all required indicators using strategy_scorer
+        indicators_df = calculate_all_indicators(df)
 
-            # Extract indicators from DataFrame
-            indicators = self._extract_indicators(indicators_df)
+        # Extract indicators from DataFrame
+        indicators = self._extract_indicators(indicators_df)
+        
+        # NaN-safe logging for key indicators
+        rsi_val = indicators.get('rsi', pd.Series([np.nan])).iloc[-1] if 'rsi' in indicators and len(indicators['rsi']) > 0 else np.nan
+        macd_hist_val = indicators.get('macd_histogram', pd.Series([np.nan])).iloc[-1] if 'macd_histogram' in indicators and len(indicators['macd_histogram']) > 0 else np.nan
+        sma_20_val = indicators.get('sma_20', pd.Series([np.nan])).iloc[-1] if 'sma_20' in indicators and len(indicators['sma_20']) > 0 else np.nan
+        sma_50_val = indicators.get('sma_50', pd.Series([np.nan])).iloc[-1] if 'sma_50' in indicators and len(indicators['sma_50']) > 0 else np.nan
+        
+        rsi_txt = 'NaN' if pd.isna(rsi_val) else f"{rsi_val:.2f}"
+        macd_txt = 'NaN' if pd.isna(macd_hist_val) else f"{macd_hist_val:.4f}"
+        sma20_txt = 'NaN' if pd.isna(sma_20_val) else f"{sma_20_val:.2f}"
+        sma50_txt = 'NaN' if pd.isna(sma_50_val) else f"{sma_50_val:.2f}"
+        
+        logger.debug(f"[TA_INDICATORS] {symbol}: RSI={rsi_txt}, MACD_hist={macd_txt}, SMA20={sma20_txt}, SMA50={sma50_txt}")
 
-            # Compute individual component scores
-            trend_score = self._score_trend(indicators)
-            momentum_score = self._score_momentum(indicators)
-            volatility_score = self._score_volatility(indicators)
-            volume_score = self._score_volume(indicators)
+        # Compute individual component scores (each has own error handling)
+        trend_score = self._score_trend(indicators)
+        momentum_score = self._score_momentum(indicators)
+        volatility_score = self._score_volatility(indicators)
+        volume_score = self._score_volume(indicators)
 
-            # Enhanced weighted composite score with more active features
-            adx_score = self._score_adx(indicators)
-            ema_score = self._score_ema(indicators)
-            stoch_score = self._score_stochastic(indicators)
-            
-            technical_score = (
-                0.25 * trend_score +      # Trend analysis (reduced weight)
-                0.20 * momentum_score +   # Momentum analysis (reduced weight)
-                0.15 * volatility_score + # Volatility analysis (reduced weight)
-                0.10 * volume_score +     # Volume analysis (reduced weight)
-                0.15 * adx_score +        # ADX trend strength (new)
-                0.10 * ema_score +        # EMA analysis (new)
-                0.05 * stoch_score        # Stochastic analysis (new)
-            )
+        # Enhanced weighted composite score with more active features
+        adx_score = self._score_adx(indicators)
+        ema_score = self._score_ema(indicators)
+        stoch_score = self._score_stochastic(indicators)
+        
+        logger.debug(f"[TA_COMPONENTS] {symbol}: trend={trend_score:.1f}, momentum={momentum_score:.1f}, volatility={volatility_score:.1f}, volume={volume_score:.1f}")
+        
+        technical_score = (
+            0.25 * trend_score +      # Trend analysis (reduced weight)
+            0.20 * momentum_score +   # Momentum analysis (reduced weight)
+            0.15 * volatility_score + # Volatility analysis (reduced weight)
+            0.10 * volume_score +     # Volume analysis (reduced weight)
+            0.15 * adx_score +        # ADX trend strength (new)
+            0.10 * ema_score +        # EMA analysis (new)
+            0.05 * stoch_score        # Stochastic analysis (new)
+        )
 
-            # Determine strategy flags
-            flags = self._determine_strategy_flags(indicators)
+        # Determine strategy flags
+        flags = self._determine_strategy_flags(indicators)
 
-            # Generate rationale
-            rationale = self._generate_rationale(indicators, technical_score, flags)
+        # Generate rationale
+        rationale = self._generate_rationale(indicators, technical_score, flags)
 
-            logger.debug(f"✅ TA scoring completed for {symbol}: {technical_score:.1f}")
+        logger.debug(f"[TA_FINAL] {symbol}: score={technical_score:.1f}, dir={flags.get('dir_hint', 'FLAT')}")
 
-            return technical_score, rationale, flags
-
-        except Exception as e:
-            logger.error(f"❌ TA scoring failed for {symbol}: {e}")
-            return 50.0, f"Scoring error: {str(e)}", {"dir_hint": "FLAT"}
+        return technical_score, rationale, flags
 
     def _extract_indicators(self, df: pd.DataFrame) -> dict[str, Any]:
         """Extract indicators from DataFrame into dictionary format."""
