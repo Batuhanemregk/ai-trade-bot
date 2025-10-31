@@ -296,6 +296,129 @@ class PrometheusExporter:
             registry=self.registry
         )
         
+        # ============================================================
+        # LLM METRICS
+        # ============================================================
+        
+        # LLM requests counter
+        self.llm_requests_total = Counter(
+            'aibot_llm_requests_total',
+            'Total LLM requests made',
+            ['status'],  # status: 2xx, 4xx, 5xx
+            registry=self.registry
+        )
+        
+        # LLM rate limits counter
+        self.llm_rate_limits_total = Counter(
+            'aibot_llm_rate_limits_total',
+            'Total LLM rate limit hits',
+            ['source'],  # source: openai
+            registry=self.registry
+        )
+        
+        # LLM internal errors counter
+        self.llm_internal_errors_total = Counter(
+            'aibot_llm_internal_errors_total',
+            'Total LLM internal/network errors',
+            registry=self.registry
+        )
+        
+        # LLM request tokens
+        self.llm_request_tokens_sum = Counter(
+            'aibot_llm_request_tokens_sum',
+            'Total LLM request tokens used',
+            ['model'],
+            registry=self.registry
+        )
+        
+        # LLM response tokens
+        self.llm_response_tokens_sum = Counter(
+            'aibot_llm_response_tokens_sum',
+            'Total LLM response tokens used',
+            ['model'],
+            registry=self.registry
+        )
+        
+        # LLM cost tracking
+        self.llm_cost_usd_total = Counter(
+            'aibot_llm_cost_usd_total',
+            'Total LLM cost in USD',
+            registry=self.registry
+        )
+        
+        # LLM budget trips
+        self.llm_budget_trips_total = Counter(
+            'aibot_llm_budget_trips_total',
+            'Total budget limit trips',
+            ['type'],  # type: tokens, usd
+            registry=self.registry
+        )
+        
+        # News items tracking
+        self.news_items_total = Counter(
+            'aibot_news_items_total',
+            'Total news items processed',
+            ['sent_to_llm'],  # sent_to_llm: true, false
+            registry=self.registry
+        )
+        
+        # News digest hits
+        self.news_digest_hits_total = Counter(
+            'aibot_news_digest_hits_total',
+            'Total news digest cache hits',
+            registry=self.registry
+        )
+        
+        # Strategy Mode Metrics
+        self.strategy_mode = Gauge(
+            'aibot_strategy_mode',
+            'Current strategy mode',
+            ['mode'],  # 'single_flip' or 'scale_in'
+            registry=self.registry
+        )
+        
+        self.open_transitions_total = Counter(
+            'aibot_open_transitions_total',
+            'Total state transitions to OPEN',
+            ['symbol', 'direction'],
+            registry=self.registry
+        )
+        
+        self.flip_events_total = Counter(
+            'aibot_flip_events_total',
+            'Total flip events',
+            ['symbol', 'from_direction', 'to_direction'],
+            registry=self.registry
+        )
+        
+        self.entry_skips_total = Counter(
+            'aibot_entry_skips_total',
+            'Total entry skips',
+            ['reason'],  # 'once_per_bar', 'same_dir_block', 'below_min', etc.
+            registry=self.registry
+        )
+        
+        self.position_tpsl_applied_total = Counter(
+            'aibot_position_tpsl_applied_total',
+            'Total position-level TP/SL applied',
+            ['symbol', 'mode'],  # 'LIVE', 'PAPER', 'DRY-RUN'
+            registry=self.registry
+        )
+        
+        self.trailing_modify_total = Counter(
+            'aibot_trailing_modify_total',
+            'Total trailing stop modifications',
+            ['symbol', 'mode'],
+            registry=self.registry
+        )
+        
+        self.orders_blocked_total = Counter(
+            'aibot_orders_blocked_total',
+            'Total orders blocked by mode',
+            ['mode'],  # 'DRY_RUN', 'PAPER'
+            registry=self.registry
+        )
+        
         self.start_time = time.time()
         
         logger.info("Initialized Prometheus metrics")
@@ -484,6 +607,121 @@ class PrometheusExporter:
             duration_seconds: Duration in seconds
         """
         self.analysis_duration.labels(symbol=symbol).observe(duration_seconds)
+    
+    # ============================================================
+    # LLM METRICS METHODS
+    # ============================================================
+    
+    def record_llm_request(self, status: str, model: str = "unknown"):
+        """
+        Record LLM request.
+        
+        Args:
+            status: HTTP status category (2xx, 4xx, 5xx)
+            model: LLM model used
+        """
+        self.llm_requests_total.labels(status=status).inc()
+        logger.debug(f"Recorded LLM request: status={status}, model={model}")
+    
+    def record_llm_rate_limit(self, source: str = "openai"):
+        """
+        Record LLM rate limit hit.
+        
+        Args:
+            source: Rate limit source (openai)
+        """
+        self.llm_rate_limits_total.labels(source=source).inc()
+        logger.debug(f"Recorded LLM rate limit: source={source}")
+    
+    def record_llm_internal_error(self):
+        """Record LLM internal/network error."""
+        self.llm_internal_errors_total.inc()
+        logger.debug("Recorded LLM internal error")
+    
+    def record_llm_tokens(self, model: str, request_tokens: int, response_tokens: int):
+        """
+        Record LLM token usage.
+        
+        Args:
+            model: LLM model used
+            request_tokens: Number of request tokens
+            response_tokens: Number of response tokens
+        """
+        self.llm_request_tokens_sum.labels(model=model).inc(request_tokens)
+        self.llm_response_tokens_sum.labels(model=model).inc(response_tokens)
+        logger.debug(f"Recorded LLM tokens: model={model}, req={request_tokens}, resp={response_tokens}")
+    
+    def record_llm_cost(self, cost_usd: float):
+        """
+        Record LLM cost in USD.
+        
+        Args:
+            cost_usd: Cost in USD
+        """
+        self.llm_cost_usd_total.inc(cost_usd)
+        logger.debug(f"Recorded LLM cost: ${cost_usd:.6f}")
+    
+    def record_budget_trip(self, trip_type: str):
+        """
+        Record budget limit trip.
+        
+        Args:
+            trip_type: Type of trip (tokens, usd)
+        """
+        self.llm_budget_trips_total.labels(type=trip_type).inc()
+        logger.debug(f"Recorded budget trip: {trip_type}")
+    
+    def record_news_items(self, count: int, sent_to_llm: bool, reason: str = "success"):
+        """
+        Record news items processed.
+        
+        Args:
+            count: Number of news items
+            sent_to_llm: Whether items were sent to LLM
+            reason: Reason if not sent (budget_exceeded, error, digest_hit)
+        """
+        self.news_items_total.labels(sent_to_llm=str(sent_to_llm).lower()).inc(count)
+        logger.debug(f"Recorded news items: count={count}, sent_to_llm={sent_to_llm}, reason={reason}")
+    
+    def record_digest_hit(self):
+        """Record news digest cache hit."""
+        self.news_digest_hits_total.inc()
+    
+    def record_strategy_mode(self, mode: str):
+        """Record current strategy mode."""
+        # Set all modes to 0, then set current to 1
+        self.strategy_mode.labels(mode='single_flip').set(0)
+        self.strategy_mode.labels(mode='scale_in').set(0)
+        self.strategy_mode.labels(mode=mode).set(1)
+    
+    def record_open_transition(self, symbol: str, direction: str):
+        """Record state transition to OPEN."""
+        self.open_transitions_total.labels(symbol=symbol, direction=direction).inc()
+    
+    def record_flip_event(self, symbol: str, from_direction: str, to_direction: str):
+        """Record flip event."""
+        self.flip_events_total.labels(
+            symbol=symbol, 
+            from_direction=from_direction, 
+            to_direction=to_direction
+        ).inc()
+    
+    def record_entry_skip(self, reason: str):
+        """Record entry skip."""
+        self.entry_skips_total.labels(reason=reason).inc()
+    
+    def record_position_tpsl(self, symbol: str, mode: str):
+        """Record position-level TP/SL applied."""
+        self.position_tpsl_applied_total.labels(symbol=symbol, mode=mode).inc()
+    
+    def record_trailing_modify(self, symbol: str, mode: str):
+        """Record trailing stop modification."""
+        self.trailing_modify_total.labels(symbol=symbol, mode=mode).inc()
+    
+    def record_order_blocked(self, mode: str):
+        """Record order blocked by mode."""
+        self.orders_blocked_total.labels(mode=mode).inc()
+        logger.debug("Recorded digest cache hit")
 
 
 # Global registry instance

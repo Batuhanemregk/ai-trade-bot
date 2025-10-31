@@ -49,6 +49,15 @@ class Trailing5mJob(BaseJob):
             logger.error(f"❌ Failed to initialize Trailing5mJob: {e}")
             raise
     
+    async def cleanup(self):
+        """Cleanup trailing stops resources"""
+        try:
+            if hasattr(self, 'exchange_adapter') and self.exchange_adapter:
+                await self.exchange_adapter.close()
+                logger.debug("✅ Closed exchange adapter for Trailing5mJob")
+        except Exception as e:
+            logger.error(f"❌ Trailing5mJob cleanup failed: {e}")
+    
     async def execute(self):
         """Execute 5-minute trailing stops update."""
         try:

@@ -55,6 +55,24 @@ def load_env(env_file: Optional[str] = None) -> None:
                 logger.info(f"Loaded environment from {env_path}")
             else:
                 logger.info("No .env file found, using system environment")
+        # Load comprehensive configuration banner
+        try:
+            from infrastructure.config_manager import config_manager
+            banner = config_manager.get_mode_banner()
+            logger.info(banner)
+            
+            # Save banner to file for reports
+            out_dir = Path('reports/strategy')
+            out_dir.mkdir(parents=True, exist_ok=True)
+            (out_dir / 'CONFIG_BANNER.txt').write_text(banner, encoding='utf-8')
+        except Exception as e:
+            logger.warning(f"Failed to load config banner: {e}")
+            # Fallback to simple mode banner
+            mode = os.getenv('TRADING_MODE', 'paper')
+            testnet = os.getenv('OKX_TESTNET', 'false')
+            sandbox = os.getenv('OKX_SANDBOX', 'false')
+            dry = os.getenv('DRY_RUN', 'false')
+            logger.info(f"[MODE] TRADING_MODE={mode} TESTNET={testnet} SANDBOX={sandbox} DRY_RUN={dry}")
                 
     except Exception as e:
         logger.error(f"Failed to load environment: {e}")
@@ -189,8 +207,8 @@ def validate_policy(policy: Dict[str, Any]) -> bool:
         
         # Validate trading.risk section
         risk = trading.get("risk", {})
-        if not isinstance(risk.get("max_position_size"), (int, float)):
-            logger.error("max_position_size must be a number")
+        if not isinstance(risk.get("max_position_size_pct"), (int, float)):
+            logger.error("max_position_size_pct must be a number")
             return False
         
         # Check if symbols exist (either at root, trading, or exchange.symbols.trading_pairs)

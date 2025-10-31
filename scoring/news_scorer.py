@@ -81,14 +81,14 @@ class NewsScorer:
             if not self.news_client:
                 return self._neutral_score(symbol)
 
-            # Get real news for the symbol
-            headlines = await self._get_news_for_symbol(symbol, lookback_minutes)
+            # Get real news for the symbol with TTL tracking
+            headlines, news_age_hours = await self._get_news_with_ttl(symbol, lookback_minutes)
 
             if not headlines:
                 logger.warning(f"No news found for {symbol}")
                 return self._neutral_score(symbol)
 
-            logger.info(f"📰 Found {len(headlines)} news articles for {symbol}")
+            logger.info(f"📰 Found {len(headlines)} news articles for {symbol} (age: {news_age_hours:.1f}h)")
 
             # Use LLM analyzer if available, otherwise fallback
             if hasattr(self, 'llm_analyzer') and self.llm_analyzer:
@@ -111,9 +111,13 @@ class NewsScorer:
                 rationale = self._generate_rationale(category_scores, news_score)
                 volatility_impact = self._compute_volatility_impact(headlines, category_scores)
 
-            logger.info(f"✅ News scoring completed for {symbol}: {news_score:.1f} ({categories})")
+            # Apply TTL-based dynamic weighting
+            ttl_weight = self._calculate_ttl_weight(news_age_hours)
+            weighted_score = news_score * ttl_weight
 
-            return news_score, categories, rationale, volatility_impact
+            logger.info(f"✅ News scoring completed for {symbol}: {news_score:.1f} -> {weighted_score:.1f} (TTL weight: {ttl_weight:.2f}, age: {news_age_hours:.1f}h)")
+
+            return weighted_score, categories, rationale, volatility_impact
 
         except Exception as e:
             logger.error(f"❌ News scoring failed for {symbol}: {e}")
@@ -127,6 +131,83 @@ class NewsScorer:
             "Neutral (no news data available)",
             0.5  # Neutral volatility impact
         )
+
+    def _calculate_ttl_weight(self, news_age_hours: float) -> float:
+        """
+        Calculate TTL-based weight for news score.
+        
+        Args:
+            news_age_hours: Age of news in hours
+            
+        Returns:
+            Weight between 0.05 and 1.0
+        """
+        # TTL configuration
+        fresh_threshold = 2.0    # 2 hours: full weight
+        stale_threshold = 24.0   # 24 hours: minimum weight
+        
+        if news_age_hours <= fresh_threshold:
+            # Fresh news: full weight
+            return 1.0
+        elif news_age_hours >= stale_threshold:
+            # Stale news: minimum weight
+            return 0.05
+        else:
+            # Linear decay between fresh and stale
+            decay_rate = (1.0 - 0.05) / (stale_threshold - fresh_threshold)
+            weight = 1.0 - decay_rate * (news_age_hours - fresh_threshold)
+            return max(0.05, min(1.0, weight))
+
+    async def _get_news_with_ttl(self, symbol: str, lookback_minutes: int) -> tuple[list[Any], float]:
+        """
+        Get news headlines with TTL tracking.
+        
+        Args:
+            symbol: Trading symbol
+            lookback_minutes: Minutes to look back
+            
+        Returns:
+            Tuple of (headlines, news_age_hours)
+        """
+        try:
+            headlines = await self._get_news_for_symbol(symbol, lookback_minutes)
+            
+            if not headlines:
+                return [], 0.0
+            
+            # Calculate average age of news
+            now = datetime.now(timezone.utc)
+            total_age_hours = 0.0
+            valid_articles = 0
+            
+            for headline in headlines:
+                if isinstance(headline, dict) and 'timestamp' in headline:
+                    try:
+                        # Parse timestamp
+                        if isinstance(headline['timestamp'], str):
+                            article_time = datetime.fromisoformat(headline['timestamp'].replace('Z', '+00:00'))
+                        else:
+                            article_time = headline['timestamp']
+                        
+                        # Calculate age in hours
+                        age_hours = (now - article_time).total_seconds() / 3600
+                        total_age_hours += age_hours
+                        valid_articles += 1
+                    except Exception:
+                        # Skip invalid timestamps
+                        continue
+            
+            if valid_articles > 0:
+                avg_age_hours = total_age_hours / valid_articles
+            else:
+                # Fallback: assume 12 hours old
+                avg_age_hours = 12.0
+            
+            return headlines, avg_age_hours
+            
+        except Exception as e:
+            logger.error(f"Error calculating news TTL for {symbol}: {e}")
+            return headlines if 'headlines' in locals() else [], 24.0  # Assume stale
 
     async def _get_news_for_symbol(self, symbol: str, lookback_minutes: int) -> list[Any]:
         """Get news headlines for a symbol within lookback period using real APIs."""

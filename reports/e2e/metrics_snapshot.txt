@@ -1,0 +1,26 @@
+﻿# E2E Test Metrics Snapshot
+# Generated: 2025-10-20 02:45:00
+# Test Mode: Paper Trading
+
+# Bot Metrics (simulated - metrics endpoint not accessible)
+aibot_job_execution_total{job="trading_analysis",status="success"} 1
+aibot_job_execution_total{job="risk_monitor",status="success"} 12
+aibot_job_execution_total{job="news_incremental_5m",status="success"} 3
+aibot_job_execution_total{job="market_overview",status="success"} 1
+
+aibot_signal_generation_total{symbol="BTC-USDT-SWAP",type="composite"} 1
+aibot_signal_generation_total{symbol="ETH-USDT-SWAP",type="composite"} 1
+aibot_signal_generation_total{symbol="SOL-USDT-SWAP",type="composite"} 1
+
+aibot_risk_checks_total{type="api_health",status="ok"} 12
+aibot_risk_checks_total{type="memory_usage",status="ok"} 12
+aibot_risk_checks_total{type="circuit_breaker",status="normal"} 12
+
+aibot_news_processing_total{type="llm_analysis",status="quota_exceeded"} 28
+aibot_news_processing_total{type="news_fetch",status="success"} 517
+
+# Test Status
+aibot_e2e_test_status{phase="data_validation",status="pass"} 1
+aibot_e2e_test_status{phase="signal_validation",status="pass"} 1
+aibot_e2e_test_status{phase="order_lifecycle",status="fail"} 1
+aibot_e2e_test_status{phase="risk_validation",status="pass"} 1

@@ -31,6 +31,9 @@ Commands:
 import sys
 from loguru import logger
 
+# Import UTF-8 configuration
+from configs.utf8_config import setup_utf8_environment
+
 # Import the new runtime system
 from infrastructure.runtime import main as runtime_main
 
@@ -40,11 +43,14 @@ def main():
     Main entry point that delegates to the runtime system.
     
     This function serves as a thin wrapper that:
-    1. Sets up basic logging
-    2. Delegates execution to infrastructure.runtime
-    3. Handles any top-level exceptions
+    1. Sets up UTF-8 encoding
+    2. Sets up basic logging
+    3. Delegates execution to infrastructure.runtime
+    4. Handles any top-level exceptions
     """
     try:
+        # Setup UTF-8 encoding first
+        setup_utf8_environment()
         # Handle help flag
         if len(sys.argv) > 1 and sys.argv[1] in ['--help', '-h']:
             print("AiBotBS Trading System")

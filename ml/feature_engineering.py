@@ -54,7 +54,13 @@ class FeatureEngineer:
         # 4. Time Features
         df = self._add_time_features(df)
         
-        # 5. Clean NaN/inf
+        # 5. Volume Features (NEW)
+        df = self._add_volume_features(df)
+        
+        # 6. Market Regime Features (NEW)
+        df = self._add_regime_features(df)
+        
+        # 7. Clean NaN/inf
         df = self._clean_data(df)
         
         # Store feature columns (excluding OHLCV)
@@ -198,12 +204,42 @@ class FeatureEngineer:
         # Create labels
         df = self.create_label(df, forward_bars)
         
-        # Split X, y
-        X = df[self.feature_columns]
+        # Split X, y - exclude timestamp and other non-feature columns
+        feature_cols = [col for col in self.feature_columns if col not in ['timestamp', 'timeframe']]
+        X = df[feature_cols]
         y = df['label']
         
-        logger.info(f"Training data: {len(X)} samples, {len(self.feature_columns)} features")
+        logger.info(f"Training data: {len(X)} samples, {len(feature_cols)} features")
         logger.info(f"Class distribution: Up={y.sum()} ({y.sum()/len(y)*100:.1f}%), Down={len(y)-y.sum()} ({(len(y)-y.sum())/len(y)*100:.1f}%)")
         
         return X, y
+    
+    def _add_volume_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Add volume-based features."""
+        # Volume SMA ratio
+        df['volume_sma_20'] = df['volume'].rolling(20).mean()
+        df['volume_sma_ratio'] = df['volume'] / df['volume_sma_20']
+        
+        # Volume momentum
+        df['volume_momentum'] = df['volume'].pct_change(5)
+        
+        # Volume volatility
+        df['volume_volatility'] = df['volume'].rolling(10).std()
+        
+        return df
+    
+    def _add_regime_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Add market regime features."""
+        # Price momentum
+        df['price_momentum_5'] = df['close'].pct_change(5)
+        df['price_momentum_20'] = df['close'].pct_change(20)
+        
+        # Volatility regime
+        df['volatility_20'] = df['close'].rolling(20).std()
+        df['volatility_regime'] = (df['volatility_20'] > df['volatility_20'].rolling(50).mean()).astype(int)
+        
+        # Trend strength
+        df['trend_strength'] = abs(df['close'].rolling(20).mean() - df['close'].rolling(50).mean()) / df['close']
+        
+        return df
 

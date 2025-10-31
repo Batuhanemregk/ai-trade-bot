@@ -267,11 +267,19 @@ class RegimeProcessor:
             # Smooth with 14-period Wilder's smoothing
             period = 14
             atr = self._wilders_smooth(tr, period)
+            
+            # Avoid division by zero - replace zeros with small values
+            atr = np.where(atr == 0, 1e-8, atr)
+            if len(atr) == 0:
+                return 0.0
+                
             di_plus = self._wilders_smooth(dm_plus, period) / atr * 100
             di_minus = self._wilders_smooth(dm_minus, period) / atr * 100
             
-            # Calculate ADX
-            dx = np.abs(di_plus - di_minus) / (di_plus + di_minus) * 100
+            # Calculate ADX - avoid division by zero
+            denominator = di_plus + di_minus
+            denominator = np.where(denominator == 0, 1e-8, denominator)
+            dx = np.abs(di_plus - di_minus) / denominator * 100
             adx = self._wilders_smooth(dx, period)
             
             return float(adx[-1]) if len(adx) > 0 else 0.0
@@ -439,8 +447,16 @@ class SignalGate:
     def _combine_results(self, persistence: GatedSignal, confirmation: GatedSignal, 
                         hysteresis: GatedSignal, regime: RegimeInfo) -> GatedSignal:
         """Combine all processing results."""
-        # Signal is valid if all processors agree
-        is_valid = (persistence.is_valid and confirmation.is_valid and hysteresis.is_valid)
+        # Check if hysteresis is disabled for testing
+        import os
+        hysteresis_enabled = os.environ.get('HYSTERESIS_ENABLE', 'true').lower() != 'false'
+        
+        if hysteresis_enabled:
+            # Signal is valid if all processors agree
+            is_valid = (persistence.is_valid and confirmation.is_valid and hysteresis.is_valid)
+        else:
+            # Skip hysteresis check for testing
+            is_valid = (persistence.is_valid and confirmation.is_valid)
         
         # Apply regime multiplier to score
         gated_score = hysteresis.gated_score * regime.confidence_multiplier

@@ -26,12 +26,32 @@ idempotency:
 
 # Trading Configuration
 trading:
+  # Mode Configuration (Single Source of Truth)
+  mode: PAPER             # LIVE | PAPER | DRY_RUN
+  use_position_tpsl: true
+  reduce_only: true
+  entry_cooldown_bars: 2
+
+  # Strategy Configuration
+  strategy:
+    type: single_flip     # single_flip | scale_in
+    once_per_bar: true
+    same_direction_block: true
+    reversal_enabled: true
+
+    # Scale-in strategy (when type=scale_in)
+    scale_in:
+      enabled: false
+      max_ladders: 2
+      ladder_size_usdt: 5
+      min_dist_pct: 0.5        # her ekleme önceki avg fiyattan en az %0.5 uzak
+      add_on_profit_only: true # sadece kâra geçince ekle
+
   # Risk Management
   risk:
-    max_position_size: 0.1  # 10% of portfolio per position
-    max_leverage: 3.0       # Maximum leverage allowed
-    stop_loss_pct: 0.02     # 2% stop loss
-    take_profit_pct: 0.04   # 4% take profit
+    max_position_size_pct: 0.01  # %1
+    max_total_risk_pct: 0.60
+    max_leverage: 3.0
     max_drawdown: 0.15      # 15% maximum drawdown
     streak_guard:
       max_losses: 3         # Max consecutive losses
@@ -104,19 +124,19 @@ trading:
   
   # Scoring
   scoring:
-    ta_weight: 0.4          # Technical Analysis weight
-    ml_weight: 0.25         # Machine Learning weight
-    news_weight: 0.2        # News sentiment weight
-    risk_weight: 0.15       # Risk score weight
+    ta_weight: 0.7          # Technical Analysis weight (increased)
+    ml_weight: 0.1          # Machine Learning weight (reduced)
+    news_weight: 0.1        # News sentiment weight (reduced)
+    risk_weight: 0.1        # Risk score weight (reduced)
     min_composite_score: 0.6  # Minimum score to execute trade
     
-    # Signal Thresholds (Single Source of Truth)
+    # Signal Thresholds (Single Source of Truth) - Enhanced Hysteresis
     decision_thresholds:
       enter_long: 60        # Score >= 60: LONG entry
       exit_long: 45         # Score <= 45: LONG exit/reversal
       enter_short: 40       # Score <= 40: SHORT entry
       exit_short: 55        # Score >= 55: SHORT exit/reversal
-      flat_range: [45, 55]  # 45-55 arası: FLAT (neutral zone)
+      flat_range: [47, 53]  # 47-53 arası: FLAT (narrower neutral zone - reduced from 45-55)
     
     # Signal Gating
     signal:
@@ -236,7 +256,7 @@ agents:
 exchange:
   name: "okx"
   testnet: false
-  mode: "live"  # live, dry-run
+  mode: "paper"  # paper, live - CHANGED TO PAPER FOR SAFETY!
   api_key: "${OKX_API_KEY}"
   secret: "${OKX_API_SECRET}"
   passphrase: "${OKX_API_PASSPHRASE}"
@@ -248,9 +268,11 @@ exchange:
   # Symbol mapping
   symbols:
     default_quote: "USDT"
-    supported_pairs: ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "LINK", "UNI", "ATOM", "NEAR", "ALGO", "ICP", "XRP", "CFX", "BIO", "PENGU", "CRO", "LDO", "TAO", "ARB", "SUI", "JUP", "OP"]
+    # Majors only (cost optimization, reduced from 23 → 3 symbols)
+    # ENV override: SYMBOLS env variable can override this list
+    supported_pairs: ["BTC", "ETH", "SOL"]
     # Trading symbols (pairs)
-    trading_pairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT", "AVAX-USDT", "LINK-USDT", "UNI-USDT", "ATOM-USDT", "NEAR-USDT", "ALGO-USDT", "ICP-USDT", "XRP-USDT", "CFX-USDT", "BIO-USDT", "PENGU-USDT", "CRO-USDT", "LDO-USDT", "TAO-USDT", "ARB-USDT", "SUI-USDT", "JUP-USDT", "OP-USDT"]
+    trading_pairs: ["BTC-USDT-SWAP", "ETH-USDT-SWAP", "SOL-USDT-SWAP"]
   
   # Symbol-specific overrides for minimum order requirements (disabled - using dynamic calculation)
   # symbol_overrides: {}
@@ -410,7 +432,7 @@ ml_scoring:
 news:
   lookback_hours_bootstrap: 24
   poll_interval_sec: 300
-  overlap_minutes: 30
+  overlap_minutes: 15  # Reduced from 30 (less duplicate CHANGED triggers)
   dedupe:
     key_fields: ["url", "title"]
   storage_paths:
@@ -423,7 +445,7 @@ news_llm:
   digest:
     max_items_per_symbol: 30
   cache:
-    ttl_minutes: 60
+    ttl_minutes: 120  # Increased from 60 (better cache hit rate, lower cost)
     invalidate_on_digest_change: true
 
 news_scoring:

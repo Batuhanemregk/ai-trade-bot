@@ -308,6 +308,33 @@ def should_skip_order(size: float, min_size: float) -> bool:
     return size < min_size
 
 
+def check_min_quantize_guard(size: float, min_size: float, min_notional: float, 
+                           price: float, mode: str = "PAPER") -> Tuple[bool, str]:
+    """
+    Check min/quantize guard and return skip decision with reason.
+    
+    Args:
+        size: Order size
+        min_size: Minimum order size
+        min_notional: Minimum notional value
+        price: Order price
+        mode: Trading mode (LIVE/PAPER/DRY-RUN)
+    
+    Returns:
+        Tuple of (should_skip, reason)
+    """
+    # Check size constraints
+    if size < min_size:
+        return True, "below_min_size"
+    
+    # Check notional constraints
+    notional_value = size * price
+    if notional_value < min_notional:
+        return True, "below_min_notional"
+    
+    return False, "ok"
+
+
 def calculate_contract_size(size: float, contract_value: float) -> float:
     """Calculate contract size from position size."""
     return size / contract_value

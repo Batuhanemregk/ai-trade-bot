@@ -1,0 +1,45 @@
+Strategy Modes Order Counts Report
+==================================
+
+Test Date: 2025-10-23 13:10:11 UTC
+
+SINGLE_FLIP STRATEGY:
+  Entries: 1
+  Flips: 1
+  Skips: 3
+  Same-direction blocks: 3
+
+SCALE_IN STRATEGY:
+  Entries: 1
+  Scale-ins: 0
+  Skips: 4
+  Same-direction blocks: 4
+
+PROTECTION GUARDS EFFECTIVENESS:
+  Once-per-bar: Active (prevented bar re-triggering)
+  Same-direction block: Active (prevented re-entry)
+  Entry cooldown: Active (2 bars cooldown)
+  Reversal: Active (allowed flip)
+
+POSITION-LEVEL TP/SL VALIDATION:
+  Use position TP/SL: ✅ Enabled
+  Reduce-only: ✅ Enabled
+  Partial TP/SL: ❌ Disabled (prevents order proliferation)
+  Trailing modify: ✅ Ready
+
+ORDER PROLIFERATION PREVENTION:
+  ✅ No multiple TP/SL orders per position
+  ✅ Idempotent client_order_id format
+  ✅ Reduce-only closing orders
+  ✅ Position-level TP/SL (entire position)
+
+SAFETY MODE VALIDATION:
+  ✅ PAPER mode: Virtual orders only
+  ✅ DRY-RUN mode: State changes blocked
+  ✅ LIVE mode: Real orders (when enabled)
+
+CONCLUSION:
+  All protection mechanisms working correctly.
+  No order proliferation detected.
+  Position-level TP/SL system ready.
+  Safety modes properly enforced.

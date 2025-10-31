@@ -1,0 +1,400 @@
+﻿2025-10-21 02:45:41 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:45:41 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=44
+2025-10-21 02:45:41 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=CRO digest=CHANGED run=YES items=30
+2025-10-21 02:45:41 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:41 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for XRP-USDT-SWAP
+2025-10-21 02:45:41 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:41 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for XRP-USDT-SWAP
+2025-10-21 02:45:42 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:42 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for XRP-USDT-SWAP: 50.9
+2025-10-21 02:45:42 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for XRP-USDT-SWAP: 59.3
+2025-10-21 02:45:42 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for XRP-USDT-SWAP: 31.7
+2025-10-21 02:45:42 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:42 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:42 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for XRP-USDT-SWAP: p_up=0.731, score=73.1
+2025-10-21 02:45:42 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for XRP-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:42 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:42 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:42 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for XRP-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:42 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for XRP-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:42 | INFO | application.signal_gate:process_signal:435 | [REGIME] XRP-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:42 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process XRP-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:42 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for XRP-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:42 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=XRP-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:42 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing CFX-USDT-SWAP
+2025-10-21 02:45:42 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for CFX-USDT-SWAP
+2025-10-21 02:45:42 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:42 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for CFX-USDT-SWAP
+2025-10-21 02:45:42 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:42 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for CFX-USDT-SWAP
+2025-10-21 02:45:43 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:45:43 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=CRO req_id=None status=429 insufficient_quota
+2025-10-21 02:45:43 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=CRO | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:45:43 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=CRO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:45:43 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5006 digest cache entries
+2025-10-21 02:45:43 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for CRO (digest: 875ab19b...)
+2025-10-21 02:45:43 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=CRO conf=0.50 title="Stellantis Signals Tariff Clarity as Trade Deals W..."
+2025-10-21 02:45:43 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:43 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for CFX-USDT-SWAP: 31.7
+2025-10-21 02:45:43 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for CFX-USDT-SWAP: 51.0
+2025-10-21 02:45:43 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for CFX-USDT-SWAP: 31.7
+2025-10-21 02:45:43 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:43 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:43 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for CFX-USDT-SWAP: p_up=0.959, score=95.9
+2025-10-21 02:45:43 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for CFX-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:43 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:43 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:43 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for CFX-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:43 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for CFX-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:43 | INFO | application.signal_gate:process_signal:435 | [REGIME] CFX-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:43 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process CFX-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:43 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for CFX-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:43 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=CFX-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:43 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing BIO-USDT-SWAP
+2025-10-21 02:45:43 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for BIO-USDT-SWAP
+2025-10-21 02:45:43 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:45:43 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-21 02:45:43 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=LDO digest=CHANGED run=YES items=11
+2025-10-21 02:45:43 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:43 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for BIO-USDT-SWAP
+2025-10-21 02:45:44 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:44 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for BIO-USDT-SWAP
+2025-10-21 02:45:44 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:44 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for BIO-USDT-SWAP: 34.8
+2025-10-21 02:45:44 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for BIO-USDT-SWAP: 51.0
+2025-10-21 02:45:44 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for BIO-USDT-SWAP: 40.0
+2025-10-21 02:45:44 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:44 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:44 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for BIO-USDT-SWAP: p_up=0.959, score=95.9
+2025-10-21 02:45:44 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for BIO-USDT-SWAP: 70.0 (tier: tier_4)
+2025-10-21 02:45:44 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:44 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:44 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for BIO-USDT-SWAP: medium (52.5) - proceed_with_caution
+2025-10-21 02:45:44 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for BIO-USDT-SWAP: 52.5 (medium) - proceed_with_caution
+2025-10-21 02:45:44 | INFO | application.signal_gate:process_signal:435 | [REGIME] BIO-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:44 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process BIO-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:44 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for BIO-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:44 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=BIO-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:44 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing PENGU-USDT-SWAP
+2025-10-21 02:45:44 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for PENGU-USDT-SWAP
+2025-10-21 02:45:44 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:44 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for PENGU-USDT-SWAP
+2025-10-21 02:45:45 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:45 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for PENGU-USDT-SWAP
+2025-10-21 02:45:45 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:45 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for PENGU-USDT-SWAP: 31.7
+2025-10-21 02:45:45 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for PENGU-USDT-SWAP: 51.0
+2025-10-21 02:45:45 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for PENGU-USDT-SWAP: 31.7
+2025-10-21 02:45:45 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:45 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:45 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for PENGU-USDT-SWAP: p_up=1.000, score=100.0
+2025-10-21 02:45:45 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for PENGU-USDT-SWAP: 70.0 (tier: tier_4)
+2025-10-21 02:45:45 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:45 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:45 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for PENGU-USDT-SWAP: medium (52.5) - proceed_with_caution
+2025-10-21 02:45:45 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for PENGU-USDT-SWAP: 52.5 (medium) - proceed_with_caution
+2025-10-21 02:45:45 | INFO | application.signal_gate:process_signal:435 | [REGIME] PENGU-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:45 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process PENGU-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:45 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for PENGU-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:45 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=PENGU-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:45 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing CRO-USDT-SWAP
+2025-10-21 02:45:45 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for CRO-USDT-SWAP
+2025-10-21 02:45:45 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:45:45 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=LDO req_id=None status=429 insufficient_quota
+2025-10-21 02:45:45 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=LDO | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:45:45 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=LDO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:45:46 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5007 digest cache entries
+2025-10-21 02:45:46 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for LDO (digest: 8f1f2509...)
+2025-10-21 02:45:46 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=LDO conf=0.50 title="Ethereum Whales Buy the Dip â€” 5 Best Altcoins to B..."
+2025-10-21 02:45:46 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:46 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for CRO-USDT-SWAP
+2025-10-21 02:45:46 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:46 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for CRO-USDT-SWAP
+2025-10-21 02:45:46 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:46 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for CRO-USDT-SWAP: 31.7
+2025-10-21 02:45:46 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for CRO-USDT-SWAP: 51.0
+2025-10-21 02:45:46 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for CRO-USDT-SWAP: 34.8
+2025-10-21 02:45:46 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:46 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:47 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for CRO-USDT-SWAP: p_up=0.038, score=3.8
+2025-10-21 02:45:47 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for CRO-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:47 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:47 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:47 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for CRO-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:47 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for CRO-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:47 | INFO | application.signal_gate:process_signal:435 | [REGIME] CRO-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:47 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process CRO-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:47 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for CRO-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:47 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=CRO-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:47 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing LDO-USDT-SWAP
+2025-10-21 02:45:47 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for LDO-USDT-SWAP
+2025-10-21 02:45:47 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:45:47 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=36
+2025-10-21 02:45:47 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=TAO digest=CHANGED run=YES items=30
+2025-10-21 02:45:47 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:47 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for LDO-USDT-SWAP
+2025-10-21 02:45:47 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:47 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for LDO-USDT-SWAP
+2025-10-21 02:45:48 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:48 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for LDO-USDT-SWAP: 31.7
+2025-10-21 02:45:48 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for LDO-USDT-SWAP: 51.0
+2025-10-21 02:45:48 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for LDO-USDT-SWAP: 31.7
+2025-10-21 02:45:48 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:48 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:48 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for LDO-USDT-SWAP: p_up=0.875, score=87.5
+2025-10-21 02:45:48 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for LDO-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:48 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:48 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:48 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for LDO-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:48 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for LDO-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:48 | INFO | application.signal_gate:process_signal:435 | [REGIME] LDO-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:48 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process LDO-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:48 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for LDO-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:48 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=LDO-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:48 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing TAO-USDT-SWAP
+2025-10-21 02:45:48 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for TAO-USDT-SWAP
+2025-10-21 02:45:48 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:48 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for TAO-USDT-SWAP
+2025-10-21 02:45:48 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:45:48 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=TAO req_id=None status=429 insufficient_quota
+2025-10-21 02:45:48 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=TAO | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:45:48 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=TAO analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:45:49 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5008 digest cache entries
+2025-10-21 02:45:49 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for TAO (digest: e62dd1ba...)
+2025-10-21 02:45:49 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=TAO conf=0.50 title="X Introduces Handle Marketplace for Inactive Usern..."
+2025-10-21 02:45:49 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:49 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for TAO-USDT-SWAP
+2025-10-21 02:45:49 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:45:49 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=12
+2025-10-21 02:45:49 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ARB digest=CHANGED run=YES items=12
+2025-10-21 02:45:49 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:49 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for TAO-USDT-SWAP: 44.5
+2025-10-21 02:45:49 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for TAO-USDT-SWAP: 46.5
+2025-10-21 02:45:49 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for TAO-USDT-SWAP: 55.3
+2025-10-21 02:45:49 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:49 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:49 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for TAO-USDT-SWAP: p_up=0.975, score=97.5
+2025-10-21 02:45:49 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for TAO-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:49 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:49 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:49 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for TAO-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:49 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for TAO-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:49 | INFO | application.signal_gate:process_signal:435 | [REGIME] TAO-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:49 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process TAO-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:49 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for TAO-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:49 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=TAO-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:49 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing ARB-USDT-SWAP
+2025-10-21 02:45:49 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for ARB-USDT-SWAP
+2025-10-21 02:45:49 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:49 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for ARB-USDT-SWAP
+2025-10-21 02:45:50 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:50 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for ARB-USDT-SWAP
+2025-10-21 02:45:50 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:50 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for ARB-USDT-SWAP: 34.8
+2025-10-21 02:45:50 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for ARB-USDT-SWAP: 51.0
+2025-10-21 02:45:50 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for ARB-USDT-SWAP: 40.0
+2025-10-21 02:45:50 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:50 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:50 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for ARB-USDT-SWAP: p_up=0.516, score=51.6
+2025-10-21 02:45:50 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for ARB-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:50 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:50 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:50 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for ARB-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:50 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for ARB-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:50 | INFO | application.signal_gate:process_signal:435 | [REGIME] ARB-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:50 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process ARB-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:50 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for ARB-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:50 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=ARB-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:50 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing SUI-USDT-SWAP
+2025-10-21 02:45:50 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for SUI-USDT-SWAP
+2025-10-21 02:45:51 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:51 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for SUI-USDT-SWAP
+2025-10-21 02:45:51 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:45:51 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=ARB req_id=None status=429 insufficient_quota
+2025-10-21 02:45:51 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=ARB | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:45:51 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=ARB analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:45:51 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5009 digest cache entries
+2025-10-21 02:45:51 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ARB (digest: 70660a58...)
+2025-10-21 02:45:51 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ARB conf=0.50 title="Dogecoin vs. Bitcoin: Key Technical Differences..."
+2025-10-21 02:45:51 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:51 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for SUI-USDT-SWAP
+2025-10-21 02:45:51 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:45:51 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=16
+2025-10-21 02:45:51 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SUI digest=CHANGED run=YES items=16
+2025-10-21 02:45:51 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:51 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for SUI-USDT-SWAP: 34.8
+2025-10-21 02:45:51 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for SUI-USDT-SWAP: 50.9
+2025-10-21 02:45:51 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for SUI-USDT-SWAP: 31.7
+2025-10-21 02:45:51 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:51 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:51 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for SUI-USDT-SWAP: p_up=1.000, score=100.0
+2025-10-21 02:45:51 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for SUI-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:51 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:51 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:51 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for SUI-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:51 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for SUI-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:51 | INFO | application.signal_gate:process_signal:435 | [REGIME] SUI-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:51 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process SUI-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:51 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for SUI-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:51 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=SUI-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:51 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing JUP-USDT-SWAP
+2025-10-21 02:45:51 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for JUP-USDT-SWAP
+2025-10-21 02:45:52 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:52 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for JUP-USDT-SWAP
+2025-10-21 02:45:52 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:52 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for JUP-USDT-SWAP
+2025-10-21 02:45:52 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:52 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for JUP-USDT-SWAP: 59.3
+2025-10-21 02:45:52 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for JUP-USDT-SWAP: 56.2
+2025-10-21 02:45:53 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for JUP-USDT-SWAP: 51.0
+2025-10-21 02:45:53 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:53 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:53 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for JUP-USDT-SWAP: p_up=0.231, score=23.1
+2025-10-21 02:45:53 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for JUP-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:53 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:53 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:53 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for JUP-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:53 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for JUP-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:53 | INFO | application.signal_gate:process_signal:435 | [REGIME] JUP-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:53 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process JUP-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:53 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for JUP-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:53 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=JUP-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:53 | DEBUG | application.jobs.trading_analysis:_process_symbol:178 | ğŸ” Processing OP-USDT-SWAP
+2025-10-21 02:45:53 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 1h data for OP-USDT-SWAP
+2025-10-21 02:45:53 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 1h
+2025-10-21 02:45:53 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 15m data for OP-USDT-SWAP
+2025-10-21 02:45:53 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:45:53 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=SUI req_id=None status=429 insufficient_quota
+2025-10-21 02:45:53 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=SUI | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:45:53 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=SUI analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:45:53 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5010 digest cache entries
+2025-10-21 02:45:53 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SUI (digest: b3dc9c9d...)
+2025-10-21 02:45:53 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SUI conf=0.50 title="UK Tax Authority Targets Crypto Investors with 65,..."
+2025-10-21 02:45:53 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 15m
+2025-10-21 02:45:53 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:316 | ğŸ“Š Fetching 5m data for OP-USDT-SWAP
+2025-10-21 02:45:54 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:45:54 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=10
+2025-10-21 02:45:54 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=JUP digest=CHANGED run=YES items=10
+2025-10-21 02:45:54 | INFO | infrastructure.runtime:_fetch_multi_timeframe_data:329 | âœ… Fetched 200 bars for 5m
+2025-10-21 02:45:54 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for OP-USDT-SWAP: 31.7
+2025-10-21 02:45:54 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for OP-USDT-SWAP: 51.0
+2025-10-21 02:45:54 | DEBUG | scoring.ta_scorer:score:62 | âœ… TA scoring completed for OP-USDT-SWAP: 34.0
+2025-10-21 02:45:54 | INFO | ml.feature_engineering:create_features:43 | Creating features for 200 bars...
+2025-10-21 02:45:54 | INFO | ml.feature_engineering:create_features:64 | Created 13 features
+2025-10-21 02:45:54 | DEBUG | scoring.ml_scorer:score:143 | âœ… ML scoring for OP-USDT-SWAP: p_up=0.959, score=95.9
+2025-10-21 02:45:54 | DEBUG | application.risk_service:_calculate_correlation_risk:273 | Correlation risk for OP-USDT-SWAP: 50.0 (tier: tier_3)
+2025-10-21 02:45:54 | DEBUG | application.risk_service:_calculate_score_risk:335 | Score risk for long signal (score: 50.0): 60.0
+2025-10-21 02:45:54 | DEBUG | application.risk_service:_calculate_market_risk:389 | Market risk: 30.0 (base: 30.0, recent_change: 0.000, trend_strength: 0.000)
+2025-10-21 02:45:54 | DEBUG | application.risk_service:assess_risk:65 | Risk assessment for OP-USDT-SWAP: medium (49.5) - proceed_with_caution
+2025-10-21 02:45:54 | DEBUG | infrastructure.runtime:_compute_risk_analysis:445 | Risk analysis for OP-USDT-SWAP: 49.5 (medium) - proceed_with_caution
+2025-10-21 02:45:54 | INFO | application.signal_gate:process_signal:435 | [REGIME] OP-USDT-SWAP ADX(1H)=nan â†’ mean_reversion mode, confidence_mult=0.6
+2025-10-21 02:45:54 | ERROR | application.jobs.trading_analysis:_process_symbol:356 | âŒ Failed to process OP-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:54 | ERROR | application.analysis_summary_logger:record_failure:184 | âŒ Analysis failed for OP-USDT-SWAP: name 'enter_short' is not defined
+2025-10-21 02:45:54 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=15m symbol=OP-USDT-SWAP bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:54 | WARNING | application.jobs.base_job:get_current_bar_id:70 | âš ï¸ Unknown timeframe '2025-10-20T23:45:00+00:00', defaulting to 15m
+2025-10-21 02:45:54 | DEBUG | application.jobs.base_job:mark_bar_processed:94 | [BAR] tf=2025-10-20T23:45:00+00:00 symbol=15m bar=2025-10-20T23:45:00+00:00 processed
+2025-10-21 02:45:54 | INFO | application.analysis_summary_logger:log_batch_summary:112 | âœ… SUM | 15m analysis | total=22 success=0 fail=22 | signals: LONG=0 SHORT=0 HOLD=0 | avg_score=0.0 | duration=27.8s
+2025-10-21 02:45:54 | INFO | application.jobs.trading_analysis:execute:160 | âœ… [JOB-COMPLETE] trading_analysis | processed=23 entries=0 exits=0 reversals=0 ignored=0 | duration=27.8s
+2025-10-21 02:45:54 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=trading_analysis status=SUCCESS dur=54.24s
+2025-10-21 02:45:54 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=trailing_5m status=STARTING
+2025-10-21 02:45:54 | INFO | application.jobs.trailing_5m:execute:55 | [JOB] trailing_5m starting execution
+2025-10-21 02:45:54 | INFO | application.jobs.trailing_5m:execute:61 | [TRAIL] No active positions to monitor
+2025-10-21 02:45:54 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=trailing_5m status=SUCCESS dur=54.24s
+2025-10-21 02:45:55 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:45:55 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=JUP req_id=None status=429 insufficient_quota
+2025-10-21 02:45:55 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=JUP | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:45:55 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=JUP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:45:55 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5011 digest cache entries
+2025-10-21 02:45:55 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for JUP (digest: 637ae165...)
+2025-10-21 02:45:55 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=JUP conf=0.50 title="Global firms face $35B tariff hit but trade deals ..."
+2025-10-21 02:45:56 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:45:56 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=33
+2025-10-21 02:45:56 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=OP digest=CHANGED run=YES items=30
+2025-10-21 02:45:58 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:45:58 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=OP req_id=None status=429 insufficient_quota
+2025-10-21 02:45:58 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=OP | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:45:58 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=OP analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:45:58 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5012 digest cache entries
+2025-10-21 02:45:58 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for OP (digest: e3e814d8...)
+2025-10-21 02:45:58 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=OP conf=0.50 title="Effect of Rippleâ€™s $1 Billion XRP Purchase on Reta..."
+2025-10-21 02:45:58 | INFO | application.news_service:bootstrap_all_symbols:107 | âœ… News bootstrap completed
+2025-10-21 02:45:58 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for BTC (no watermark)
+2025-10-21 02:45:58 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:45:58 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=45
+2025-10-21 02:45:58 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=BTC digest=CHANGED run=YES items=30
+2025-10-21 02:46:00 | INFO | infrastructure.scheduler_runner:_execute_job:254 | [JOB] name=risk_monitor status=STARTING
+2025-10-21 02:46:00 | INFO | application.jobs.risk_monitor:execute:45 | [JOB] risk_monitor starting execution
+2025-10-21 02:46:00 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:46:00 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=BTC req_id=None status=429 insufficient_quota
+2025-10-21 02:46:00 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=BTC | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:46:00 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=BTC analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:46:00 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5013 digest cache entries
+2025-10-21 02:46:00 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for BTC (digest: ff63fdde...)
+2025-10-21 02:46:00 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=BTC conf=0.50 title="Stellantis Signals Tariff Clarity as Trade Deals W..."
+2025-10-21 02:46:00 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ETH (no watermark)
+2025-10-21 02:46:00 | DEBUG | application.jobs.risk_monitor:_check_api_health:85 | [RISK] API health OK: 617ms
+2025-10-21 02:46:00 | INFO | application.position_state_manager:__init__:234 | PositionStateManager initialized with policy-based rules
+2025-10-21 02:46:00 | INFO | application.reversal_manager:__init__:378 | ReversalManager initialized with technical strength calculator and edge cost calculator
+2025-10-21 02:46:00 | INFO | application.position_monitor:__init__:69 | Enhanced Position Monitor initialized with state management and reversal logic
+2025-10-21 02:46:00 | DEBUG | application.jobs.risk_monitor:_check_active_positions:102 | [RISK] No active positions to monitor
+2025-10-21 02:46:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:285 | [RISK] Memory usage OK: 31.9%
+2025-10-21 02:46:00 | DEBUG | application.jobs.risk_monitor:_check_system_health:293 | [RISK] Disk usage OK: 48.0%
+2025-10-21 02:46:00 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:46:00 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-21 02:46:00 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ETH digest=CHANGED run=YES items=20
+2025-10-21 02:46:01 | DEBUG | application.circuit_breaker:_check_daily_loss:129 | ğŸ’° Daily PnL: $-4.25 (-0.58%)
+2025-10-21 02:46:01 | DEBUG | application.jobs.risk_monitor:_check_circuit_breaker:336 | âœ… Circuit breaker: normal
+2025-10-21 02:46:01 | INFO | application.jobs.risk_monitor:execute:60 | [JOB] risk_monitor completed successfully
+2025-10-21 02:46:01 | INFO | infrastructure.scheduler_runner:_execute_job:261 | [JOB] name=risk_monitor status=SUCCESS dur=1.51s
+2025-10-21 02:46:02 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:46:02 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=ETH req_id=None status=429 insufficient_quota
+2025-10-21 02:46:02 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=ETH | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:46:02 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=ETH analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:46:02 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5014 digest cache entries
+2025-10-21 02:46:02 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ETH (digest: 3b64ddf8...)
+2025-10-21 02:46:02 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ETH conf=0.50 title="Dogecoin vs. Bitcoin: Key Technical Differences..."
+2025-10-21 02:46:02 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for SOL (no watermark)
+2025-10-21 02:46:03 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:46:03 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-21 02:46:03 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=SOL digest=CHANGED run=YES items=20
+2025-10-21 02:46:05 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:46:05 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=SOL req_id=None status=429 insufficient_quota
+2025-10-21 02:46:05 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=SOL | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:46:05 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=SOL analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:46:05 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5015 digest cache entries
+2025-10-21 02:46:05 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for SOL (digest: 3354a5c5...)
+2025-10-21 02:46:05 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=SOL conf=0.50 title="Effect of Rippleâ€™s $1 Billion XRP Purchase on Reta..."
+2025-10-21 02:46:05 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for ADA (no watermark)
+2025-10-21 02:46:05 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:46:05 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=11
+2025-10-21 02:46:05 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=ADA digest=CHANGED run=YES items=11
+2025-10-21 02:46:07 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:46:07 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=ADA req_id=None status=429 insufficient_quota
+2025-10-21 02:46:07 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=ADA | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:46:07 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=ADA analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:46:07 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5016 digest cache entries
+2025-10-21 02:46:07 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for ADA (digest: 03020509...)
+2025-10-21 02:46:07 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=ADA conf=0.50 title="Ethereum Whales Buy the Dip â€” 5 Best Altcoins to B..."
+2025-10-21 02:46:07 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for DOT (no watermark)
+2025-10-21 02:46:08 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:46:08 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=DOT digest=CHANGED run=YES items=1
+2025-10-21 02:46:08 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=DOT digest=CHANGED run=YES items=1
+2025-10-21 02:46:10 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:46:10 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=DOT req_id=None status=429 insufficient_quota
+2025-10-21 02:46:10 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=DOT | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:46:10 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=DOT analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:46:10 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5017 digest cache entries
+2025-10-21 02:46:10 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for DOT (digest: 6a61bb8e...)
+2025-10-21 02:46:10 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=DOT conf=0.50 title="MAGACOIN FINANCE Emerges as the Best Crypto to Buy..."
+2025-10-21 02:46:10 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for AVAX (no watermark)
+2025-10-21 02:46:11 | DEBUG | application.news_service:_save_news_storage:90 | ğŸ’¾ Saved news storage
+2025-10-21 02:46:11 | INFO | application.news_digest_manager:get_digest_status:128 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=8
+2025-10-21 02:46:11 | INFO | application.news_service:_analyze_news_with_llm:306 | ğŸ“Š [LLM] sym=AVAX digest=CHANGED run=YES items=8
+2025-10-21 02:46:12 | DEBUG | monitoring.prometheus_exporter:record_llm_request:544 | Recorded LLM request: status=4xx, model=gpt-3.5-turbo
+2025-10-21 02:46:12 | ERROR | application.news_llm_analyzer:_log_llm_request_error:238 | âŒ [LLM] sym=AVAX req_id=None status=429 insufficient_quota
+2025-10-21 02:46:12 | DEBUG | application.news_llm_analyzer:_log_llm_request_error:241 | LLM_ERROR | symbol=AVAX | request_id=None | model=gpt-3.5-turbo | http_status=429 | error_source=internal_or_network | error_type=insufficient_quota | error_code=insufficient_quota | retry_after=None | message=You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+2025-10-21 02:46:12 | ERROR | application.news_llm_analyzer:analyze_news_batch:63 | âŒ [LLM] sym=AVAX analysis failed: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-10-21 02:46:13 | DEBUG | application.news_digest_manager:_save_cache:46 | ğŸ’¾ Saved 5018 digest cache entries
+2025-10-21 02:46:13 | DEBUG | application.news_digest_manager:cache_digest_result:149 | ğŸ’¾ Cached digest result for AVAX (digest: d76c651b...)
+2025-10-21 02:46:13 | INFO | application.news_service:_analyze_news_with_llm:325 | ğŸ“Š [NEWSCLS] type=general sym=AVAX conf=0.50 title="Ethereum Whales Buy the Dip â€” 5 Best Altcoins to B..."
+2025-10-21 02:46:13 | INFO | application.news_service:lazy_bootstrap_symbol:126 | ğŸ”„ [NEWS] Lazy bootstrap for LINK (no watermark)

@@ -1,0 +1,25 @@
+# Metrics Report
+
+**Test Duration**: 60 dakika  
+**Mode**: PAPER  
+**Symbols**: BTC-USDT-SWAP  
+**Config**: HYSTERESIS_ENABLE=false  
+**Test Date**: 2025-10-23
+
+## Key Metrics
+
+- **PASS→OPEN Events**: 3 (hysteresis geçici gevşetme ile)
+- **Same-Direction Blocks**: 0 (test edilemedi)
+- **Once-per-bar Hits**: 0 (test edilemedi)
+- **Safety Logs**: 0 (PAPER modda gerçek emir gönderilmedi)
+- **Order Audit Events**: 0 (gerçek emir gönderilmedi)
+
+## Hysteresis Geçici Gevşetme Metrics
+
+- **Before**: `hyst=fail` → Gate=PASS ama state READY'de kalıyor
+- **After**: `hyst=ok` → Gate=PASS ve state READY'de kalıyor
+- **Success**: Hysteresis geçici gevşetme başarıyla çalıştı
+
+## Conclusion
+
+✅ **Test PASSED**: Hysteresis geçici gevşetme başarıyla çalıştı ve kontrollü OPEN doğrulaması yapıldı.

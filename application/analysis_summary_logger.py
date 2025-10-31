@@ -33,7 +33,27 @@ class AnalysisSummaryLogger:
             'success': 0,
             'fail': 0,
             'signals': {'LONG': 0, 'SHORT': 0, 'HOLD': 0},
-            'scores': []
+            'scores': [],
+            # Enhanced features tracking
+            'enhanced_features': {
+                'confidence_stats': {
+                    'multipliers': [],
+                    'high_confidence_count': 0
+                },
+                'regime_stats': {
+                    'trend_regime_count': 0,
+                    'sideways_regime_count': 0
+                },
+                'news_ttl_stats': {
+                    'ttl_weights': [],
+                    'fresh_news_count': 0,
+                    'stale_news_count': 0
+                },
+                'ta_features_stats': {
+                    'active_features_counts': [],
+                    'max_features_used': 0
+                }
+            }
         }
         
         # Prometheus metrics (will be injected)
@@ -87,7 +107,7 @@ class AnalysisSummaryLogger:
     
     def log_batch_summary(self, timeframe: str, duration: float):
         """
-        Log batch analysis summary.
+        Log batch analysis summary with enhanced features.
         
         Args:
             timeframe: Timeframe of analysis (e.g., '15m')
@@ -98,6 +118,9 @@ class AnalysisSummaryLogger:
         if self._batch_stats['scores']:
             avg_score = sum(self._batch_stats['scores']) / len(self._batch_stats['scores'])
         
+        # Calculate enhanced features statistics
+        enhanced_features = self._calculate_enhanced_features_stats()
+        
         summary_data = {
             'timeframe': timeframe,
             'total': self._batch_stats['total'],
@@ -105,7 +128,8 @@ class AnalysisSummaryLogger:
             'fail': self._batch_stats['fail'],
             'signals': self._batch_stats['signals'].copy(),
             'avg_score': avg_score,
-            'duration': duration
+            'duration': duration,
+            'enhanced_features': enhanced_features
         }
         
         message = self.formatter.format_batch_summary(summary_data)
@@ -151,7 +175,7 @@ class AnalysisSummaryLogger:
             logger.debug(f"Failed to update Prometheus metrics: {e}")
     
     def _update_batch_stats(self, data: Dict[str, Any]):
-        """Update batch statistics."""
+        """Update batch statistics with enhanced features."""
         self._batch_stats['total'] += 1
         
         # Success/fail (assuming success if we got this far)
@@ -166,6 +190,87 @@ class AnalysisSummaryLogger:
         final_score = data.get('final_score')
         if final_score is not None:
             self._batch_stats['scores'].append(final_score)
+        
+        # Track enhanced features
+        self._track_enhanced_features(data)
+    
+    def _track_enhanced_features(self, data: Dict[str, Any]):
+        """Track enhanced features statistics."""
+        enhanced_features = self._batch_stats['enhanced_features']
+        
+        # Confidence-aware position sizing
+        confidence_multiplier = data.get('confidence_multiplier')
+        ml_confidence = data.get('ml_confidence')
+        if confidence_multiplier is not None:
+            enhanced_features['confidence_stats']['multipliers'].append(confidence_multiplier)
+            if ml_confidence == 'high':
+                enhanced_features['confidence_stats']['high_confidence_count'] += 1
+        
+        # Regime-adaptive weights
+        regime = data.get('regime')
+        if regime:
+            if regime == 'trend_vol':
+                enhanced_features['regime_stats']['trend_regime_count'] += 1
+            elif regime == 'sideways_vol':
+                enhanced_features['regime_stats']['sideways_regime_count'] += 1
+        
+        # News TTL dynamic weight
+        ttl_weight = data.get('ttl_weight')
+        news_age_hours = data.get('news_age_hours')
+        if ttl_weight is not None:
+            enhanced_features['news_ttl_stats']['ttl_weights'].append(ttl_weight)
+            if news_age_hours and news_age_hours <= 2.0:
+                enhanced_features['news_ttl_stats']['fresh_news_count'] += 1
+            elif news_age_hours and news_age_hours >= 24.0:
+                enhanced_features['news_ttl_stats']['stale_news_count'] += 1
+        
+        # TA active features
+        ta_active_features = data.get('ta_active_features')
+        if ta_active_features is not None:
+            enhanced_features['ta_features_stats']['active_features_counts'].append(ta_active_features)
+            enhanced_features['ta_features_stats']['max_features_used'] = max(
+                enhanced_features['ta_features_stats']['max_features_used'], 
+                ta_active_features
+            )
+    
+    def _calculate_enhanced_features_stats(self) -> Dict[str, Any]:
+        """Calculate enhanced features statistics."""
+        enhanced_features = self._batch_stats['enhanced_features']
+        
+        # Confidence stats
+        conf_multipliers = enhanced_features['confidence_stats']['multipliers']
+        conf_stats = {
+            'avg_multiplier': sum(conf_multipliers) / len(conf_multipliers) if conf_multipliers else 0.0,
+            'high_confidence_count': enhanced_features['confidence_stats']['high_confidence_count']
+        }
+        
+        # Regime stats
+        regime_stats = {
+            'trend_regime_count': enhanced_features['regime_stats']['trend_regime_count'],
+            'sideways_regime_count': enhanced_features['regime_stats']['sideways_regime_count']
+        }
+        
+        # News TTL stats
+        ttl_weights = enhanced_features['news_ttl_stats']['ttl_weights']
+        news_ttl_stats = {
+            'avg_ttl_weight': sum(ttl_weights) / len(ttl_weights) if ttl_weights else 0.0,
+            'fresh_news_count': enhanced_features['news_ttl_stats']['fresh_news_count'],
+            'stale_news_count': enhanced_features['news_ttl_stats']['stale_news_count']
+        }
+        
+        # TA features stats
+        active_features_counts = enhanced_features['ta_features_stats']['active_features_counts']
+        ta_features_stats = {
+            'avg_active_features': sum(active_features_counts) / len(active_features_counts) if active_features_counts else 0.0,
+            'max_features_used': enhanced_features['ta_features_stats']['max_features_used']
+        }
+        
+        return {
+            'confidence_stats': conf_stats,
+            'regime_stats': regime_stats,
+            'news_ttl_stats': news_ttl_stats,
+            'ta_features_stats': ta_features_stats
+        }
     
     def _reset_batch_stats(self):
         """Reset batch statistics for next batch."""
@@ -174,7 +279,27 @@ class AnalysisSummaryLogger:
             'success': 0,
             'fail': 0,
             'signals': {'LONG': 0, 'SHORT': 0, 'HOLD': 0},
-            'scores': []
+            'scores': [],
+            # Enhanced features tracking
+            'enhanced_features': {
+                'confidence_stats': {
+                    'multipliers': [],
+                    'high_confidence_count': 0
+                },
+                'regime_stats': {
+                    'trend_regime_count': 0,
+                    'sideways_regime_count': 0
+                },
+                'news_ttl_stats': {
+                    'ttl_weights': [],
+                    'fresh_news_count': 0,
+                    'stale_news_count': 0
+                },
+                'ta_features_stats': {
+                    'active_features_counts': [],
+                    'max_features_used': 0
+                }
+            }
         }
     
     def record_failure(self, symbol: str, error: str):

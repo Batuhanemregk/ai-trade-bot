@@ -10,6 +10,9 @@ from typing import Optional
 
 from loguru import logger
 
+# Import UTF-8 configuration
+from configs.utf8_config import setup_utf8_environment
+
 from infrastructure.cli import main as cli_main
 from application.trading_orchestrator import TradingOrchestrator
 from infrastructure.bootstrap import load_env, load_policy, init_logging, validate_policy, get_config_summary
@@ -299,6 +302,14 @@ async def trading_main(
     except Exception as e:
         logger.error(f"❌ Clean runtime trading failed: {e}")
         return 1
+    finally:
+        # Cleanup: Close exchange adapter
+        try:
+            if 'exchange_adapter' in locals() and exchange_adapter:
+                await exchange_adapter.close()
+                logger.debug("✅ Closed exchange adapter in runtime")
+        except Exception as e:
+            logger.debug(f"⚠️ Exchange adapter close warning: {e}")
 
 
 async def _fetch_multi_timeframe_data(exchange_adapter, symbol: str, live: bool) -> dict:
@@ -486,13 +497,8 @@ async def _compute_composite_signal(
             details=risk_details
         )
         
-        # Compute weighted composite score
-        weights = {
-            'ta': 0.40,
-            'ml': 0.25,
-            'news': 0.20,
-            'risk': 0.15
-        }
+        # Enhanced regime-adaptive weights
+        weights = _calculate_regime_adaptive_weights(ta_score, risk_score)
         
         final_score = (
             weights['ta'] * ta_score +
@@ -513,19 +519,30 @@ async def _compute_composite_signal(
         else:
             grade = "D"
         
-        # Determine decision based on policy thresholds (hysteresis)
+        # Enhanced hysteresis decision logic
         decision = "FLAT"
-        # Note: Policy thresholds are now handled by the enhanced signal processing system
-        # This is kept for backward compatibility
-        enter_long = 60  # Score >= 60: LONG
-        enter_short = 40  # Score <= 40: SHORT
         
+        # Load thresholds from policy (with enhanced hysteresis)
+        from configs.policy import load_policy
+        policy = load_policy()
+        thresholds = policy.get('trading', {}).get('scoring', {}).get('decision_thresholds', {})
+        
+        enter_long = thresholds.get('enter_long', 60)
+        enter_short = thresholds.get('enter_short', 40)
+        flat_range = thresholds.get('flat_range', [47, 53])
+        flat_min, flat_max = flat_range
+        
+        # Enhanced hysteresis logic
         if final_score >= enter_long:
             decision = "LONG"
         elif final_score <= enter_short:
             decision = "SHORT"
+        elif flat_min <= final_score <= flat_max:
+            decision = "FLAT"  # Narrower neutral zone (47-53 instead of 45-55)
         else:
-            decision = "FLAT"  # Neutral zone
+            # Scores between flat_max and enter_long, or between enter_short and flat_min
+            # Use previous decision or default to FLAT
+            decision = "FLAT"
         
         # Create composite signal
         composite_signal = CompositeSignal(
@@ -575,8 +592,79 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         from execution.prevalidation import validate_bracket_order
         from execution.okx_symbol import okx_to_ccxt_symbol
         
-        # Step 1: Generate client order ID
-        client_order_id = generate_client_id("E")
+        # Step 0: Enforcements (gate/state/once-per-bar/safety)
+        try:
+            from application.decision_tracer import get_decision_tracer
+            tracer = get_decision_tracer()
+        except Exception:
+            tracer = None
+
+        # Expect composite_signal to carry gating/state context via meta if available
+        gate_pass = getattr(composite_signal, "gate_pass", None)
+        state_before = getattr(composite_signal, "state_before", "UNKNOWN")
+        direction = getattr(composite_signal, "decision", "FLAT")
+
+        # 1) Comprehensive protection guards check
+        from application.protection_guards import protection_guards
+        
+        bar_id = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%MZ')
+        timeframe = os.getenv("TIMEFRAME", "15m")
+        
+        # Get current positions (placeholder - should be injected from state manager)
+        current_positions = {}  # TODO: Get from state manager
+        
+        # Get last entry time (placeholder - should be tracked per symbol)
+        last_entry_time = None  # TODO: Get from position history
+        
+        # Generate client order ID
+        side_tag = 'L' if direction == 'LONG' else 'S' if direction == 'SHORT' else 'F'
+        client_order_id = f"E:{symbol}:{side_tag}:{bar_id}"
+        
+        # Comprehensive protection check
+        allowed, skip_reason, details = protection_guards.comprehensive_check(
+            symbol=symbol,
+            direction=direction,
+            timeframe=timeframe,
+            bar_id=bar_id,
+            gate_result="PASS" if gate_pass else "PENDING",
+            client_order_id=client_order_id,
+            size=0.001,  # Will be updated by execution pipeline
+            min_size=0.001,
+            min_notional=5.0,
+            price=50000.0,  # Will be updated by execution pipeline
+            mode="PAPER",  # Will be updated by mode determination
+            current_positions=current_positions,
+            last_entry_time=last_entry_time
+        )
+        
+        if not allowed:
+            logger.info(f"[ENFORCE] SKIP entry: {skip_reason} sym={symbol} details={details}")
+            return False
+
+        # 4) Mode determination and safety checks (using config manager)
+        from infrastructure.config_manager import config_manager
+        
+        mode, mode_source = config_manager.get('trading.mode', 'PAPER')
+        dry_run, dry_run_source = config_manager.get('DRY_RUN', False)
+        
+        # Mode dispatch: LIVE/PAPER/DRY-RUN
+        if dry_run:
+            mode = "DRY-RUN"
+            logger.info(f"[SAFETY] DRY-RUN mode: state changes blocked (source={dry_run_source})")
+            return False
+        elif mode.upper() == "LIVE" and live:
+            mode = "LIVE"
+            effective_live = True
+        else:
+            mode = "PAPER"
+            effective_live = False
+            
+        logger.info(f"[MODE] Trading mode: {mode} (live={effective_live}, source={mode_source})")
+
+        # Step 1: Generate client order ID (deterministic with bar id)
+        bar_id = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%MZ')
+        side_tag = 'L' if direction == 'LONG' else 'S' if direction == 'SHORT' else 'F'
+        client_order_id = f"E:{symbol}:{side_tag}:{bar_id}"
         logger.info(f"📝 Generated client order ID: {client_order_id}")
         
         # Structured log for trade attempt
@@ -598,7 +686,7 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         entry_price = await _calculate_entry_price(current_price, composite_signal.decision)
         logger.info(f"🎯 Entry price: {entry_price}")
         
-        # Step 5: Ensure minimum order requirements
+        # Step 5: Min/quantize guard
         from execution.prevalidation import ensure_minimums
         try:
             # Get exchange market info
@@ -610,13 +698,26 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
             # Ensure minimum order amount
             adjusted_amount, meta, need = await ensure_minimums(exchange, symbol, entry_price, position_size)
             
-            # Always use adjusted_amount if it's different from requested
+            min_notional = meta.get('min_cost', 5.0)  # Default 5 USDT
+            min_qty = meta.get('amount_min', 0.001)   # Default 0.001
+            
+            # Check min/quantize guard using risk service
+            from application.risk_service import RiskService
+            risk_service = RiskService()
+            should_skip, reason, details = risk_service.check_min_quantize_guard(
+                adjusted_amount, min_qty, min_notional, entry_price, mode
+            )
+            
+            if should_skip:
+                logger.info(f"[MIN-GUARD] sym={symbol} size_calc={position_size} min_notional={min_notional} min_qty={min_qty} final_qty={adjusted_amount} → skip: {reason}")
+                return False
+            
+            # Use adjusted amount if valid
             if adjusted_amount != position_size:
-                logger.warning(f"⚠️ Position size adjusted for {symbol}. Requested: {position_size}, Adjusted: {adjusted_amount}")
-                logger.info(f"[OKX-LIMITS] sym={symbol} min_cost={meta.get('min_cost')}, min_amount={meta.get('amount_min')}, step={meta.get('amount_step')}, px={entry_price}, requested={position_size}, adjusted={adjusted_amount}")
+                logger.info(f"[OKX-LIMITS] sym={symbol} min_cost={min_notional}, min_amount={min_qty}, step={meta.get('amount_step')}, px={entry_price}, requested={position_size}, adjusted={adjusted_amount}")
                 position_size = adjusted_amount
             
-            logger.info(f"🔧 Adjusted position size: {position_size}")
+            logger.info(f"[SIZE] sym={symbol} size_calc={position_size} min_notional={min_notional} final_qty={position_size}")
             
         except Exception as e:
             logger.error(f"❌ Failed to ensure minimums: {e}")
@@ -666,8 +767,8 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         
         logger.info(f"✅ Bracket order validation passed")
         
-        # Step 8: Execute entry order via CCXT
-        if live:
+        # Step 8: Execute entry order (LIVE vs PAPER vs DRY-RUN)
+        if mode == "LIVE":
             logger.info(f"🚀 Executing LIVE {composite_signal.decision} order")
             # Convert decision to side: LONG -> buy, SHORT -> sell
             side = 'buy' if composite_signal.decision == 'LONG' else 'sell'
@@ -690,42 +791,190 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
                 # Order error log
                 logger.error(f"[ORDER] sym={symbol} clientId={client_order_id} status=ERROR error={str(e)}")
                 raise
-        else:
-            logger.info(f"🧪 DRY-RUN: Would execute {composite_signal.decision} order")
+                
+        elif mode == "PAPER":
+            logger.info(f"🧪 Executing PAPER {composite_signal.decision} order")
+            # Convert decision to side: LONG -> buy, SHORT -> sell
+            side = 'buy' if composite_signal.decision == 'LONG' else 'sell'
+            
+            # Use paper executor for virtual execution
+            from execution.paper_executor import PaperExecutor
+            paper_executor = PaperExecutor()
+            
+            # Create virtual order
+            virtual_order = paper_executor.create_virtual_order(
+                symbol=symbol,
+                side=side,
+                quantity=quantized_size,
+                price=quantized_price,
+                client_order_id=client_order_id
+            )
+            
+            # Create virtual position
+            virtual_position = paper_executor.create_virtual_position(virtual_order)
+            
             entry_result = {
-                'id': f"DRY_{client_order_id}",
+                'id': virtual_order.order_id,
                 'status': 'filled',
-                'side': composite_signal.decision.lower(),
+                'side': side,
                 'amount': quantized_size,
                 'price': quantized_price
             }
+            
+            logger.info(f"[PAPER] Virtual order executed: {virtual_order.order_id} {symbol} {side} {quantized_size}@{quantized_price}")
+            
+        else:  # DRY-RUN
+            logger.info(f"🔍 DRY-RUN mode: state changes blocked")
+            return False
         
         logger.info(f"📋 Entry order result: {entry_result}")
         
-        # Step 9: Execute TP/SL triggers via REST
-        if live:
+        # Step 9: Execute TP/SL triggers (LIVE vs PAPER vs DRY-RUN)
+        if mode == "LIVE":
             logger.info(f"🎯 Executing LIVE TP/SL triggers")
-            tp_result = await _create_trigger_order(
-                exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
-                tp_price, -1, True, f"A_TP_{client_order_id}"
+            tp_id = f"A_TP_{client_order_id}"
+            sl_id = f"A_SL_{client_order_id}"
+            # Check existing open algos and skip duplicate create
+            try:
+                open_algos = await exchange_adapter.fetch_open_trigger_orders(symbol)
+            except Exception:
+                open_algos = []
+            existing_ids = {o.get('clientOrderId') or o.get('algoClOrdId') for o in open_algos}
+            tp_result = {'skipped': False}
+            sl_result = {'skipped': False}
+            if tp_id in existing_ids:
+                tp_result = {'skipped': True, 'reason': 'duplicate'}
+            else:
+                tp_result = await _create_trigger_order(
+                    exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
+                    tp_price, -1, True, tp_id
+                )
+            if sl_id in existing_ids:
+                sl_result = {'skipped': True, 'reason': 'duplicate'}
+            else:
+                sl_result = await _create_trigger_order(
+                    exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
+                    sl_price, -1, True, sl_id
+                )
+                
+        elif mode == "PAPER":
+            logger.info(f"🧪 Executing PAPER TP/SL triggers")
+            # Create virtual bracket orders
+            bracket_orders = paper_executor.create_virtual_bracket_orders(
+                virtual_position, sl_price, tp_price
             )
-            sl_result = await _create_trigger_order(
-                exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
-                sl_price, -1, True, f"A_SL_{client_order_id}"
-            )
-        else:
-            logger.info(f"🧪 DRY-RUN: Would execute TP/SL triggers")
+            
+            tp_result = {'algoId': bracket_orders['tp_order_id']}
+            sl_result = {'algoId': bracket_orders['sl_order_id']}
+            
+            logger.info(f"[PAPER] Virtual bracket orders created: TP={bracket_orders['tp_order_id']}, SL={bracket_orders['sl_order_id']}")
+            
+        else:  # DRY-RUN
+            logger.info(f"🔍 DRY-RUN mode: TP/SL triggers blocked")
             tp_result = {'algoId': f"DRY_TP_{client_order_id}"}
             sl_result = {'algoId': f"DRY_SL_{client_order_id}"}
         
         logger.info(f"📋 TP trigger: {tp_result}")
         logger.info(f"📋 SL trigger: {sl_result}")
         
+        # Step 10: Trigger state transition (READY→OPEN)
+        if mode in ('LIVE', 'PAPER'):
+            logger.info(f"🔄 Triggering state transition: READY→{composite_signal.decision}_OPEN")
+            
+            # Create updated signal dict with size and mode
+            updated_signal_dict = {
+                'final_score': composite_signal.final_score,
+                'is_valid': True,  # Gate passed
+                'direction': composite_signal.decision,
+                'size': quantized_size,
+                'mode': mode
+            }
+            
+            # Process state transition
+            from application.position_state_manager import PositionStateManager
+            state_manager = PositionStateManager({})  # Empty policy for now
+            transition = state_manager.process_signal(symbol, updated_signal_dict)
+            
+            if transition:
+                logger.info(f"✅ State transition successful: {transition.from_state}→{transition.to_state}")
+            else:
+                logger.warning(f"⚠️ State transition failed")
+        
         return True
         
     except Exception as e:
         logger.error(f"❌ Trade execution failed: {e}")
         return False
+
+
+def _calculate_regime_adaptive_weights(ta_score: float, risk_score: float) -> dict[str, float]:
+    """
+    Calculate regime-adaptive weights based on market conditions.
+    
+    Args:
+        ta_score: Technical analysis score (0-100)
+        risk_score: Risk assessment score (0-100)
+    
+    Returns:
+        Dictionary with adaptive weights for ta, ml, news, risk
+    """
+    # Calculate trend strength from TA score
+    trend_strength = ta_score / 100.0  # Normalize to 0-1
+    
+    # Calculate volatility from risk score (inverted)
+    volatility = (100.0 - risk_score) / 100.0  # Higher risk = lower volatility score
+    
+    # Regime detection
+    if trend_strength > 0.6 and volatility > 0.7:  # High trend + low risk (high volatility score)
+        # Trend↑/Vol↓ regime: Emphasize TA for trend following
+        return {
+            'ta': 0.50,    # Increased TA weight
+            'ml': 0.20,    # Reduced ML weight
+            'news': 0.15,  # Reduced news weight
+            'risk': 0.15   # Same risk weight
+        }
+    else:
+        # Yanal/Vol↑ regime: Emphasize ML and Risk for adaptive strategies
+        return {
+            'ta': 0.30,    # Reduced TA weight
+            'ml': 0.35,    # Increased ML weight
+            'news': 0.15,  # Same news weight
+            'risk': 0.20   # Increased risk weight
+        }
+
+
+def _calculate_confidence_multiplier(ml_confidence: str, risk_level: str) -> float:
+    """
+    Calculate position size multiplier based on ML confidence and risk level.
+    
+    Args:
+        ml_confidence: 'high', 'medium', 'low'
+        risk_level: 'low', 'medium', 'high'
+    
+    Returns:
+        Multiplier between 0.2 and 1.0
+    """
+    # Base multipliers by confidence level
+    confidence_multipliers = {
+        'high': 1.0,
+        'medium': 0.7,
+        'low': 0.4
+    }
+    
+    # Risk level adjustments
+    risk_adjustments = {
+        'low': 1.0,      # No additional reduction
+        'medium': 0.8,   # 20% reduction
+        'high': 0.5      # 50% reduction
+    }
+    
+    base_multiplier = confidence_multipliers.get(ml_confidence, 0.4)
+    risk_adjustment = risk_adjustments.get(risk_level, 0.8)
+    
+    final_multiplier = base_multiplier * risk_adjustment
+    
+    # Clamp to reasonable range
+    return max(0.2, min(1.0, final_multiplier))
 
 
 async def _calculate_position_size(composite_signal, symbol: str, exchange_adapter) -> float:
@@ -782,25 +1031,25 @@ async def _calculate_position_size(composite_signal, symbol: str, exchange_adapt
         risk_multiplier = 1.0 - (risk_score / 100.0) * 0.5  # Reduce by up to 50% for high risk
         risk_multiplier = max(0.5, min(1.0, risk_multiplier))  # Clamp 0.5-1.0
         
-        # ML Confidence adjustment: higher confidence = larger position
+        # Enhanced ML Confidence + Risk Level adjustment
         ml_confidence = 'low'  # default
-        ml_confidence_multiplier = 1.0  # default (no adjustment)
+        risk_level = 'medium'  # default
         
         if hasattr(composite_signal, 'ml') and hasattr(composite_signal.ml, 'details'):
             ml_details = composite_signal.ml.details
             if isinstance(ml_details, dict):
                 ml_confidence = ml_details.get('confidence', 'low')
         
-        # Adjust position size based on ML confidence
-        if ml_confidence == 'high':
-            ml_confidence_multiplier = 1.0  # Full size for high confidence
-        elif ml_confidence == 'medium':
-            ml_confidence_multiplier = 0.85  # 85% size for medium confidence
-        else:  # low
-            ml_confidence_multiplier = 0.70  # 70% size for low confidence
+        if hasattr(composite_signal, 'risk') and hasattr(composite_signal.risk, 'details'):
+            risk_details = composite_signal.risk.details
+            if isinstance(risk_details, dict):
+                risk_level = risk_details.get('risk_level', 'medium')
         
-        # Final position size = signal strength * risk adjustment * ML confidence
-        base_percentage = signal_percentage * risk_multiplier * ml_confidence_multiplier
+        # Enhanced confidence-aware position sizing
+        confidence_multiplier = _calculate_confidence_multiplier(ml_confidence, risk_level)
+        
+        # Final position size = signal strength * risk adjustment * confidence multiplier
+        base_percentage = signal_percentage * risk_multiplier * confidence_multiplier
         base_percentage = max(0.01, min(0.10, base_percentage))  # Final clamp 1%-10%
         
         # Calculate desired position size
@@ -836,7 +1085,7 @@ async def _calculate_position_size(composite_signal, symbol: str, exchange_adapt
         max_position_size = usdt_balance * 0.10
         position_size_usdt = min(position_size_usdt, max_position_size)
         
-        logger.info(f"💰 Dynamic position size: balance=${usdt_balance:.2f}, signal_score={composite_score:.1f}, risk_score={risk_score:.1f}, ml_conf={ml_confidence}, signal_pct={signal_percentage:.1%}, risk_mult={risk_multiplier:.2f}, ml_mult={ml_confidence_multiplier:.2f}, final_pct={base_percentage:.1%}, desired=${desired_size_usdt:.2f}, min_req=${min_required_usdt:.2f}, final=${position_size_usdt:.2f}")
+        logger.info(f"💰 Enhanced position size: balance=${usdt_balance:.2f}, signal_score={composite_score:.1f}, risk_score={risk_score:.1f}, ml_conf={ml_confidence}, risk_level={risk_level}, signal_pct={signal_percentage:.1%}, risk_mult={risk_multiplier:.2f}, conf_mult={confidence_multiplier:.2f}, final_pct={base_percentage:.1%}, desired=${desired_size_usdt:.2f}, min_req=${min_required_usdt:.2f}, final=${position_size_usdt:.2f}")
         
         return position_size_usdt
         
@@ -1411,6 +1660,9 @@ def main():
     Delegates to appropriate function based on command line arguments.
     """
     try:
+        # Setup UTF-8 encoding first
+        setup_utf8_environment()
+        
         # Initialize logging
         init_logging()
         

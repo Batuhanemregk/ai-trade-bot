@@ -33,6 +33,10 @@ class BaseJob(ABC):
         """Execute the main job logic."""
         pass
     
+    async def cleanup(self):
+        """Cleanup job resources (optional override)."""
+        pass
+    
     def get_current_bar_id(self, timeframe: str) -> str:
         """Get current closed bar ID for given timeframe."""
         now = datetime.now(timezone.utc)

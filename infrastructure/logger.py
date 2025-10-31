@@ -43,7 +43,7 @@ def _get_env_config():
         'log_level': os.getenv('LOG_LEVEL', 'INFO' if os.getenv('APP_ENV') != 'dev' else 'DEBUG'),
         'console_enabled': os.getenv('CONSOLE_LOG', '1') == '1',
         'file_enabled': os.getenv('FILE_LOG', '1') == '1',
-        'emoji_enabled': os.getenv('LOG_EMOJI', '1') == '1',
+        'emoji_enabled': os.getenv('LOG_EMOJI', '1') == '1' and os.getenv('LOG_USE_EMOJI', 'true').lower() in ('true', '1', 'yes', 'on'),
     }
 
 
@@ -275,7 +275,7 @@ def get_agent_logger(name: str) -> logging.Logger:
         std_logger.addHandler(console_handler)
         
         # Add file handler
-        file_handler = logging.FileHandler(f"logs/agent_{name}.log")
+        file_handler = logging.FileHandler(f"logs/agent_{name}.log", encoding="utf-8")
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         std_logger.addHandler(file_handler)
@@ -316,7 +316,7 @@ def get_service_logger(name: str) -> logging.Logger:
 
     # Create file handler
     try:
-        file_handler = logging.FileHandler(f"logs/service_{name}.log")
+        file_handler = logging.FileHandler(f"logs/service_{name}.log", encoding="utf-8")
         file_handler.setFormatter(formatter)
         service_logger.addHandler(file_handler)
     except Exception:
@@ -356,7 +356,7 @@ def get_system_logger(name: str) -> logging.Logger:
 
     # Create file handler
     try:
-        file_handler = logging.FileHandler(f"logs/system_{name}.log")
+        file_handler = logging.FileHandler(f"logs/system_{name}.log", encoding="utf-8")
         file_handler.setFormatter(formatter)
         system_logger.addHandler(file_handler)
     except Exception:
@@ -370,7 +370,7 @@ def add_file_handler(logger_name: str, file_path: str, level: str = "DEBUG",
     """Add a file handler to a specific logger."""
     try:
         # Create file handler
-        file_handler = logging.FileHandler(file_path)
+        file_handler = logging.FileHandler(file_path, encoding="utf-8")
         file_handler.setLevel(getattr(logging, level.upper()))
         
         # Set formatter

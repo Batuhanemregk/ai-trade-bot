@@ -1,0 +1,137 @@
+# Observability Metrics Snapshot
+# Generated: 2025-10-21 22:25 UTC
+# Status: Pre-test (bot henüz başlamadı)
+
+# ============================================================
+# PROMETHEUS TARGETS STATUS
+# ============================================================
+# Target: ai-trading-bot
+#   Health: DOWN (bot başlamadı)
+#   URL: http://host.docker.internal:8000/metrics
+#   Last Error: connection refused
+#   Scrape Interval: 10s
+#
+# Target: prometheus
+#   Health: UP
+#   URL: http://localhost:9090/metrics
+#   Scrape Interval: 15s
+
+# ============================================================
+# PROMQL TEST QUERIES (Bot Başladıktan Sonra)
+# ============================================================
+
+# Query 1: LLM Request Rate (5 dakikalık window)
+# PromQL: rate(aibot_llm_requests_total[5m])
+# Expected Value: 0.01-0.03 requests/sec
+# 
+# Anlam: Son 5 dakikada saniyedik LLM request rate'i
+# 30 dk test: ~10 request / 1800 sec = 0.0056 req/sec
+# 60 dk test: ~20 request / 3600 sec = 0.0056 req/sec
+#
+# Result (bot başlayınca doldurulacak):
+# [TO BE FILLED]
+
+# Query 2: News Digest Hits (Son 1 saat)
+# PromQL: increase(aibot_news_digest_hits_total[1h])
+# Expected Value: 20-40 (cache hit count)
+#
+# Anlam: Son 1 saatte kaç kez digest cache hit oldu
+# Calculation: 12 runs × 3 symbols × 70% hit = ~25 hits
+#
+# Result (bot başlayınca doldurulacak):
+# [TO BE FILLED]
+
+# Query 3: Total LLM Cost
+# PromQL: sum(aibot_llm_cost_usd_total)
+# Expected Value: $0.0005-0.0015 (30 dk), $0.001-0.003 (60 dk)
+#
+# Anlam: Başlangıçtan beri toplam LLM maliyeti
+# gpt-5-nano: ~$0.0001/request
+# 10 requests × $0.0001 = $0.001
+#
+# Result (bot başlayınca doldurulacak):
+# [TO BE FILLED]
+
+# Query 4: News Items Breakdown (Son 1 saat)
+# PromQL: sum by(sent_to_llm) (increase(aibot_news_items_total[1h]))
+# Expected Values:
+#   {sent_to_llm="true"} ~30   (LLM'e gönderilen)
+#   {sent_to_llm="false"} ~80  (Digest cache hit)
+#
+# Anlam: Son 1 saatte işlenen haberler, LLM'e gidip gitmediğine göre
+# 12 runs × 3 symbols = 36 opportunities
+# 70% hit rate: 25 cache, 11 LLM
+# Her sembol ~3 item: 25×3=75 cached, 11×3=33 sent
+#
+# Result (bot başlayınca doldurulacak):
+# {sent_to_llm="false"} [TO BE FILLED]
+# {sent_to_llm="true"} [TO BE FILLED]
+
+# ============================================================
+# ADDITIONAL METRICS (Monitoring Dashboard için)
+# ============================================================
+
+# Budget Status
+# PromQL: aibot_llm_budget_trips_total
+# Expected: 0 (budget aşılmadı)
+
+# Token Usage
+# PromQL: aibot_llm_request_tokens_sum{model="gpt-5-nano"}
+# Expected: 12,000-18,000 (30 dk)
+
+# PromQL: aibot_llm_response_tokens_sum{model="gpt-5-nano"}
+# Expected: 1,000-1,500 (30 dk)
+
+# Composite Score (örnek sembol)
+# PromQL: aibot_composite_score{symbol="BTC-USDT-SWAP"}
+# Expected: 0-100 (trading signal score)
+
+# News Score
+# PromQL: aibot_news_score{symbol="BTC-USDT-SWAP"}
+# Expected: 0-100 (sentiment score)
+
+# ============================================================
+# GRAFANA DASHBOARD QUERIES
+# ============================================================
+
+# Panel 1: LLM Cost Tracking
+sum(rate(aibot_llm_cost_usd_total[5m])) * 60 * 60 * 24
+# Shows: Günlük maliyet projeksiyonu ($/gün)
+
+# Panel 2: Digest Hit Rate
+(
+  sum(increase(aibot_news_items_total{sent_to_llm="false"}[1h])) / 
+  sum(increase(aibot_news_items_total[1h]))
+) * 100
+# Shows: Digest cache hit rate (%)
+
+# Panel 3: LLM Request Breakdown
+sum by(status) (rate(aibot_llm_requests_total[5m]))
+# Shows: Success/error rate by status code
+
+# Panel 4: Token Usage
+sum(rate(aibot_llm_request_tokens_sum[5m])) + sum(rate(aibot_llm_response_tokens_sum[5m]))
+# Shows: Tokens/sec kullanımı
+
+# ============================================================
+# HEALTH CHECK SCRIPT OUTPUT
+# ============================================================
+
+# PowerShell healthcheck.ps1 çıktısı (bot başlayınca):
+# ✅ Bot Metrics: UP (http://localhost:8000/metrics)
+# ✅ Prometheus API: UP (http://localhost:9090/api/v1/status/config)
+# ✅ Grafana Health: UP (http://localhost:3000/api/health)
+
+# ============================================================
+# NOTES
+# ============================================================
+# - Prometheus containers UP ve scraping
+# - Bot target henüz DOWN (bot başlamadı)
+# - Grafana datasource: Prometheus bağlı ve çalışıyor
+# - Bot başladığında metrics otomatik toplanmaya başlayacak
+# - Expected scrape interval: 10 saniye
+# - Expected retention: 30 gün (prometheus config)
+#
+# NEXT STEP: Bot'u başlat ve 30-60 dk çalıştır
+# Bu dosya gerçek metrics ile güncellenecek
+

@@ -1,0 +1,64 @@
+﻿{
+    "status":  "success",
+    "data":  {
+                 "activeTargets":  [
+                                       {
+                                           "discoveredLabels":  {
+                                                                    "__address__":  "host.docker.internal:8000",
+                                                                    "__metrics_path__":  "/metrics",
+                                                                    "__scheme__":  "http",
+                                                                    "__scrape_interval__":  "10s",
+                                                                    "__scrape_timeout__":  "5s",
+                                                                    "app":  "ai-trading-bot",
+                                                                    "job":  "ai-trading-bot",
+                                                                    "service":  "main"
+                                                                },
+                                           "labels":  {
+                                                          "app":  "ai-trading-bot",
+                                                          "instance":  "host.docker.internal:8000",
+                                                          "job":  "ai-trading-bot",
+                                                          "service":  "main"
+                                                      },
+                                           "scrapePool":  "ai-trading-bot",
+                                           "scrapeUrl":  "http://host.docker.internal:8000/metrics",
+                                           "globalUrl":  "http://host.docker.internal:8000/metrics",
+                                           "lastError":  "Get \"http://host.docker.internal:8000/metrics\": dial tcp 192.168.65.254:8000: connect: connection refused",
+                                           "lastScrape":  "2025-10-21T22:25:14.90939403Z",
+                                           "lastScrapeDuration":  0.00354978,
+                                           "health":  "down",
+                                           "scrapeInterval":  "10s",
+                                           "scrapeTimeout":  "5s"
+                                       },
+                                       {
+                                           "discoveredLabels":  {
+                                                                    "__address__":  "localhost:9090",
+                                                                    "__metrics_path__":  "/metrics",
+                                                                    "__scheme__":  "http",
+                                                                    "__scrape_interval__":  "15s",
+                                                                    "__scrape_timeout__":  "10s",
+                                                                    "job":  "prometheus"
+                                                                },
+                                           "labels":  {
+                                                          "instance":  "localhost:9090",
+                                                          "job":  "prometheus"
+                                                      },
+                                           "scrapePool":  "prometheus",
+                                           "scrapeUrl":  "http://localhost:9090/metrics",
+                                           "globalUrl":  "http://546a468edfca:9090/metrics",
+                                           "lastError":  "",
+                                           "lastScrape":  "2025-10-21T22:25:07.995339214Z",
+                                           "lastScrapeDuration":  0.003333725,
+                                           "health":  "up",
+                                           "scrapeInterval":  "15s",
+                                           "scrapeTimeout":  "10s"
+                                       }
+                                   ],
+                 "droppedTargets":  [
+
+                                    ],
+                 "droppedTargetCounts":  {
+                                             "ai-trading-bot":  0,
+                                             "prometheus":  0
+                                         }
+             }
+}

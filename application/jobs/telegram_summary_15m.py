@@ -18,6 +18,17 @@ class TelegramSummary15mJob(BaseJob):
         self.analysis_cards = AnalysisCardsService(self.policy)
         logger.info("✅ TelegramSummary15mJob initialized")
     
+    async def cleanup(self):
+        """Cleanup telegram summary resources"""
+        try:
+            if hasattr(self, 'analysis_cards') and self.analysis_cards:
+                # Close telegram client session if exists
+                if hasattr(self.analysis_cards, 'telegram_client') and self.analysis_cards.telegram_client:
+                    await self.analysis_cards.telegram_client.stop()
+                    logger.debug("✅ Closed telegram client for TelegramSummary15mJob")
+        except Exception as e:
+            logger.error(f"❌ TelegramSummary15mJob cleanup failed: {e}")
+    
     async def execute(self):
         """Execute the 15-minute summary job"""
         try:

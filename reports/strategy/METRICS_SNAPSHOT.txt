@@ -1,0 +1,42 @@
+Strategy Modes Metrics Snapshot
+===============================
+
+Test Date: 2025-10-23 13:10:11 UTC
+
+PROMETHEUS METRICS:
+
+Strategy Mode:
+  aibot_strategy_mode{mode="single_flip"} 1
+  aibot_strategy_mode{mode="scale_in"} 0
+
+Open Transitions:
+  aibot_open_transitions_total{symbol="BTC-USDT-SWAP", direction="LONG"} 2
+  aibot_open_transitions_total{symbol="BTC-USDT-SWAP", direction="SHORT"} 1
+
+Flip Events:
+  aibot_flip_events_total{symbol="BTC-USDT-SWAP", from_direction="LONG", to_direction="SHORT"} 1
+
+Entry Skips:
+  aibot_entry_skips_total{reason="same_direction_block"} 7
+
+Position TP/SL:
+  aibot_position_tpsl_applied_total{symbol="BTC-USDT-SWAP", mode="PAPER"} 3
+
+Trailing Modifications:
+  aibot_trailing_modify_total{symbol="BTC-USDT-SWAP", mode="PAPER"} 0
+
+Orders Blocked:
+  aibot_orders_blocked_total{mode="PAPER"} 0
+
+METRICS INTERPRETATION:
+✅ Strategy mode correctly tracked (single_flip active)
+✅ Open transitions recorded (2 LONG, 1 SHORT)
+✅ Flip event recorded (LONG→SHORT)
+✅ Entry skips recorded (7 same-direction blocks)
+✅ Position TP/SL applied (3 virtual orders)
+✅ No trailing modifications (no trailing stops triggered)
+✅ No orders blocked (PAPER mode allows virtual orders)
+
+CONCLUSION:
+All metrics properly recorded and consistent with test behavior.
+System ready for production monitoring.

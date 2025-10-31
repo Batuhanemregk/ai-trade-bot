@@ -25,10 +25,20 @@ class CryptoCompareNewsAPI:
         if self.session:
             await self.session.close()
     
+    async def close(self):
+        """Close the session."""
+        if self.session:
+            await self.session.close()
+            self.session = None
+    
     async def get_crypto_news(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Get latest cryptocurrency news"""
         try:
             url = f"{self.base_url}/news/?lang=EN&limit={limit}"
+            
+            # Create session if not exists
+            if not self.session:
+                self.session = aiohttp.ClientSession()
             
             async with self.session.get(url) as response:
                 if response.status == 200:

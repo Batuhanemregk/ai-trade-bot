@@ -1,0 +1,125 @@
+{
+  "test_environment": {
+    "name": "AiBotBS Test Environment",
+    "description": "Comprehensive test configuration for AiBotBS trading system",
+    "version": "1.0"
+  },
+  "logging": {
+    "level": "DEBUG",
+    "console_output": true,
+    "file_output": true,
+    "log_file": "logs/test_execution.log"
+  },
+  "test_suites": {
+    "unit_tests": {
+      "enabled": true,
+      "timeout": 300,
+      "coverage_threshold": 90,
+      "parallel_execution": true
+    },
+    "integration_tests": {
+      "enabled": true,
+      "timeout": 600,
+      "api_timeout": 30,
+      "retry_attempts": 3,
+      "parallel_execution": false
+    },
+    "e2e_tests": {
+      "enabled": true,
+      "timeout": 900,
+      "testnet_only": true,
+      "parallel_execution": false
+    },
+    "performance_tests": {
+      "enabled": true,
+      "timeout": 1200,
+      "memory_limit_mb": 512,
+      "response_time_limit_ms": 2000
+    },
+    "security_tests": {
+      "enabled": true,
+      "timeout": 300,
+      "api_key_validation": true,
+      "data_validation": true
+    }
+  },
+  "external_services": {
+    "okx_exchange": {
+      "enabled": true,
+      "testnet": true,
+      "sandbox": true,
+      "rate_limit_delay_ms": 100,
+      "timeout_seconds": 30
+    },
+    "news_apis": {
+      "cryptocompare": {
+        "enabled": true,
+        "rate_limit_delay_ms": 200,
+        "timeout_seconds": 15
+      }
+    },
+    "openai": {
+      "enabled": true,
+      "mock_mode": true,
+      "timeout_seconds": 30
+    },
+    "telegram": {
+      "enabled": false,
+      "mock_mode": true,
+      "test_chat_id": "test_chat_id"
+    }
+  },
+  "test_data": {
+    "symbols": [
+      "BTC-USDT-SWAP",
+      "ETH-USDT-SWAP",
+      "SOL-USDT-SWAP"
+    ],
+    "timeframes": [
+      "1m",
+      "5m", 
+      "15m",
+      "1h"
+    ],
+    "sample_data_size": 200,
+    "mock_data_enabled": true
+  },
+  "performance_benchmarks": {
+    "single_symbol_analysis_ms": 2000,
+    "multi_symbol_analysis_ms": 5000,
+    "memory_usage_mb": 512,
+    "cpu_usage_percent": 80,
+    "api_response_time_ms": 500
+  },
+  "coverage_requirements": {
+    "minimum_coverage_percent": 85,
+    "critical_paths_coverage_percent": 95,
+    "exclude_patterns": [
+      "tests/",
+      "scripts/",
+      "docs/",
+      "*.pyc",
+      "__pycache__/"
+    ]
+  },
+  "error_handling": {
+    "max_retry_attempts": 3,
+    "retry_delay_seconds": 1,
+    "timeout_handling": "graceful",
+    "error_reporting": "detailed"
+  },
+  "reporting": {
+    "generate_html_report": true,
+    "generate_json_report": true,
+    "generate_markdown_report": true,
+    "include_screenshots": false,
+    "report_directory": "test_reports"
+  },
+  "cleanup": {
+    "cleanup_test_data": true,
+    "cleanup_logs": true,
+    "cleanup_temp_files": true,
+    "cleanup_mock_data": true
+  }
+}
+

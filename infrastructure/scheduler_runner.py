@@ -17,6 +17,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from loguru import logger
 
+# Cross-platform signal handling (Windows compatible)
+
 from infrastructure.bootstrap import load_env, load_policy, init_logging
 from application.jobs.trading_analysis import TradingAnalysisJob
 from application.jobs.trailing_5m import Trailing5mJob
@@ -49,6 +51,10 @@ class SchedulerRunner:
         
         # Monitoring
         self.prometheus_exporter = None
+        
+        # Global shared adapters
+        self.global_exchange_adapter = None
+        self.global_news_service = None
         
     async def initialize(self):
         """Initialize scheduler and load configuration."""
@@ -97,6 +103,9 @@ class SchedulerRunner:
             else:
                 logger.info("ℹ️ Prometheus monitoring disabled")
             
+            # Initialize global shared adapters
+            await self._initialize_global_adapters()
+            
             # Initialize scheduler
             self.scheduler = AsyncIOScheduler(
                 timezone="Europe/Istanbul",
@@ -133,6 +142,23 @@ class SchedulerRunner:
             logger.error(f"❌ Failed to initialize scheduler: {e}")
             raise
     
+    async def _initialize_global_adapters(self):
+        """Initialize global shared adapters to prevent session leaks."""
+        try:
+            # Initialize global exchange adapter
+            from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+            self.global_exchange_adapter = OKXCCXTAdapter()
+            logger.info("✅ Global exchange adapter initialized")
+            
+            # Initialize global news service
+            from application.news_service import NewsService
+            self.global_news_service = NewsService(self.policy)
+            logger.info("✅ Global news service initialized")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize global adapters: {e}")
+            raise
+    
     async def _initialize_jobs(self):
         """Initialize all job classes."""
         try:
@@ -145,6 +171,11 @@ class SchedulerRunner:
                 'news_incremental_5m': NewsIncremental5mJob(self.policy, self.semaphore, self.runtime_state),
                 'telegram_summary_15m': TelegramSummary15mJob(self.policy, self.semaphore, self.runtime_state),
             }
+            
+            # Pass global adapters to jobs
+            for job_name, job_instance in self.jobs.items():
+                if hasattr(job_instance, 'set_global_adapters'):
+                    job_instance.set_global_adapters(self.global_exchange_adapter, self.global_news_service)
             
             # Initialize each job
             for job_name, job_instance in self.jobs.items():
@@ -378,8 +409,13 @@ class SchedulerRunner:
             asyncio.create_task(self.stop())
             self.shutdown_event.set()
         
-        signal.signal(signal.SIGINT, signal_handler)
-        signal.signal(signal.SIGTERM, signal_handler)
+        # Cross-platform signal handling
+        signal.signal(signal.SIGINT, signal_handler)   # Ctrl+C
+        signal.signal(signal.SIGTERM, signal_handler)  # Termination
+        
+        # Windows specific signals (if available)
+        if hasattr(signal, 'SIGBREAK'):
+            signal.signal(signal.SIGBREAK, signal_handler)  # Ctrl+Break
     
     async def _send_startup_message(self):
         """Send startup message to Telegram"""
@@ -418,6 +454,69 @@ async def main():
     except Exception as e:
         logger.error(f"❌ Scheduler runner failed: {e}")
         sys.exit(1)
+    finally:
+        # Cleanup: Close all sessions
+        logger.info("🧹 Cleaning up resources...")
+        try:
+            if 'runner' in locals() and runner and hasattr(runner, 'jobs'):
+                for job_name, job_instance in runner.jobs.items():
+                    # Call job cleanup method
+                    try:
+                        if hasattr(job_instance, 'cleanup'):
+                            await job_instance.cleanup()
+                            logger.debug(f"✅ Job cleanup completed for {job_name}")
+                    except Exception as e:
+                        logger.debug(f"⚠️ Job cleanup warning for {job_name}: {e}")
+                    
+                    # Legacy cleanup for backward compatibility
+                    if hasattr(job_instance, 'news_service') and job_instance.news_service:
+                        try:
+                            await job_instance.news_service.close()
+                            logger.debug(f"✅ Closed news service for {job_name}")
+                        except Exception as e:
+                            logger.debug(f"⚠️ News service close warning: {e}")
+                    
+                    if hasattr(job_instance, 'exchange_adapter') and job_instance.exchange_adapter:
+                        try:
+                            await job_instance.exchange_adapter.close()
+                            logger.debug(f"✅ Closed exchange adapter for {job_name}")
+                        except Exception as e:
+                            logger.debug(f"⚠️ Exchange adapter close warning: {e}")
+                    
+                    if hasattr(job_instance, 'session') and job_instance.session:
+                        try:
+                            await job_instance.session.close()
+                            logger.debug(f"✅ Closed aiohttp session for {job_name}")
+                        except Exception as e:
+                            logger.debug(f"⚠️ Session close warning: {e}")
+            
+            # Close global adapters
+            try:
+                if 'runner' in locals() and runner and hasattr(runner, 'global_exchange_adapter') and runner.global_exchange_adapter:
+                    await runner.global_exchange_adapter.close()
+                    logger.debug("✅ Closed global exchange adapter")
+            except Exception as e:
+                logger.debug(f"⚠️ Global exchange adapter close warning: {e}")
+            
+            try:
+                if 'runner' in locals() and runner and hasattr(runner, 'global_news_service') and runner.global_news_service:
+                    await runner.global_news_service.close()
+                    logger.debug("✅ Closed global news service")
+            except Exception as e:
+                logger.debug(f"⚠️ Global news service close warning: {e}")
+            
+            # Close global sessions
+            try:
+                import aiohttp
+                # Close any remaining aiohttp sessions
+                if hasattr(aiohttp, '_connector'):
+                    await aiohttp._connector.close()
+            except Exception as e:
+                logger.debug(f"⚠️ Global session close warning: {e}")
+            
+            logger.info("✅ Cleanup completed")
+        except Exception as e:
+            logger.error(f"❌ Cleanup error: {e}")
 
 
 if __name__ == "__main__":

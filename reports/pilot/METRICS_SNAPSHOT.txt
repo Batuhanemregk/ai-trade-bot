@@ -1,0 +1,64 @@
+# Pilot Test Metrics Snapshot
+
+**Test Duration**: 90 dakika  
+**Mode**: PAPER  
+**Test Date**: 2025-10-23
+
+## Prometheus Metrics Queries
+
+### 1. LLM Requests (1 hour)
+```
+increase(aibot_llm_requests_total[1h])
+```
+**Expected**: 50-100 requests (news analysis için)
+
+### 2. LLM Cost Total
+```
+sum(aibot_llm_cost_usd_total)
+```
+**Expected**: $0.50-$1.00 (gpt-5-nano model)
+
+### 3. News Items Sent to LLM
+```
+sum by(sent_to_llm) (increase(aibot_news_items_total[1h]))
+```
+**Expected**: sent_to_llm="true": 100-200 items
+
+## Sample Metrics (from logs)
+
+From the test logs, we can see:
+- **LLM Requests**: Multiple successful requests with status=200
+- **LLM Model**: gpt-5-nano (cost optimized)
+- **LLM Tokens**: ~1300-1500 input tokens, ~128 output tokens per request
+- **LLM Cost**: ~$0.012 per request
+- **News Items**: 20-44 items per symbol per run
+
+## LLM Cost Breakdown
+
+**Per Request**:
+- Input tokens: ~1400
+- Output tokens: 128
+- Cost: ~$0.012
+
+**Daily Projection** (90 dakika test):
+- Total requests: ~50-100
+- Total cost: ~$0.50-$1.00
+- Daily budget remaining: $998.99
+
+## News Pipeline Metrics
+
+**Digest Cache**:
+- Total entries: 5409
+- Unique symbols: 28
+- Expired entries: 5282
+- TTL minutes: 120
+
+**News Processing**:
+- Symbols with news: 28
+- Total articles: 527
+- LLM enabled: True
+- Digest hits: Multiple
+
+## Conclusion
+
+✅ **Metrics Working**: LLM cost optimization is working correctly with gpt-5-nano model and structured output.

@@ -688,6 +688,63 @@ class OKXRESTAdapter:
             logger.error(f"❌ OKX REST connection test failed: {e}")
             return False
     
+    async def fetch_historical_klines(self, symbol: str, timeframe: str, 
+                                    start_time: Optional[str] = None, 
+                                    end_time: Optional[str] = None,
+                                    limit: int = 300) -> List[List]:
+        """
+        Fetch historical klines data from OKX REST API v5.
+        
+        Args:
+            symbol: Trading pair (e.g., 'BTC-USDT-SWAP')
+            timeframe: Timeframe (e.g., '15m', '1h', '4h')
+            start_time: Start time in ISO format (optional)
+            end_time: End time in ISO format (optional)
+            limit: Number of candles to fetch (max 300)
+            
+        Returns:
+            List of klines data
+        """
+        try:
+            # Convert timeframe to OKX format
+            tf_map = {
+                '1m': '1m', '3m': '3m', '5m': '5m', '15m': '15m', '30m': '30m',
+                '1h': '1H', '2h': '2H', '4h': '4H', '6h': '6H', '12h': '12H',
+                '1d': '1D', '1w': '1W', '1M': '1M'
+            }
+            okx_tf = tf_map.get(timeframe, '15m')
+            
+            # Prepare parameters
+            params = {
+                'instId': symbol,
+                'bar': okx_tf,
+                'limit': str(limit)
+            }
+            
+            if start_time:
+                params['before'] = start_time
+            if end_time:
+                params['after'] = end_time
+            
+            # Make request
+            url = f"{self.base_url}{self.api_paths['get_klines']}"
+            
+            async with self._session.get(url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get('code') == '0':
+                        return data.get('data', [])
+                    else:
+                        logger.error(f"OKX API error: {data.get('msg', 'Unknown error')}")
+                        return []
+                else:
+                    logger.error(f"HTTP error {response.status}: {await response.text()}")
+                    return []
+                    
+        except Exception as e:
+            logger.error(f"Error fetching klines: {e}")
+            return []
+
     async def close(self):
         """Close HTTP session."""
         try:
