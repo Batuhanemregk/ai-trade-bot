@@ -57,7 +57,7 @@ class LGBMTrainerPerSymbolTF:
                     
                     # Create labels
                     logger.info("Creating labels...")
-                    df = self.feature_builder.create_label(df, forward_bars=3, threshold_pct=0.25)
+                    df = self.feature_builder.create_label(df, forward_bars=1, threshold_pct=0.15)
                     
                     # Extract X, y
                     X = df[self.feature_builder.feature_columns]
@@ -121,19 +121,21 @@ class LGBMTrainerPerSymbolTF:
     def _train_single_model(self, X: pd.DataFrame, y: pd.Series, symbol: str, tf: str) -> Any:
         """Train single LightGBM model with time-series CV."""
         
-        # Hyperparameters
+        # Hyperparameters - Optimized for AUC 0.7-0.8
         params = {
             'objective': 'binary',
             'metric': 'auc',
             'boosting_type': 'gbdt',
-            'n_estimators': 500,
-            'learning_rate': 0.05,
-            'num_leaves': 31,
-            'max_depth': -1,
-            'colsample_bytree': 0.7,
-            'subsample': 0.7,
-            'reg_alpha': 0.1,
-            'reg_lambda': 0.1,
+            'n_estimators': 1000,        # Increased from 500
+            'learning_rate': 0.03,        # Reduced from 0.05
+            'num_leaves': 63,             # Increased from 31
+            'max_depth': 10,              # Limited from -1
+            'colsample_bytree': 0.8,      # Increased from 0.7
+            'subsample': 0.8,             # Increased from 0.7
+            'reg_alpha': 0.5,             # Increased from 0.1
+            'reg_lambda': 0.5,            # Increased from 0.1
+            'min_child_samples': 50,      # Added for regularization
+            'class_weight': 'balanced',   # CRITICAL: Handle imbalance
             'seed': 42,
             'n_jobs': -1,
             'verbose': -1
@@ -205,21 +207,23 @@ class LGBMTrainerPerSymbolTF:
             'metrics': metrics,
             'training_date': datetime.now().isoformat(),
             'label_config': {
-                'forward_bars': 3,
-                'threshold_pct': 0.25
+                'forward_bars': 1,
+                'threshold_pct': 0.15
             },
             'hyperparameters': {
                 'objective': 'binary',
                 'metric': 'auc',
                 'boosting_type': 'gbdt',
-                'n_estimators': 500,
-                'learning_rate': 0.05,
-                'num_leaves': 31,
-                'max_depth': -1,
-                'colsample_bytree': 0.7,
-                'subsample': 0.7,
-                'reg_alpha': 0.1,
-                'reg_lambda': 0.1
+                'n_estimators': 1000,
+                'learning_rate': 0.03,
+                'num_leaves': 63,
+                'max_depth': 10,
+                'colsample_bytree': 0.8,
+                'subsample': 0.8,
+                'reg_alpha': 0.5,
+                'reg_lambda': 0.5,
+                'min_child_samples': 50,
+                'class_weight': 'balanced'
             }
         }
         

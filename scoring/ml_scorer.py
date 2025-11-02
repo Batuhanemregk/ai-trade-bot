@@ -41,8 +41,13 @@ class MLScorer:
         for symbol in symbols:
             for tf in timeframes:
                 key = f"{symbol}_{tf}"
-                model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m.pkl")
-                metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m_metadata.json")
+                # Try 18-month model first (new), fallback to 6-month
+                model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m.pkl")
+                metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m_metadata.json")
+                
+                if not model_path.exists():
+                    model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m.pkl")
+                    metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m_metadata.json")
                 
                 try:
                     if not model_path.exists():
@@ -60,7 +65,10 @@ class MLScorer:
                     else:
                         self.metadata[key] = {}
                     
-                    auc = self.metadata[key].get('metrics', {}).get('auc_mean', 'unknown')
+                    # Try to get AUC from metrics
+                    auc = self.metadata[key].get('metrics', {}).get('auc', 'unknown')
+                    if auc == 'unknown':
+                        auc = self.metadata[key].get('metrics', {}).get('auc_mean', 'unknown')
                     n_features = self.metadata[key].get('n_features', 'unknown')
                     
                     logger.info(f"✅ Loaded LGBM model: {key} (AUC={auc}, Features={n_features})")
@@ -138,35 +146,69 @@ class MLScorer:
                 logger.warning(f"No feature columns for {model_key}")
                 return self._fallback_score(symbol)
             
-            # Get latest features
-            latest_features = df[model_features].iloc[-1:].values
+            # Filter features to only those available in df
+            available_features = [f for f in model_features if f in df.columns]
+            missing_features = [f for f in model_features if f not in df.columns]
+            
+            if missing_features:
+                logger.warning(f"Missing features for {model_key}: {missing_features[:5]}")
+                logger.debug(f"Available features: {len(available_features)}, Missing: {len(missing_features)}")
+            
+            if len(available_features) == 0:
+                logger.error(f"No available features for {model_key}")
+                return self._fallback_score(symbol)
+            
+            # Get latest features as DataFrame (preserve feature names)
+            latest_features_df = df[available_features].iloc[-1:]
             
             # Check for NaN/inf
-            if np.isnan(latest_features).any() or np.isinf(latest_features).any():
+            if latest_features_df.isnull().any().any() or np.isinf(latest_features_df.values).any():
                 logger.warning(f"Invalid features for {symbol}, using fallback")
                 return self._fallback_score(symbol)
             
-            # Predict
+            # Predict with DataFrame (preserves feature names)
             model = self.models[model_key]
-            p_up = model.predict_proba(latest_features)[0, 1]
+            p_up = model.predict_proba(latest_features_df)[0, 1]
             
-            # Convert to 0-100 score
-            ml_score = round(p_up * 100, 1)
+            # Convert to 0-100 score (bidirectional mapping for SHORT/LONG)
+            # p_up >= 0.65: Strong LONG (70-100)
+            # 0.50 < p_up < 0.65: Moderate LONG (60-69)
+            # 0.35 < p_up < 0.50: Weak/NEUTRAL (40-59)
+            # 0.20 < p_up <= 0.35: Moderate SHORT (20-39)
+            # p_up <= 0.20: Strong SHORT (0-19)
+            if p_up >= 0.65:
+                ml_score = round(70 + (p_up - 0.65) / 0.35 * 30, 1)  # 70-100
+                signal_dir = "LONG"
+            elif p_up >= 0.50:
+                ml_score = round(60 + (p_up - 0.50) / 0.15 * 10, 1)  # 60-70
+                signal_dir = "LONG_WEAK"
+            elif p_up >= 0.35:
+                ml_score = round(40 + (p_up - 0.35) / 0.15 * 20, 1)  # 40-60
+                signal_dir = "NEUTRAL"
+            elif p_up >= 0.20:
+                ml_score = round(20 + (p_up - 0.20) / 0.15 * 20, 1)  # 20-40
+                signal_dir = "SHORT_WEAK"
+            else:
+                ml_score = round((p_up / 0.20) * 20, 1)  # 0-20
+                signal_dir = "SHORT"
             
             # Determine confidence
             confidence = self._calculate_confidence(p_up)
             
             # Rationale
-            rationale = f"LGBM {model_key}: p_up={p_up:.3f} -> {ml_score:.1f}/100 (confidence={confidence})"
+            rationale = f"LGBM {model_key}: p_up={p_up:.3f} -> {ml_score:.1f}/100 ({signal_dir}, confidence={confidence})"
             
             # Details
-            auc = self.metadata[model_key].get('metrics', {}).get('auc_mean', 0)
+            auc = self.metadata[model_key].get('metrics', {}).get('auc', 0)
+            if not auc:
+                auc = self.metadata[model_key].get('metrics', {}).get('auc_mean', 0)
             
             details = {
                 'model': model_key,
                 'p_up': float(p_up),
                 'p_down': float(1 - p_up),
                 'ml_score': float(ml_score),
+                'signal_direction': signal_dir,
                 'confidence': confidence,
                 'model_type': 'LightGBM',
                 'auc': float(auc) if auc else None,

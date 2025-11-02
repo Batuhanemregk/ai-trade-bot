@@ -78,9 +78,9 @@ class RiskService:
     async def _calculate_volatility_risk(self, symbol: str, market_data: Dict[str, Any]) -> float:
         """Calculate volatility-based risk with symbol-specific thresholds from policy."""
         try:
-            # Check cache first
-            if symbol in self._volatility_cache:
-                return self._volatility_cache[symbol]
+            # Cache disabled to allow dynamic volatility-based risk
+            # if symbol in self._volatility_cache:
+            #     return self._volatility_cache[symbol]
             
             # Policy'den volatility risk konfigürasyonunu al
             risk_config = self.policy.get('trading', {}).get('risk', {}).get('risk_assessment', {}).get('volatility_risk', {})
@@ -110,7 +110,8 @@ class RiskService:
                 prices = market_data['trend']['close'].values
                 
                 if len(prices) < 20:
-                    return 50.0  # Medium risk if insufficient data
+                    logger.warning(f"[RISK_SCORE] {symbol} insufficient data (n={len(prices)}), returning None")
+                    return None  # Skip instead of default
                 
                 # Calculate returns
                 returns = np.diff(np.log(prices))
@@ -138,26 +139,35 @@ class RiskService:
                     if should_log:
                         suffix = " (first occurrence)" if is_first else ""
                         logger.info(f"No thresholds found for {symbol}, using default{suffix}")
-                    return 50.0
+                    return None  # Skip instead of default
                 
-                # Calculate volatility-based risk
+                # Dynamic volatility-based risk calculation
+                # Map volatility directly to risk score with non-linear scaling
                 low_threshold = thresholds.get('low', 0.25)
                 medium_threshold = thresholds.get('medium', 0.45)
                 high_threshold = thresholds.get('high', 0.65)
                 
+                # Non-linear mapping for better risk differentiation
                 if volatility < low_threshold:
-                    risk = 20.0  # Low volatility = low risk
+                    # Low vol: 20-40 risk
+                    risk = 20.0 + (volatility / low_threshold) * 20.0
                 elif volatility < medium_threshold:
-                    risk = 50.0  # Medium volatility = medium risk
+                    # Medium vol: 40-60 risk
+                    vol_range = medium_threshold - low_threshold
+                    risk = 40.0 + ((volatility - low_threshold) / vol_range) * 20.0
                 elif volatility < high_threshold:
-                    risk = 75.0  # High volatility = high risk
+                    # High vol: 60-80 risk
+                    vol_range = high_threshold - medium_threshold
+                    risk = 60.0 + ((volatility - medium_threshold) / vol_range) * 20.0
                 else:
-                    risk = 95.0  # Very high volatility = very high risk
+                    # Very high vol: 80-100 risk with cap
+                    risk = 80.0 + min(20.0, (volatility - high_threshold) * 50.0)
                 
-                # Cache the result
-                self._volatility_cache[symbol] = risk
+                # Remove cache to allow dynamic updates
+                # Cache caused flat scores (same volatility → same cached risk)
+                # self._volatility_cache[symbol] = risk
                 
-                logger.debug(f"Volatility risk for {symbol}: {risk} (volatility: {volatility:.3f}, thresholds: {thresholds})")
+                logger.info(f"[RISK_SCORE] {symbol} volatility={volatility:.3f} (thresholds: {thresholds}) → risk={risk:.1f}")
                 return risk
             else:
                 key = f"risk:no_price_volatility:{symbol}"
@@ -393,21 +403,33 @@ class RiskService:
             logger.warning(f"Failed to calculate market risk: {e}")
             return 40.0
     
-    def _combine_risk_metrics(self, risks: Dict[str, float]) -> float:
+    def _combine_risk_metrics(self, risks: Dict[str, Optional[float]]) -> float:
         """Combine multiple risk metrics into a single score."""
         try:
             # Weighted combination of risk factors
             weights = {
-                'volatility': 0.25,
+                'volatility': 0.30,
                 'liquidity': 0.20,
-                'correlation': 0.15,
-                'score': 0.25,
+                'correlation': 0.20,
+                'score': 0.15,
                 'market': 0.15
             }
             
-            total_risk = sum(risks[factor] * weight for factor, weight in weights.items())
+            # Filter out None values (invalid metrics)
+            valid_metrics = {k: v for k, v in risks.items() if v is not None}
             
-            return min(100.0, max(0.0, total_risk))  # Clamp between 0-100
+            if not valid_metrics:
+                logger.warning("[RISK_SCORE] no valid metrics, returning neutral")
+                return 50.0
+            
+            # Recalculate weights to sum to 1.0
+            total_weight = sum(weights[k] for k in valid_metrics.keys())
+            weighted_sum = sum(valid_metrics[k] * weights.get(k, 0.1) for k in valid_metrics.keys())
+            
+            final_risk = weighted_sum / total_weight if total_weight > 0 else 50.0
+            
+            logger.info(f"[RISK_SCORE] combined: {valid_metrics} → {final_risk:.1f}")
+            return min(100.0, max(0.0, final_risk))  # Clamp between 0-100
             
         except Exception as e:
             logger.warning(f"Failed to combine risk metrics: {e}")

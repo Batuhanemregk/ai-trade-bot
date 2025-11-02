@@ -1,7 +1,7 @@
 ================================================================================
 🚀 AIBOTBS CONFIGURATION BANNER
 ================================================================================
-MODE: PAPER (source=policy.yaml)
+MODE: LIVE (source=policy.yaml)
 STRATEGY: single_flip (source=policy.yaml)
 USE_POSITION_TPSL: True (source=policy.yaml)
 REDUCE_ONLY: True (source=policy.yaml)

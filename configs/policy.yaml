@@ -27,7 +27,7 @@ idempotency:
 # Trading Configuration
 trading:
   # Mode Configuration (Single Source of Truth)
-  mode: PAPER             # LIVE | PAPER | DRY_RUN
+  mode: LIVE             # LIVE | PAPER | DRY_RUN
   use_position_tpsl: true
   reduce_only: true
   entry_cooldown_bars: 2
@@ -257,7 +257,7 @@ agents:
 exchange:
   name: "okx"
   testnet: false
-  mode: "paper"  # paper, live - CHANGED TO PAPER FOR SAFETY!
+  mode: "live"  # paper, live
   api_key: "${OKX_API_KEY}"
   secret: "${OKX_API_SECRET}"
   passphrase: "${OKX_API_PASSPHRASE}"
@@ -403,9 +403,7 @@ development:
 ml_scoring:
   enabled: true
   model:
-    path: "models/rf_v1.pkl"
-    type: "RandomForest"
-    version: "v1"
+    type: "LightGBM"  # Only LightGBM models supported
     auto_reload: false  # Auto-reload if new model detected
   
   scoring:
@@ -423,7 +421,7 @@ ml_scoring:
     
     # Score adjustment
     score_multiplier: 1.0  # Multiply ML score if needed
-    
+  
   fallback:
     enabled: true
     neutral_score: 50.0  # Fallback to neutral if model unavailable

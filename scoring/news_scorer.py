@@ -75,10 +75,12 @@ class NewsScorer:
         try:
             # Use new news service if available
             if hasattr(self, 'news_service') and self.news_service:
+                logger.debug(f"[NEWS_SCORE] Using news_service for {symbol}")
                 return await self.news_service.get_news_score(symbol)
             
             # Fallback to legacy system
             if not self.news_client:
+                logger.warning(f"[NEWS_SCORE] {symbol} no news_client available, using neutral")
                 return self._neutral_score(symbol)
 
             # Get real news for the symbol with TTL tracking
@@ -123,10 +125,11 @@ class NewsScorer:
             logger.error(f"❌ News scoring failed for {symbol}: {e}")
             return self._neutral_score(symbol)
 
-    def _neutral_score(self, symbol: str) -> tuple[float, list[str], str, float]:
+    def _neutral_score(self, symbol: str) -> tuple:
         """Return neutral score when news is not available."""
+        logger.info(f"[NEWS_SCORE] {symbol} -> NEUTRAL (no data), returning None for skip-weight")
         return (
-            50.0,  # Neutral score
+            None,  # None score to skip weight in composite
             ["general"],  # General category
             "Neutral (no news data available)",
             0.5  # Neutral volatility impact

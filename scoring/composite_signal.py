@@ -4,7 +4,7 @@ Composite Signal Model - Unified scoring system for trading signals
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 from loguru import logger
 
@@ -28,7 +28,7 @@ class MLBlock:
 @dataclass
 class NewsBlock:
     """News sentiment scoring block."""
-    score: float  # 0-100
+    score: float | None  # 0-100 or None (skip weight)
     categories: list[str]
     rationale: str
     volatility_impact: float  # 0-1
@@ -81,16 +81,44 @@ class CompositeSignal:
             direction_hint: Optional direction hint from technical analysis
         """
         try:
-            # Calculate weighted final score
+            # Calculate weighted final score, handling None values (skip weight)
+            news_score = self.news.score if self.news.score is not None else 50.0
+            risk_score = self.risk.score if self.risk.score is not None else 50.0
+            
+            # Recalculate weights if news or risk is None (skip these components)
+            adjusted_weights = weights.copy()
+            total_weight = sum(adjusted_weights.values())
+            
+            if self.news.score is None:
+                # Redistribute news weight to other components
+                news_weight = adjusted_weights.pop('news', 0.0)
+                if total_weight > 0:
+                    scale = total_weight / (total_weight - news_weight) if (total_weight - news_weight) > 0 else 1.0
+                    adjusted_weights = {k: v * scale for k, v in adjusted_weights.items()}
+                news_score = 50.0  # Neutral for calculation
+            
+            if self.risk.score is None:
+                # Redistribute risk weight to other components
+                risk_weight = adjusted_weights.pop('risk', 0.0)
+                total_weight = sum(adjusted_weights.values())
+                if total_weight > 0:
+                    scale = total_weight / (total_weight - risk_weight) if (total_weight - risk_weight) > 0 else 1.0
+                    adjusted_weights = {k: v * scale for k, v in adjusted_weights.items()}
+                risk_score = 50.0  # Neutral for calculation
+            
             self.final_score = (
-                weights.get('technical', 0.0) * self.technical.score +
-                weights.get('ml', 0.0) * self.ml.score +
-                weights.get('news', 0.0) * self.news.score +
-                weights.get('risk', 0.0) * self.risk.score
+                adjusted_weights.get('technical', 0.0) * self.technical.score +
+                adjusted_weights.get('ml', 0.0) * self.ml.score +
+                adjusted_weights.get('news', 0.0) * news_score +
+                adjusted_weights.get('risk', 0.0) * risk_score
             )
 
             # Ensure score is within bounds
             self.final_score = max(0.0, min(100.0, self.final_score))
+            
+            # Log weight adjustment if any component was None
+            if self.news.score is None or self.risk.score is None:
+                logger.debug(f"[COMPOSITE] Adjusted weights: {adjusted_weights} (news/risk skipped)")
 
             # Set confidence percentage
             self.confidence_pct = self.final_score

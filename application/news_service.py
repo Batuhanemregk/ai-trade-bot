@@ -210,7 +210,10 @@ class NewsService:
             # Update watermark
             self.watermark_manager.update_watermark_from_news(symbol, new_news_items)
             
-            # Run LLM analysis if digest changed
+            # Force digest invalidation on new articles
+            logger.info(f"[NEWS_SCORE] {symbol} updated: +{len(new_news_items)} articles, forcing LLM re-analysis")
+            
+            # Run LLM analysis for new articles
             if self.llm_analyzer:
                 await self._analyze_news_with_llm(symbol, merged_news)
             
@@ -346,25 +349,35 @@ class NewsService:
     async def get_news_score(self, symbol: str) -> Tuple[float, List[str], str, float]:
         """Get news score for a symbol"""
         try:
+            logger.debug(f"[NEWS_SCORE] get_news_score called for {symbol}")
+            
             # Get latest cached LLM result
             news_items = self.news_data.get(symbol, [])
+            logger.debug(f"[NEWS_SCORE] {symbol} has {len(news_items)} cached articles")
+            
             if not news_items:
+                logger.info(f"[NEWS_SCORE] {symbol} -> 50.0 (no articles in storage)")
                 return 50.0, ["GENERAL"], "No news data available", 0.5
             
             max_items = self.llm_config.get('digest', {}).get('max_items_per_symbol', 30)
-            digest_hash, _, cached_result = self.digest_manager.get_digest_status(
+            digest_hash, is_changed, cached_result = self.digest_manager.get_digest_status(
                 symbol, news_items, max_items
             )
             
+            logger.debug(f"[NEWS_SCORE] {symbol} digest_status: changed={is_changed}, has_cache={cached_result is not None}")
+            
             if cached_result:
+                score = cached_result['score']
+                logger.info(f"[NEWS_SCORE] {symbol} -> {score:.1f} (cached LLM result)")
                 return (
-                    cached_result['score'],
+                    score,
                     cached_result['categories'],
                     cached_result['rationale'],
                     cached_result['volatility_impact']
                 )
             else:
                 # Fallback to neutral score
+                logger.info(f"[NEWS_SCORE] {symbol} -> 50.0 (no LLM analysis cached)")
                 return 50.0, ["GENERAL"], "No LLM analysis available", 0.5
                 
         except Exception as e:

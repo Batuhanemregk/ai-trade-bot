@@ -447,6 +447,11 @@ async def _compute_news_analysis(news_scorer, symbol: str) -> tuple[float, list,
         # Compute news score (now async)
         score, categories, rationale, volatility_impact = await news_scorer.score(symbol)
         
+        # Handle None score (returned when no news data)
+        if score is None:
+            logger.debug(f"[COMPOSITE] News score is None for {symbol}, using 50.0 for composite")
+            score = 50.0
+        
         return score, categories, rationale, volatility_impact
         
     except Exception as e:

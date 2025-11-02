@@ -247,6 +247,26 @@ class FeatureBuilder:
             lambda x: x.kurtosis() if len(x) > 3 else 0
         )
         
+        # ===== Volatility Regime Detection =====
+        # High vol vs low vol periods
+        df['volatility_regime'] = (df['close'].rolling(window=20).std() > 
+                                   df['close'].rolling(window=100).std()).astype(int)
+        
+        # Volatility z-score
+        vol_20 = df['close'].rolling(window=20).std()
+        vol_mean = vol_20.rolling(window=100).mean()
+        vol_std = vol_20.rolling(window=100).std()
+        df['volatility_zscore'] = (vol_20 - vol_mean) / vol_std
+        
+        # ===== Normalized Price Distance from Key Levels =====
+        # Distance from SMAs (normalized by price)
+        df['distance_sma_20'] = (df['close'] - df['sma_20']) / df['close']
+        df['distance_sma_50'] = (df['close'] - df['sma_50']) / df['close']
+        
+        # Distance from recent high/low
+        df['distance_high_20'] = (df['close'] - df['high'].rolling(window=20).max()) / df['close']
+        df['distance_low_20'] = (df['close'] - df['low'].rolling(window=20).min()) / df['close']
+        
         return df
     
     def _add_time_features(self, df: pd.DataFrame) -> pd.DataFrame:

@@ -193,14 +193,113 @@ function Start-Trading {
     }
 }
 
+function Start-Telegram {
+    param(
+        [string]$VenvPath,
+        [switch]$NoVenv
+    )
+    
+    Show-Banner "STARTING TELEGRAM BOT" "Cyan"
+    
+    # Load .env file if exists
+    $envFile = Join-Path $ProjectRoot ".env"
+    if (Test-Path $envFile) {
+        Get-Content $envFile | ForEach-Object {
+            if ($_ -match '^\s*([^#=]+)=(.*)$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                [Environment]::SetEnvironmentVariable($key, $value, "Process")
+            }
+        }
+        Write-Host "✅ Loaded .env file" -ForegroundColor Green
+    }
+    
+    # Check if Telegram is enabled
+    $telegramEnabled = if ($env:TELEGRAM_ENABLED) { $env:TELEGRAM_ENABLED.ToLower() -eq 'true' } else { $true }
+    
+    if (-not $telegramEnabled) {
+        Write-Host "⚠️  Telegram bot is disabled (TELEGRAM_ENABLED=false)" -ForegroundColor Yellow
+        return
+    }
+    
+    # Check for token
+    if (-not $env:TELEGRAM_BOT_TOKEN) {
+        Write-Host "❌ TELEGRAM_BOT_TOKEN not found in .env" -ForegroundColor Red
+        Write-Host "   Please add TELEGRAM_BOT_TOKEN=your_token to .env file" -ForegroundColor Yellow
+        return
+    }
+    
+    try {
+        $pythonPath = Get-PythonPath -VenvPath $VenvPath -NoVenv:$NoVenv
+        
+        Write-Host "Python: $pythonPath" -ForegroundColor Cyan
+        Write-Host "Environment:" -ForegroundColor Yellow
+        Write-Host "  TELEGRAM_BOT_TOKEN = $($env:TELEGRAM_BOT_TOKEN.Substring(0, [Math]::Min(10, $env:TELEGRAM_BOT_TOKEN.Length)))..." -ForegroundColor White
+        Write-Host "  TELEGRAM_CHAT_ID   = $($env:TELEGRAM_CHAT_ID)" -ForegroundColor White
+        Write-Host ""
+        Write-Host "✅ Starting Telegram bot..." -ForegroundColor Green
+        Write-Host "   Press Ctrl+C to stop" -ForegroundColor Gray
+        Write-Host ""
+        
+        # Use existing script file
+        $telegramScriptPath = Join-Path $ProjectRoot "scripts" "start_telegram_bot.py"
+        
+        if (-not (Test-Path $telegramScriptPath)) {
+            Write-Host "❌ Telegram bot script not found: $telegramScriptPath" -ForegroundColor Red
+            Write-Host "   Please create scripts/start_telegram_bot.py" -ForegroundColor Yellow
+            return
+        }
+        
+        Write-Host "✅ Using Telegram bot script: $telegramScriptPath" -ForegroundColor Gray
+        & $pythonPath -u $telegramScriptPath
+    } catch {
+        Write-Host "❌ Hata: $_" -ForegroundColor Red
+    }
+}
+
 function Start-Scheduler {
     param(
         [switch]$NoDetach,
+        [switch]$Telegram,
         [string]$VenvPath,
         [switch]$NoVenv
     )
     
     Show-Banner "STARTING SCHEDULER (DEV MODE)" "Cyan"
+    
+    # Start Telegram bot in background if requested
+    $telegramJob = $null
+    if ($Telegram) {
+        Write-Host "📱 Starting Telegram bot in background..." -ForegroundColor Cyan
+        
+        # Use existing Telegram script file
+        $telegramScriptPath = Join-Path $ProjectRoot "scripts" "start_telegram_bot.py"
+        
+        if (-not (Test-Path $telegramScriptPath)) {
+            Write-Host "❌ Telegram bot script not found: $telegramScriptPath" -ForegroundColor Red
+            Write-Host "   Skipping Telegram bot..." -ForegroundColor Yellow
+        } else {
+            $telegramJob = Start-Job -ScriptBlock {
+                param($ProjectRoot, $ScriptPath, $VenvPath, $NoVenv)
+                Set-Location $ProjectRoot
+                if ($VenvPath) {
+                    $pythonPath = Join-Path $VenvPath "Scripts\python.exe"
+                } else {
+                    $pythonPath = "python"
+                }
+                $env:TELEGRAM_ENABLED = "true"
+                & $pythonPath -u $ScriptPath
+            } -ArgumentList $ProjectRoot, $telegramScriptPath, $VenvPath, $NoVenv
+            
+            Start-Sleep -Seconds 2
+            if ($telegramJob.State -eq "Running") {
+                Write-Host "✅ Telegram bot started (background)" -ForegroundColor Green
+            } else {
+                Write-Host "⚠️  Telegram bot may have failed to start" -ForegroundColor Yellow
+            }
+            Write-Host ""
+        }
+    }
     
     try {
         $pythonPath = Get-PythonPath -VenvPath $VenvPath -NoVenv:$NoVenv
@@ -212,23 +311,35 @@ function Start-Scheduler {
         Write-Host "  APP_ENV       = $env:APP_ENV" -ForegroundColor White
         Write-Host "  LOG_LEVEL     = $env:LOG_LEVEL" -ForegroundColor White
         Write-Host "  DEV_CONSOLE   = $env:DEV_CONSOLE" -ForegroundColor White
+        if ($Telegram) {
+            Write-Host "  TELEGRAM      = ENABLED" -ForegroundColor Green
+        }
         Write-Host ""
         
         & $pythonPath @arguments
     } catch {
         Write-Host "❌ Hata: $_" -ForegroundColor Red
+    } finally {
+        # Stop Telegram bot job if running
+        if ($telegramJob -and $telegramJob.State -eq "Running") {
+            Write-Host ""
+            Write-Host "🛑 Stopping Telegram bot..." -ForegroundColor Yellow
+            Stop-Job $telegramJob
+            Remove-Job $telegramJob
+        }
     }
 }
 
 function Start-FullStack {
     param(
+        [switch]$Telegram,
         [string]$VenvPath,
         [switch]$NoVenv
     )
     
     Show-Banner "STARTING FULL STACK (BOT + MONITORING)" "Magenta"
     
-    Write-Host "🚀 Step 1/3: Checking Docker..." -ForegroundColor Cyan
+    Write-Host "🚀 Step 1/4: Checking Docker..." -ForegroundColor Cyan
     
     # Check if Docker is running
     try {
@@ -241,7 +352,7 @@ function Start-FullStack {
     }
     
     Write-Host ""
-    Write-Host "🐳 Step 2/3: Starting monitoring containers..." -ForegroundColor Cyan
+    Write-Host "🐳 Step 2/4: Starting monitoring containers..." -ForegroundColor Cyan
     Push-Location monitoring
     docker compose up -d
     if ($LASTEXITCODE -eq 0) {
@@ -255,8 +366,61 @@ function Start-FullStack {
     }
     Pop-Location
     
+    # Start Telegram bot in background if requested
+    $telegramJob = $null
+    if ($Telegram) {
+        Write-Host ""
+        Write-Host "📱 Step 3/4: Starting Telegram bot..." -ForegroundColor Cyan
+        
+        # Load .env file if exists
+        $envFile = Join-Path $ProjectRoot ".env"
+        if (Test-Path $envFile) {
+            Get-Content $envFile | ForEach-Object {
+                if ($_ -match '^\s*([^#=]+)=(.*)$') {
+                    $key = $matches[1].Trim()
+                    $value = $matches[2].Trim()
+                    [Environment]::SetEnvironmentVariable($key, $value, "Process")
+                }
+            }
+        }
+        
+        if ($env:TELEGRAM_BOT_TOKEN) {
+            # Use existing Telegram script file
+            $telegramScriptPath = Join-Path $ProjectRoot "scripts" "start_telegram_bot.py"
+            
+            if (-not (Test-Path $telegramScriptPath)) {
+                Write-Host "❌ Telegram bot script not found: $telegramScriptPath" -ForegroundColor Red
+                Write-Host "   Skipping Telegram bot..." -ForegroundColor Yellow
+            } else {
+                $telegramJob = Start-Job -ScriptBlock {
+                    param($ProjectRoot, $ScriptPath, $VenvPath, $NoVenv)
+                    Set-Location $ProjectRoot
+                    if ($VenvPath) {
+                        $pythonPath = Join-Path $VenvPath "Scripts\python.exe"
+                    } else {
+                        $pythonPath = "python"
+                    }
+                    $env:TELEGRAM_ENABLED = "true"
+                    & $pythonPath -u $ScriptPath
+                } -ArgumentList $ProjectRoot, $telegramScriptPath, $VenvPath, $NoVenv
+                
+                Start-Sleep -Seconds 2
+                if ($telegramJob.State -eq "Running") {
+                    Write-Host "✅ Telegram bot started (background)" -ForegroundColor Green
+                } else {
+                    Write-Host "⚠️  Telegram bot may have failed to start" -ForegroundColor Yellow
+                }
+            }
+        } else {
+            Write-Host "⚠️  TELEGRAM_BOT_TOKEN not found, skipping Telegram bot" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host ""
+        Write-Host "⏭️  Step 3/4: Telegram bot skipped (use -Telegram to enable)" -ForegroundColor Gray
+    }
+    
     Write-Host ""
-    Write-Host "🤖 Step 3/3: Starting trading bot scheduler..." -ForegroundColor Cyan
+    Write-Host "🤖 Step 4/4: Starting trading bot scheduler..." -ForegroundColor Cyan
     Write-Host ""
     
     # Start the bot
@@ -268,6 +432,9 @@ function Start-FullStack {
         Write-Host "  APP_ENV       = $env:APP_ENV" -ForegroundColor White
         Write-Host "  LOG_LEVEL     = $env:LOG_LEVEL" -ForegroundColor White
         Write-Host "  DEV_CONSOLE   = $env:DEV_CONSOLE" -ForegroundColor White
+        if ($Telegram) {
+            Write-Host "  TELEGRAM      = ENABLED" -ForegroundColor Green
+        }
         Write-Host ""
         Write-Host "✅ Full stack is ready! Press Ctrl+C to stop..." -ForegroundColor Green
         Write-Host ""
@@ -276,6 +443,14 @@ function Start-FullStack {
         & $pythonPath @arguments
     } catch {
         Write-Host "❌ Hata: $_" -ForegroundColor Red
+    } finally {
+        # Stop Telegram bot job if running
+        if ($telegramJob -and $telegramJob.State -eq "Running") {
+            Write-Host ""
+            Write-Host "🛑 Stopping Telegram bot..." -ForegroundColor Yellow
+            Stop-Job $telegramJob
+            Remove-Job $telegramJob
+        }
     }
 }
 
@@ -454,22 +629,37 @@ function Show-Menu {
     Write-Host "  1. Start-Trading            - Start trading bot (scheduler mode)" -ForegroundColor White
     Write-Host "  2. Start-Trading -Once      - Single run test" -ForegroundColor White
     Write-Host "  3. Start-Scheduler          - Start scheduler only" -ForegroundColor White
-    Write-Host "  4. Start-FullStack          - Start Docker + Bot together 🚀" -ForegroundColor Magenta
-    Write-Host "  5. Watch-Logs -Follow       - Live log viewer" -ForegroundColor White
-    Write-Host "  6. Test-Health              - System health check" -ForegroundColor White
-    Write-Host "  7. Show-Python              - Show Python configuration" -ForegroundColor White
-    Write-Host "  8. Install-Req              - Install requirements.txt" -ForegroundColor White
-    Write-Host "  9. Stop-Bot                 - Stop bot processes" -ForegroundColor White
+    Write-Host "  4. Start-Scheduler -Telegram - Start scheduler + Telegram bot" -ForegroundColor Cyan
+    Write-Host "  5. Start-FullStack          - Start Docker + Bot together 🚀" -ForegroundColor Magenta
+    Write-Host "  6. Start-FullStack -Telegram - Full stack + Telegram bot 📱" -ForegroundColor Magenta
+    Write-Host "  7. Start-Telegram            - Start Telegram bot only" -ForegroundColor Cyan
+    Write-Host "  8. Watch-Logs -Follow       - Live log viewer" -ForegroundColor White
+    Write-Host "  9. Test-Health              - System health check" -ForegroundColor White
+    Write-Host " 10. Show-Python              - Show Python configuration" -ForegroundColor White
+    Write-Host " 11. Install-Req              - Install requirements.txt" -ForegroundColor White
+    Write-Host " 12. Stop-Bot                 - Stop bot processes" -ForegroundColor White
     Write-Host ""
     Write-Host "Options:" -ForegroundColor Yellow
     Write-Host "  -VenvPath <path>            - Use specific venv" -ForegroundColor Gray
     Write-Host "  -NoVenv                     - Use system Python" -ForegroundColor Gray
+    Write-Host "  -Telegram                   - Enable Telegram bot (with scheduler/fullstack)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Environment:" -ForegroundColor Green
     Write-Host "  APP_ENV          = $env:APP_ENV" -ForegroundColor Gray
     Write-Host "  LOG_LEVEL        = $env:LOG_LEVEL" -ForegroundColor Gray
     Write-Host "  DEV_CONSOLE      = $env:DEV_CONSOLE" -ForegroundColor Gray
     Write-Host "  PYTHONUNBUFFERED = $env:PYTHONUNBUFFERED" -ForegroundColor Gray
+    
+    # Check Telegram config
+    $envFile = Join-Path $ProjectRoot ".env"
+    if (Test-Path $envFile) {
+        $telegramToken = (Get-Content $envFile | Select-String "TELEGRAM_BOT_TOKEN").ToString() -replace 'TELEGRAM_BOT_TOKEN=', '' -replace '#.*', '' | ForEach-Object { $_.Trim() }
+        if ($telegramToken) {
+            Write-Host "  TELEGRAM_BOT_TOKEN = Set ✅" -ForegroundColor Green
+        } else {
+            Write-Host "  TELEGRAM_BOT_TOKEN = Not set ⚠️" -ForegroundColor Yellow
+        }
+    }
     Write-Host ""
 }
 

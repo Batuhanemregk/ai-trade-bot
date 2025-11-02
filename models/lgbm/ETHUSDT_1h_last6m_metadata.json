@@ -54,6 +54,12 @@
     "roll_std_20",
     "skewness_20",
     "kurtosis_20",
+    "volatility_regime",
+    "volatility_zscore",
+    "distance_sma_20",
+    "distance_sma_50",
+    "distance_high_20",
+    "distance_low_20",
     "hour_sin",
     "hour_cos",
     "dow_sin",
@@ -68,31 +74,33 @@
     "macd_hist_4h",
     "trend_strength_4h"
   ],
-  "n_features": 65,
+  "n_features": 71,
   "metrics": {
-    "auc": 0.5689164241961223,
-    "accuracy": 0.57663421418637,
-    "precision": 0.44143355798532635,
-    "recall": 0.369280937697395,
-    "f1": 0.3900690679548583,
-    "balanced_accuracy": 0.541065832700426
+    "auc": 0.5645292031570637,
+    "accuracy": 0.564673157162726,
+    "precision": 0.4236471970136056,
+    "recall": 0.4301748869125472,
+    "f1": 0.422404959559804,
+    "balanced_accuracy": 0.538516059681403
   },
-  "training_date": "2025-10-31T23:48:38.667051",
+  "training_date": "2025-11-01T00:37:46.298132",
   "label_config": {
-    "forward_bars": 3,
-    "threshold_pct": 0.25
+    "forward_bars": 1,
+    "threshold_pct": 0.15
   },
   "hyperparameters": {
     "objective": "binary",
     "metric": "auc",
     "boosting_type": "gbdt",
-    "n_estimators": 500,
-    "learning_rate": 0.05,
-    "num_leaves": 31,
-    "max_depth": -1,
-    "colsample_bytree": 0.7,
-    "subsample": 0.7,
-    "reg_alpha": 0.1,
-    "reg_lambda": 0.1
+    "n_estimators": 1000,
+    "learning_rate": 0.03,
+    "num_leaves": 63,
+    "max_depth": 10,
+    "colsample_bytree": 0.8,
+    "subsample": 0.8,
+    "reg_alpha": 0.5,
+    "reg_lambda": 0.5,
+    "min_child_samples": 50,
+    "class_weight": "balanced"
   }
 }

@@ -17,9 +17,17 @@ class RunWatchdog:
         self.policy = policy
         self.scheduler = scheduler
         self.jobs = jobs
-        self.miss_threshold = 90  # seconds
+        self.miss_threshold = 300  # seconds (was: 90) - increased to prevent repeated catch-ups
         self.history_path = Path("data/run_history.jsonl")
         self.history_path.parent.mkdir(exist_ok=True)
+        
+        # Grace period for recent scheduler starts
+        self.scheduler_start_time = datetime.now(timezone.utc)
+        self.grace_period_minutes = 10  # Ignore misses for first 10 min after startup
+        
+        # Cooldown to prevent repeated catch-ups for same job
+        self.last_catchup = {}  # {job_name: timestamp}
+        self.catchup_cooldown = 600  # 10 minutes between catch-ups
         
         # Critical jobs to monitor
         self.critical_jobs = [
@@ -44,6 +52,12 @@ class RunWatchdog:
         try:
             current_time = datetime.now(timezone.utc)
             
+            # Check if we're in grace period
+            time_since_start = (current_time - self.scheduler_start_time).total_seconds()
+            if time_since_start < self.grace_period_minutes * 60:
+                logger.debug(f"[WATCHDOG] in grace period for {self.grace_period_minutes} min, skipping missed run checks")
+                return
+            
             for job_name in self.critical_jobs:
                 if job_name not in self.jobs:
                     continue
@@ -56,6 +70,14 @@ class RunWatchdog:
                     expected_next = last_run + timedelta(seconds=expected_interval)
                     
                     if time_since_last > expected_interval + self.miss_threshold:
+                        # Check cooldown
+                        last_catchup_time = self.last_catchup.get(job_name)
+                        if last_catchup_time:
+                            time_since_catchup = (current_time - last_catchup_time).total_seconds()
+                            if time_since_catchup < self.catchup_cooldown:
+                                logger.debug(f"[WATCHDOG] {job_name} catch-up on cooldown ({time_since_catchup:.0f}s remaining)")
+                                continue
+                        
                         logger.warning(f"[WATCHDOG] missed run for {job_name} expected={expected_next.strftime('%H:%M:%S')} actual={current_time.strftime('%H:%M:%S')}")
                         await self._trigger_catch_up(job_name)
                         
@@ -89,6 +111,9 @@ class RunWatchdog:
         """Trigger immediate catch-up for a missed job."""
         try:
             logger.info(f"[WATCHDOG] triggering catch-up for {job_name}")
+            
+            # Record catch-up time for cooldown
+            self.last_catchup[job_name] = datetime.now(timezone.utc)
             
             # Add immediate job execution
             self.scheduler.add_job(

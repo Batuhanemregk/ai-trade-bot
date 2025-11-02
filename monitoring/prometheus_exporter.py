@@ -419,6 +419,57 @@ class PrometheusExporter:
             registry=self.registry
         )
         
+        # ============================================================
+        # TELEGRAM METRICS
+        # ============================================================
+        
+        # Telegram view renders counter
+        self.tg_views_render_total = Counter(
+            'aibot_tg_views_render_total',
+            'Total Telegram views rendered',
+            ['view'],
+            registry=self.registry
+        )
+        
+        # Telegram callbacks counter
+        self.tg_callbacks_total = Counter(
+            'aibot_tg_callbacks_total',
+            'Total Telegram callbacks processed',
+            ['view', 'act'],
+            registry=self.registry
+        )
+        
+        # Telegram errors counter
+        self.tg_errors_total = Counter(
+            'aibot_tg_errors_total',
+            'Total Telegram errors',
+            ['type'],
+            registry=self.registry
+        )
+        
+        # Telegram rate limited counter
+        self.tg_rate_limited_total = Counter(
+            'aibot_tg_rate_limited_total',
+            'Total Telegram rate limit hits',
+            registry=self.registry
+        )
+        
+        # Telegram latency histogram
+        self.tg_latency_ms = Histogram(
+            'aibot_tg_latency_ms_bucket',
+            'Telegram view render latency in milliseconds',
+            ['view'],
+            buckets=[10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
+            registry=self.registry
+        )
+        
+        # Telegram message size gauge
+        self.tg_message_size_bytes = Gauge(
+            'aibot_tg_message_size_bytes',
+            'Telegram message size in bytes',
+            registry=self.registry
+        )
+        
         self.start_time = time.time()
         
         logger.info("Initialized Prometheus metrics")
@@ -722,6 +773,60 @@ class PrometheusExporter:
         """Record order blocked by mode."""
         self.orders_blocked_total.labels(mode=mode).inc()
         logger.debug("Recorded digest cache hit")
+    
+    # ============================================================
+    # TELEGRAM METRICS METHODS
+    # ============================================================
+    
+    def record_tg_view_render(self, view: str, render_time_ms: float, message_size_bytes: int, success: bool = True):
+        """
+        Record Telegram view render.
+        
+        Args:
+            view: View name (main, sig, risk, etc.)
+            render_time_ms: Render time in milliseconds
+            message_size_bytes: Message size in bytes
+            success: Whether render was successful
+        """
+        if success:
+            self.tg_views_render_total.labels(view=view).inc()
+            self.tg_latency_ms.labels(view=view).observe(render_time_ms / 1000.0)  # Convert to seconds
+            self.tg_message_size_bytes.set(message_size_bytes)
+            
+            # Warn if message size exceeds limit
+            if message_size_bytes > 3500:
+                logger.warning(f"Telegram message size {message_size_bytes}B exceeds 3500B limit for view={view}")
+        
+        logger.debug(f"Recorded TG view render: view={view} t={render_time_ms:.0f}ms size={message_size_bytes}B")
+    
+    def record_tg_callback(self, view: str, action: str, success: bool = True):
+        """
+        Record Telegram callback.
+        
+        Args:
+            view: View name
+            action: Action name (view, open, save, etc.)
+            success: Whether callback was successful
+        """
+        if success:
+            self.tg_callbacks_total.labels(view=view, act=action).inc()
+        
+        logger.debug(f"Recorded TG callback: view={view} action={action} success={success}")
+    
+    def record_tg_error(self, error_type: str):
+        """
+        Record Telegram error.
+        
+        Args:
+            error_type: Error type (start_command, callback, etc.)
+        """
+        self.tg_errors_total.labels(type=error_type).inc()
+        logger.debug(f"Recorded TG error: type={error_type}")
+    
+    def record_tg_rate_limit(self):
+        """Record Telegram rate limit hit."""
+        self.tg_rate_limited_total.inc()
+        logger.debug("Recorded TG rate limit")
 
 
 # Global registry instance

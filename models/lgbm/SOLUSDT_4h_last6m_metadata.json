@@ -54,6 +54,12 @@
     "roll_std_20",
     "skewness_20",
     "kurtosis_20",
+    "volatility_regime",
+    "volatility_zscore",
+    "distance_sma_20",
+    "distance_sma_50",
+    "distance_high_20",
+    "distance_low_20",
     "hour_sin",
     "hour_cos",
     "dow_sin",
@@ -68,31 +74,33 @@
     "macd_hist_1h",
     "trend_strength_1h"
   ],
-  "n_features": 65,
+  "n_features": 71,
   "metrics": {
-    "auc": 0.544153494445881,
-    "accuracy": 0.5128491620111731,
-    "precision": 0.5803084084294926,
-    "recall": 0.4826124492791159,
-    "f1": 0.4493466257198058,
-    "balanced_accuracy": 0.5306241486178067
+    "auc": 0.529169733603288,
+    "accuracy": 0.5195530726256983,
+    "precision": 0.47661913982280113,
+    "recall": 0.47910488920292843,
+    "f1": 0.4482135358256885,
+    "balanced_accuracy": 0.5213663252481148
   },
-  "training_date": "2025-10-31T23:49:02.197944",
+  "training_date": "2025-11-01T00:38:15.603908",
   "label_config": {
-    "forward_bars": 3,
-    "threshold_pct": 0.25
+    "forward_bars": 1,
+    "threshold_pct": 0.15
   },
   "hyperparameters": {
     "objective": "binary",
     "metric": "auc",
     "boosting_type": "gbdt",
-    "n_estimators": 500,
-    "learning_rate": 0.05,
-    "num_leaves": 31,
-    "max_depth": -1,
-    "colsample_bytree": 0.7,
-    "subsample": 0.7,
-    "reg_alpha": 0.1,
-    "reg_lambda": 0.1
+    "n_estimators": 1000,
+    "learning_rate": 0.03,
+    "num_leaves": 63,
+    "max_depth": 10,
+    "colsample_bytree": 0.8,
+    "subsample": 0.8,
+    "reg_alpha": 0.5,
+    "reg_lambda": 0.5,
+    "min_child_samples": 50,
+    "class_weight": "balanced"
   }
 }

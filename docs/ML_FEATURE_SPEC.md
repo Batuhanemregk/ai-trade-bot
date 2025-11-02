@@ -1,386 +1,370 @@
 # ML Feature Specification
 
-**Date**: 2025-10-31  
-**Version**: 2.0 (Expanded Feature Set)  
-**Implementation**: `ml/features/builder.py`
-
-## Overview
-
-This document provides detailed specifications for all ML features used in LightGBM model training and inference. The expanded feature set contains **60+ features** across 6 categories.
-
-## No Look-Ahead Guarantee
-
-**CRITICAL**: All features are calculated using only information available at bar close time. No future information leaks into feature values.
-
-### Guarantee Mechanisms
-
-1. **Rolling Window**: All rolling calculations use `.shift(1)` internally or operate on historical data only
-2. **Lag Operations**: Features like `pct_change()` and `diff()` are inherently backward-looking
-3. **Multi-Timeframe Join**: Uses `asof` merge with forward-fill (fills within gaps but never uses future data)
-4. **Label Separation**: Labels are created separately after features, using `shift(-forward_bars)` only in label creation
-
-### Verification
-
-Every feature calculation can be verified as using only:
-- Current bar: `close[t]`, `high[t]`, `low[t]`, `volume[t]`
-- Historical bars: `close[t-1, t-2, ...]`
-- Never uses: `close[t+1]`, `high[t+1]`, etc.
-
-## Feature Categories
-
-### 1. Technical Analysis Indicators (28 features)
-
-#### Moving Averages (6 features)
-
-**SMA Features:**
-- `sma_5`: Simple Moving Average (5 periods)
-  - Formula: `SMA(5) = (close[t] + close[t-1] + ... + close[t-4]) / 5`
-  
-- `sma_10`: Simple Moving Average (10 periods)
-  - Formula: `SMA(10) = (close[t] + close[t-1] + ... + close[t-9]) / 10`
-  
-- `sma_20`: Simple Moving Average (20 periods)
-  - Formula: `SMA(20) = (close[t] + close[t-1] + ... + close[t-19]) / 20`
-  
-- `sma_50`: Simple Moving Average (50 periods)
-  - Formula: `SMA(50) = (close[t] + close[t-1] + ... + close[t-49]) / 50`
-
-**EMA Features:**
-- `ema_12`: Exponential Moving Average (12 periods)
-  - Formula: `EMA(12) = close[t] * α + EMA[t-1] * (1-α)`, where `α = 2/(12+1)`
-  
-- `ema_26`: Exponential Moving Average (26 periods)
-  - Formula: `EMA(26) = close[t] * α + EMA[t-1] * (1-α)`, where `α = 2/(26+1)`
-
-#### MACD Features (3 features)
-
-- `macd_line`: MACD Line
-  - Formula: `EMA(12) - EMA(26)`
-  
-- `macd_signal`: Signal Line
-  - Formula: `EMA(9) of macd_line`
-  
-- `macd_hist`: MACD Histogram
-  - Formula: `macd_line - macd_signal`
-
-#### RSI (1 feature)
-
-- `rsi_14`: Relative Strength Index (14 periods)
-  - Formula: `RSI = 100 - (100 / (1 + RS))`
-  - Where `RS = avg_gain / avg_loss` over 14 periods
-
-#### Stochastic Oscillator (2 features)
-
-- `stoch_k`: Stochastic %K (14, 3)
-  - Formula: `%K = 100 * (close - min_low_14) / (max_high_14 - min_low_14)`
-  
-- `stoch_d`: Stochastic %D (14, 3)
-  - Formula: `%D = SMA(3) of %K`
-
-#### Williams%R (1 feature)
-
-- `williams_r`: Williams %R (14 periods)
-  - Formula: `%R = -100 * (max_high_14 - close) / (max_high_14 - min_low_14)`
-
-#### ADX, +DI, -DI (3 features)
-
-- `plus_di`: +Directional Indicator (14 periods)
-  - Formula: `+DI = 100 * (+DM_smooth / ATR)`
-  
-- `minus_di`: -Directional Indicator (14 periods)
-  - Formula: `-DI = 100 * (-DM_smooth / ATR)`
-  
-- `adx`: Average Directional Index (14 periods)
-  - Formula: `ADX = SMA(14) of DX`, where `DX = 100 * |+DI - -DI| / (+DI + -DI)`
-
-#### ATR (2 features)
-
-- `atr_14`: Average True Range (14 periods)
-  - Formula: `ATR = SMA(14) of TR`
-  - Where `TR = max(high-low, |high - close[t-1]|, |low - close[t-1]|)`
-  
-- `atr_pct`: ATR as Percentage of Close
-  - Formula: `atr_14 / close * 100`
-
-#### Bollinger Bands (5 features)
-
-- `bb_upper`: Upper Bollinger Band
-  - Formula: `SMA(20) + 2 * STD(20)`
-  
-- `bb_lower`: Lower Bollinger Band
-  - Formula: `SMA(20) - 2 * STD(20)`
-  
-- `bb_width`: Bollinger Band Width
-  - Formula: `(bb_upper - bb_lower) / SMA(20)`
-  
-- `bb_pos`: Bollinger Band Position
-  - Formula: `(close - SMA(20)) / (2 * STD(20))`
-  
-- `bb_pctb`: Bollinger Band %b
-  - Formula: `(close - bb_lower) / (bb_upper - bb_lower)`
-
-#### OBV (1 feature)
-
-- `obv`: On Balance Volume
-  - Formula: `OBV[t] = OBV[t-1] + sign(close[t] - close[t-1]) * volume[t]`
-  - Where `sign(x) = 1 if x > 0, -1 if x < 0, 0 if x = 0`
-
-#### MFI (1 feature)
-
-- `mfi`: Money Flow Index (14 periods)
-  - Formula: `MFI = 100 - (100 / (1 + Money_Ratio))`
-  - Where `Money_Ratio = Positive_MF / Negative_MF`
-  - And `MF = Typical_Price * volume`
-
-### 2. Price Action Features (18 features)
-
-#### Body and Wick Ratios (4 features)
-
-- `body`: Candle Body
-  - Formula: `close - open`
-  
-- `body_ratio`: Body to Range Ratio
-  - Formula: `body / (high - low)`
-  
-- `upper_wick_ratio`: Upper Wick Ratio
-  - Formula: `(high - max(open, close)) / (high - low)`
-  
-- `lower_wick_ratio`: Lower Wick Ratio
-  - Formula: `(min(open, close) - low) / (high - low)`
-
-#### Heikin-Ashi Features (4 features)
-
-- `ha_open`: Heikin-Ashi Open
-  - Formula: `HA_open[t] = (HA_open[t-1] + HA_close[t-1]) / 2`
-  - With `HA_open[0] = (open[0] + close[0]) / 2`
-  
-- `ha_close`: Heikin-Ashi Close
-  - Formula: `(open + high + low + close) / 4`
-  
-- `ha_high`: Heikin-Ashi High
-  - Formula: `max(high, ha_open, ha_close)`
-  
-- `ha_low`: Heikin-Ashi Low
-  - Formula: `min(low, ha_open, ha_close)`
-
-#### Pattern Flags (4 features)
-
-- `engulfing_bull`: Bullish Engulfing Pattern
-  - Formula: `bool(prev_body < 0 AND body > 0 AND open < prev_close AND close > prev_open)`
-  
-- `engulfing_bear`: Bearish Engulfing Pattern
-  - Formula: `bool(prev_body > 0 AND body < 0 AND open > prev_close AND close < prev_open)`
-  
-- `pinbar_up`: Bullish Pinbar
-  - Formula: `bool(lower_wick_ratio > 0.66 AND upper_wick_ratio < 0.33)`
-  
-- `pinbar_down`: Bearish Pinbar
-  - Formula: `bool(upper_wick_ratio > 0.66 AND lower_wick_ratio < 0.33)`
-
-#### HH/HL/LH/LL Patterns (4 features)
-
-- `hh`: Higher High
-  - Formula: `bool(high > max(high[t-1] ... high[t-5]))`
-  
-- `hl`: Higher Low
-  - Formula: `bool(low > min(low[t-1] ... low[t-5]))`
-  
-- `lh`: Lower High
-  - Formula: `bool(high < max(high[t-1] ... high[t-5]))`
-  
-- `ll`: Lower Low
-  - Formula: `bool(low < min(low[t-1] ... low[t-5]))`
-
-### 3. Statistics Features (11 features)
-
-#### Log Returns (3 features)
-
-- `log_ret_1`: 1-Bar Log Return
-  - Formula: `log(close[t] / close[t-1])`
-  
-- `log_ret_3`: 3-Bar Log Return
-  - Formula: `log(close[t] / close[t-3])`
-  
-- `log_ret_5`: 5-Bar Log Return
-  - Formula: `log(close[t] / close[t-5])`
-
-#### Rolling Mean (3 features)
-
-- `roll_mean_5`: 5-Period Rolling Mean
-  - Formula: `SMA(5) of close`
-  
-- `roll_mean_10`: 10-Period Rolling Mean
-  - Formula: `SMA(10) of close`
-  
-- `roll_mean_20`: 20-Period Rolling Mean
-  - Formula: `SMA(20) of close`
-
-#### Rolling Std (3 features)
-
-- `roll_std_5`: 5-Period Rolling Std
-  - Formula: `STD(5) of close`
-  
-- `roll_std_10`: 10-Period Rolling Std
-  - Formula: `STD(10) of close`
-  
-- `roll_std_20`: 20-Period Rolling Std
-  - Formula: `STD(20) of close`
-
-#### Skewness and Kurtosis (2 features)
-
-- `skewness_20`: 20-Period Rolling Skewness
-  - Formula: `E[(x - μ)^3] / σ^3` over 20 periods
-  
-- `kurtosis_20`: 20-Period Rolling Kurtosis
-  - Formula: `E[(x - μ)^4] / σ^4` over 20 periods
-
-### 4. Time Features (4 features)
-
-#### Hour Encoding (2 features)
-
-- `hour_sin`: Hour Sine Encoding
-  - Formula: `sin(2π * hour / 24)`
-  
-- `hour_cos`: Hour Cosine Encoding
-  - Formula: `cos(2π * hour / 24)`
-
-#### Day of Week Encoding (2 features)
-
-- `dow_sin`: Day of Week Sine Encoding
-  - Formula: `sin(2π * dow / 7)`
-  
-- `dow_cos`: Day of Week Cosine Encoding
-  - Formula: `cos(2π * dow / 7)`
-
-### 5. Volume Features (6 features)
-
-- `volume_sma_20`: Volume SMA
-  - Formula: `SMA(20) of volume`
-  
-- `volume_sma_ratio`: Volume to SMA Ratio
-  - Formula: `volume / volume_sma_20`
-  
-- `volume_ema_20`: Volume EMA
-  - Formula: `EMA(20) of volume`
-  
-- `volume_ema_ratio`: Volume to EMA Ratio
-  - Formula: `volume / volume_ema_20`
-  
-- `volume_momentum`: Volume Momentum
-  - Formula: `(volume - volume[t-5]) / volume[t-5]`
-  
-- `volume_volatility`: Volume Volatility
-  - Formula: `STD(10) of volume`
-
-### 6. Multi-Timeframe Features (6 features)
-
-Multi-timeframe features are calculated from higher timeframes (1h, 4h) and merged using **asof** join (no look-ahead).
-
-#### From 1h Timeframe (3 features)
-
-- `rsi_14_1h`: RSI from 1h
-  - Calculated on 1h bars, merged to current TF
-  
-- `macd_hist_1h`: MACD Histogram from 1h
-  - Calculated on 1h bars, merged to current TF
-  
-- `trend_strength_1h`: Trend Strength from 1h
-  - Formula: `|SMA20_1h - SMA50_1h| / close_1h`
-
-#### From 4h Timeframe (3 features)
-
-- `rsi_14_4h`: RSI from 4h
-  - Calculated on 4h bars, merged to current TF
-  
-- `macd_hist_4h`: MACD Histogram from 4h
-  - Calculated on 4h bars, merged to current TF
-  
-- `trend_strength_4h`: Trend Strength from 4h
-  - Formula: `|SMA20_4h - SMA50_4h| / close_4h`
-
-#### Multi-Timeframe Merge Logic
-
-**CRITICAL**: No look-ahead leakage in MTF join.
-
-1. Calculate features on higher timeframe bars (e.g., 1h bars)
-2. Use `asof` merge: for each current TF bar, find the last MTF bar that closed before it
-3. Forward-fill within gaps (same MTF bar value for multiple current TF bars)
-4. Never use future MTF data
-
-Example for 15m main / 1h MTF:
-- 15m bar at 10:15:00 → uses 1h bar at 10:00:00 (last 1h bar)
-- 15m bar at 10:30:00 → uses 1h bar at 10:00:00 (still last 1h bar)
-- 15m bar at 11:00:00 → uses 1h bar at 11:00:00 (new 1h bar)
-
-## Label Specification
-
-### Threshold-Based Binary Classification
-
-- **Label**: Binary (0 or 1)
-- **Forward Bars**: 3
-- **Threshold**: 0.25% return
-
-**Formula**:
-```
-future_return = ((close[t+3] - close[t]) / close[t]) * 100
-label = 1 if future_return > 0.25 else 0
-```
-
-**No Look-Ahead**: Labels are created after features using `shift(-forward_bars)`, and the last N rows are dropped.
-
-## Data Cleaning
-
-### NaN and Inf Handling
-
-1. Replace `inf` and `-inf` with `NaN`
-2. Forward-fill `NaN` using previous valid value
-3. Backward-fill remaining `NaN` (first rows)
-4. Fill any still-remaining `NaN` with 0
-
-**Rationale**: 
-- Forward-fill: Use last known value if feature calculation not yet ready
-- Backward-fill: Avoid dropping initial rows
-- Zero-fill: Provide neutral value as last resort
-
-## Feature Count Summary
-
-| Category | Count | Features |
-|----------|-------|----------|
-| TA Indicators | 28 | SMA/EMA/MACD/RSI/Stoch/Williams/ADX/ATR/BB/OBV/MFI |
-| Price Action | 18 | Body/wick ratios, Heikin-Ashi, patterns, HH/HL/LH/LL |
-| Statistics | 11 | Log returns, rolling means, stds, skewness, kurtosis |
-| Time | 4 | Hour/day cyclical encoding |
-| Volume | 6 | Volume SMA/EMA/ratios, momentum, volatility |
-| Multi-TF | 6 | RSI/MACD/Trend from 1h and 4h |
-| **TOTAL** | **73** | |
-
-**Note**: Actual feature count may vary based on multi-TF availability (73 if both 1h and 4h provided, 67 if only one, 67 if none).
-
-## Testing Requirements
-
-### No Look-Ahead Tests
-
-1. **Feature Consistency**: Verify features for bar[t] don't change after bar[t+1] arrives
-2. **MTF Join**: Verify asof merge uses only past MTF data
-3. **Label Separation**: Verify labels use `shift(-forward_bars)` only in label creation
-4. **Rolling Windows**: Verify all rolling windows are backward-looking
-
-### Feature Completeness Tests
-
-1. Verify all 73 features are present when MTF data provided
-2. Verify 67 features present when MTF data not provided
-3. Verify no duplicate feature names
-4. Verify all features are numeric
-
-### Data Quality Tests
-
-1. No `inf` or `-inf` in final features
-2. No `NaN` in final features
-3. Feature distributions are reasonable
-4. No extreme outliers (capped or logged where appropriate)
+**Date**: 2025-11-01  
+**Purpose**: Complete specification of ML features for LightGBM models  
+**No Look-Ahead**: All features computed from current and historical data only
 
 ---
 
-**Document Version**: 2.0  
-**Last Updated**: 2025-10-31
+## Overview
 
+**Total Features**: 68-74 (depends on MTF availability)  
+**Source**: `ml/features/builder.py`  
+**Training**: `ml/training/train_lgbm_per_symbol_tf.py`  
+**Usage**: Binary classification (price up/down prediction)
+
+---
+
+## Category 1: Technical Analysis Indicators (29 features)
+
+### Moving Averages (6 features)
+
+#### SMA - Simple Moving Average
+- **Features**: `sma_5`, `sma_10`, `sma_20`, `sma_50`
+- **Formula**: `SMA(n) = sum(close[t:n]) / n`
+- **Parameters**: Periods [5, 10, 20, 50]
+- **Use**: Trend identification, support/resistance
+
+#### EMA - Exponential Moving Average
+- **Features**: `ema_12`, `ema_26`
+- **Formula**: `EMA(n) = alpha * close + (1 - alpha) * EMA_prev`
+- **Parameters**: Spans [12, 26] (for MACD)
+- **Use**: Trend identification, faster signal than SMA
+
+### MACD - Moving Average Convergence Divergence (3 features)
+
+- **Features**: `macd_line`, `macd_signal`, `macd_hist`
+- **Formula**:
+  - MACD Line = EMA(12) - EMA(26)
+  - Signal = EMA(9) of MACD Line
+  - Histogram = MACD Line - Signal
+- **Parameters**: (12, 26, 9)
+- **Use**: Momentum, trend changes
+
+### RSI - Relative Strength Index (1 feature)
+
+- **Feature**: `rsi_14`
+- **Formula**:
+  - Gain = avg of positive price changes
+  - Loss = avg of negative price changes
+  - RS = Gain / Loss
+  - RSI = 100 - (100 / (1 + RS))
+- **Parameters**: Period 14
+- **Use**: Overbought/oversold conditions
+- **Range**: 0-100
+
+### Stochastic Oscillator (2 features)
+
+- **Features**: `stoch_k`, `stoch_d`
+- **Formula**:
+  - %K = 100 * (close - low_min) / (high_max - low_min)
+  - %D = 3-period SMA of %K
+- **Parameters**: Period 14, smooth 3
+- **Use**: Momentum, overbought/oversold
+- **Range**: 0-100
+
+### Williams %R (1 feature)
+
+- **Feature**: `williams_r`
+- **Formula**: `-100 * (high_max - close) / (high_max - low_min)`
+- **Parameters**: Period 14
+- **Use**: Momentum
+- **Range**: -100 to 0
+
+### ADX System (3 features)
+
+- **Features**: `adx`, `plus_di`, `minus_di`
+- **Formula**:
+  - True Range = max(high-low, |high-close_prev|, |low-close_prev|)
+  - ATR = 14-period SMA of TR
+  - +DI = 100 * (SMA of +DM) / ATR
+  - -DI = 100 * (SMA of -DM) / ATR
+  - DX = 100 * |+DI - -DI| / (+DI + -DI)
+  - ADX = 14-period SMA of DX
+- **Parameters**: Period 14
+- **Use**: Trend strength and direction
+- **Range**: ADX 0-100, +/-DI 0-100
+
+### ATR - Average True Range (2 features)
+
+- **Features**: `atr_14`, `atr_pct`
+- **Formula**:
+  - ATR(14) = 14-period SMA of True Range
+  - ATR% = (ATR / close) * 100
+- **Parameters**: Period 14
+- **Use**: Volatility measurement
+
+### Bollinger Bands (5 features)
+
+- **Features**: `bb_upper`, `bb_lower`, `bb_width`, `bb_pos`, `bb_pctb`
+- **Formula**:
+  - Middle = SMA(20)
+  - Upper = Middle + 2*STD(20)
+  - Lower = Middle - 2*STD(20)
+  - Width = (Upper - Lower) / Middle
+  - Position = (close - Middle) / (2*STD)
+  - %B = (close - Lower) / (Upper - Lower)
+- **Parameters**: Period 20, std 2
+- **Use**: Volatility, mean reversion
+
+### Volume Indicators (2 features)
+
+#### OBV - On-Balance Volume
+- **Feature**: `obv`
+- **Formula**: Cumulative sum of volume * sign(price_change)
+- **Use**: Volume trend confirmation
+
+#### MFI - Money Flow Index
+- **Feature**: `mfi`
+- **Formula**: `100 - (100 / (1 + Money_Ratio))`
+- **Parameters**: Period 14
+- **Use**: Volume-weighted RSI
+- **Range**: 0-100
+
+---
+
+## Category 2: Price Action Features (16 features)
+
+### Candlestick Structure (4 features)
+
+- **Features**: `body`, `body_ratio`, `upper_wick_ratio`, `lower_wick_ratio`
+- **Formula**:
+  - Body = close - open
+  - Range = high - low
+  - Body Ratio = body / range
+  - Upper Wick = (high - max(open, close)) / range
+  - Lower Wick = (min(open, close) - low) / range
+- **Use**: Candlestick pattern recognition
+
+### Heikin-Ashi OHLC (4 features)
+
+- **Features**: `ha_open`, `ha_high`, `ha_low`, `ha_close`
+- **Formula**:
+  - HA Close = (open + high + low + close) / 4
+  - HA Open = (HA_open_prev + HA_close_prev) / 2
+  - HA High = max(high, HA_open, HA_close)
+  - HA Low = min(low, HA_open, HA_close)
+- **Use**: Trend smoothing, noise reduction
+
+### Pattern Flags (8 features, binary 0/1)
+
+#### Engulfing Patterns
+- `engulfing_bull`: Bullish engulfing detected
+- `engulfing_bear`: Bearish engulfing detected
+
+#### Pinbar Patterns
+- `pinbar_up`: Long lower wick (>66%), short upper wick (<33%)
+- `pinbar_down`: Long upper wick (>66%), short lower wick (<33%)
+
+#### Swing Patterns
+- `hh`: Higher High (current high > previous 5 highs max)
+- `hl`: Higher Low (current low > previous 5 lows min)
+- `lh`: Lower High (current high < previous 5 highs max)
+- `ll`: Lower Low (current low < previous 5 lows min)
+
+**Parameters**: N=5 bars lookback for swing patterns
+
+---
+
+## Category 3: Statistical Features (16 features)
+
+### Log Returns (3 features)
+
+- **Features**: `log_ret_1`, `log_ret_3`, `log_ret_5`
+- **Formula**: `log(close_t / close_{t-n})`
+- **Parameters**: Periods [1, 3, 5]
+- **Use**: Normalized returns
+
+### Rolling Statistics (9 features)
+
+#### Rolling Mean
+- **Features**: `roll_mean_5`, `roll_mean_10`, `roll_mean_20`
+- **Formula**: `SMA(n)` of close
+
+#### Rolling Std
+- **Features**: `roll_std_5`, `roll_std_10`, `roll_std_20`
+- **Formula**: `STD(n)` of close
+- **Use**: Volatility measurement
+
+#### Distribution
+- **Features**: `skewness_20`, `kurtosis_20`
+- **Formula**: Rolling skew/kurtosis of close
+- **Parameters**: Period 20
+- **Use**: Distribution shape
+
+### Volatility Regime (2 features)
+
+- **Feature**: `volatility_regime` (binary 0/1)
+- **Formula**: `1 if STD(20) > STD(100), else 0`
+- **Use**: High vs low volatility regimes
+
+- **Feature**: `volatility_zscore`
+- **Formula**: `(STD(20) - mean(STD(20)) / std(STD(20))`
+- **Use**: Normalized volatility measure
+
+### Distance Features (4 features) - NEW in Phase 2
+
+- **Features**: `distance_sma_20`, `distance_sma_50`, `distance_high_20`, `distance_low_20`
+- **Formula**: `(value - reference) / close`
+- **Use**: Normalized distance from key levels
+- **Rationale**: Price position relative to SMAs/highs/lows
+
+---
+
+## Category 4: Volume Features (6 features)
+
+### Volume Moving Averages
+- `volume_sma_20`: 20-period SMA of volume
+- `volume_ema_20`: 20-period EMA of volume
+
+### Volume Ratios
+- `volume_sma_ratio`: volume / volume_sma_20
+- `volume_ema_ratio`: volume / volume_ema_20
+
+### Volume Dynamics
+- `volume_momentum`: `pct_change(5)` of volume
+- `volume_volatility`: `STD(10)` of volume
+
+---
+
+## Category 5: Time Features (4 features)
+
+### Cyclical Encoding
+
+- **Features**: `hour_sin`, `hour_cos`, `dow_sin`, `dow_cos`
+- **Formula**:
+  - Hour: `sin(2π * hour / 24)`, `cos(2π * hour / 24)`
+  - DOW: `sin(2π * dow / 7)`, `cos(2π * dow / 7)`
+- **Use**: Seasonality, intraday patterns
+
+---
+
+## Category 6: Multi-Timeframe Features (0-6 features)
+
+**Conditional**: Only added when higher timeframes available
+
+### From 1h Timeframe (3 features if available)
+- `rsi_14_1h`: RSI computed on 1h bars
+- `macd_hist_1h`: MACD histogram on 1h bars
+- `trend_strength_1h`: |SMA20 - SMA50| / close on 1h
+
+### From 4h Timeframe (3 features if available)
+- `rsi_14_4h`: RSI computed on 4h bars
+- `macd_hist_4h`: MACD histogram on 4h bars
+- `trend_strength_4h`: |SMA20 - SMA50| / close on 4h
+
+**No Look-Ahead**: Backward-fill merge using timestamp join
+
+---
+
+## Feature Engineering Principles
+
+### 1. No Look-Ahead
+
+**All features** use only:
+- Current bar data
+- Historical data via `.shift()`, `.rolling()`
+- Backward-fill merge for MTF (not forward-fill)
+
+**Verification**:
+- All rolling windows use historical data only
+- MTF merge uses 'asof' join (backward-fill)
+- No future data leakage
+
+### 2. Normalization
+
+**Price-normalized features**:
+- `atr_pct`: ATR / price
+- `distance_*`: All distance features normalized by price
+- `bb_pos`, `bb_pctb`: Position within bands
+
+**Volume ratios**: Volume / volume_average
+
+**Rationale**: Stability across different price levels
+
+### 3. Cyclical Encoding
+
+**Time features** use sin/cos encoding:
+- Preserves cyclical nature (hour 23 close to hour 0)
+- Better for tree-based models than ordinal encoding
+
+### 4. Pattern Flags
+
+**Binary flags** (0/1) for:
+- Candlestick patterns
+- Swing patterns
+- Volatility regime
+
+**Rationale**: Clear categorical signals
+
+---
+
+## Data Cleaning
+
+**Pipeline**:
+1. Replace inf with NaN
+2. Forward-fill NaN within series
+3. Backward-fill remaining NaN
+4. Fill any remaining with 0
+
+**Applied to**: All features before training
+
+---
+
+## Training Configuration
+
+**Current Setup** (`ml/training/train_lgbm_per_symbol_tf.py`):
+- **Label**: Binary (forward_bars=1, threshold_pct=0.15%)
+- **Models**: 9 separate models (3 symbols × 3 TFs)
+- **Features**: 68-74 per model
+- **Validation**: Time-series 5-fold CV
+
+**Model Files**: `models/lgbm/{SYMBOL}_{TF}_last6m.pkl`
+
+---
+
+## Usage in Inference
+
+**Scorer**: `scoring/ml_scorer.py`
+
+**Flow**:
+1. Load OHLCV data
+2. Call `FeatureBuilder.build_features()`
+3. Extract feature columns matching trained model
+4. Predict with LightGBM
+5. Map probability to score (0-100)
+
+**Fallback**: Neutral score if model unavailable
+
+---
+
+## Future Enhancements
+
+### Potential Additions
+
+1. **Cross-Asset**:
+   - BTC dominance impact
+   - ETH/BTC correlation
+   - Market-wide momentum
+
+2. **External Data**:
+   - Order book imbalance
+   - Funding rate
+   - Social sentiment
+
+3. **Advanced**:
+   - Regime-specific features
+   - Event detection
+   - Microstructure features
+
+4. **On-Chain**:
+   - Exchange reserves
+   - Whale movements
+   - DEX flows
+
+---
+
+**Last Updated**: 2025-11-01  
+**Version**: Phase 2 Expanded  
+**Status**: ✅ Production-Ready  
+**No Look-Ahead**: ✅ Verified
