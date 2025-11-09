@@ -4,11 +4,12 @@ Enhanced logging for trading analysis with age tracking and detailed metrics.
 """
 
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 from loguru import logger
 
 from application.log_formatter import get_log_formatter
 from application.market_data_service import get_market_data_cache
+from application.jobs.base_job import BaseJob
 
 
 class AnalysisSummaryLogger:
@@ -26,6 +27,8 @@ class AnalysisSummaryLogger:
         
         # Track last signals for age calculation
         self._last_signals: Dict[str, datetime] = {}
+        self._analysis_seen: Dict[Tuple[str, str], str] = {}
+        self._batch_seen: Dict[str, str] = {}
         
         # Batch statistics
         self._batch_stats = {
@@ -71,6 +74,32 @@ class AnalysisSummaryLogger:
             data: Analysis data containing all scores, signals, and metadata
         """
         symbol = data.get('symbol', 'UNKNOWN')
+        timeframe = data.get('timeframe', '15m')
+        bar_id = data.get('bar_id')
+        bar_timestamp = data.get('bar_timestamp')
+        
+        if bar_id is None and bar_timestamp:
+            if isinstance(bar_timestamp, str):
+                try:
+                    bar_dt = datetime.fromisoformat(bar_timestamp.replace('Z', '+00:00'))
+                except ValueError:
+                    bar_dt = datetime.now(timezone.utc)
+            else:
+                bar_dt = bar_timestamp
+                if bar_dt.tzinfo is None:
+                    bar_dt = bar_dt.replace(tzinfo=timezone.utc)
+            bar_id = BaseJob.get_bar_id(bar_dt, timeframe)
+            data['bar_id'] = bar_id
+        elif bar_id is None:
+            bar_id = BaseJob.get_bar_id(datetime.now(timezone.utc), timeframe)
+            data['bar_id'] = bar_id
+        
+        cache_key = (symbol, timeframe)
+        if bar_id and self._analysis_seen.get(cache_key) == bar_id:
+            logger.info(f"[ANALYSIS] {symbol} tf={timeframe} bar={bar_id} skipped(idempotent)")
+            return
+        if bar_id:
+            self._analysis_seen[cache_key] = bar_id
         
         # Age is already calculated in signal gate (counter format: 0/6, 3/6, etc.)
         # We use gate_details if available, otherwise calculate time-based age
@@ -84,7 +113,6 @@ class AnalysisSummaryLogger:
                 data['age'] = age
         
         # Get cache age for data freshness
-        timeframe = data.get('timeframe', '15m')
         cache_age = self.market_cache.get_age(symbol, timeframe)
         if cache_age:
             data['cache_age'] = cache_age
@@ -105,7 +133,7 @@ class AnalysisSummaryLogger:
         if direction != 'HOLD':
             self._last_signals[symbol] = data.get('timestamp', datetime.now(timezone.utc))
     
-    def log_batch_summary(self, timeframe: str, duration: float):
+    def log_batch_summary(self, timeframe: str, duration: float, bar_id: Optional[str] = None, run_id: Optional[str] = None):
         """
         Log batch analysis summary with enhanced features.
         
@@ -113,6 +141,14 @@ class AnalysisSummaryLogger:
             timeframe: Timeframe of analysis (e.g., '15m')
             duration: Duration in seconds
         """
+        if bar_id is None:
+            bar_id = BaseJob.get_bar_id(datetime.now(timezone.utc), timeframe)
+        if bar_id and self._batch_seen.get(timeframe) == bar_id:
+            logger.info(f"[BATCH] timeframe={timeframe} bar={bar_id} skipped(idempotent)")
+            return
+        if bar_id:
+            self._batch_seen[timeframe] = bar_id
+        
         # Calculate average score
         avg_score = 0.0
         if self._batch_stats['scores']:
@@ -129,7 +165,9 @@ class AnalysisSummaryLogger:
             'signals': self._batch_stats['signals'].copy(),
             'avg_score': avg_score,
             'duration': duration,
-            'enhanced_features': enhanced_features
+            'enhanced_features': enhanced_features,
+            'bar_id': bar_id,
+            'run_id': run_id,
         }
         
         message = self.formatter.format_batch_summary(summary_data)

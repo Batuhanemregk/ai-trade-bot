@@ -10,6 +10,10 @@ from loguru import logger
 
 from infrastructure.bootstrap import load_policy
 from adapters.telegram.middleware import get_metrics_hook
+from application.analysis_cards_state import (
+    get_latest_analysis,
+    get_detail,
+)
 
 
 class ContextResolver:
@@ -840,6 +844,34 @@ class ContextResolver:
                 'timeframe': '15m',
                 'timeframe_locked': True
             }
+
+    async def resolve_analysis_summary_context(self) -> Dict[str, Any]:
+        """Resolve context for analysis summary view."""
+        state = get_latest_analysis() or {}
+        results = state.get('results') or []
+        counts = {
+            'LONG': sum(1 for r in results if r.get('decision') == 'LONG'),
+            'SHORT': sum(1 for r in results if r.get('decision') == 'SHORT'),
+            'FLAT': sum(1 for r in results if r.get('decision') == 'FLAT'),
+        }
+        return {
+            'bar_id': state.get('bar_id', '-'),
+            'run_id': state.get('run_id', 'unknown'),
+            'results': results,
+            'counts': counts,
+            'generated_at': state.get('updated_at'),
+        }
+
+    async def resolve_analysis_detail_context(self, symbol: Optional[str]) -> Dict[str, Any]:
+        """Resolve context for a specific symbol detail view."""
+        state = get_latest_analysis() or {}
+        detail = get_detail(symbol) if symbol else None
+        return {
+            'symbol': symbol or 'UNKNOWN',
+            'detail': detail,
+            'bar_id': state.get('bar_id', '-'),
+            'run_id': state.get('run_id', 'unknown'),
+        }
 
 
 # Global instance

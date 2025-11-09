@@ -3,13 +3,13 @@ Telegram Client - Robust notification system with queue, retry, and backoff
 """
 
 import asyncio
-import json
-import os
 import time
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 from loguru import logger
 import aiohttp
+
+from infrastructure.feature_flags import TELEGRAM_MOCK_ENABLED
 
 
 class TelegramClient:
@@ -36,6 +36,7 @@ class TelegramClient:
         
         # Persistent session for connection reuse
         self._session: Optional[aiohttp.ClientSession] = None
+        self._mock_message_id = 10_000
         
         # Validation
         self.enabled = self._validate_config()
@@ -88,7 +89,7 @@ class TelegramClient:
         
         logger.info("🛑 Telegram client worker stopped")
     
-    async def send_message(self, text: str, priority: str = "normal") -> bool:
+    async def send_message(self, text: str, priority: str = "normal", reply_markup: Optional[Dict[str, Any]] = None) -> bool:
         """Send a message via Telegram (queued)"""
         if not self.enabled:
             return False
@@ -97,7 +98,8 @@ class TelegramClient:
             'text': text,
             'priority': priority,
             'timestamp': datetime.now(timezone.utc).isoformat(),
-            'retry_count': 0
+            'retry_count': 0,
+            'reply_markup': reply_markup,
         }
         
         # Add to queue
@@ -133,10 +135,12 @@ class TelegramClient:
         """Send message with retry and backoff"""
         text = message['text']
         retry_count = message['retry_count']
+        reply_markup = message.get('reply_markup')
         
         for attempt in range(self.retries):
             try:
-                success = await self._send_direct_message(text)
+                success, _ = await self._send_direct_message_json(text, reply_markup=reply_markup)
+                success, _ = await self._send_direct_message_json(text, reply_markup=reply_markup)
                 if success:
                     return True
                 
@@ -154,16 +158,36 @@ class TelegramClient:
         
         return False
     
-    async def _send_direct_message(self, text: str) -> bool:
-        """Send message directly to Telegram API"""
+    async def _send_direct_message_json(
+        self,
+        text: str,
+        reply_markup: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[bool, Optional[Dict[str, Any]]]:
+        """Send message directly to Telegram API and return response JSON."""
+        if TELEGRAM_MOCK_ENABLED:
+            self._mock_message_id += 1
+            logger.info(f"[MOCK] Telegram send message_id={self._mock_message_id} text={text[:48]}...")
+            response = {
+                'ok': True,
+                'result': {
+                    'message_id': self._mock_message_id,
+                    'chat': {'id': self.chat_id},
+                    'date': int(time.time()),
+                    'text': text,
+                }
+            }
+            return True, response
+        
         url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
         
         payload = {
             'chat_id': self.chat_id,
             'text': text,
             'parse_mode': 'HTML',
-            'disable_web_page_preview': True
+            'disable_web_page_preview': True,
         }
+        if reply_markup:
+            payload['reply_markup'] = reply_markup
         
         timeout = aiohttp.ClientTimeout(total=self.timeout)
         
@@ -173,29 +197,98 @@ class TelegramClient:
                 session = self._session
                 async with session.post(url, json=payload) as response:
                     if response.status == 200:
+                        try:
+                            data = await response.json()
+                        except Exception:
+                            data = {'ok': True}
                         logger.debug("✅ Telegram message sent successfully")
-                        return True
+                        return True, data
                     else:
                         error_text = await response.text()
                         logger.error(f"❌ Telegram API error {response.status}: {error_text}")
-                        return False
+                        return False, None
             else:
                 # Create temporary session for single request
                 async with aiohttp.ClientSession(timeout=timeout) as session:
                     async with session.post(url, json=payload) as response:
                         if response.status == 200:
+                            try:
+                                data = await response.json()
+                            except Exception:
+                                data = {'ok': True}
                             logger.debug("✅ Telegram message sent successfully")
-                            return True
+                            return True, data
                         else:
                             error_text = await response.text()
                             logger.error(f"❌ Telegram API error {response.status}: {error_text}")
-                            return False
+                            return False, None
                         
         except asyncio.TimeoutError:
             logger.error("❌ Telegram send timeout")
-            return False
+            return False, None
         except Exception as e:
             logger.error(f"❌ Telegram send error: {e}")
+            return False, None
+    
+    async def _send_direct_message(self, text: str) -> bool:
+        """Backward-compatible helper returning boolean only."""
+        success, _ = await self._send_direct_message_json(text)
+        return success
+
+    async def send_text_immediate(
+        self,
+        text: str,
+        reply_markup: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[bool, Optional[Dict[str, Any]]]:
+        """Send a message immediately and return (success, response_json)."""
+        if not self.enabled and not TELEGRAM_MOCK_ENABLED:
+            return False, None
+        return await self._send_direct_message_json(text, reply_markup=reply_markup)
+
+    async def edit_message(
+        self,
+        message_id: int,
+        text: str,
+        reply_markup: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """Edit an existing Telegram message."""
+        if TELEGRAM_MOCK_ENABLED:
+            logger.info(f"[MOCK] Telegram edit message_id={message_id} text={text[:48]}...")
+            return True
+        if not self.enabled:
+            return False
+        
+        url = f"https://api.telegram.org/bot{self.bot_token}/editMessageText"
+        payload = {
+            'chat_id': self.chat_id,
+            'message_id': message_id,
+            'text': text,
+            'parse_mode': 'HTML',
+            'disable_web_page_preview': True,
+        }
+        if reply_markup:
+            payload['reply_markup'] = reply_markup
+        
+        timeout = aiohttp.ClientTimeout(total=self.timeout)
+        
+        try:
+            if self._session and not self._session.closed:
+                async with self._session.post(url, json=payload) as response:
+                    if response.status == 200:
+                        return True
+                    error_text = await response.text()
+                    logger.error(f"❌ Telegram edit error {response.status}: {error_text}")
+                    return False
+            else:
+                async with aiohttp.ClientSession(timeout=timeout) as session:
+                    async with session.post(url, json=payload) as response:
+                        if response.status == 200:
+                            return True
+                        error_text = await response.text()
+                        logger.error(f"❌ Telegram edit error {response.status}: {error_text}")
+                        return False
+        except Exception as e:
+            logger.error(f"❌ Telegram edit exception: {e}")
             return False
     
     def get_queue_stats(self) -> Dict[str, Any]:

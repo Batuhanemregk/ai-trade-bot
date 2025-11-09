@@ -363,17 +363,18 @@ class FeatureBuilder:
         
         return df
     
-    def create_label(self, df: pd.DataFrame, forward_bars: int = 3, threshold_pct: float = 0.25) -> pd.DataFrame:
+    def create_label(self, df: pd.DataFrame, forward_bars: int = 3, threshold_pct: float = 0.20, include_flat: bool = True) -> pd.DataFrame:
         """
-        Create threshold-based binary label.
+        Create three-class label: LONG=2, SHORT=0, FLAT=1.
         
         Args:
             df: DataFrame with 'close' column
             forward_bars: How many bars ahead to predict (default: 3)
-            threshold_pct: Return threshold in percent (default: 0.25%)
+            threshold_pct: Return threshold in percent (default: 0.20%)
+            include_flat: Whether to include FLAT labels (default: True)
         
         Returns:
-            DataFrame with 'label' column added
+            DataFrame with 'label' column added (LONG=2, SHORT=0, FLAT=1)
         """
         df = df.copy()
         
@@ -381,25 +382,44 @@ class FeatureBuilder:
         future_close = df['close'].shift(-forward_bars)
         future_return = ((future_close - df['close']) / df['close']) * 100
         
-        # Label: 1 if return > threshold
-        df['label'] = (future_return > threshold_pct).astype(int)
+        # Three-class label
+        # LONG: future_return > threshold_pct → 2
+        # SHORT: future_return < -threshold_pct → 0
+        # FLAT: -threshold_pct <= future_return <= threshold_pct → 1
+        
+        df['label'] = 1  # Default: FLAT
+        df.loc[future_return > threshold_pct, 'label'] = 2  # LONG
+        df.loc[future_return < -threshold_pct, 'label'] = 0  # SHORT
         
         # Drop last N rows (no future data)
-        df = df.iloc[:-forward_bars]
+        df_labeled = df.iloc[:-forward_bars].copy()
         
-        logger.debug(f"Created labels: {df['label'].sum()} positives ({df['label'].sum()/len(df)*100:.1f}%)")
+        # If not including FLAT, filter them out
+        if not include_flat:
+            df_labeled = df_labeled[df_labeled['label'] != 1].copy()
         
-        return df
+        long_count = (df_labeled['label'] == 2).sum()
+        short_count = (df_labeled['label'] == 0).sum()
+        flat_count = (df_labeled['label'] == 1).sum()
+        total = len(df_labeled)
+        
+        logger.info(f"Created labels: LONG={long_count} ({long_count/total*100:.1f}%), "
+                    f"SHORT={short_count} ({short_count/total*100:.1f}%), "
+                    f"FLAT={flat_count} ({flat_count/total*100:.1f}%), "
+                    f"Total={total}")
+        
+        return df_labeled
     
     def get_feature_columns(self) -> list:
         """Get list of feature column names."""
         return self.feature_columns
     
     def prepare_for_training(self, df: pd.DataFrame, 
-                           df_1h: Optional[pd.DataFrame] = None,
-                           df_4h: Optional[pd.DataFrame] = None,
-                           forward_bars: int = 3,
-                           threshold_pct: float = 0.25) -> Tuple[pd.DataFrame, pd.Series]:
+                            df_1h: Optional[pd.DataFrame] = None,
+                            df_4h: Optional[pd.DataFrame] = None,
+                            forward_bars: int = 3,
+                            threshold_pct: float = 0.20,
+                            include_flat: bool = True) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Prepare data for training: features + labels.
         
@@ -407,25 +427,34 @@ class FeatureBuilder:
             df: Main timeframe OHLCV data
             df_1h: Optional 1h timeframe
             df_4h: Optional 4h timeframe
-            forward_bars: Forward bars for labeling
-            threshold_pct: Return threshold
+            forward_bars: Forward bars for labeling (default: 3)
+            threshold_pct: Return threshold (default: 0.20%)
+            include_flat: Whether to include FLAT labels (default: True)
         
         Returns:
             X: Features DataFrame
-            y: Labels Series
+            y: Labels Series (LONG=2, SHORT=0, FLAT=1)
         """
         # Build features
         df = self.build_features(df, df_1h, df_4h)
         
         # Create labels
-        df = self.create_label(df, forward_bars, threshold_pct)
+        df = self.create_label(df, forward_bars, threshold_pct, include_flat)
         
         # Extract X, y
         X = df[self.feature_columns]
         y = df['label']
         
+        # Log class distribution
+        long_count = (y == 2).sum()
+        short_count = (y == 0).sum()
+        flat_count = (y == 1).sum()
+        total = len(y)
+        
         logger.info(f"Training data: {len(X)} samples, {len(self.feature_columns)} features")
-        logger.info(f"Class distribution: Pos={y.sum()} ({y.sum()/len(y)*100:.1f}%), Neg={len(y)-y.sum()} ({(len(y)-y.sum())/len(y)*100:.1f}%)")
+        logger.info(f"Class distribution: LONG={long_count} ({long_count/total*100:.1f}%), "
+                    f"SHORT={short_count} ({short_count/total*100:.1f}%), "
+                    f"FLAT={flat_count} ({flat_count/total*100:.1f}%)")
         
         return X, y
 

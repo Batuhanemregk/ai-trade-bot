@@ -60,14 +60,19 @@ class Trailing5mJob(BaseJob):
     
     async def execute(self):
         """Execute 5-minute trailing stops update."""
+        if not self.start_run('5m'):
+            return
+        
+        bar_id = self.current_bar_id
         try:
-            logger.info("[JOB] trailing_5m starting execution")
+            logger.info(f"[JOB] trailing_5m run_id={self.run_id} bar={bar_id} starting execution")
             
             # Get all active positions
             active_positions = await self._get_active_positions()
             
             if not active_positions:
                 logger.info("[TRAIL] No active positions to monitor")
+                self.finish_run("SUCCESS")
                 return
             
             logger.info(f"[TRAIL] Monitoring {len(active_positions)} active positions")
@@ -91,10 +96,16 @@ class Trailing5mJob(BaseJob):
                     logger.error(f"❌ Failed to process trailing stops for {symbol}: {e}")
                     continue
             
-            logger.info(f"[JOB] trailing_5m completed {processed_count}/{len(active_positions)} positions")
+            logger.info(
+                f"[JOB] trailing_5m run_id={self.run_id} bar={bar_id} "
+                f"completed {processed_count}/{len(active_positions)} positions"
+            )
+            self.mark_bar_processed(self.job_id, '5m')
+            self.finish_run("SUCCESS")
             
         except Exception as e:
             logger.error(f"❌ Trailing5mJob execution failed: {e}")
+            self.finish_run("FAILED", str(e))
             raise
     
     async def _get_active_positions(self) -> List[str]:

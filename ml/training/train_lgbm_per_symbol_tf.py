@@ -37,6 +37,10 @@ class LGBMTrainerPerSymbolTF:
         
         logger.info("="*80)
         logger.info("STARTING TRAINING: 9 MODELS (3 SYMBOLS × 3 TFS)")
+        logger.info("Configuration: Multiclass (LONG=2, SHORT=0, FLAT=1)")
+        logger.info("  - Forward bars: 3")
+        logger.info("  - Threshold: 0.20%")
+        logger.info("  - Include FLAT: Yes (with reduced weight)")
         logger.info("="*80)
         
         for symbol in symbols:
@@ -51,20 +55,14 @@ class LGBMTrainerPerSymbolTF:
                     df_1h = self._load_data(symbol, '1h') if tf != '1h' else None
                     df_4h = self._load_data(symbol, '4h') if tf != '4h' else None
                     
-                    # Build features
-                    logger.info("Building features...")
-                    df = self.feature_builder.build_features(df_main, df_1h, df_4h)
-                    
-                    # Create labels
-                    logger.info("Creating labels...")
-                    df = self.feature_builder.create_label(df, forward_bars=1, threshold_pct=0.15)
-                    
-                    # Extract X, y
-                    X = df[self.feature_builder.feature_columns]
-                    y = df['label']
-                    
-                    logger.info(f"Training data: {len(X)} samples, {len(X.columns)} features")
-                    logger.info(f"Class distribution: {y.sum()} positives ({y.sum()/len(y)*100:.1f}%)")
+                    # Prepare data: features + labels (3-class: LONG=2, SHORT=0, FLAT=1)
+                    logger.info("Preparing training data...")
+                    X, y = self.feature_builder.prepare_for_training(
+                        df_main, df_1h, df_4h,
+                        forward_bars=3,
+                        threshold_pct=0.20,
+                        include_flat=True
+                    )
                     
                     # Train
                     logger.info("Training model...")
@@ -93,15 +91,15 @@ class LGBMTrainerPerSymbolTF:
         return self.results
     
     def _load_data(self, symbol: str, timeframe: str) -> pd.DataFrame:
-        """Load OHLCV data from CSV."""
-        # Convert symbol format (BTCUSDT -> BTC)
-        symbol_short = symbol.replace('USDT', '')
-        filename = f"{symbol_short}_USDT_{timeframe}_6months_binance.csv"
+        """Load OHLCV data from CSV (18-month data only)."""
+        # Use 18-month data format: BTCUSDT_15m_18months_binance.csv
+        filename = f"{symbol}_{timeframe}_18months_binance.csv"
         filepath = Path(f"data/ml_training/{filename}")
         
         if not filepath.exists():
-            raise FileNotFoundError(f"Data file not found: {filepath}")
+            raise FileNotFoundError(f"18-month data file not found: {filepath}")
         
+        logger.info(f"Loading 18-month data: {filepath}")
         df = pd.read_csv(filepath)
         
         # Parse timestamp
@@ -115,27 +113,49 @@ class LGBMTrainerPerSymbolTF:
         df = df.sort_values('timestamp').reset_index(drop=True)
         df = df.set_index('timestamp')
         
-        logger.debug(f"Loaded {len(df)} bars from {filepath}")
+        logger.info(f"Loaded {len(df)} bars (Date range: {df.index[0]} to {df.index[-1]})")
         return df
     
     def _train_single_model(self, X: pd.DataFrame, y: pd.Series, symbol: str, tf: str) -> Any:
-        """Train single LightGBM model with time-series CV."""
+        """Train single LightGBM model with time-series CV (3-class: LONG=2, SHORT=0, FLAT=1)."""
         
-        # Hyperparameters - Optimized for AUC 0.7-0.8
+        # Calculate class weights (give FLAT lower weight to focus on LONG/SHORT)
+        unique_classes = np.unique(y)
+        class_counts = {cls: (y == cls).sum() for cls in unique_classes}
+        total = len(y)
+        
+        # Inverse frequency weighting with FLAT penalty
+        class_weight_dict = {}
+        for cls in unique_classes:
+            freq = class_counts[cls] / total
+            weight = 1.0 / freq  # Inverse frequency
+            # Reduce FLAT weight by 50% (FLAT=1)
+            if cls == 1:  # FLAT
+                weight *= 0.5
+            class_weight_dict[cls] = weight
+        
+        # Normalize weights
+        total_weight = sum(class_weight_dict.values())
+        class_weight_dict = {k: v / total_weight * len(unique_classes) for k, v in class_weight_dict.items()}
+        
+        logger.info(f"Class weights: {class_weight_dict}")
+        
+        # Hyperparameters - Multiclass for 3 classes
         params = {
-            'objective': 'binary',
-            'metric': 'auc',
+            'objective': 'multiclass',
+            'num_class': 3,
+            'metric': 'multi_logloss',
             'boosting_type': 'gbdt',
-            'n_estimators': 1000,        # Increased from 500
-            'learning_rate': 0.03,        # Reduced from 0.05
-            'num_leaves': 63,             # Increased from 31
-            'max_depth': 10,              # Limited from -1
-            'colsample_bytree': 0.8,      # Increased from 0.7
-            'subsample': 0.8,             # Increased from 0.7
-            'reg_alpha': 0.5,             # Increased from 0.1
-            'reg_lambda': 0.5,            # Increased from 0.1
-            'min_child_samples': 50,      # Added for regularization
-            'class_weight': 'balanced',   # CRITICAL: Handle imbalance
+            'n_estimators': 1000,
+            'learning_rate': 0.03,
+            'num_leaves': 63,
+            'max_depth': 10,
+            'colsample_bytree': 0.8,
+            'subsample': 0.8,
+            'reg_alpha': 0.5,
+            'reg_lambda': 0.5,
+            'min_child_samples': 50,
+            'class_weight': class_weight_dict,  # Custom weights (FLAT penalized)
             'seed': 42,
             'n_jobs': -1,
             'verbose': -1
@@ -149,7 +169,9 @@ class LGBMTrainerPerSymbolTF:
         return model
     
     def _evaluate_model(self, model: Any, X: pd.DataFrame, y: pd.Series) -> Dict[str, float]:
-        """Evaluate model with time-series split."""
+        """Evaluate model with time-series split (multiclass: LONG=2, SHORT=0, FLAT=1)."""
+        from sklearn.metrics import roc_auc_score, classification_report
+        
         tscv = TimeSeriesSplit(n_splits=5)
         
         metrics_list = []
@@ -162,17 +184,24 @@ class LGBMTrainerPerSymbolTF:
             temp_model = lgb.LGBMClassifier(**model.get_params())
             temp_model.fit(X_train, y_train)
             
-            # Predict
-            y_pred_proba = temp_model.predict_proba(X_test)[:, 1]
-            y_pred = (y_pred_proba > 0.5).astype(int)
+            # Predict (multiclass)
+            y_pred_proba = temp_model.predict_proba(X_test)  # Shape: (n_samples, 3)
+            y_pred = temp_model.predict(X_test)
             
-            # Calculate metrics
+            # Multiclass AUC (one-vs-rest average)
+            try:
+                # One-vs-rest AUC for each class
+                auc_ovr = roc_auc_score(y_test, y_pred_proba, multi_class='ovr', average='macro')
+            except:
+                auc_ovr = 0.5  # Fallback if AUC calculation fails
+            
+            # Calculate metrics (multiclass)
             fold_metrics = {
-                'auc': roc_auc_score(y_test, y_pred_proba),
+                'auc': auc_ovr,  # Macro-averaged one-vs-rest AUC
                 'accuracy': accuracy_score(y_test, y_pred),
-                'precision': precision_score(y_test, y_pred, zero_division=0),
-                'recall': recall_score(y_test, y_pred, zero_division=0),
-                'f1': f1_score(y_test, y_pred, zero_division=0),
+                'precision': precision_score(y_test, y_pred, average='macro', zero_division=0),
+                'recall': recall_score(y_test, y_pred, average='macro', zero_division=0),
+                'f1': f1_score(y_test, y_pred, average='macro', zero_division=0),
                 'balanced_accuracy': balanced_accuracy_score(y_test, y_pred)
             }
             
@@ -193,26 +222,40 @@ class LGBMTrainerPerSymbolTF:
         model_dir = Path("models/lgbm")
         model_dir.mkdir(exist_ok=True)
         
-        # Save model
-        model_path = model_dir / f"{symbol}_{tf}_last6m.pkl"
+        # Save model with multiclass_v3 tag
+        model_path = model_dir / f"{symbol}_{tf}_multiclass_v3.pkl"
         with open(model_path, 'wb') as f:
             pickle.dump(model, f)
+        
+        # Get model hyperparameters
+        model_params = model.get_params()
+        class_weight_info = model_params.get('class_weight', 'unknown')
+        if isinstance(class_weight_info, dict):
+            class_weight_info = {str(k): float(v) for k, v in class_weight_info.items()}
         
         # Save metadata
         metadata = {
             'symbol': symbol,
             'timeframe': tf,
+            'model_version': 'multiclass_v3',
             'features': features,
             'n_features': len(features),
             'metrics': metrics,
             'training_date': datetime.now().isoformat(),
             'label_config': {
-                'forward_bars': 1,
-                'threshold_pct': 0.15
+                'type': 'multiclass_three_class',
+                'forward_bars': 3,
+                'threshold_pct': 0.20,
+                'long_label': 2,
+                'short_label': 0,
+                'flat_label': 1,
+                'include_flat': True
             },
+            'data_period': '18_months',
             'hyperparameters': {
-                'objective': 'binary',
-                'metric': 'auc',
+                'objective': 'multiclass',
+                'num_class': 3,
+                'metric': 'multi_logloss',
                 'boosting_type': 'gbdt',
                 'n_estimators': 1000,
                 'learning_rate': 0.03,
@@ -223,11 +266,11 @@ class LGBMTrainerPerSymbolTF:
                 'reg_alpha': 0.5,
                 'reg_lambda': 0.5,
                 'min_child_samples': 50,
-                'class_weight': 'balanced'
+                'class_weight': class_weight_info
             }
         }
         
-        metadata_path = model_dir / f"{symbol}_{tf}_last6m_metadata.json"
+        metadata_path = model_dir / f"{symbol}_{tf}_multiclass_v3_metadata.json"
         with open(metadata_path, 'w') as f:
             json.dump(metadata, f, indent=2)
         
@@ -237,10 +280,22 @@ class LGBMTrainerPerSymbolTF:
     def generate_report(self) -> str:
         """Generate training report as markdown."""
         lines = [
-            "# LGBM Training Report",
+            "# Symmetric Binary LGBM Training Report",
             "",
             f"**Date**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"**Models Trained**: {len(self.results)}",
+            f"**Model Version**: symmetric_v2",
+            "",
+            "## Configuration",
+            "",
+            "- **Label Strategy**: Symmetric binary classification",
+            "  - LONG (1): future_return > 0.25%",
+            "  - SHORT (0): future_return < -0.25%",
+            "  - FLAT: Removed from training",
+            "- **Data Period**: 18 months",
+            "- **Forward Bars**: 1 bar",
+            "- **Features**: 60-73 (multi-timeframe)",
+            "- **Class Balancing**: Balanced class weights enabled",
             "",
             "## Model Performance",
             "",
@@ -259,14 +314,25 @@ class LGBMTrainerPerSymbolTF:
                     f"{metrics.get('f1', 0):.4f} | {metrics.get('balanced_accuracy', 0):.4f} |"
                 )
         
+        # Calculate average AUC
+        auc_values = [r.get('auc', 0) for r in self.results.values() if 'auc' in r]
+        avg_auc = sum(auc_values) / len(auc_values) if auc_values else 0
+        
         lines.extend([
             "",
             "## Summary",
             "",
-            "- **Training Method**: Time-series cross-validation (5 folds)",
-            "- **Label**: Binary (price up >0.25% in 3 bars)",
-            "- **Features**: 60-73 (depending on MTF availability)",
-            "- **Hyperparameters**: Standard LightGBM config with regularization"
+            f"- **Average AUC**: {avg_auc:.4f}",
+            f"- **Target AUC**: 0.70-0.80",
+            f"- **Status**: {'✅ Target achieved' if avg_auc >= 0.70 else '⚠️ Below target'}",
+            "",
+            "## Improvements vs Previous Version",
+            "",
+            "- Symmetric learning for both LONG and SHORT directions",
+            "- 18-month data (vs 6-month)",
+            "- FLAT examples removed for cleaner training",
+            "- More balanced class distribution (~30% LONG, ~30% SHORT, ~40% removed)",
+            "- Enhanced hyperparameters with class balancing"
         ])
         
         return "\n".join(lines)

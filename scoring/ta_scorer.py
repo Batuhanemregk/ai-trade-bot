@@ -110,11 +110,16 @@ class TAScorer:
         indicators = {}
 
         # Extract all indicator columns
-        indicator_columns = [
+        base_columns = [
             'sma_20', 'sma_50', 'rsi', 'macd', 'macd_signal', 'macd_histogram',
             'bb_upper', 'bb_middle', 'bb_lower', 'bb_width', 'atr',
-            'volume_sma', 'volume_ratio', 'current_price', 'high_20', 'low_20'
+            'volume_sma', 'volume_ratio', 'current_price', 'high_20', 'low_20',
+            # Frequently used derivatives
+            'di_plus', 'di_minus', 'supertrend', 'supertrend_direction'
         ]
+        
+        # Combine canonical COL values with base columns to ensure we surface all indicators
+        indicator_columns = list(dict.fromkeys(base_columns + list(COL.values())))
 
         for col in indicator_columns:
             if col in df.columns:

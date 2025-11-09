@@ -5,6 +5,8 @@ Enhanced with professional logging and monitoring.
 """
 
 import asyncio
+import hashlib
+import json
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List
@@ -105,18 +107,17 @@ class TradingAnalysisJob(BaseJob):
     
     async def execute(self):
         """Execute 15-minute trading analysis."""
+        if not self.start_run('15m'):
+            return
+        
         start_time = time.time()
+        bar_id = self.current_bar_id
         
         try:
-            # Check idempotency for 15m bar
-            bar_id = self.get_current_bar_id('15m')
-            job_key = 'trading_analysis'
-            if self.is_bar_already_processed(job_key, '15m'):
-                logger.info(f"⏭️ Already processed tf=15m bar={bar_id} → skipping")
-                return
-            
             symbols = self.get_all_symbols()
-            logger.info(f"🔄 [JOB] trading_analysis processing {len(symbols)} symbols for bar={bar_id}")
+            logger.info(
+                f"🔄 [JOB] trading_analysis run_id={self.run_id} bar={bar_id} symbols={len(symbols)} processing"
+            )
             
             processed_count = 0
             analysis_results = []  # Store results for cards
@@ -154,20 +155,25 @@ class TradingAnalysisJob(BaseJob):
             if analysis_results and self.analysis_cards:
                 await self.analysis_cards.send_analysis_cards(analysis_results)
             
-            # Mark 15m bar as processed
-            self.mark_bar_processed('15m', bar_id)
+            # Mark 15m bar as processed for legacy idempotency tracking
+            self.mark_bar_processed(self.job_id, '15m')
             
             # Calculate duration
             duration = time.time() - start_time
             
             # Log batch summary using enhanced logger
-            self.summary_logger.log_batch_summary('15m', duration)
+            self.summary_logger.log_batch_summary('15m', duration, bar_id, self.run_id)
             
             # Record job execution in Prometheus
             if self.prometheus_exporter:
                 self.prometheus_exporter.record_job_execution('trading_analysis_15m', duration, True)
             
-            logger.info(f"✅ [JOB-COMPLETE] trading_analysis | processed={processed_count} entries={entries} exits={exits} reversals={reversals} ignored={ignored_same_dir} | duration={duration:.1f}s")
+            logger.info(
+                f"✅ [JOB-COMPLETE] trading_analysis run_id={self.run_id} bar={bar_id} "
+                f"processed={processed_count} entries={entries} exits={exits} "
+                f"reversals={reversals} ignored={ignored_same_dir} duration={duration:.1f}s"
+            )
+            self.finish_run("SUCCESS")
             
         except Exception as e:
             duration = time.time() - start_time
@@ -178,6 +184,7 @@ class TradingAnalysisJob(BaseJob):
                 self.prometheus_exporter.record_error('execution_failed', 'trading_analysis')
             
             logger.error(f"❌ TradingAnalysisJob execution failed: {e}")
+            self.finish_run("FAILED", str(e))
             raise
     
     async def _process_symbol(self, symbol: str):
@@ -206,7 +213,40 @@ class TradingAnalysisJob(BaseJob):
             
             # Step 5: Risk Analysis - MUST come AFTER data fetch, uses OHLCV data
             # This ensures risk calculations use the same data snapshot as TA/ML
-            risk_score, risk_details = await _compute_risk_analysis(self.risk_service, symbol, ohlcv_data)
+            position_snapshot = None
+            position_snapshot_hash = None
+            if self.state_manager:
+                position_info = self.state_manager.get_position_info(symbol)
+                if position_info:
+                    position_snapshot = {
+                        "state": position_info.state.value,
+                        "entry_time": position_info.entry_time.isoformat() if position_info.entry_time else None,
+                        "entry_price": position_info.entry_price,
+                        "size": position_info.size,
+                        "side": position_info.side,
+                        "stop_loss": position_info.stop_loss,
+                        "take_profit": position_info.take_profit,
+                        "holding_bars": position_info.holding_bars,
+                        "r_multiple": position_info.r_multiple,
+                    }
+                    position_snapshot_hash = hashlib.sha1(
+                        json.dumps(position_snapshot, sort_keys=True, default=str).encode('utf-8')
+                    ).hexdigest()
+            risk_context = {
+                "timeframe": "15m",
+                "bar_id": self.current_bar_id,
+            }
+            if position_snapshot is not None:
+                risk_context["position_snapshot"] = position_snapshot
+            if position_snapshot_hash is not None:
+                risk_context["position_snapshot_hash"] = position_snapshot_hash
+            
+            risk_score, risk_details = await _compute_risk_analysis(
+                self.risk_service,
+                symbol,
+                ohlcv_data,
+                context=risk_context,
+            )
             
             # Step 6: Composite Score & Decision
             composite_signal = await _compute_composite_signal(
@@ -225,6 +265,26 @@ class TradingAnalysisJob(BaseJob):
                     timestamp_ms = int(idx.timestamp() * 1000)
                     ohlcv_1h_list.append([timestamp_ms, row['open'], row['high'], row['low'], row['close'], row['volume']])
             
+            # Determine bar timestamp from 15m frame for counter alignment
+            bar_timestamp = None
+            main_df = ohlcv_data.get('main')
+            if main_df is not None and not main_df.empty:
+                ts = main_df.index[-1]
+                if hasattr(ts, "to_pydatetime"):
+                    ts = ts.to_pydatetime()
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
+                bar_timestamp = ts
+            else:
+                fallback_bar_id = self.get_current_bar_id('15m')
+                try:
+                    bar_timestamp = datetime.fromisoformat(fallback_bar_id.replace('Z', '+00:00'))
+                    if bar_timestamp.tzinfo is None:
+                        bar_timestamp = bar_timestamp.replace(tzinfo=timezone.utc)
+                except Exception:
+                    logger.warning(f"[COUNTER] {symbol} unable to derive bar timestamp from fallback bar_id={fallback_bar_id}")
+                    bar_timestamp = datetime.now(timezone.utc)
+            
             # Create signal dict
             signal_dict = {
                 'final_score': composite_signal.final_score,
@@ -233,7 +293,11 @@ class TradingAnalysisJob(BaseJob):
                 'ml_score': ml_score,
                 'news_score': news_score,
                 'risk_score': risk_score,
-                'timestamp': datetime.now(timezone.utc)
+                'timestamp': datetime.now(timezone.utc),
+                'timeframe': '15m',
+                'run_id': self.run_id,
+                'bar_id': self.current_bar_id,
+                'bar_timestamp': bar_timestamp
             }
             
             # Process through signal gate
@@ -256,6 +320,12 @@ class TradingAnalysisJob(BaseJob):
                 'confidence': gated_signal.details.get('confidence', 0.0),
                 'conf_required': gated_signal.details.get('conf_threshold', 0.0)
             }
+            if gated_signal.details.get('duplicate_bar'):
+                gate_details['duplicate'] = gated_signal.details.get('duplicate_count', 1)
+            if gated_signal.details.get('bar_id'):
+                gate_details['bar_id'] = gated_signal.details['bar_id']
+            if gated_signal.details.get('run_id') or self.run_id:
+                gate_details['run_id'] = gated_signal.details.get('run_id', self.run_id)
             
             # Extract age from signal history (counter format)
             signal_history = self.signal_gate.get_signal_history(symbol)
@@ -358,6 +428,8 @@ class TradingAnalysisJob(BaseJob):
                 'symbol': symbol,
                 'timeframe': '15m',
                 'timestamp': datetime.now(timezone.utc),
+                'bar_id': self.current_bar_id,
+                'run_id': self.run_id,
                 'ta_score': ta_score,
                 'ml_score': ml_score,
                 'news_score': news_score,
@@ -429,6 +501,8 @@ class TradingAnalysisJob(BaseJob):
                 'ml_score': ml_score,
                 'news_score': news_score,
                 'risk_score': risk_score,
+                'bar_id': self.current_bar_id,
+                'run_id': self.run_id,
                 'action': transition.action,  # Add action here
                 'news_info': {
                     'type': news_categories.get('type', 'general') if isinstance(news_categories, dict) else 'general',
@@ -477,7 +551,9 @@ class TradingAnalysisJob(BaseJob):
                         state_transition=f"{transition.from_state.value}→{transition.to_state.value}",
                         strategy='single_flip',
                         guards=gate_results,
-                        source='trading_analysis'
+                        source='trading_analysis',
+                        bar_id=self.current_bar_id,
+                        run_id=self.run_id
                     )
                 except Exception as log_err:
                     logger.warning(f"⚠️ Decision logging failed for {symbol}: {log_err}")

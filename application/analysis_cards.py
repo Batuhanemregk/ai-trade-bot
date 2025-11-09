@@ -2,13 +2,23 @@
 Analysis Cards Service - Rich Telegram cards for trading analysis
 """
 
-import asyncio
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from loguru import logger
 
 from adapters.telegram_client import TelegramClient
-from infrastructure.bootstrap import load_policy
+from adapters.telegram.formatter import get_formatter
+from adapters.telegram.views.analysis import (
+    build_analysis_detail_view,
+    build_analysis_summary_view,
+)
+from application.jobs.base_job import BaseJob
+from infrastructure.feature_flags import TELEGRAM_MOCK_ENABLED
+from application.analysis_cards_state import (
+    set_latest_analysis,
+    get_latest_analysis,
+)
+from adapters.telegram.keyboards import build_keyboard
 
 
 class AnalysisCardsService:
@@ -18,6 +28,13 @@ class AnalysisCardsService:
         self.policy = policy
         self.telegram_client = None
         self.is_enabled = policy.get('analysis_cards', {}).get('enabled', False)
+        self.formatter = get_formatter()
+        self.summary_state: Dict[str, Any] = {
+            'message_id': None,
+            'bar_id': None,
+            'text': None,
+            'keyboard_signature': None,
+        }
         
         if self.is_enabled:
             self._initialize_telegram()
@@ -75,35 +92,25 @@ class AnalysisCardsService:
     
     async def send_analysis_cards(self, analysis_results: List[Dict[str, Any]]):
         """Send analysis cards for all symbols"""
+        if not analysis_results:
+            return
+        
+        # Determine bar/run identifiers
+        first_entry = analysis_results[0]
+        bar_id = first_entry.get('bar_id')
+        if not bar_id:
+            bar_id = BaseJob.get_bar_id(datetime.now(timezone.utc), '15m')
+        run_id = first_entry.get('run_id', 'unknown')
+        
+        # Persist shared state for callbacks/summary job
+        set_latest_analysis(bar_id, run_id, analysis_results)
+        
         if not self.is_enabled or not self.telegram_client:
             return
         
         try:
-            # Start worker if not running
-            if not self.telegram_client.is_running:
-                await self.telegram_client.start()
-            
-            # Group results by decision
-            long_symbols = [r for r in analysis_results if r.get('decision') == 'LONG']
-            short_symbols = [r for r in analysis_results if r.get('decision') == 'SHORT']
-            flat_symbols = [r for r in analysis_results if r.get('decision') == 'FLAT']
-            
-            # Send summary first
-            summary_message = self._create_summary_card(len(long_symbols), len(short_symbols), len(flat_symbols))
-            success = await self.telegram_client.send_message(summary_message)
-            if not success:
-                logger.error("❌ Failed to send summary card")
-                return
-            
-            # Send individual cards for each decision
-            for symbol_data in long_symbols + short_symbols + flat_symbols:
-                card_message = self._create_symbol_card(symbol_data)
-                success = await self.telegram_client.send_message(card_message)
-                if not success:
-                    logger.error(f"❌ Failed to send card for {symbol_data.get('symbol', 'UNKNOWN')}")
-                await asyncio.sleep(0.5)  # Rate limiting
-            
-            logger.info(f"📊 [CARDS] Sent {len(analysis_results)} analysis cards")
+            summary_context = self._build_summary_context(bar_id, run_id, analysis_results)
+            await self._publish_summary(summary_context)
             
         except Exception as e:
             logger.error(f"❌ Failed to send analysis cards: {e}")
@@ -138,66 +145,107 @@ class AnalysisCardsService:
 <i>Goodbye! 👋</i>
 """
     
-    def _create_summary_card(self, long_count: int, short_count: int, flat_count: int) -> str:
-        """Create summary card"""
-        now = datetime.now(timezone.utc)
-        total = long_count + short_count + short_count
-        
-        return f"""
-📊 <b>Market Analysis Summary</b>
-⏰ <b>Time:</b> {now.strftime('%H:%M:%S')} UTC
-📈 <b>LONG:</b> {long_count} symbols
-📉 <b>SHORT:</b> {short_count} symbols
-➡️ <b>FLAT:</b> {flat_count} symbols
-🔢 <b>Total:</b> {total} symbols analyzed
-
-<i>Detailed analysis below ⬇️</i>
-"""
+    def _build_summary_context(
+        self,
+        bar_id: str,
+        run_id: str,
+        analysis_results: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Build summary context for view builders."""
+        sorted_results = sorted(
+            analysis_results,
+            key=lambda r: r.get('final_score', 0.0),
+            reverse=True,
+        )
+        counts = {
+            'LONG': sum(1 for r in analysis_results if r.get('decision') == 'LONG'),
+            'SHORT': sum(1 for r in analysis_results if r.get('decision') == 'SHORT'),
+            'FLAT': sum(1 for r in analysis_results if r.get('decision') == 'FLAT'),
+        }
+        return {
+            'bar_id': bar_id,
+            'run_id': run_id,
+            'results': sorted_results,
+            'counts': counts,
+            'generated_at': datetime.now(timezone.utc).isoformat(),
+        }
     
-    def _create_symbol_card(self, data: Dict[str, Any]) -> str:
-        """Create individual symbol card"""
-        symbol = data.get('symbol', 'UNKNOWN')
-        decision = data.get('decision', 'FLAT')
-        final_score = data.get('final_score', 0)
-        ta_score = data.get('ta_score', 0)
-        ml_score = data.get('ml_score', 0)
-        news_score = data.get('news_score', 0)
-        risk_score = data.get('risk_score', 0)
+    async def _publish_summary(self, summary_context: Dict[str, Any]) -> None:
+        """Send or edit summary message based on context."""
+        if TELEGRAM_MOCK_ENABLED or not self.telegram_client:
+            self.summary_state['bar_id'] = summary_context.get('bar_id')
+            self.summary_state['text'] = "<mock>"
+            self.summary_state['keyboard_signature'] = keyboard_signature
+            return
         
-        # Decision emoji
-        decision_emoji = {
-            'LONG': '🟢',
-            'SHORT': '🔴', 
-            'FLAT': '⚪'
-        }.get(decision, '❓')
+        text, buttons = build_analysis_summary_view(summary_context, self.formatter)
+        keyboard_markup = build_keyboard(buttons)
+        reply_markup = keyboard_markup.to_dict()
+        keyboard_signature = tuple(
+            tuple(button['callback_data'] for button in row)
+            for row in buttons
+        )
         
-        # News info
-        news_info = data.get('news_info', {})
-        news_type = news_info.get('type', 'general')
-        news_confidence = news_info.get('confidence', 0)
-        news_title = news_info.get('title', 'No recent news')[:50]
+        existing_bar = self.summary_state.get('bar_id')
+        existing_text = self.summary_state.get('text')
+        existing_sig = self.summary_state.get('keyboard_signature')
+        if (self.summary_state.get('message_id') and
+                existing_bar == summary_context.get('bar_id') and
+                existing_text == text and
+                existing_sig == keyboard_signature):
+            return
         
-        # Risk info
-        risk_info = data.get('risk_info', {})
-        risk_level = risk_info.get('level', 'medium')
-        risk_factors = risk_info.get('factors', [])
+        if (not force and
+                self.summary_state.get('bar_id') == summary_context.get('bar_id') and
+                self.summary_state.get('text') == text):
+            return  # No change
         
-        return f"""
-{decision_emoji} <b>{symbol}</b> - {decision}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📊 <b>Scores:</b>
-• Final: {final_score:.1f}
-• TA: {ta_score:.1f}
-• ML: {ml_score:.1f}
-• News: {news_score:.1f}
-• Risk: {risk_score:.1f}
-
-📰 <b>News:</b> {news_type} ({news_confidence:.1f})
-<i>{news_title}...</i>
-
-⚠️ <b>Risk:</b> {risk_level}
-<i>{', '.join(risk_factors[:3])}</i>
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-"""
+        # If we have existing message, try editing
+        message_id = self.summary_state.get('message_id')
+        success = False
+        if message_id:
+            success = await self.telegram_client.edit_message(
+                message_id=message_id,
+                text=text,
+                reply_markup=reply_markup,
+            )
+            if not success:
+                logger.warning("Failed to edit summary message, sending a new one")
+        
+        if not success:
+            success, response = await self.telegram_client.send_text_immediate(
+                text=text,
+                reply_markup=reply_markup,
+            )
+            if success and response:
+                result_obj = response.get('result') or {}
+                message_id = result_obj.get('message_id')
+                if message_id:
+                    self.summary_state['message_id'] = message_id
+                    self.summary_state['chat_id'] = result_obj.get('chat', {}).get('id')
+        
+        if success:
+            self.summary_state['bar_id'] = summary_context.get('bar_id')
+            self.summary_state['text'] = text
+            self.summary_state['keyboard_signature'] = keyboard_signature
+            logger.info(
+                "📊 [CARDS] Summary published "
+                f"bar={summary_context.get('bar_id')} run={summary_context.get('run_id')}"
+            )
+        else:
+            logger.error(
+                "❌ [CARDS] Failed to publish summary "
+                f"bar={summary_context.get('bar_id')} run={summary_context.get('run_id')}"
+            )
+    
+    async def publish_latest_summary(self) -> None:
+        """Ensure latest summary is published (used by summary job)."""
+        state = get_latest_analysis()
+        if not state or not state.get('results'):
+            return
+        summary_context = self._build_summary_context(
+            state.get('bar_id', '-'),
+            state.get('run_id', 'unknown'),
+            state.get('results', []),
+        )
+        await self._publish_summary(summary_context)

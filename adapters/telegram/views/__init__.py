@@ -12,6 +12,10 @@ from .trailing import build_trailing_view
 from .pnl import build_pnl_view
 from .settings import build_settings_view
 from .positions import build_positions_view
+from .analysis import (
+    build_analysis_summary_view,
+    build_analysis_detail_view,
+)
 
 __all__ = [
     "build_main_view",
@@ -23,5 +27,7 @@ __all__ = [
     "build_pnl_view",
     "build_settings_view",
     "build_positions_view",
+    "build_analysis_summary_view",
+    "build_analysis_detail_view",
 ]
 

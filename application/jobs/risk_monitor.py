@@ -6,7 +6,7 @@ NO daily loss limits or consecutive loss tracking
 
 import asyncio
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Callable, Awaitable
 
 from loguru import logger
 
@@ -21,6 +21,34 @@ class RiskMonitorJob(BaseJob):
         self.exchange_adapter = None
         self.circuit_breaker = None
         self.api_health_status = {}
+    
+    async def _call_with_retries(
+        self,
+        func: Callable[[], Awaitable[Any]],
+        description: str,
+        *,
+        max_attempts: int = 3,
+        base_delay: float = 1.0
+    ) -> Any:
+        """Retry helper for transient exchange errors."""
+        last_exc: Exception | None = None
+        
+        for attempt in range(1, max_attempts + 1):
+            try:
+                return await func()
+            except Exception as exc:  # pragma: no cover - network interactions
+                last_exc = exc
+                if attempt == max_attempts:
+                    break
+                
+                delay = base_delay * attempt
+                logger.warning(
+                    f"[RISK] {description} failed (attempt {attempt}/{max_attempts}), retrying in {delay:.1f}s: {exc}"
+                )
+                await asyncio.sleep(delay)
+        
+        assert last_exc is not None  # mypy / type check guard
+        raise last_exc
         
     async def initialize(self):
         """Initialize risk monitoring components."""
@@ -50,8 +78,12 @@ class RiskMonitorJob(BaseJob):
     
     async def execute(self):
         """Execute 1-minute risk monitoring."""
+        if not self.start_run('1m'):
+            return
+        
+        bar_id = self.current_bar_id
         try:
-            logger.info("[JOB] risk_monitor starting execution")
+            logger.info(f"[JOB] risk_monitor run_id={self.run_id} bar={bar_id} starting execution")
             
             # Check API health
             await self._check_api_health()
@@ -66,10 +98,13 @@ class RiskMonitorJob(BaseJob):
             if self.circuit_breaker:
                 await self._check_circuit_breaker()
             
-            logger.info("[JOB] risk_monitor completed successfully")
+            logger.info(f"[JOB] risk_monitor run_id={self.run_id} bar={bar_id} completed successfully")
+            self.mark_bar_processed(self.job_id, '1m')
+            self.finish_run("SUCCESS")
             
         except Exception as e:
             logger.error(f"❌ RiskMonitorJob execution failed: {e}")
+            self.finish_run("FAILED", str(e))
             raise
     
     async def _check_api_health(self):
@@ -78,7 +113,12 @@ class RiskMonitorJob(BaseJob):
             start_time = datetime.now(timezone.utc)
             
             # Test API connectivity with a simple call
-            await self.exchange_adapter.fetch_ticker('BTC-USDT-SWAP')
+            await self._call_with_retries(
+                lambda: self.exchange_adapter.fetch_ticker('BTC-USDT-SWAP'),
+                "API ticker health check",
+                max_attempts=3,
+                base_delay=1.0
+            )
             
             latency = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             
@@ -203,7 +243,12 @@ class RiskMonitorJob(BaseJob):
     async def _get_current_price(self, symbol: str) -> float:
         """Get current price for a symbol."""
         try:
-            ticker = await self.exchange_adapter.fetch_ticker(symbol)
+            ticker = await self._call_with_retries(
+                lambda: self.exchange_adapter.fetch_ticker(symbol),
+                f"fetch ticker for {symbol}",
+                max_attempts=3,
+                base_delay=1.0
+            )
             return float(ticker['last'])
             
         except Exception as e:
@@ -313,11 +358,21 @@ class RiskMonitorJob(BaseJob):
         try:
             # Get portfolio state
             try:
-                balance = await self.exchange_adapter.fetch_balance()
+                balance = await self._call_with_retries(
+                    lambda: self.exchange_adapter.fetch_balance(),
+                    "fetch balance for circuit breaker",
+                    max_attempts=2,
+                    base_delay=1.5
+                )
                 total_value = float(balance.get('USDT', {}).get('total', 0))
                 
                 # Get positions for PnL
-                positions = await self.exchange_adapter.fetch_positions()
+                positions = await self._call_with_retries(
+                    lambda: self.exchange_adapter.fetch_positions(),
+                    "fetch positions for circuit breaker",
+                    max_attempts=2,
+                    base_delay=1.5
+                )
                 total_pnl = sum(float(pos.get('unrealizedPnl', 0)) for pos in positions if pos.get('contracts', 0) != 0)
                 
                 # Simple drawdown estimation

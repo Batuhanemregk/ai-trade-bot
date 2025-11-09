@@ -1,0 +1,10 @@
+[RUN] job=trading_analysis run_id=5b1a42f3 bar_id=2025-11-09T18:45:00Z status=starting
+[NEWS_DEDUP] key=8f0b1c72e4f5 miss reason=cold_start
+[NEWS_DEDUP] key=8f0b1c72e4f5 hit reason=ttl
+[RISK_CACHE] key=4d6fa902b8a1 miss reason=cold_start
+[RISK_CACHE] key=4d6fa902b8a1 hit reason=ttl
+[COMPOSITE] sym=BTC-USDT tf=15m news=skip risk=47.4 final=52.8 reason=FLAT
+[ANALYSIS] BTC-USDT-SWAP tf=15m bar=2025-11-09T18:45:00Z run=5b1a42f3 skipped(idempotent)
+[BATCH] timeframe=15m bar=2025-11-09T18:45:00Z run=5b1a42f3 skipped(idempotent)
+[RUN] job=trading_analysis run_id=5b1a42f3 bar_id=2025-11-09T18:45:00Z status=SUCCESS
+

@@ -3,6 +3,7 @@ News Service - Main news collection and analysis service with LLM integration
 """
 
 import asyncio
+import hashlib
 import json
 import os
 from datetime import datetime, timezone, timedelta
@@ -13,6 +14,8 @@ from adapters.news_apis import MultiSourceNewsClient
 from application.news_watermark_manager import NewsWatermarkManager
 from application.news_digest_manager import NewsDigestManager
 from application.news_llm_analyzer import NewsLLMAnalyzer
+from application.ttl_cache import TTLCache
+from infrastructure.feature_flags import NEWS_DEDUP_ENABLED, NEWS_DEDUP_TTL_SECONDS
 
 
 class NewsService:
@@ -23,6 +26,7 @@ class NewsService:
         self.news_config = policy.get('news', {})
         self.llm_config = policy.get('news_llm', {})
         self.scoring_config = policy.get('news_scoring', {})
+        self.locale = self.news_config.get('locale', 'en')
         
         # Log verbosity control
         self.verbose_logging = os.getenv('NEWS_VERBOSITY', 'summary').lower() == 'full'
@@ -57,6 +61,10 @@ class NewsService:
         # News storage
         self.news_data: Dict[str, List[Dict[str, Any]]] = {}
         self._load_news_storage()
+        
+        # Deduplication cache for LLM calls
+        self._dedup_cache = TTLCache("news")
+        self._dedup_fingerprint: Dict[Tuple[str, str], Dict[str, str]] = {}
     
     def _load_symbol_aliases(self) -> Dict[str, Any]:
         """Load symbol aliases from config"""
@@ -128,8 +136,9 @@ class NewsService:
             since_timestamp = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
             await self._bootstrap_symbol(symbol, since_timestamp)
     
-    async def _bootstrap_symbol(self, symbol: str, since_timestamp: datetime):
+    async def _bootstrap_symbol(self, symbol: str, since_timestamp: datetime, timeframe: str = "bootstrap"):
         """Bootstrap news collection for a single symbol"""
+        since_timestamp = self._normalize_datetime(since_timestamp)
         if self.verbose_logging:
             logger.info(f"📊 [NEWS] sym={symbol} bootstrap since={since_timestamp.isoformat()}")
         
@@ -146,7 +155,14 @@ class NewsService:
             
             # Run LLM analysis if enabled
             if self.llm_analyzer:
-                await self._analyze_news_with_llm(symbol, news_items)
+                now = datetime.now(timezone.utc)
+                await self._analyze_news_with_llm(
+                    symbol,
+                    news_items,
+                    timeframe=timeframe,
+                    window_start=since_timestamp,
+                    window_end=now,
+                )
             
             if self.verbose_logging:
                 logger.info(f"✅ [NEWS] sym={symbol} bootstrap completed: {len(news_items)} articles")
@@ -154,10 +170,10 @@ class NewsService:
             if self.verbose_logging:
                 logger.warning(f"⚠️ [NEWS] sym={symbol} no articles found in bootstrap")
     
-    async def incremental_update_symbols(self, symbols: List[str]):
+    async def incremental_update_symbols(self, symbols: List[str], timeframe: str = "5m"):
         """Incremental news update for all symbols"""
         if self.verbose_logging:
-            logger.info(f"🔄 Starting incremental news update for {len(symbols)} symbols")
+            logger.info(f"🔄 Starting incremental news update for {len(symbols)} symbols tf={timeframe}")
         
         overlap_minutes = self.news_config.get('overlap_minutes', 30)
         total_fetched = 0
@@ -167,7 +183,7 @@ class NewsService:
         
         for symbol in symbols:
             try:
-                await self._incremental_update_symbol(symbol, overlap_minutes)
+                await self._incremental_update_symbol(symbol, overlap_minutes, timeframe)
             except Exception as e:
                 logger.error(f"❌ Incremental update failed for {symbol}: {e}")
                 errors += 1
@@ -179,7 +195,7 @@ class NewsService:
         else:
             logger.info("✅ Incremental news update completed")
     
-    async def _incremental_update_symbol(self, symbol: str, overlap_minutes: int):
+    async def _incremental_update_symbol(self, symbol: str, overlap_minutes: int, timeframe: str):
         """Incremental news update for a single symbol"""
         # Lazy bootstrap if no watermark
         if not self.watermark_manager.has_watermark(symbol):
@@ -193,6 +209,7 @@ class NewsService:
             logger.warning(f"⚠️ [NEWS] sym={symbol} no watermark after bootstrap, skipping incremental")
             return
         
+        since_timestamp = self._normalize_datetime(since_timestamp)
         logger.info(f"📊 [NEWS] sym={symbol} incremental since={since_timestamp.isoformat()}")
         
         # Fetch new news
@@ -215,7 +232,14 @@ class NewsService:
             
             # Run LLM analysis for new articles
             if self.llm_analyzer:
-                await self._analyze_news_with_llm(symbol, merged_news)
+                window_end = datetime.now(timezone.utc)
+                await self._analyze_news_with_llm(
+                    symbol,
+                    merged_news,
+                    timeframe=timeframe,
+                    window_start=since_timestamp,
+                    window_end=window_end,
+                )
             
             logger.info(f"✅ [NEWS] sym={symbol} incremental: {len(new_news_items)} new, {len(merged_news)} total")
         else:
@@ -288,21 +312,149 @@ class NewsService:
         
         return merged
     
-    async def _analyze_news_with_llm(self, symbol: str, news_items: List[Dict[str, Any]]):
-        """Analyze news with LLM if digest changed"""
+    def _normalize_datetime(self, value: datetime | str) -> datetime:
+        """Ensure datetime is timezone-aware UTC."""
+        if isinstance(value, datetime):
+            dt = value
+        else:
+            dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    
+    def _build_source_set_hash(self, news_items: List[Dict[str, Any]]) -> str:
+        """Build stable hash for article source set."""
+        sources: List[str] = []
+        for item in news_items:
+            source = item.get('source')
+            if isinstance(source, dict):
+                source_name = source.get('name') or source.get('id')
+            else:
+                source_name = source
+            if source_name:
+                sources.append(str(source_name).strip())
+        if not sources:
+            return "none"
+        unique_sources = sorted(set(sources))
+        digest_input = "|".join(unique_sources)
+        return hashlib.sha1(digest_input.encode('utf-8')).hexdigest()[:12]
+    
+    def _build_dedup_key(
+        self,
+        symbol: str,
+        timeframe: str,
+        digest_hash: str,
+        window_start_iso: str,
+        window_end_iso: str,
+        model_version: str,
+        locale: str,
+        source_set_hash: str,
+    ) -> str:
+        components = [
+            symbol,
+            timeframe,
+            digest_hash,
+            window_start_iso,
+            window_end_iso,
+            model_version,
+            locale,
+            source_set_hash,
+        ]
+        return "|".join(components)
+    
+    def _determine_news_miss_reason(
+        self,
+        symbol: str,
+        timeframe: str,
+        dedup_key: str,
+        digest_hash: str,
+        window_start_iso: str,
+        window_end_iso: str,
+    ) -> str:
+        fingerprint_key = (symbol, timeframe)
+        previous = self._dedup_fingerprint.get(fingerprint_key)
+        
+        if previous is None:
+            reason = "cold_start"
+        elif previous.get('key') == dedup_key:
+            reason = "ttl"
+        elif previous.get('digest_hash') != digest_hash:
+            reason = "digest_change"
+        elif (
+            previous.get('window_start') != window_start_iso
+            or previous.get('window_end') != window_end_iso
+        ):
+            reason = "window_change"
+        else:
+            reason = "config_change"
+        
+        self._dedup_fingerprint[fingerprint_key] = {
+            'key': dedup_key,
+            'digest_hash': digest_hash,
+            'window_start': window_start_iso,
+            'window_end': window_end_iso,
+        }
+        return reason
+    
+    async def _analyze_news_with_llm(
+        self,
+        symbol: str,
+        news_items: List[Dict[str, Any]],
+        *,
+        timeframe: str,
+        window_start: datetime,
+        window_end: datetime,
+    ):
+        """Analyze news with LLM if digest changed, respecting deduplication TTL."""
         if not self.llm_analyzer:
             return
         
         max_items = self.llm_config.get('digest', {}).get('max_items_per_symbol', 30)
+        window_start_dt = self._normalize_datetime(window_start)
+        window_end_dt = self._normalize_datetime(window_end)
+        window_start_iso = window_start_dt.isoformat().replace('+00:00', 'Z')
+        window_end_iso = window_end_dt.isoformat().replace('+00:00', 'Z')
+        model_version = getattr(self.llm_analyzer, "model", "unknown")
+        source_set_hash = self._build_source_set_hash(news_items[:max_items])
         
         # Get digest status
         digest_hash, is_changed, cached_result = self.digest_manager.get_digest_status(
             symbol, news_items, max_items
         )
+
+        dedup_key = self._build_dedup_key(
+            symbol,
+            timeframe,
+            digest_hash,
+            window_start_iso,
+            window_end_iso,
+            model_version,
+            self.locale,
+            source_set_hash,
+        )
+        key_short = hashlib.sha1(dedup_key.encode('utf-8')).hexdigest()[:12]
+
+        if NEWS_DEDUP_ENABLED:
+            cached_entry = self._dedup_cache.get(dedup_key)
+            if cached_entry:
+                logger.info(f"[NEWS_DEDUP] key={key_short} hit reason=ttl")
+                return
         
         if not is_changed and cached_result:
             logger.info(f"📊 [LLM] sym={symbol} digest=UNCHANGED run=NO items={len(news_items)}")
             return
+
+        miss_reason = "dedup_disabled"
+        if NEWS_DEDUP_ENABLED:
+            miss_reason = self._determine_news_miss_reason(
+                symbol,
+                timeframe,
+                dedup_key,
+                digest_hash,
+                window_start_iso,
+                window_end_iso,
+            )
+            logger.info(f"[NEWS_DEDUP] key={key_short} miss reason={miss_reason}")
         
         # Run LLM analysis
         try:
@@ -326,6 +478,15 @@ class NewsService:
             # Log classification results
             classification = self._determine_classification(categories, score)
             logger.info(f"📊 [NEWSCLS] type={classification['type']} sym={symbol} conf={classification['confidence']:.2f} title=\"{news_items[0].get('title', 'N/A')[:50]}...\"")
+
+            if NEWS_DEDUP_ENABLED:
+                cache_payload = {
+                    'digest_hash': digest_hash,
+                    'stored_at': datetime.now(timezone.utc).isoformat(),
+                    'window_start': window_start_iso,
+                    'window_end': window_end_iso,
+                }
+                self._dedup_cache.set(dedup_key, cache_payload, NEWS_DEDUP_TTL_SECONDS)
             
         except Exception as e:
             logger.error(f"❌ LLM analysis failed for {symbol}: {e}")

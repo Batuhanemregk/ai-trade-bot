@@ -10,6 +10,8 @@ from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 from loguru import logger
 
+from application.jobs.base_job import BaseJob
+
 
 def round_to_bar(ts, bar_minutes=15):
     """Round timestamp to bar boundary (15-minute default)."""
@@ -82,13 +84,19 @@ class PersistenceProcessor(SignalProcessor):
         self.persistence_bars = policy['trading']['scoring']['signal']['persistence_bars']
         self.max_signal_age = policy['trading']['scoring']['signal']['max_signal_age_bars']
     
-    def process(self, signal: Dict, history: List[SignalHistory], regime: RegimeInfo) -> GatedSignal:
+    def process(
+        self,
+        signal: Dict,
+        history: List[SignalHistory],
+        regime: RegimeInfo,
+        current_bar_id: Optional[str] = None,
+    ) -> GatedSignal:
         """Check signal persistence requirements."""
         final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         direction = self._get_direction(final_score)
         
         # Check if signal has persisted for required bars
-        persistence_count = self._count_persistence(history, direction)
+        persistence_count = self._count_persistence(history, direction, current_bar_id)
         
         # Check signal age
         signal_age = len(history) if history else 0
@@ -121,7 +129,12 @@ class PersistenceProcessor(SignalProcessor):
         else:
             return 'flat'
     
-    def _count_persistence(self, history: List[SignalHistory], direction: str) -> int:
+    def _count_persistence(
+        self,
+        history: List[SignalHistory],
+        direction: str,
+        current_bar_id: Optional[str] = None,
+    ) -> int:
         """Count consecutive bars with same direction and threshold met."""
         if not history:
             return 0
@@ -132,6 +145,8 @@ class PersistenceProcessor(SignalProcessor):
         count = 0
         for signal in reversed(history):
             # Check if direction matches AND threshold met
+            if current_bar_id and getattr(signal, 'bar_id', None) == current_bar_id:
+                continue
             if signal.direction == direction:
                 # Verify score meets threshold
                 score_meets_threshold = (
@@ -169,13 +184,19 @@ class ConfirmationProcessor(SignalProcessor):
         self.policy = policy
         self.confirm_bars = policy['trading']['scoring']['signal']['rev_confirm_bars']
     
-    def process(self, signal: Dict, history: List[SignalHistory], regime: RegimeInfo) -> GatedSignal:
+    def process(
+        self,
+        signal: Dict,
+        history: List[SignalHistory],
+        regime: RegimeInfo,
+        current_bar_id: Optional[str] = None,
+    ) -> GatedSignal:
         """Check signal confirmation requirements."""
         final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         direction = self._get_direction(final_score)
         
         # Count confirmation bars
-        confirmation_count = self._count_confirmation(history, direction)
+        confirmation_count = self._count_confirmation(history, direction, current_bar_id)
         
         is_valid = confirmation_count >= self.confirm_bars
         
@@ -205,7 +226,12 @@ class ConfirmationProcessor(SignalProcessor):
         else:
             return 'flat'
     
-    def _count_confirmation(self, history: List[SignalHistory], direction: str) -> int:
+    def _count_confirmation(
+        self,
+        history: List[SignalHistory],
+        direction: str,
+        current_bar_id: Optional[str] = None,
+    ) -> int:
         """Count confirmation bars for direction with threshold + margin check."""
         if not history:
             return 0
@@ -217,6 +243,8 @@ class ConfirmationProcessor(SignalProcessor):
         count = 0
         for signal in reversed(history):
             # Check if direction matches AND score meets threshold + margin
+            if current_bar_id and getattr(signal, 'bar_id', None) == current_bar_id:
+                continue
             if signal.direction == direction:
                 # Verify score meets threshold + margin for confirmation
                 score_meets_threshold_margin = (
@@ -455,6 +483,8 @@ class SignalGate:
     def __init__(self, policy: Dict):
         self.policy = policy
         self.signal_history: Dict[str, List[SignalHistory]] = {}
+        self._last_bar_for_symbol: Dict[str, str] = {}
+        self._duplicate_counts: Dict[str, int] = {}
         
         # Initialize processors
         self.persistence_processor = PersistenceProcessor(policy)
@@ -466,6 +496,27 @@ class SignalGate:
     
     def process_signal(self, symbol: str, signal: Dict, ohlcv_1h: List[List]) -> GatedSignal:
         """Process signal with all gating logic."""
+        bar_timestamp = signal.get('bar_timestamp')
+        if isinstance(bar_timestamp, str):
+            try:
+                bar_timestamp = datetime.fromisoformat(bar_timestamp.replace('Z', '+00:00'))
+            except ValueError:
+                bar_timestamp = datetime.now(timezone.utc)
+        elif bar_timestamp is None:
+            bar_timestamp = datetime.now(timezone.utc)
+        elif hasattr(bar_timestamp, "to_pydatetime"):
+            bar_timestamp = bar_timestamp.to_pydatetime()
+        
+        if bar_timestamp.tzinfo is None:
+            bar_timestamp = bar_timestamp.replace(tzinfo=timezone.utc)
+        
+        timeframe = signal.get('timeframe', '15m')
+        bar_id = BaseJob.get_bar_id(bar_timestamp, timeframe)
+        signal['bar_timestamp'] = bar_timestamp
+        signal['bar_id'] = bar_id
+        
+        duplicate_bar = self._last_bar_for_symbol.get(symbol) == bar_id
+        
         # Detect market regime
         regime = self.regime_processor.detect_regime(ohlcv_1h)
         
@@ -473,19 +524,31 @@ class SignalGate:
         history = self.signal_history.get(symbol, [])
         
         # Apply persistence check
-        persistence_result = self.persistence_processor.process(signal, history, regime)
+        persistence_result = self.persistence_processor.process(signal, history, regime, current_bar_id=bar_id)
         
         # Apply confirmation check
-        confirmation_result = self.confirmation_processor.process(signal, history, regime)
+        confirmation_result = self.confirmation_processor.process(signal, history, regime, current_bar_id=bar_id)
         
         # Apply hysteresis check
         hysteresis_result = self.hysteresis_processor.process(signal, history, regime)
         
         # Combine results
         final_result = self._combine_results(persistence_result, confirmation_result, hysteresis_result, regime)
+        final_result.details.setdefault('bar_id', bar_id)
+        if signal.get('run_id'):
+            final_result.details.setdefault('run_id', signal['run_id'])
+        
+        if duplicate_bar:
+            final_result.details['duplicate_bar'] = True
+            final_result.details['duplicate_count'] = self._duplicate_counts.get(symbol, 0) + 1
+            logger.debug(f"[GATE] {symbol} duplicate bar detected id={bar_id} count={final_result.details['duplicate_count']}")
+            self._duplicate_counts[symbol] = final_result.details['duplicate_count']
+        else:
+            self._duplicate_counts[symbol] = 0
         
         # Update signal history
-        self._update_history(symbol, signal, final_result)
+        self._update_history(symbol, signal, final_result, bar_id)
+        self._last_bar_for_symbol[symbol] = bar_id
         
         # Log regime information
         if regime.trend_throttle:
@@ -531,18 +594,13 @@ class SignalGate:
             confirmation_bars=confirmation.confirmation_bars
         )
     
-    def _update_history(self, symbol: str, signal: Dict, gated_signal: GatedSignal):
+    def _update_history(self, symbol: str, signal: Dict, gated_signal: GatedSignal, bar_id: str):
         """Update signal history with bar-based deduplication."""
         if symbol not in self.signal_history:
             self.signal_history[symbol] = []
         
         # Extract bar_timestamp for deduplication
-        bar_timestamp = signal.get('bar_timestamp')
-        bar_id = round_to_bar(bar_timestamp) if bar_timestamp else None
-        
-        if bar_id is None:
-            logger.warning(f"[COUNTER] {symbol} bar_id is None, using current time")
-            bar_id = round_to_bar(datetime.now())
+        bar_timestamp = signal.get('bar_timestamp') or datetime.now(timezone.utc)
         
         # Check if this bar already processed (deduplication)
         history = self.signal_history[symbol]
@@ -575,8 +633,8 @@ class SignalGate:
             history.append(new_signal)
         
         # Calculate and log counters
-        persist_count = self.persistence_processor._count_persistence(history, gated_signal.direction)
-        conf_count = self.confirmation_processor._count_confirmation(history, gated_signal.direction)
+        persist_count = self.persistence_processor._count_persistence(history, gated_signal.direction, bar_id)
+        conf_count = self.confirmation_processor._count_confirmation(history, gated_signal.direction, bar_id)
         age_count = len(history)
         
         logger.debug(f"[COUNTER] {symbol} bar_id={bar_id} persist={persist_count} conf={conf_count} age={age_count}")

@@ -44,8 +44,12 @@ class Regime1hJob(BaseJob):
     
     async def execute(self):
         """Execute 1-hour regime update."""
+        if not self.start_run('1h'):
+            return
+        
+        bar_id = self.current_bar_id
         try:
-            logger.info("[JOB] regime_1h starting execution")
+            logger.info(f"[JOB] regime_1h run_id={self.run_id} bar={bar_id} starting execution")
             
             symbols = self.get_all_symbols()
             logger.info(f"[REGIME] Processing {len(symbols)} symbols for regime update")
@@ -69,10 +73,16 @@ class Regime1hJob(BaseJob):
                     logger.error(f"❌ Failed to process regime update for {symbol}: {e}")
                     continue
             
-            logger.info(f"[JOB] regime_1h completed {processed_count}/{len(symbols)} symbols")
+            logger.info(
+                f"[JOB] regime_1h run_id={self.run_id} bar={bar_id} "
+                f"completed {processed_count}/{len(symbols)} symbols"
+            )
+            self.mark_bar_processed(self.job_id, '1h')
+            self.finish_run("SUCCESS")
             
         except Exception as e:
             logger.error(f"❌ Regime1hJob execution failed: {e}")
+            self.finish_run("FAILED", str(e))
             raise
     
     async def _process_regime_update(self, symbol: str):

@@ -44,8 +44,12 @@ class MarketOverviewJob(BaseJob):
     
     async def execute(self):
         """Execute 15-minute market overview."""
+        if not self.start_run('15m'):
+            return
+        
+        bar_id = self.current_bar_id
         try:
-            logger.info("[JOB] market_overview starting execution")
+            logger.info(f"[JOB] market_overview run_id={self.run_id} bar={bar_id} starting execution")
             
             symbols = self.get_all_symbols()
             logger.info(f"[MARKET] Analyzing {len(symbols)} symbols for market overview")
@@ -66,10 +70,16 @@ class MarketOverviewJob(BaseJob):
             # Generate market summary
             await self._generate_market_summary()
             
-            logger.info(f"[JOB] market_overview completed {processed_count}/{len(symbols)} symbols")
+            logger.info(
+                f"[JOB] market_overview run_id={self.run_id} bar={bar_id} "
+                f"completed {processed_count}/{len(symbols)} symbols"
+            )
+            self.mark_bar_processed(self.job_id, '15m')
+            self.finish_run("SUCCESS")
             
         except Exception as e:
             logger.error(f"❌ MarketOverviewJob execution failed: {e}")
+            self.finish_run("FAILED", str(e))
             raise
     
     async def _process_symbol_batch(self, symbols: List[str]):

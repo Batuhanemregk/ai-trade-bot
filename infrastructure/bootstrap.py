@@ -55,6 +55,14 @@ def load_env(env_file: Optional[str] = None) -> None:
                 logger.info(f"Loaded environment from {env_path}")
             else:
                 logger.info("No .env file found, using system environment")
+
+        # Ensure default feature flag values exist without overriding explicit envs
+        os.environ.setdefault('DEDUP_ENABLED', 'true')
+        os.environ.setdefault('DEDUP_CACHE_SECONDS', '3600')
+        os.environ.setdefault('DEDUP_CACHE_MAX_ITEMS', '128')
+        os.environ.setdefault('NEWS_DEDUP', 'true')
+        os.environ.setdefault('RISK_CACHE_TTL_SECONDS', '75')
+        os.environ.setdefault('TELEGRAM_MOCK', 'false')
         # Load comprehensive configuration banner
         try:
             from infrastructure.config_manager import config_manager

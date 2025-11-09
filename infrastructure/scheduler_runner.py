@@ -172,6 +172,11 @@ class SchedulerRunner:
                 'telegram_summary_15m': TelegramSummary15mJob(self.policy, self.semaphore, self.runtime_state),
             }
             
+            # Assign canonical job identifiers for dedup instrumentation
+            for job_name, job_instance in self.jobs.items():
+                if hasattr(job_instance, "job_id"):
+                    job_instance.job_id = job_name
+            
             # Pass global adapters to jobs
             for job_name, job_instance in self.jobs.items():
                 if hasattr(job_instance, 'set_global_adapters'):

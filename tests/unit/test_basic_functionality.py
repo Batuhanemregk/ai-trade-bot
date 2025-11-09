@@ -30,14 +30,16 @@ class TestBasicFunctionality:
         dedup_service = LogDedupService(ttl_seconds=60)
         
         # Test first occurrence
-        should_log, is_first = dedup_service.should_log("test_key")
+        should_log, is_first, dedup_count = dedup_service.should_log("test_key")
         assert should_log is True
         assert is_first is True
+        assert dedup_count == 0
         
         # Test duplicate within TTL
-        should_log, is_first = dedup_service.should_log("test_key")
+        should_log, is_first, dedup_count = dedup_service.should_log("test_key")
         assert should_log is False
         assert is_first is False
+        assert dedup_count == 0
         
         print("Log deduplication service working correctly")
     

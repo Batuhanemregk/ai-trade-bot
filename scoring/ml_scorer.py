@@ -32,7 +32,7 @@ class MLScorer:
         self._load_all_models()
     
     def _load_all_models(self):
-        """Load all 9 LightGBM models (3 symbols × 3 TFs)."""
+        """Load all 9 LightGBM models (prioritize symmetric_v2)."""
         symbols = ['BTC', 'ETH', 'SOL']
         timeframes = ['15m', '1h', '4h']
         
@@ -41,17 +41,34 @@ class MLScorer:
         for symbol in symbols:
             for tf in timeframes:
                 key = f"{symbol}_{tf}"
-                # Try 18-month model first (new), fallback to 6-month
-                model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m.pkl")
-                metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m_metadata.json")
                 
-                if not model_path.exists():
-                    model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m.pkl")
-                    metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m_metadata.json")
+                # Priority order: symmetric_v2 > 18m > 6m
+                model_paths = [
+                    Path(f"models/lgbm/{symbol}USDT_{tf}_multiclass_v3.pkl"),
+                    Path(f"models/lgbm/{symbol}USDT_{tf}_symmetric_v2.pkl"),
+                    Path(f"models/lgbm/{symbol}USDT_{tf}_last18m.pkl"),
+                    Path(f"models/lgbm/{symbol}USDT_{tf}_last6m.pkl")
+                ]
+                
+                metadata_paths = [
+                    Path(f"models/lgbm/{symbol}USDT_{tf}_multiclass_v3_metadata.json"),
+                    Path(f"models/lgbm/{symbol}USDT_{tf}_symmetric_v2_metadata.json"),
+                    Path(f"models/lgbm/{symbol}USDT_{tf}_last18m_metadata.json"),
+                    Path(f"models/lgbm/{symbol}USDT_{tf}_last6m_metadata.json")
+                ]
+                
+                model_path = None
+                metadata_path = None
+                
+                for mp, mdp in zip(model_paths, metadata_paths):
+                    if mp.exists():
+                        model_path = mp
+                        metadata_path = mdp if mdp.exists() else None
+                        break
                 
                 try:
-                    if not model_path.exists():
-                        logger.debug(f"Model not found: {model_path}, will use fallback")
+                    if not model_path:
+                        logger.debug(f"No model found for {key}, will use fallback")
                         continue
                     
                     # Load model
@@ -59,19 +76,19 @@ class MLScorer:
                         self.models[key] = pickle.load(f)
                     
                     # Load metadata
-                    if metadata_path.exists():
+                    if metadata_path and metadata_path.exists():
                         with open(metadata_path, 'r') as f:
                             self.metadata[key] = json.load(f)
                     else:
                         self.metadata[key] = {}
                     
-                    # Try to get AUC from metrics
+                    model_version = self.metadata[key].get('model_version', 'unknown')
                     auc = self.metadata[key].get('metrics', {}).get('auc', 'unknown')
                     if auc == 'unknown':
                         auc = self.metadata[key].get('metrics', {}).get('auc_mean', 'unknown')
                     n_features = self.metadata[key].get('n_features', 'unknown')
                     
-                    logger.info(f"✅ Loaded LGBM model: {key} (AUC={auc}, Features={n_features})")
+                    logger.info(f"✅ Loaded {key} [{model_version}] (AUC={auc}, Features={n_features})")
                     
                 except Exception as e:
                     logger.warning(f"⚠️ Failed to load {key}: {e}")

@@ -453,6 +453,26 @@ class PrometheusExporter:
             'Total Telegram rate limit hits',
             registry=self.registry
         )
+
+        # Cache metrics
+        self.cache_hits_total = Counter(
+            'aibot_cache_hits_total',
+            'Total cache hits',
+            ['cache'],
+            registry=self.registry
+        )
+        self.cache_misses_total = Counter(
+            'aibot_cache_misses_total',
+            'Total cache misses',
+            ['cache'],
+            registry=self.registry
+        )
+        self.cache_items = Gauge(
+            'aibot_cache_items',
+            'Current cache item count',
+            ['cache'],
+            registry=self.registry
+        )
         
         # Telegram latency histogram
         self.tg_latency_ms = Histogram(
@@ -827,6 +847,18 @@ class PrometheusExporter:
         """Record Telegram rate limit hit."""
         self.tg_rate_limited_total.inc()
         logger.debug("Recorded TG rate limit")
+
+    def record_cache_hit(self, cache_name: str):
+        """Record cache hit."""
+        self.cache_hits_total.labels(cache=cache_name).inc()
+
+    def record_cache_miss(self, cache_name: str):
+        """Record cache miss."""
+        self.cache_misses_total.labels(cache=cache_name).inc()
+
+    def set_cache_items(self, cache_name: str, count: int):
+        """Update cache item count."""
+        self.cache_items.labels(cache=cache_name).set(count)
 
 
 # Global registry instance

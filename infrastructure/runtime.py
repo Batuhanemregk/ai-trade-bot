@@ -20,6 +20,7 @@ from infrastructure.logger import get_logger, set_all_log_levels
 from scoring.composite_signal import CompositeSignal
 from application.position_state_manager import PositionStateManager
 from application.signal_gate import SignalGate
+from application.jobs.base_job import BaseJob
 from application.reversal_manager import ReversalManager
 
 
@@ -169,8 +170,14 @@ async def trading_main(
                 bar_timestamp = None
                 if 'main' in ohlcv_data and ohlcv_data['main'] is not None and not ohlcv_data['main'].empty:
                     bar_timestamp = ohlcv_data['main'].index[-1]  # Latest bar timestamp
+                    if hasattr(bar_timestamp, "to_pydatetime"):
+                        bar_timestamp = bar_timestamp.to_pydatetime()
                 else:
                     logger.warning(f"[COUNTER] {symbol} No bar_timestamp in signal, using current time (may cause same-bar duplicates)")
+                    bar_timestamp = datetime.now(timezone.utc)
+                if bar_timestamp.tzinfo is None:
+                    bar_timestamp = bar_timestamp.replace(tzinfo=timezone.utc)
+                bar_id = BaseJob.get_bar_id(bar_timestamp, '15m')
                 
                 gated_signal = signal_gate.process_signal(symbol, {
                     'final_score': composite_signal.final_score,
@@ -178,7 +185,10 @@ async def trading_main(
                     'ml_score': ml_score,
                     'news_score': news_score,
                     'risk_score': risk_score,
-                    'bar_timestamp': bar_timestamp
+                    'bar_timestamp': bar_timestamp,
+                    'timeframe': '15m',
+                    'run_id': 'runtime',
+                    'bar_id': bar_id
                 }, ohlcv_data.get('1h', []))
                 
                 # Step 8: State Management & Decision
@@ -206,6 +216,7 @@ async def trading_main(
                     'symbol': symbol,
                     'timeframe': '15m',
                     'timestamp': datetime.now(timezone.utc),
+                    'bar_id': bar_id,
                     'ta_score': ta_score,
                     'ml_score': ml_score,
                     'news_score': news_score,
@@ -459,14 +470,20 @@ async def _compute_news_analysis(news_scorer, symbol: str) -> tuple[float, list,
         return 50.0, ["general"], f"News analysis error: {e}", 0.5
 
 
-async def _compute_risk_analysis(risk_service, symbol: str, ohlcv_data: dict) -> tuple[float, dict]:
+async def _compute_risk_analysis(
+    risk_service,
+    symbol: str,
+    ohlcv_data: dict,
+    context: Optional[dict] = None,
+) -> tuple[float, dict]:
     """Compute risk analysis using real RiskService."""
     try:
         # Prepare market data for risk assessment
         market_data = {
-            'trend': ohlcv_data.get('1h', None),  # Use 1h data for trend analysis
-            'main': ohlcv_data.get('15m', None),  # Use 15m data for main analysis
-            'entry': ohlcv_data.get('5m', None)   # Use 5m data for entry analysis
+            'trend': ohlcv_data.get('trend'),   # 1h data fetched in _fetch_multi_timeframe_data
+            'main': ohlcv_data.get('main'),     # 15m primary analysis frame
+            'entry': ohlcv_data.get('entry'),   # 5m entry confirmation frame
+            'fourh': ohlcv_data.get('4h')       # 4h context when available
         }
         
         # Get composite signal score for risk assessment
@@ -480,7 +497,8 @@ async def _compute_risk_analysis(risk_service, symbol: str, ohlcv_data: dict) ->
             symbol=symbol,
             score=default_score,
             signal_type=signal_type,
-            market_data=market_data
+            market_data=market_data,
+            risk_context=context,
         )
         
         # Extract risk score and details from real assessment
@@ -602,6 +620,12 @@ async def _compute_composite_signal(
             decision=decision,
             confidence_pct=final_score,
             meta={'rationale': [ta_rationale, ml_rationale, news_rationale]}
+        )
+
+        news_log = "skip" if news_block.score is None else f"{news_block.score:.1f}"
+        risk_log = "skip" if risk_block.score is None else f"{risk_block.score:.1f}"
+        logger.info(
+            f"[COMPOSITE] sym={symbol} tf=15m news={news_log} risk={risk_log} final={final_score:.1f} reason={decision}"
         )
         
         return composite_signal

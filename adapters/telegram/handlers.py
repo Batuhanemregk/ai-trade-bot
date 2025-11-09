@@ -21,6 +21,8 @@ from adapters.telegram.views import (
     build_pnl_view,
     build_settings_view,
     build_positions_view,
+    build_analysis_summary_view,
+    build_analysis_detail_view,
 )
 from adapters.telegram.keyboards import build_keyboard
 from adapters.telegram.callback_registry import get_callback_registry
@@ -369,6 +371,15 @@ Use /start to view dashboard."""
         Returns:
             Tuple of (text, buttons)
         """
+        if view_id == 'an':
+            if params.get('s'):
+                context = await self.context_resolver.resolve_analysis_detail_context(params.get('s'))
+                text, buttons = build_analysis_detail_view(context, self.formatter)
+            else:
+                context = await self.context_resolver.resolve_analysis_summary_context()
+                text, buttons = build_analysis_summary_view(context, self.formatter)
+            return text, buttons
+
         view_id_map = {
             'main': ('main', self.context_resolver.resolve_main_context, build_main_view),
             'sig': ('signals', lambda: self.context_resolver.resolve_signals_context(limit=6, symbol_filter=params.get('sym')), build_signals_view),

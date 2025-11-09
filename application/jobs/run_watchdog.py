@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from loguru import logger
 
+from application.jobs.base_job import BaseJob
+
 
 class RunWatchdog:
     """Monitors job execution and triggers catch-up for missed runs."""
@@ -34,7 +36,9 @@ class RunWatchdog:
             'trading_analysis',
             'telegram_summary_15m',
             'trailing_5m',
-            'news_incremental_5m'
+            'news_incremental_5m',
+            'market_overview',
+            'risk_monitor',
         ]
         
         # Expected intervals (seconds)
@@ -43,8 +47,18 @@ class RunWatchdog:
             'telegram_summary_15m': 900,  # 15 minutes
             'trailing_5m': 300,           # 5 minutes
             'news_incremental_5m': 300,   # 5 minutes
+            'market_overview': 900,       # 15 minutes
             'regime_1h': 3600,            # 1 hour
             'risk_monitor': 60            # 1 minute
+        }
+        self.timeframe_map = {
+            'trading_analysis': '15m',
+            'telegram_summary_15m': '15m',
+            'trailing_5m': '5m',
+            'news_incremental_5m': '5m',
+            'market_overview': '15m',
+            'regime_1h': '1h',
+            'risk_monitor': '1m',
         }
     
     async def check_missed_runs(self):
@@ -63,6 +77,16 @@ class RunWatchdog:
                     continue
                     
                 expected_interval = self.expected_intervals.get(job_name, 300)
+                
+                # Skip if dedup recorded run for current bar
+                timeframe = self.timeframe_map.get(job_name)
+                if timeframe:
+                    bar_id = BaseJob.get_bar_id(current_time, timeframe)
+                    job_run_state = self.policy_runtime_state().get('job_runs', {}).get(job_name, {})
+                    if job_run_state.get('bar_id') == bar_id:
+                        logger.debug(f"[WATCHDOG] {job_name} already recorded for bar {bar_id}, skipping miss check")
+                        continue
+                
                 last_run = await self._get_last_run_time(job_name)
                 
                 if last_run:
@@ -83,6 +107,14 @@ class RunWatchdog:
                         
         except Exception as e:
             logger.error(f"[WATCHDOG] error checking missed runs: {e}")
+    
+    def policy_runtime_state(self) -> Dict[str, Any]:
+        """Access scheduler runtime state if exposed via jobs."""
+        if not self.jobs:
+            return {}
+        # Jobs share the same runtime_state reference; use first job
+        any_job = next(iter(self.jobs.values()))
+        return getattr(any_job, "runtime_state", {})
     
     async def _get_last_run_time(self, job_name: str) -> Optional[datetime]:
         """Get the last run time for a job from history."""

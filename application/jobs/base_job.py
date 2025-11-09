@@ -4,24 +4,43 @@ Provides common functionality for all jobs including bar idempotency
 """
 
 import asyncio
+import time
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List
+from uuid import uuid4
 
 from loguru import logger
+
+from infrastructure.feature_flags import (
+    DEDUP_CACHE_MAX_ITEMS,
+    DEDUP_CACHE_SECONDS,
+    DEDUP_ENABLED,
+)
 
 
 class BaseJob(ABC):
     """Base class for all scheduler jobs with common functionality."""
+    
+    _SUPPORTED_TIMEFRAMES = {'1m', '5m', '15m', '1h', '4h', '1d'}
+    _job_dedup_cache: "OrderedDict[str, float]" = OrderedDict()
     
     def __init__(self, policy: Dict[str, Any], semaphore: asyncio.Semaphore, runtime_state: Dict[str, Any]):
         self.policy = policy
         self.semaphore = semaphore
         self.runtime_state = runtime_state
         self.job_name = self.__class__.__name__.replace('Job', '').lower()
+        # Scheduler assigns canonical ID after instantiation
+        self.job_id: str = self.job_name
+        self.run_id: Optional[str] = None
+        self.current_bar_id: Optional[str] = None
         
         # Bar idempotency tracking
         self.last_processed_bars = self.runtime_state.setdefault('last_processed_bars', {})
+        self.runtime_state.setdefault('job_runs', {})
+        self.runtime_state.setdefault('job_dedup_history', {})
+        self._invalid_timeframes_logged: set[str] = set()
         
     @abstractmethod
     async def initialize(self):
@@ -37,18 +56,193 @@ class BaseJob(ABC):
         """Cleanup job resources (optional override)."""
         pass
     
+    def _normalize_timeframe(self, timeframe: Any) -> str:
+        """Ensure timeframe is a known cadence string."""
+        if isinstance(timeframe, datetime):
+            logger.warning(f"⚠️ get_current_bar_id received datetime instead of timeframe string: {timeframe}")
+            return '15m'
+        
+        timeframe_str = str(timeframe).lower().strip()
+        if timeframe_str in self._SUPPORTED_TIMEFRAMES:
+            return timeframe_str
+        
+        # Detect ISO bar identifiers mistakenly passed in as timeframe
+        looks_like_bar_id = 't' in timeframe_str and ':' in timeframe_str
+        if looks_like_bar_id:
+            if timeframe_str not in self._invalid_timeframes_logged:
+                self._invalid_timeframes_logged.add(timeframe_str)
+                logger.opt(stack=True).warning(
+                    f"[BAR] Detected bar id '{timeframe}' passed as timeframe in {self.job_name}. "
+                    "Defaulting to 15m and recording stack for diagnostics."
+                )
+            return '15m'
+        
+        # Unknown timeframe — allow downstream handler to log once
+        return timeframe_str
+    
     def get_current_bar_id(self, timeframe: str) -> str:
         """Get current closed bar ID for given timeframe."""
         now = datetime.now(timezone.utc)
+        timeframe_str = self._normalize_timeframe(timeframe)
+        bar_start = self.get_bar_id(now, timeframe_str)
+        return bar_start
+    
+    @staticmethod
+    def get_bar_id(moment: datetime, timeframe: str) -> str:
+        """Return ISO timestamp (UTC) representing bar start."""
+        dt = moment.astimezone(timezone.utc)
         
-        # Handle different input types
-        if isinstance(timeframe, datetime):
-            # If timeframe is actually a datetime, use it as bar_time
-            logger.warning(f"⚠️ get_current_bar_id received datetime instead of timeframe string: {timeframe}")
-            return timeframe.isoformat()
+        def _round_minutes(minutes: int) -> datetime:
+            minute = (dt.minute // minutes) * minutes
+            return dt.replace(minute=minute, second=0, microsecond=0)
         
-        # Ensure timeframe is a string
-        timeframe_str = str(timeframe).lower()
+        def _round_hours(hours: int) -> datetime:
+            hour = dt.hour - (dt.hour % hours)
+            return dt.replace(hour=hour, minute=0, second=0, microsecond=0)
+        
+        if timeframe == '1m':
+            bar_time = dt.replace(second=0, microsecond=0)
+        elif timeframe == '5m':
+            bar_time = _round_minutes(5)
+        elif timeframe == '15m':
+            bar_time = _round_minutes(15)
+        elif timeframe == '1h':
+            bar_time = dt.replace(minute=0, second=0, microsecond=0)
+        elif timeframe == '4h':
+            bar_time = _round_hours(4)
+        elif timeframe == '1d':
+            bar_time = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            # Generic parsing: support Xm / Xh if possible
+            try:
+                if timeframe.endswith('m'):
+                    minutes = int(timeframe[:-1])
+                    minutes = max(minutes, 1)
+                    bar_time = _round_minutes(minutes)
+                elif timeframe.endswith('h'):
+                    hours = int(timeframe[:-1])
+                    hours = max(hours, 1)
+                    bar_time = _round_hours(hours)
+                else:
+                    logger.warning(f"⚠️ Unhandled timeframe '{timeframe}', defaulting to 15m rounding")
+                    bar_time = _round_minutes(15)
+            except ValueError:
+                logger.warning(f"⚠️ Invalid timeframe '{timeframe}', defaulting to 15m rounding")
+                bar_time = _round_minutes(15)
+        
+        return bar_time.isoformat().replace('+00:00', 'Z')
+    
+    def get_effective_bar_id(self, timeframe: str) -> str:
+        """Compute current bar id for given timeframe."""
+        return self.get_current_bar_id(timeframe)
+    
+    @staticmethod
+    def build_job_key(job_name: str, bar_id: str) -> str:
+        return f"{job_name}:{bar_id}"
+    
+    @classmethod
+    def _prune_dedup_cache(cls) -> None:
+        if not cls._job_dedup_cache:
+            return
+        
+        now = time.time()
+        # Remove expired entries
+        while cls._job_dedup_cache:
+            oldest_key, timestamp = next(iter(cls._job_dedup_cache.items()))
+            if (now - timestamp) > DEDUP_CACHE_SECONDS or len(cls._job_dedup_cache) > DEDUP_CACHE_MAX_ITEMS:
+                cls._job_dedup_cache.popitem(last=False)
+            else:
+                break
+    
+    @classmethod
+    def should_skip_job(cls, job_key: str) -> bool:
+        """Return True if job already executed for the bar and dedup active."""
+        if not DEDUP_ENABLED:
+            return False
+        
+        cls._prune_dedup_cache()
+        return job_key in cls._job_dedup_cache
+    
+    @classmethod
+    def record_job_run(cls, job_key: str, dedup_hit: bool) -> None:
+        """Record job execution in dedup cache."""
+        if not DEDUP_ENABLED:
+            return
+        
+        cls._job_dedup_cache[job_key] = time.time()
+        cls._prune_dedup_cache()
+    
+    def start_run(self, timeframe: str) -> bool:
+        """
+        Initialise run context with run_id/bar_id and apply dedup guard.
+        
+        Returns:
+            bool: True if execution should continue, False if dedup skip.
+        """
+        self.run_id = uuid4().hex
+        self.current_bar_id = self.get_effective_bar_id(timeframe)
+        job_key = self.build_job_key(self.job_id, self.current_bar_id)
+        
+        if self.should_skip_job(job_key):
+            self.record_job_run(job_key, dedup_hit=True)
+            logger.info(
+                f"[RUN] job={self.job_id} run_id={self.run_id} bar_id={self.current_bar_id} "
+                "status=skipped reason=dedup"
+            )
+            self.runtime_state['job_runs'][self.job_id] = {
+                "run_id": self.run_id,
+                "bar_id": self.current_bar_id,
+                "started_at": datetime.now(timezone.utc).isoformat(),
+                "status": "dedup_hit",
+            }
+            self.runtime_state['job_dedup_history'][job_key] = {
+                "run_id": self.run_id,
+                "bar_id": self.current_bar_id,
+                "status": "dedup_hit",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+            return False
+        
+        self.record_job_run(job_key, dedup_hit=False)
+        self.runtime_state['job_runs'][self.job_id] = {
+            "run_id": self.run_id,
+            "bar_id": self.current_bar_id,
+            "started_at": datetime.now(timezone.utc).isoformat(),
+        }
+        logger.info(
+            f"[RUN] job={self.job_id} run_id={self.run_id} bar_id={self.current_bar_id} status=starting"
+        )
+        return True
+    
+    def finish_run(self, status: str = "SUCCESS", error: Optional[str] = None) -> None:
+        """Update runtime metadata after job execution."""
+        if not self.current_bar_id or not self.run_id:
+            return
+        
+        self.runtime_state['job_runs'][self.job_id] = {
+            "run_id": self.run_id,
+            "bar_id": self.current_bar_id,
+            "finished_at": datetime.now(timezone.utc).isoformat(),
+            "status": status,
+            "error": error,
+        }
+        job_key = self.build_job_key(self.job_id, self.current_bar_id)
+        self.runtime_state['job_dedup_history'][job_key] = {
+            "run_id": self.run_id,
+            "bar_id": self.current_bar_id,
+            "status": status,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "error": error,
+        }
+        log_line = (
+            f"[RUN] job={self.job_id} run_id={self.run_id} bar_id={self.current_bar_id} status={status}"
+        )
+        if error:
+            log_line += f" error={error}"
+        logger.info(log_line)
+        # Reset context
+        self.run_id = None
+        self.current_bar_id = None
         
         if timeframe_str == '1m':
             # Round down to minute boundary
@@ -71,7 +265,9 @@ class BaseJob(ABC):
             bar_time = now.replace(minute=minute, second=0, microsecond=0)
         else:
             # Default to 15m for unknown timeframes
-            logger.warning(f"⚠️ Unknown timeframe '{timeframe}', defaulting to 15m")
+            if timeframe_str not in self._invalid_timeframes_logged:
+                self._invalid_timeframes_logged.add(timeframe_str)
+                logger.warning(f"⚠️ Unknown timeframe '{timeframe}', defaulting to 15m")
             minute = (now.minute // 15) * 15
             bar_time = now.replace(minute=minute, second=0, microsecond=0)
         
@@ -79,23 +275,25 @@ class BaseJob(ABC):
     
     def is_bar_already_processed(self, symbol: str, timeframe: str) -> bool:
         """Check if current bar has already been processed for this symbol/timeframe."""
-        bar_id = self.get_current_bar_id(timeframe)
-        key = f"{symbol}_{timeframe}"
+        normalized_timeframe = self._normalize_timeframe(timeframe)
+        bar_id = self.get_current_bar_id(normalized_timeframe)
+        key = f"{symbol}_{normalized_timeframe}"
         
         last_processed = self.last_processed_bars.get(key)
         if last_processed and last_processed >= bar_id:
-            logger.debug(f"[BAR] tf={timeframe} symbol={symbol} bar={bar_id} already processed")
+            logger.debug(f"[BAR] tf={normalized_timeframe} symbol={symbol} bar={bar_id} already processed")
             return True
         
         return False
     
     def mark_bar_processed(self, symbol: str, timeframe: str):
         """Mark current bar as processed for this symbol/timeframe."""
-        bar_id = self.get_current_bar_id(timeframe)
-        key = f"{symbol}_{timeframe}"
+        normalized_timeframe = self._normalize_timeframe(timeframe)
+        bar_id = self.get_current_bar_id(normalized_timeframe)
+        key = f"{symbol}_{normalized_timeframe}"
         
         self.last_processed_bars[key] = bar_id
-        logger.debug(f"[BAR] tf={timeframe} symbol={symbol} bar={bar_id} processed")
+        logger.debug(f"[BAR] tf={normalized_timeframe} symbol={symbol} bar={bar_id} processed")
     
     def get_symbols_batch(self, all_symbols: List[str], batch_index: int = 0) -> List[str]:
         """Get a batch of symbols for processing."""

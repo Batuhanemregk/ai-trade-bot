@@ -69,6 +69,12 @@ class LogFormatter:
         ts = data.get('timestamp', datetime.now()).strftime('%H:%M:%S')
         symbol = data.get('symbol', 'UNKNOWN')
         tf = data.get('timeframe', '?')
+        bar_id = data.get('bar_id', '-')
+        run_id = data.get('run_id')
+        if isinstance(run_id, str):
+            run_display = run_id[:8]
+        else:
+            run_display = run_id if run_id is not None else '-'
         
         ta = data.get('ta_score', 0.0)
         ml = data.get('ml_score', 0.0)
@@ -129,7 +135,7 @@ class LogFormatter:
         
         # Build enhanced line
         base_line = (
-            f"ℹ️ {ts} | {symbol} | tf={tf} | "
+            f"ℹ️ {ts} | {symbol} | tf={tf} bar={bar_id} run={run_display} | "
             f"TA={ta:.1f} ML={ml:.1f} News={news:.1f} Risk={risk:.1f} | "
             f"Final={final:.1f} ({grade}) | Dir={direction}{age_str} | "
             f"Gate={gate_status} (persist {persist}, conf {conf})"
@@ -211,10 +217,18 @@ class LogFormatter:
         # Build basic block
         width = 62
         title = f"{symbol} Analysis ({tf}) @ {ts}"
+        bar_id = data.get('bar_id', '-')
+        run_id = data.get('run_id')
+        if isinstance(run_id, str):
+            run_display = run_id[:8]
+        else:
+            run_display = run_id if run_id is not None else '-'
+        subtitle = f"bar={bar_id} run={run_display}"
         title_padding = max(0, width - len(title) - 4)
         
         lines = [
             f"╭─ {title} {'─' * title_padding}╮",
+            f"│ {subtitle:<58} │",
             f"│ TA Score:    {ta:5.1f} {ta_bar}                            │",
             f"│ ML Score:    {ml:5.1f} {ml_bar}                            │",
             f"│ News Score:  {news:5.1f} {news_bar}                            │",
@@ -359,6 +373,12 @@ class LogFormatter:
         total = data.get('total', 0)
         success = data.get('success', 0)
         fail = data.get('fail', 0)
+        bar_id = data.get('bar_id', '-')
+        run_id = data.get('run_id')
+        if isinstance(run_id, str):
+            run_display = run_id[:8]
+        else:
+            run_display = run_id if run_id is not None else '-'
         
         signals = data.get('signals', {})
         long_count = signals.get('LONG', 0)
@@ -394,7 +414,7 @@ class LogFormatter:
         
         # Build base summary
         base_summary = (
-            f"✅ SUM | {tf} analysis | "
+            f"✅ SUM | {tf} analysis | bar={bar_id} run={run_display} | "
             f"total={total} success={success} fail={fail} | "
             f"signals: LONG={long_count} SHORT={short_count} HOLD={hold_count} | "
             f"avg_score={avg_score:.1f} | duration={duration:.1f}s"

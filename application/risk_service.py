@@ -3,11 +3,15 @@ Risk Service - Real risk management with market analysis
 Enhanced with log deduplication to reduce spam.
 """
 
+import hashlib
+import json
 from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 from loguru import logger
 
 from application.log_dedup_service import get_log_dedup_service
+from application.ttl_cache import TTLCache
+from infrastructure.feature_flags import RISK_CACHE_ENABLED, RISK_CACHE_TTL_SECONDS
 
 
 class RiskService:
@@ -18,10 +22,197 @@ class RiskService:
         self._volatility_cache = {}
         self._correlation_cache = {}
         self._log_dedup = get_log_dedup_service()
+        self._result_cache = TTLCache("risk")
+        self._last_cache_fingerprint: Dict[str, Dict[str, str]] = {}
     
-    async def assess_risk(self, symbol: str, score: float, signal_type: str, market_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _hash_structure(self, payload: Any) -> str:
+        """Create stable hash for arbitrary payload."""
+        try:
+            serialised = json.dumps(payload, sort_keys=True, default=str)
+        except TypeError:
+            serialised = str(payload)
+        return hashlib.sha1(serialised.encode('utf-8')).hexdigest()[:12]
+    
+    def _summarise_frame(self, frame: Any) -> Dict[str, Any]:
+        """Summarise market dataframe-like structures for hashing."""
+        if frame is None:
+            return {"rows": 0}
+        
+        if hasattr(frame, "empty"):
+            if frame.empty:
+                return {"rows": 0}
+            try:
+                rows = len(frame)
+                last_row = frame.iloc[-1]
+                last_close = float(last_row.get('close')) if 'close' in frame.columns else None
+                last_volume = float(last_row.get('volume')) if 'volume' in frame.columns else None
+                last_ts = frame.index[-1]
+                if hasattr(last_ts, "isoformat"):
+                    last_ts = last_ts.isoformat()
+                return {
+                    "rows": rows,
+                    "last_close": last_close,
+                    "last_volume": last_volume,
+                    "last_ts": str(last_ts),
+                }
+            except Exception:
+                return {"rows": len(frame)}
+        
+        return {"type": str(type(frame))}
+    
+    def _compute_position_snapshot_hash(
+        self,
+        symbol: str,
+        score: float,
+        signal_type: str,
+        market_data: Dict[str, Any],
+        risk_context: Optional[Dict[str, Any]],
+    ) -> str:
+        """Compute position snapshot hash from provided context or market data."""
+        if risk_context and risk_context.get('position_snapshot_hash'):
+            return str(risk_context['position_snapshot_hash'])
+        
+        snapshot = {
+            "symbol": symbol,
+            "score": round(score, 4),
+            "signal_type": signal_type,
+            "market": {
+                frame_name: self._summarise_frame(frame)
+                for frame_name, frame in market_data.items()
+            },
+        }
+        
+        if risk_context and risk_context.get('position_snapshot'):
+            snapshot["position_snapshot"] = risk_context['position_snapshot']
+        
+        return self._hash_structure(snapshot)
+    
+    def _extract_risk_config_versions(self, risk_context: Optional[Dict[str, Any]]) -> Dict[str, str]:
+        """Extract or derive config version strings for cache key."""
+        risk_ctx = risk_context or {}
+        risk_root = self.policy.get('trading', {}).get('risk', {}).get('risk_assessment', {})
+        volatility_cfg = risk_root.get('volatility_risk', {})
+        correlation_cfg = risk_root.get('correlation_risk', {})
+        
+        vola_window = str(risk_ctx.get('vola_window') or volatility_cfg.get('window', 'default'))
+        corr_window = str(risk_ctx.get('corr_window') or correlation_cfg.get('window', 'default'))
+        
+        tier_version = risk_ctx.get('tier_config_version')
+        if not tier_version:
+            tier_version = self._hash_structure(correlation_cfg.get('market_cap_tiers', {}))
+        else:
+            tier_version = str(tier_version)
+        
+        return {
+            "vola_window": vola_window,
+            "corr_window": corr_window,
+            "tier_config_version": tier_version,
+        }
+    
+    def _build_cache_fingerprint(
+        self,
+        symbol: str,
+        score: float,
+        signal_type: str,
+        market_data: Dict[str, Any],
+        risk_context: Optional[Dict[str, Any]],
+    ) -> Tuple[Optional[str], Optional[Dict[str, str]]]:
+        """Construct cache key and fingerprint for current assessment."""
+        if not RISK_CACHE_ENABLED:
+            return None, None
+        
+        risk_ctx = risk_context or {}
+        timeframe = risk_ctx.get('timeframe')
+        bar_id = risk_ctx.get('bar_id')
+        
+        if not timeframe or not bar_id:
+            return None, None
+        
+        position_hash = self._compute_position_snapshot_hash(
+            symbol,
+            score,
+            signal_type,
+            market_data,
+            risk_ctx,
+        )
+        if not position_hash:
+            return None, None
+        
+        config_versions = self._extract_risk_config_versions(risk_ctx)
+        fingerprint = {
+            "symbol": symbol,
+            "timeframe": str(timeframe),
+            "bar_id": str(bar_id),
+            "position_hash": position_hash,
+            "vola_window": config_versions["vola_window"],
+            "corr_window": config_versions["corr_window"],
+            "tier_config_version": config_versions["tier_config_version"],
+        }
+        cache_key = "|".join([
+            fingerprint["symbol"],
+            fingerprint["timeframe"],
+            fingerprint["bar_id"],
+            fingerprint["position_hash"],
+            fingerprint["vola_window"],
+            fingerprint["corr_window"],
+            fingerprint["tier_config_version"],
+        ])
+        fingerprint["key"] = cache_key
+        return cache_key, fingerprint
+    
+    def _determine_risk_miss_reason(self, symbol: str, fingerprint: Dict[str, str]) -> str:
+        """Determine miss reason compared to last fingerprint."""
+        previous = self._last_cache_fingerprint.get(symbol)
+        if previous is None:
+            reason = "cold_start"
+        elif previous.get('key') == fingerprint.get('key'):
+            reason = "ttl"
+        elif previous.get('position_hash') != fingerprint.get('position_hash'):
+            reason = "state_change"
+        elif previous.get('bar_id') != fingerprint.get('bar_id'):
+            reason = "state_change"
+        elif (
+            previous.get('vola_window') != fingerprint.get('vola_window')
+            or previous.get('corr_window') != fingerprint.get('corr_window')
+            or previous.get('tier_config_version') != fingerprint.get('tier_config_version')
+        ):
+            reason = "config_change"
+        else:
+            reason = "state_change"
+        
+        self._last_cache_fingerprint[symbol] = fingerprint
+        return reason
+    
+    async def assess_risk(
+        self,
+        symbol: str,
+        score: float,
+        signal_type: str,
+        market_data: Dict[str, Any],
+        risk_context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Assess comprehensive risk for a trading decision."""
         try:
+            cache_key = None
+            key_short = None
+            fingerprint = None
+            if RISK_CACHE_ENABLED:
+                cache_key, fingerprint = self._build_cache_fingerprint(
+                    symbol,
+                    score,
+                    signal_type,
+                    market_data,
+                    risk_context,
+                )
+                if cache_key:
+                    key_short = hashlib.sha1(cache_key.encode('utf-8')).hexdigest()[:12]
+                    cached_result = self._result_cache.get(cache_key)
+                    if cached_result is not None:
+                        logger.info(f"[RISK_CACHE] key={key_short} hit reason=ttl")
+                        return cached_result
+                    miss_reason = self._determine_risk_miss_reason(symbol, fingerprint)
+                    logger.info(f"[RISK_CACHE] key={key_short} miss reason={miss_reason}")
+            
             # Calculate various risk metrics
             volatility_risk = await self._calculate_volatility_risk(symbol, market_data)
             liquidity_risk = await self._calculate_liquidity_risk(symbol, market_data)
@@ -63,6 +254,12 @@ class RiskService:
             }
             
             logger.debug(f"Risk assessment for {symbol}: {risk_level} ({total_risk:.1f}) - {recommendation}")
+
+            if RISK_CACHE_ENABLED and cache_key:
+                self._result_cache.set(cache_key, result, RISK_CACHE_TTL_SECONDS)
+                # fingerprint already stored during miss evaluation; ensure map updated if not
+                self._last_cache_fingerprint[symbol] = fingerprint or {}
+
             return result
             
         except Exception as e:
@@ -87,9 +284,13 @@ class RiskService:
             
             if not risk_config:
                 key = "risk:no_volatility_config"
-                should_log, is_first = self._log_dedup.should_log(key)
+                should_log, is_first, dedup_count = self._log_dedup.should_log(key)
                 if should_log:
-                    suffix = " (first occurrence)" if is_first else ""
+                    suffix = ""
+                    if is_first:
+                        suffix += " (first occurrence)"
+                    if dedup_count:
+                        suffix += f" (dedup x{dedup_count})"
                     logger.info(f"No volatility risk config in policy, using defaults{suffix}")
                 return 50.0
             
@@ -99,10 +300,14 @@ class RiskService:
             
             if not volatility_thresholds:
                 key = "risk:no_volatility_thresholds"
-                should_log, is_first = self._log_dedup.should_log(key)
-                if should_log:
-                    suffix = " (first occurrence)" if is_first else ""
-                    logger.info(f"No volatility thresholds in policy, using defaults{suffix}")
+            should_log, is_first, dedup_count = self._log_dedup.should_log(key)
+            if should_log:
+                suffix = ""
+                if is_first:
+                    suffix += " (first occurrence)"
+                if dedup_count:
+                    suffix += f" (dedup x{dedup_count})"
+                logger.info(f"No volatility thresholds in policy, using defaults{suffix}")
                 return 50.0
             
             # Get price data for volatility calculation
@@ -135,9 +340,13 @@ class RiskService:
                 
                 if not thresholds:
                     key = f"risk:no_vol_thresholds:{symbol}"
-                    should_log, is_first = self._log_dedup.should_log(key)
+                    should_log, is_first, dedup_count = self._log_dedup.should_log(key)
                     if should_log:
-                        suffix = " (first occurrence)" if is_first else ""
+                        suffix = ""
+                        if is_first:
+                            suffix += " (first occurrence)"
+                        if dedup_count:
+                            suffix += f" (dedup x{dedup_count})"
                         logger.info(f"No thresholds found for {symbol}, using default{suffix}")
                     return None  # Skip instead of default
                 
@@ -171,9 +380,13 @@ class RiskService:
                 return risk
             else:
                 key = f"risk:no_price_volatility:{symbol}"
-                should_log, is_first = self._log_dedup.should_log(key)
+                should_log, is_first, dedup_count = self._log_dedup.should_log(key)
                 if should_log:
-                    suffix = " (first occurrence)" if is_first else ""
+                    suffix = ""
+                    if is_first:
+                        suffix += " (first occurrence)"
+                    if dedup_count:
+                        suffix += f" (dedup x{dedup_count})"
                     logger.info(f"No price data for {symbol}, using default{suffix}")
                 return 50.0
                 
@@ -244,9 +457,13 @@ class RiskService:
                 return risk
             else:
                 key = f"risk:no_volume:{symbol}"
-                should_log, is_first = self._log_dedup.should_log(key)
+                should_log, is_first, dedup_count = self._log_dedup.should_log(key)
                 if should_log:
-                    suffix = " (first occurrence)" if is_first else ""
+                    suffix = ""
+                    if is_first:
+                        suffix += " (first occurrence)"
+                    if dedup_count:
+                        suffix += f" (dedup x{dedup_count})"
                     logger.info(f"No volume data for {symbol}, using default{suffix}")
                 return default_unknown
                 
@@ -299,9 +516,13 @@ class RiskService:
             
             if not risk_config:
                 key = "risk:no_score_config"
-                should_log, is_first = self._log_dedup.should_log(key)
+                should_log, is_first, dedup_count = self._log_dedup.should_log(key)
                 if should_log:
-                    suffix = " (first occurrence)" if is_first else ""
+                    suffix = ""
+                    if is_first:
+                        suffix += " (first occurrence)"
+                    if dedup_count:
+                        suffix += f" (dedup x{dedup_count})"
                     logger.info(f"No score risk config in policy, using defaults{suffix}")
                 return 50.0
             

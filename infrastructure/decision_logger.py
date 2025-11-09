@@ -23,6 +23,7 @@ class DecisionLogger:
         # Load configuration
         self.log_summary_mode, _ = self.config.get('logging.summary_mode', 'line')
         self.news_verbosity, _ = self.config.get('logging.news_verbosity', 'summary')
+        self._decision_seen: Dict[tuple[str, str], str] = {}
         
         # Skip reason dictionary for consistent logging
         self.skip_reasons = {
@@ -49,7 +50,8 @@ class DecisionLogger:
                            gate_result: str, gate_details: Dict[str, Any], direction: str,
                            size: float, leverage: float, sl_price: float, tp_price: float,
                            risk_exp: float, tier: str, cb_status: str, state_transition: str,
-                           strategy: str, guards: Dict[str, bool], source: str) -> None:
+                           strategy: str, guards: Dict[str, bool], source: str,
+                           bar_id: Optional[str] = None, run_id: Optional[str] = None) -> None:
         """
         Log single-line decision summary.
         
@@ -74,6 +76,12 @@ class DecisionLogger:
         """
         # Format time
         time_str = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        cache_key = (symbol, timeframe)
+        if bar_id and self._decision_seen.get(cache_key) == bar_id:
+            logger.info(f"⏭️ {time_str} | {symbol} | tf={timeframe} bar={bar_id} decision skipped(idempotent)")
+            return
+        if bar_id:
+            self._decision_seen[cache_key] = bar_id
         
         # Format signal scores
         ta_score = signal_scores.get('ta', 0.0)
@@ -94,7 +102,7 @@ class DecisionLogger:
         
         # Single-line summary
         summary = (
-            f"ℹ️ {time_str} | {symbol} | tf={timeframe} | "
+            f"ℹ️ {time_str} | {symbol} | tf={timeframe} | bar={bar_id or '-'} | run={run_id or '-'} | "
             f"TA={ta_score:.1f} ML={ml_score:.1f} News={news_score:.1f} Risk={risk_score:.1f} | "
             f"Final={final_score:.1f} ({gate_result}) | "
             f"Dir={direction} | Gate={gate_result} "
@@ -266,14 +274,15 @@ class DecisionLogger:
                     gate_result: str, gate_details: Dict[str, Any], direction: str,
                     size: float, leverage: float, sl_price: float, tp_price: float,
                     risk_exp: float, tier: str, cb_status: str, state_transition: str,
-                    strategy: str, guards: Dict[str, bool], source: str) -> None:
+                    strategy: str, guards: Dict[str, bool], source: str,
+                    bar_id: Optional[str] = None, run_id: Optional[str] = None) -> None:
         """
         Alias for log_decision_summary for backward compatibility.
         """
         self.log_decision_summary(symbol, timeframe, signal_scores, gate_result, 
                                  gate_details, direction, size, leverage, sl_price, 
                                  tp_price, risk_exp, tier, cb_status, state_transition, 
-                                 strategy, guards, source)
+                                 strategy, guards, source, bar_id=bar_id, run_id=run_id)
 
 
 # Global decision logger instance
