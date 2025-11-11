@@ -195,12 +195,20 @@ class ConfirmationProcessor(SignalProcessor):
         final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         direction = self._get_direction(final_score)
         
-        # Count confirmation bars
-        confirmation_count = self._count_confirmation(history, direction, current_bar_id)
+        # Determine if this is an entry signal (no position) or reversal signal
+        is_entry = self._is_entry_signal(history, direction)
         
-        is_valid = confirmation_count >= self.confirm_bars
-        
-        reason = f"Confirmation: {confirmation_count}/{self.confirm_bars}"
+        if is_entry:
+            # For entry signals, confirmation is not required (only persistence matters)
+            # Count confirmation bars anyway for logging, but don't require them for entry
+            confirmation_count = self._count_confirmation(history, direction, current_bar_id, is_entry=True)
+            is_valid = True  # Entry signals don't need confirmation, only persistence
+            reason = f"Entry confirmation: {confirmation_count}/{self.confirm_bars} (not required)"
+        else:
+            # For reversal signals, confirmation is required
+            confirmation_count = self._count_confirmation(history, direction, current_bar_id, is_entry=False)
+            is_valid = confirmation_count >= self.confirm_bars
+            reason = f"Reversal confirmation: {confirmation_count}/{self.confirm_bars}"
         
         return GatedSignal(
             original_score=final_score,
@@ -213,6 +221,15 @@ class ConfirmationProcessor(SignalProcessor):
             persistence_bars=0,
             confirmation_bars=confirmation_count
         )
+    
+    def _is_entry_signal(self, history: List[SignalHistory], direction: str) -> bool:
+        """Determine if this is an entry signal (no existing position)."""
+        if not history:
+            return True  # First signal is always entry
+        
+        # Check if last signal was 'flat' (no position)
+        last_direction = history[-1].direction
+        return last_direction == 'flat'
     
     def _get_direction(self, score: float) -> str:
         """Get signal direction from score."""
@@ -231,6 +248,7 @@ class ConfirmationProcessor(SignalProcessor):
         history: List[SignalHistory],
         direction: str,
         current_bar_id: Optional[str] = None,
+        is_entry: bool = False,
     ) -> int:
         """Count confirmation bars for direction with threshold + margin check."""
         if not history:
@@ -241,24 +259,48 @@ class ConfirmationProcessor(SignalProcessor):
         margin = self.policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('confirmation_margin', 2.0)
         
         count = 0
-        for signal in reversed(history):
-            # Check if direction matches AND score meets threshold + margin
-            if current_bar_id and getattr(signal, 'bar_id', None) == current_bar_id:
-                continue
-            if signal.direction == direction:
-                # Verify score meets threshold + margin for confirmation
-                score_meets_threshold_margin = (
-                    (direction == 'long' and signal.final_score >= (enter_long + margin)) or
-                    (direction == 'short' and signal.final_score <= (enter_short - margin))
-                )
-                if score_meets_threshold_margin:
-                    count += 1
+        
+        if is_entry:
+            # For entry signals, count bars where direction matches (including current signal)
+            # We count consecutive bars with same direction that meet threshold
+            for signal in reversed(history):
+                if current_bar_id and getattr(signal, 'bar_id', None) == current_bar_id:
+                    continue
+                if signal.direction == direction:
+                    # For entry, check if score meets threshold (without margin requirement)
+                    score_meets_threshold = (
+                        (direction == 'long' and signal.final_score >= enter_long) or
+                        (direction == 'short' and signal.final_score <= enter_short)
+                    )
+                    if score_meets_threshold:
+                        count += 1
+                    else:
+                        break
+                elif signal.direction == 'flat':
+                    # Flat signals are acceptable in entry confirmation (they don't break the streak)
+                    continue
                 else:
-                    # Score dropped below threshold + margin, reset
+                    # Different direction, reset
                     break
-            else:
-                # Direction changed, reset
-                break
+        else:
+            # For reversal signals, require threshold + margin
+            for signal in reversed(history):
+                if current_bar_id and getattr(signal, 'bar_id', None) == current_bar_id:
+                    continue
+                if signal.direction == direction:
+                    # Verify score meets threshold + margin for confirmation
+                    score_meets_threshold_margin = (
+                        (direction == 'long' and signal.final_score >= (enter_long + margin)) or
+                        (direction == 'short' and signal.final_score <= (enter_short - margin))
+                    )
+                    if score_meets_threshold_margin:
+                        count += 1
+                    else:
+                        # Score dropped below threshold + margin, reset
+                        break
+                else:
+                    # Direction changed, reset
+                    break
         
         return count
     

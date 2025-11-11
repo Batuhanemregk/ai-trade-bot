@@ -50,12 +50,15 @@ class RiskMonitorJob(BaseJob):
         assert last_exc is not None  # mypy / type check guard
         raise last_exc
         
-    async def initialize(self):
+    async def initialize(self, exchange_adapter=None):
         """Initialize risk monitoring components."""
         try:
             # Initialize exchange adapter
-            from adapters.exchange_okx_ccxt import OKXCCXTAdapter
-            self.exchange_adapter = OKXCCXTAdapter()
+            if exchange_adapter:
+                self.exchange_adapter = exchange_adapter
+            else:
+                from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+                self.exchange_adapter = OKXCCXTAdapter()
             
             # Initialize circuit breaker
             from application.circuit_breaker import CircuitBreaker

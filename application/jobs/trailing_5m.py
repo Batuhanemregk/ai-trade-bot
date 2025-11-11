@@ -20,12 +20,15 @@ class Trailing5mJob(BaseJob):
         self.exchange_adapter = None
         self.position_monitor = None
         
-    async def initialize(self):
+    async def initialize(self, exchange_adapter=None):
         """Initialize trailing stops components."""
         try:
             # Initialize exchange adapter
-            from adapters.exchange_okx_ccxt import OKXCCXTAdapter
-            self.exchange_adapter = OKXCCXTAdapter()
+            if exchange_adapter:
+                self.exchange_adapter = exchange_adapter
+            else:
+                from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+                self.exchange_adapter = OKXCCXTAdapter()
             
             # Initialize position monitor with real services
             from application.position_monitor import PositionMonitor

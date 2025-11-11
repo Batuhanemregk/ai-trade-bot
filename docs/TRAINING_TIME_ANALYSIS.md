@@ -216,3 +216,5 @@ Hızlanma Oranı:
 
 **Sonuç:** Yeni eğitim mimarisi **çok daha verimli** ve **pratik**. Eski 2 saatlik eğitim muhtemelen `max_depth=-1` ve CalibratedClassifierCV yüzünden yavaştı. Yeni yaklaşım **164x daha hızlı** ve kalite kaybı minimal! 🎉
 
+
+

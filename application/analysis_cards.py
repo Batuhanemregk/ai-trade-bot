@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List
 from loguru import logger
 
-from adapters.telegram_client import TelegramClient
+from adapters.telegram.client import TelegramClient
 from adapters.telegram.formatter import get_formatter
 from adapters.telegram.views.analysis import (
     build_analysis_detail_view,
@@ -24,13 +24,15 @@ from adapters.telegram.keyboards import build_keyboard
 class AnalysisCardsService:
     """Service for sending rich analysis cards to Telegram"""
     
-    def __init__(self, policy: Dict[str, Any]):
+    def __init__(self, policy: Dict[str, Any], telegram_client=None):
         self.policy = policy
-        self.telegram_client = None
+        self.telegram_client = telegram_client
         self.is_enabled = policy.get('analysis_cards', {}).get('enabled', False)
         self.formatter = get_formatter()
+        self.chat_id = None
         self.summary_state: Dict[str, Any] = {
             'message_id': None,
+            'chat_id': None,
             'bar_id': None,
             'text': None,
             'keyboard_signature': None,
@@ -42,15 +44,22 @@ class AnalysisCardsService:
     def _initialize_telegram(self):
         """Initialize Telegram client"""
         try:
-            from infrastructure.notification_service import NotificationService
-            notification_service = NotificationService()
-            if notification_service.is_initialized:
-                self.telegram_client = notification_service.telegram_client
-                logger.info("✅ Analysis cards service initialized with Telegram")
+            # Get chat_id from policy or environment
+            import os
+            self.chat_id = os.getenv('TELEGRAM_CHAT_ID', '')
+            if not self.chat_id:
+                telegram_config = self.policy.get('telegram', {})
+                self.chat_id = telegram_config.get('chat_id', '')
+            
+            # Telegram client should be passed from scheduler via constructor
+            # If not provided, it will be None and cards won't be sent
+            if self.telegram_client:
+                logger.info("✅ Analysis cards service initialized with Telegram client")
             else:
-                logger.warning("⚠️ Telegram not available for analysis cards")
+                logger.info("ℹ️ Analysis cards service initialized (Telegram client not set - will be set by scheduler)")
         except Exception as e:
             logger.error(f"❌ Failed to initialize analysis cards: {e}")
+            self.telegram_client = None
     
     async def send_startup_message(self):
         """Send startup message"""
@@ -58,12 +67,24 @@ class AnalysisCardsService:
             return
         
         try:
+            # Get chat_id
+            import os
+            chat_id = os.getenv('TELEGRAM_CHAT_ID', '')
+            if not chat_id:
+                telegram_config = self.policy.get('telegram', {})
+                chat_id = telegram_config.get('chat_id', '')
+            if not chat_id:
+                logger.warning("⚠️ No chat_id for startup message")
+                return
+            
             message = self._create_startup_card()
-            # Start worker if not running
-            if not self.telegram_client.is_running:
-                await self.telegram_client.start()
             # Send message
-            success = await self.telegram_client.send_message(message)
+            success = await self.telegram_client.send_message(
+                chat_id=str(chat_id),
+                text=message,
+                parse_mode='HTML',
+                disable_web_page_preview=True
+            )
             if success:
                 logger.info("📊 [CARDS] Startup message sent")
             else:
@@ -77,12 +98,24 @@ class AnalysisCardsService:
             return
         
         try:
+            # Get chat_id
+            import os
+            chat_id = os.getenv('TELEGRAM_CHAT_ID', '')
+            if not chat_id:
+                telegram_config = self.policy.get('telegram', {})
+                chat_id = telegram_config.get('chat_id', '')
+            if not chat_id:
+                logger.warning("⚠️ No chat_id for shutdown message")
+                return
+            
             message = self._create_shutdown_card()
-            # Start worker if not running
-            if not self.telegram_client.is_running:
-                await self.telegram_client.start()
             # Send message
-            success = await self.telegram_client.send_message(message)
+            success = await self.telegram_client.send_message(
+                chat_id=str(chat_id),
+                text=message,
+                parse_mode='HTML',
+                disable_web_page_preview=True
+            )
             if success:
                 logger.info("📊 [CARDS] Shutdown message sent")
             else:
@@ -91,8 +124,9 @@ class AnalysisCardsService:
             logger.error(f"❌ Failed to send shutdown message: {e}")
     
     async def send_analysis_cards(self, analysis_results: List[Dict[str, Any]]):
-        """Send analysis cards for all symbols"""
+        """Store analysis results in state for Telegram summary job and button callbacks."""
         if not analysis_results:
+            logger.debug("📊 [CARDS] No analysis results to store")
             return
         
         # Determine bar/run identifiers
@@ -102,18 +136,14 @@ class AnalysisCardsService:
             bar_id = BaseJob.get_bar_id(datetime.now(timezone.utc), '15m')
         run_id = first_entry.get('run_id', 'unknown')
         
-        # Persist shared state for callbacks/summary job
+        # Persist shared state for callbacks and summary job (15m periodic)
         set_latest_analysis(bar_id, run_id, analysis_results)
+        logger.info(f"📊 [CARDS] Analysis state updated: bar_id={bar_id} run_id={run_id} symbols={len(analysis_results)}")
         
-        if not self.is_enabled or not self.telegram_client:
-            return
-        
-        try:
-            summary_context = self._build_summary_context(bar_id, run_id, analysis_results)
-            await self._publish_summary(summary_context)
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to send analysis cards: {e}")
+        # Note: Telegram summary will be sent by telegram_summary_15m job (every 15 minutes)
+        # The job checks if analysis exists and sends it if not already published
+        # This allows users to view analysis via buttons anytime, and get periodic summaries
+        # The job runs at second=20 of each 15m bar, after trading_analysis completes (second=7)
     
     def _create_startup_card(self) -> str:
         """Create startup card"""
@@ -162,22 +192,25 @@ class AnalysisCardsService:
             'SHORT': sum(1 for r in analysis_results if r.get('decision') == 'SHORT'),
             'FLAT': sum(1 for r in analysis_results if r.get('decision') == 'FLAT'),
         }
+        
+        # Get policy for timeframe and mode
+        timeframe = self.policy.get('trading', {}).get('timeframe', '15m')
+        mode = self.policy.get('trading', {}).get('mode', 'paper').lower()
+        last_update = datetime.now(timezone.utc)
+        
         return {
             'bar_id': bar_id,
             'run_id': run_id,
             'results': sorted_results,
             'counts': counts,
-            'generated_at': datetime.now(timezone.utc).isoformat(),
+            'timeframe': timeframe,
+            'mode': mode,
+            'last_update': last_update,
+            'generated_at': last_update.isoformat(),
         }
     
     async def _publish_summary(self, summary_context: Dict[str, Any]) -> None:
         """Send or edit summary message based on context."""
-        if TELEGRAM_MOCK_ENABLED or not self.telegram_client:
-            self.summary_state['bar_id'] = summary_context.get('bar_id')
-            self.summary_state['text'] = "<mock>"
-            self.summary_state['keyboard_signature'] = keyboard_signature
-            return
-        
         text, buttons = build_analysis_summary_view(summary_context, self.formatter)
         keyboard_markup = build_keyboard(buttons)
         reply_markup = keyboard_markup.to_dict()
@@ -185,6 +218,12 @@ class AnalysisCardsService:
             tuple(button['callback_data'] for button in row)
             for row in buttons
         )
+        
+        if TELEGRAM_MOCK_ENABLED or not self.telegram_client:
+            self.summary_state['bar_id'] = summary_context.get('bar_id')
+            self.summary_state['text'] = "<mock>"
+            self.summary_state['keyboard_signature'] = keyboard_signature
+            return
         
         existing_bar = self.summary_state.get('bar_id')
         existing_text = self.summary_state.get('text')
@@ -195,34 +234,59 @@ class AnalysisCardsService:
                 existing_sig == keyboard_signature):
             return
         
-        if (not force and
-                self.summary_state.get('bar_id') == summary_context.get('bar_id') and
-                self.summary_state.get('text') == text):
-            return  # No change
+        # Get chat_id from policy or state
+        chat_id = self.summary_state.get('chat_id') or self.chat_id
+        if not chat_id:
+            # Try to get from policy (environment variable)
+            import os
+            chat_id = os.getenv('TELEGRAM_CHAT_ID', '')
+            if not chat_id:
+                telegram_config = self.policy.get('telegram', {})
+                chat_id = telegram_config.get('chat_id', '')
+            if not chat_id:
+                logger.error("❌ [CARDS] No chat_id available for sending message")
+                return
+        
+        # Store chat_id in state
+        self.summary_state['chat_id'] = chat_id
+        self.chat_id = chat_id
         
         # If we have existing message, try editing
         message_id = self.summary_state.get('message_id')
         success = False
-        if message_id:
-            success = await self.telegram_client.edit_message(
-                message_id=message_id,
-                text=text,
-                reply_markup=reply_markup,
-            )
-            if not success:
-                logger.warning("Failed to edit summary message, sending a new one")
+        if message_id and chat_id:
+            try:
+                success = await self.telegram_client.edit_message_text(
+                    chat_id=str(chat_id),
+                    message_id=message_id,
+                    text=text,
+                    parse_mode='HTML',
+                    reply_markup=reply_markup,
+                    disable_web_page_preview=True
+                )
+                if not success:
+                    logger.warning("Failed to edit summary message, sending a new one")
+            except Exception as e:
+                logger.warning(f"Failed to edit message: {e}, sending a new one")
+                success = False
         
         if not success:
-            success, response = await self.telegram_client.send_text_immediate(
-                text=text,
-                reply_markup=reply_markup,
-            )
-            if success and response:
-                result_obj = response.get('result') or {}
-                message_id = result_obj.get('message_id')
-                if message_id:
-                    self.summary_state['message_id'] = message_id
-                    self.summary_state['chat_id'] = result_obj.get('chat', {}).get('id')
+            try:
+                # Send new message
+                sent_message = await self.telegram_client.bot.send_message(
+                    chat_id=str(chat_id),
+                    text=text,
+                    parse_mode='HTML',
+                    reply_markup=reply_markup,
+                    disable_web_page_preview=True
+                )
+                if sent_message:
+                    self.summary_state['message_id'] = sent_message.message_id
+                    self.summary_state['chat_id'] = chat_id
+                    success = True
+            except Exception as e:
+                logger.error(f"Failed to send Telegram message: {e}")
+                success = False
         
         if success:
             self.summary_state['bar_id'] = summary_context.get('bar_id')

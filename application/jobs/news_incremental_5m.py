@@ -17,7 +17,7 @@ class NewsIncremental5mJob(BaseJob):
         super().__init__(policy, semaphore, runtime_state)
         self.news_service = None
     
-    async def initialize(self):
+    async def initialize(self, exchange_adapter=None):
         """Initialize the job"""
         self.news_service = NewsService(self.policy)
         logger.info("✅ NewsIncremental5mJob initialized")

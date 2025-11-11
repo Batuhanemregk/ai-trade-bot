@@ -88,7 +88,14 @@ class LogFormatter:
         gate_status = data.get('gate_status', 'UNKNOWN')
         gate_details = data.get('gate_details', {})
         persist = f"{gate_details.get('persist_count', 0)}/{gate_details.get('persist_required', 0)}"
-        conf = f"{gate_details.get('confidence', 0):.2f}/{gate_details.get('conf_required', 0):.2f}"
+        # Confirmation is integer count, not float confidence
+        conf_count = gate_details.get('confirmation_bars', gate_details.get('confidence', 0))
+        conf_required = gate_details.get('conf_required', 0)
+        if isinstance(conf_count, float):
+            conf_count = int(conf_count)
+        if isinstance(conf_required, float):
+            conf_required = int(conf_required)
+        conf = f"{conf_count}/{conf_required}" if conf_required > 0 else "0/0"
         
         # Age (optional) - Counter format: age=3/6 or time format: age=2.3h
         age_str = ""

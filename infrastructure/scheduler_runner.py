@@ -9,7 +9,7 @@ import json
 import os
 import signal
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, Any, Optional
 
@@ -55,6 +55,9 @@ class SchedulerRunner:
         # Global shared adapters
         self.global_exchange_adapter = None
         self.global_news_service = None
+        
+        # Telegram bot client
+        self.telegram_client = None
         
     async def initialize(self):
         """Initialize scheduler and load configuration."""
@@ -105,6 +108,9 @@ class SchedulerRunner:
             
             # Initialize global shared adapters
             await self._initialize_global_adapters()
+            
+            # Initialize Telegram bot if enabled
+            await self._initialize_telegram_bot()
             
             # Initialize scheduler
             self.scheduler = AsyncIOScheduler(
@@ -159,6 +165,21 @@ class SchedulerRunner:
             logger.error(f"❌ Failed to initialize global adapters: {e}")
             raise
     
+    async def _initialize_telegram_bot(self):
+        """Initialize Telegram bot if enabled."""
+        try:
+            telegram_config = self.policy.get('telegram', {})
+            if telegram_config.get('enabled', True):
+                from adapters.telegram.client import init_telegram_app
+                self.telegram_client = await init_telegram_app()
+                logger.info("✅ Telegram bot initialized and started")
+            else:
+                logger.info("ℹ️ Telegram bot disabled in policy")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize Telegram bot: {e}")
+            # Don't raise - Telegram is optional
+            self.telegram_client = None
+    
     async def _initialize_jobs(self):
         """Initialize all job classes."""
         try:
@@ -182,10 +203,15 @@ class SchedulerRunner:
                 if hasattr(job_instance, 'set_global_adapters'):
                     job_instance.set_global_adapters(self.global_exchange_adapter, self.global_news_service)
             
+            # Pass Telegram client to jobs that need it
+            for job_name, job_instance in self.jobs.items():
+                if hasattr(job_instance, 'set_telegram_client'):
+                    job_instance.set_telegram_client(self.telegram_client)
+            
             # Initialize each job
             for job_name, job_instance in self.jobs.items():
                 if hasattr(job_instance, 'initialize'):
-                    await job_instance.initialize()
+                    await job_instance.initialize(self.global_exchange_adapter)
                 logger.info(f"✅ Initialized job: {job_name}")
                 
         except Exception as e:
@@ -262,7 +288,8 @@ class SchedulerRunner:
             second=3  # Align to 15m boundaries
         )
         
-        # Telegram Summary (15m)
+        # Telegram Summary (15m) - Run after trading_analysis (20 seconds after bar start)
+        # This ensures analysis is completed before sending summary
         self.scheduler.add_job(
             self._execute_job,
             CronTrigger.from_crontab(schedule_config['telegram_summary_15m'], timezone="Europe/Istanbul"),
@@ -270,7 +297,7 @@ class SchedulerRunner:
             id='telegram_summary_15m',
             name='Telegram Summary (15m)',
             replace_existing=True,
-            second=11  # Align to 15m boundaries
+            second=20  # Run 20 seconds after bar start (trading_analysis runs at second=7, needs ~10s to complete)
         )
         
         logger.info("✅ All jobs registered with scheduler")
@@ -394,6 +421,14 @@ class SchedulerRunner:
             # Send shutdown message
             await self._send_shutdown_message()
             
+            # Stop Telegram bot
+            if hasattr(self, 'telegram_client') and self.telegram_client:
+                try:
+                    await self.telegram_client.stop()
+                    logger.info("✅ Telegram bot stopped")
+                except Exception as e:
+                    logger.debug(f"⚠️ Telegram bot stop warning: {e}")
+            
             # Save final state
             await self._save_runtime_state()
             
@@ -426,7 +461,7 @@ class SchedulerRunner:
         """Send startup message to Telegram"""
         try:
             from application.analysis_cards import AnalysisCardsService
-            cards_service = AnalysisCardsService(self.policy)
+            cards_service = AnalysisCardsService(self.policy, telegram_client=self.telegram_client)
             await cards_service.send_startup_message()
         except Exception as e:
             logger.error(f"❌ Failed to send startup message: {e}")
@@ -435,7 +470,7 @@ class SchedulerRunner:
         """Send shutdown message to Telegram"""
         try:
             from application.analysis_cards import AnalysisCardsService
-            cards_service = AnalysisCardsService(self.policy)
+            cards_service = AnalysisCardsService(self.policy, telegram_client=self.telegram_client)
             await cards_service.send_shutdown_message()
         except Exception as e:
             logger.error(f"❌ Failed to send shutdown message: {e}")
@@ -494,6 +529,14 @@ async def main():
                             logger.debug(f"✅ Closed aiohttp session for {job_name}")
                         except Exception as e:
                             logger.debug(f"⚠️ Session close warning: {e}")
+            
+            # Stop Telegram bot
+            try:
+                if 'runner' in locals() and runner and hasattr(runner, 'telegram_client') and runner.telegram_client:
+                    await runner.telegram_client.stop()
+                    logger.info("✅ Telegram bot stopped")
+            except Exception as e:
+                logger.debug(f"⚠️ Telegram bot stop warning: {e}")
             
             # Close global adapters
             try:

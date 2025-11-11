@@ -20,12 +20,15 @@ class Regime1hJob(BaseJob):
         self.exchange_adapter = None
         self.regime_cache = {}
         
-    async def initialize(self):
+    async def initialize(self, exchange_adapter=None):
         """Initialize regime update components."""
         try:
             # Initialize exchange adapter
-            from adapters.exchange_okx_ccxt import OKXCCXTAdapter
-            self.exchange_adapter = OKXCCXTAdapter()
+            if exchange_adapter:
+                self.exchange_adapter = exchange_adapter
+            else:
+                from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+                self.exchange_adapter = OKXCCXTAdapter()
             
             logger.info("✅ Regime1hJob initialized")
             

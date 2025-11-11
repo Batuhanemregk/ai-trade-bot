@@ -300,14 +300,14 @@ class RiskService:
             
             if not volatility_thresholds:
                 key = "risk:no_volatility_thresholds"
-            should_log, is_first, dedup_count = self._log_dedup.should_log(key)
-            if should_log:
-                suffix = ""
-                if is_first:
-                    suffix += " (first occurrence)"
-                if dedup_count:
-                    suffix += f" (dedup x{dedup_count})"
-                logger.info(f"No volatility thresholds in policy, using defaults{suffix}")
+                should_log, is_first, dedup_count = self._log_dedup.should_log(key)
+                if should_log:
+                    suffix = ""
+                    if is_first:
+                        suffix += " (first occurrence)"
+                    if dedup_count:
+                        suffix += f" (dedup x{dedup_count})"
+                    logger.info(f"No volatility thresholds in policy, using defaults{suffix}")
                 return 50.0
             
             # Get price data for volatility calculation

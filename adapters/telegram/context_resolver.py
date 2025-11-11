@@ -847,31 +847,131 @@ class ContextResolver:
 
     async def resolve_analysis_summary_context(self) -> Dict[str, Any]:
         """Resolve context for analysis summary view."""
-        state = get_latest_analysis() or {}
-        results = state.get('results') or []
-        counts = {
-            'LONG': sum(1 for r in results if r.get('decision') == 'LONG'),
-            'SHORT': sum(1 for r in results if r.get('decision') == 'SHORT'),
-            'FLAT': sum(1 for r in results if r.get('decision') == 'FLAT'),
-        }
-        return {
-            'bar_id': state.get('bar_id', '-'),
-            'run_id': state.get('run_id', 'unknown'),
-            'results': results,
-            'counts': counts,
-            'generated_at': state.get('updated_at'),
-        }
+        try:
+            state = get_latest_analysis() or {}
+            results = state.get('results') or []
+            
+            # Get policy for timeframe and mode
+            policy = self._get_policy()
+            timeframe = policy.get('trading', {}).get('timeframe', '15m')
+            mode = policy.get('trading', {}).get('mode', 'paper').lower()
+            
+            # Get last update time
+            last_update_str = state.get('updated_at')
+            if last_update_str:
+                try:
+                    last_update = datetime.fromisoformat(last_update_str.replace("Z", "+00:00"))
+                except ValueError:
+                    last_update = datetime.now(timezone.utc)
+            else:
+                last_update = datetime.now(timezone.utc)
+            
+            # Ensure results have all required fields with defaults
+            enriched_results = []
+            for result in results:
+                enriched_result = {
+                    'symbol': result.get('symbol', 'UNKNOWN'),
+                    'final_score': result.get('final_score', 0.0),
+                    'grade': result.get('grade', 'D'),
+                    'decision': result.get('decision', 'FLAT'),
+                    'ta_score': result.get('ta_score', 0.0),
+                    'ml_score': result.get('ml_score', 0.0),
+                    'news_score': result.get('news_score', 0.0),
+                    'risk_score': result.get('risk_score', 0.0),
+                    'persist_count': result.get('persist_count', 0),
+                    'persist_required': result.get('persist_required', 5),
+                    'age_bars': result.get('age_bars', 0),
+                    'age_max': result.get('age_max', 6),
+                    'confirmation_bars': result.get('confirmation_bars', 0),
+                    'conf_required': result.get('conf_required', 2),
+                }
+                enriched_results.append(enriched_result)
+            
+            return {
+                'bar_id': state.get('bar_id', '-'),
+                'run_id': state.get('run_id', 'unknown'),
+                'results': enriched_results,
+                'timeframe': timeframe,
+                'mode': mode,
+                'last_update': last_update,
+                'generated_at': last_update_str,
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve analysis summary context: {e}", exc_info=True)
+            return {
+                'bar_id': '-',
+                'run_id': 'unknown',
+                'results': [],
+                'timeframe': '15m',
+                'mode': 'paper',
+                'last_update': datetime.now(timezone.utc),
+                'generated_at': None,
+            }
 
     async def resolve_analysis_detail_context(self, symbol: Optional[str]) -> Dict[str, Any]:
         """Resolve context for a specific symbol detail view."""
-        state = get_latest_analysis() or {}
-        detail = get_detail(symbol) if symbol else None
-        return {
-            'symbol': symbol or 'UNKNOWN',
-            'detail': detail,
-            'bar_id': state.get('bar_id', '-'),
-            'run_id': state.get('run_id', 'unknown'),
-        }
+        try:
+            state = get_latest_analysis() or {}
+            detail = get_detail(symbol) if symbol else None
+            
+            # Get policy for timeframe and mode
+            policy = self._get_policy()
+            timeframe = policy.get('trading', {}).get('timeframe', '15m')
+            mode = policy.get('trading', {}).get('mode', 'paper').lower()
+            
+            # Get last update time
+            last_update_str = state.get('updated_at')
+            if last_update_str:
+                try:
+                    last_update = datetime.fromisoformat(last_update_str.replace("Z", "+00:00"))
+                except ValueError:
+                    last_update = datetime.now(timezone.utc)
+            else:
+                last_update = datetime.now(timezone.utc)
+            
+            # Enrich detail with defaults and additional info
+            if detail:
+                enriched_detail = {
+                    'symbol': detail.get('symbol', symbol or 'UNKNOWN'),
+                    'final_score': detail.get('final_score', 0.0),
+                    'grade': detail.get('grade', 'D'),
+                    'decision': detail.get('decision', 'FLAT'),
+                    'ta_score': detail.get('ta_score', 0.0),
+                    'ml_score': detail.get('ml_score', 0.0),
+                    'news_score': detail.get('news_score', 0.0),
+                    'risk_score': detail.get('risk_score', 0.0),
+                    'persist_count': detail.get('persist_count', 0),
+                    'persist_required': detail.get('persist_required', 5),
+                    'age_bars': detail.get('age_bars', 0),
+                    'age_max': detail.get('age_max', 6),
+                    'confirmation_bars': detail.get('confirmation_bars', 0),
+                    'conf_required': detail.get('conf_required', 2),
+                    'news_info': detail.get('news_info', {}),
+                    'risk_info': detail.get('risk_info', {}),
+                }
+            else:
+                enriched_detail = {}
+            
+            return {
+                'symbol': symbol or 'UNKNOWN',
+                'detail': enriched_detail,
+                'bar_id': state.get('bar_id', '-'),
+                'run_id': state.get('run_id', 'unknown'),
+                'timeframe': timeframe,
+                'mode': mode,
+                'last_update': last_update,
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve analysis detail context: {e}", exc_info=True)
+            return {
+                'symbol': symbol or 'UNKNOWN',
+                'detail': {},
+                'bar_id': '-',
+                'run_id': 'unknown',
+                'timeframe': '15m',
+                'mode': 'paper',
+                'last_update': datetime.now(timezone.utc),
+            }
 
 
 # Global instance

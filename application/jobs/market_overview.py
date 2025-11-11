@@ -20,12 +20,15 @@ class MarketOverviewJob(BaseJob):
         self.exchange_adapter = None
         self.market_metrics = {}
         
-    async def initialize(self):
+    async def initialize(self, exchange_adapter=None):
         """Initialize market overview components."""
         try:
             # Initialize exchange adapter
-            from adapters.exchange_okx_ccxt import OKXCCXTAdapter
-            self.exchange_adapter = OKXCCXTAdapter()
+            if exchange_adapter:
+                self.exchange_adapter = exchange_adapter
+            else:
+                from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+                self.exchange_adapter = OKXCCXTAdapter()
             
             logger.info("✅ MarketOverviewJob initialized")
             

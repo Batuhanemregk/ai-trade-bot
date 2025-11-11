@@ -52,12 +52,15 @@ class TradingAnalysisJob(BaseJob):
         self.summary_logger = get_analysis_summary_logger()
         self.prometheus_exporter = None
         
-    async def initialize(self):
+    async def initialize(self, exchange_adapter=None):
         """Initialize trading analysis components."""
         try:
             # Initialize exchange adapter
-            from adapters.exchange_okx_ccxt import OKXCCXTAdapter
-            self.exchange_adapter = OKXCCXTAdapter()
+            if exchange_adapter:
+                self.exchange_adapter = exchange_adapter
+            else:
+                from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+                self.exchange_adapter = OKXCCXTAdapter()
             
             # Initialize scoring components with real services
             from scoring.ta_scorer import TAScorer
@@ -313,12 +316,16 @@ class TradingAnalysisJob(BaseJob):
             }
             transition = self.state_manager.process_signal(symbol, gated_signal_dict)
             
-            # Extract gate details for logging
+            # Extract gate details for logging - read from policy
+            persistence_bars_required = self.policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('persistence_bars', 2)
+            rev_confirm_bars_required = self.policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('rev_confirm_bars', 2)
+            
             gate_details = {
                 'persist_count': gated_signal.details.get('persist_count', gated_signal.persistence_bars),
-                'persist_required': gated_signal.details.get('persist_required', 5),
+                'persist_required': gated_signal.details.get('persist_required', persistence_bars_required),
+                'confirmation_bars': gated_signal.confirmation_bars,  # Add confirmation_bars for logging
                 'confidence': gated_signal.details.get('confidence', 0.0),
-                'conf_required': gated_signal.details.get('conf_threshold', 0.0)
+                'conf_required': gated_signal.details.get('conf_threshold', rev_confirm_bars_required)
             }
             if gated_signal.details.get('duplicate_bar'):
                 gate_details['duplicate'] = gated_signal.details.get('duplicate_count', 1)
@@ -497,13 +504,20 @@ class TradingAnalysisJob(BaseJob):
                 'symbol': symbol,
                 'decision': composite_signal.decision,
                 'final_score': composite_signal.final_score,
+                'grade': composite_signal.grade,
                 'ta_score': ta_score,
                 'ml_score': ml_score,
                 'news_score': news_score,
                 'risk_score': risk_score,
                 'bar_id': self.current_bar_id,
                 'run_id': self.run_id,
-                'action': transition.action,  # Add action here
+                'action': transition.action,
+                'persist_count': gated_signal.persistence_bars,
+                'persist_required': gate_details['persist_required'],
+                'confirmation_bars': gated_signal.confirmation_bars,
+                'conf_required': gate_details['conf_required'],
+                'age_bars': age_bars,
+                'age_max': max_age_bars,
                 'news_info': {
                     'type': news_categories.get('type', 'general') if isinstance(news_categories, dict) else 'general',
                     'confidence': news_categories.get('confidence', 0) if isinstance(news_categories, dict) else 0,
@@ -534,12 +548,28 @@ class TradingAnalysisJob(BaseJob):
                         'final': composite_signal.final_score
                     }
                     
+                    # Format gate_details for decision_logger (persist X/Y, conf X/Y format)
+                    persist_str = f"{gated_signal.persistence_bars}/{gate_details['persist_required']}"
+                    # Confirmation bars is an integer count, not a float
+                    conf_count = int(gated_signal.confirmation_bars)
+                    conf_required = int(gate_details['conf_required'])
+                    conf_str = f"{conf_count}/{conf_required}" if conf_required > 0 else "0/0"
+                    age_str = f"{age_bars}/{max_age_bars}"
+                    hyst_str = ""  # Hysteresis is handled in gate logic, not shown separately
+                    
+                    gate_details_formatted = {
+                        'persist': persist_str,
+                        'conf': conf_str,
+                        'age': age_str,
+                        'hyst': hyst_str
+                    }
+                    
                     self.decision_logger.log_decision(
                         symbol=symbol,
                         timeframe='15m',
                         signal_scores=signal_scores,
                         gate_result='PASS' if gated_signal.is_valid else 'FAIL',
-                        gate_details=gate_results,
+                        gate_details=gate_details_formatted,
                         direction=composite_signal.decision,
                         size=0.0,  # Will be set during execution
                         leverage=1.0,

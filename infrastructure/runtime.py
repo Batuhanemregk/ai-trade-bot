@@ -202,11 +202,18 @@ async def trading_main(
                 from application.log_formatter import get_log_formatter
                 formatter = get_log_formatter()
                 
+                # Read persistence and confirmation requirements from policy
+                from infrastructure.config_manager import config_manager
+                policy = config_manager.get_policy()
+                persistence_bars_required = policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('persistence_bars', 2)
+                rev_confirm_bars_required = policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('rev_confirm_bars', 2)
+                max_signal_age_bars = policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('max_signal_age_bars', 6)
+                
                 gate_details = {
                     'persist_count': gated_signal.persistence_bars,
-                    'persist_required': 5,
+                    'persist_required': persistence_bars_required,
                     'confidence': gated_signal.details.get('confidence', 0.0),
-                    'conf_required': gated_signal.details.get('conf_threshold', 0.0)
+                    'conf_required': gated_signal.details.get('conf_threshold', rev_confirm_bars_required)
                 }
                 
                 signal_history = signal_gate.get_signal_history(symbol)
@@ -227,7 +234,7 @@ async def trading_main(
                     'gate_status': 'PASS' if gated_signal.is_valid else 'PENDING',
                     'gate_details': gate_details,
                     'age_bars': age_bars,
-                    'max_age_bars': 6
+                    'max_age_bars': max_signal_age_bars
                 })
                 logger.info(log_message)
                 
@@ -280,13 +287,10 @@ async def trading_main(
                             logger.info(f"🎯 Creating TP/SL orders for {symbol}")
                             await _create_trigger_order(exchange_adapter, symbol, decision, composite_signal)
                             
-                            # Send Telegram Notification
-                            logger.info(f"📱 Sending Telegram notification for {symbol}")
-                            await _send_telegram_analysis_card(symbol, composite_signal, live)
-                            await _send_telegram_execution_card(symbol, composite_signal, execution_result, live)
+                            # Telegram notifications are now handled by AnalysisCardsService
+                            # which sends analysis cards automatically via telegram_summary_15m job
                         else:
                             logger.error(f"❌ {symbol}: Trade execution failed")
-                            await _send_telegram_error_card(symbol, composite_signal, "Trade execution failed", live)
                     else:
                         logger.info(f"🧪 DRY-RUN: Would execute {decision} trade for {symbol} with size {position_size:.4f}")
                 
@@ -978,6 +982,7 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
 def _calculate_regime_adaptive_weights(ta_score: float, risk_score: float) -> dict[str, float]:
     """
     Calculate regime-adaptive weights based on market conditions.
+    Uses policy weights as base, with adaptive adjustments.
     
     Args:
         ta_score: Technical analysis score (0-100)
@@ -986,28 +991,45 @@ def _calculate_regime_adaptive_weights(ta_score: float, risk_score: float) -> di
     Returns:
         Dictionary with adaptive weights for ta, ml, news, risk
     """
+    # Load base weights from policy
+    from configs.policy import load_policy
+    policy = load_policy()
+    base_weights = policy.get('trading', {}).get('scoring', {})
+    ta_weight = base_weights.get('ta_weight', 0.7)
+    ml_weight = base_weights.get('ml_weight', 0.1)
+    news_weight = base_weights.get('news_weight', 0.1)
+    risk_weight = base_weights.get('risk_weight', 0.07)  # Reduced from 0.1
+    
+    # Normalize weights to sum to 1.0
+    total_weight = ta_weight + ml_weight + news_weight + risk_weight
+    if total_weight > 0:
+        ta_weight = ta_weight / total_weight
+        ml_weight = ml_weight / total_weight
+        news_weight = news_weight / total_weight
+        risk_weight = risk_weight / total_weight
+    
     # Calculate trend strength from TA score
     trend_strength = ta_score / 100.0  # Normalize to 0-1
     
     # Calculate volatility from risk score (inverted)
     volatility = (100.0 - risk_score) / 100.0  # Higher risk = lower volatility score
     
-    # Regime detection
+    # Regime detection - apply small adjustments to base weights
     if trend_strength > 0.6 and volatility > 0.7:  # High trend + low risk (high volatility score)
-        # Trend↑/Vol↓ regime: Emphasize TA for trend following
+        # Trend↑/Vol↓ regime: Slight TA emphasis
         return {
-            'ta': 0.50,    # Increased TA weight
-            'ml': 0.20,    # Reduced ML weight
-            'news': 0.15,  # Reduced news weight
-            'risk': 0.15   # Same risk weight
+            'ta': min(ta_weight * 1.1, 0.8),      # +10% TA weight (capped at 0.8)
+            'ml': ml_weight,                      # Keep ML weight
+            'news': news_weight,                  # Keep news weight
+            'risk': max(risk_weight * 0.9, 0.05)  # -10% risk weight (min 0.05)
         }
     else:
-        # Yanal/Vol↑ regime: Emphasize ML and Risk for adaptive strategies
+        # Yanal/Vol↑ regime: Use base weights from policy
         return {
-            'ta': 0.30,    # Reduced TA weight
-            'ml': 0.35,    # Increased ML weight
-            'news': 0.15,  # Same news weight
-            'risk': 0.20   # Increased risk weight
+            'ta': ta_weight,
+            'ml': ml_weight,
+            'news': news_weight,
+            'risk': risk_weight
         }
 
 
@@ -1355,166 +1377,13 @@ async def _create_trigger_order(exchange_adapter, symbol: str, side: str, trigge
         return {}
 
 
-async def _send_telegram_analysis_card(symbol: str, composite_signal, live: bool) -> None:
-    """Send Telegram analysis card."""
-    try:
-        from infrastructure.notification_service import NotificationManager
-        from telegram_bot.bot import TelegramBot
-        
-        # Create notification service
-        import os
-        telegram_token = os.getenv('TELEGRAM_BOT_TOKEN', '')
-        telegram_bot = TelegramBot(telegram_token)
-        notification_service = NotificationManager(telegram_bot, {})
-        
-        # Format analysis card
-        mode_text = "🚀 LIVE" if live else "🧪 DRY-RUN"
-        decision_emoji = "🟢" if composite_signal.decision == "LONG" else "🔴" if composite_signal.decision == "SHORT" else "⚪"
-        
-        message = f"""
-📊 <b>Market Analysis - {symbol}</b> {mode_text}
-
-{decision_emoji} <b>Decision:</b> {composite_signal.decision}
-📈 <b>Final Score:</b> {composite_signal.final_score:.1f}/100
-🏆 <b>Grade:</b> {composite_signal.grade}
-
-<b>📊 Component Scores:</b>
-• TA: {composite_signal.technical.score:.1f} - {composite_signal.technical.rationale}
-• ML: {composite_signal.ml.score:.1f} - {composite_signal.ml.rationale}
-• News: {composite_signal.news.score:.1f} - {composite_signal.news.rationale}
-• Risk: {composite_signal.risk.score:.1f}
-
-<b>🎯 Technical Flags:</b>
-{_format_technical_flags(composite_signal.technical.flags)}
-
-<b>⏰ Timestamp:</b> {composite_signal.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}
-"""
-        
-        # Send notification
-        await notification_service.send_notification(message, "telegram")
-        logger.info(f"📱 Sent analysis card to Telegram for {symbol}")
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to send analysis card: {e}")
-
-
-async def _send_telegram_execution_card(symbol: str, composite_signal, execution_result: bool, live: bool) -> None:
-    """Send Telegram execution card."""
-    try:
-        from infrastructure.notification_service import NotificationManager
-        from telegram_bot.bot import TelegramBot
-        
-        # Create notification service
-        import os
-        telegram_token = os.getenv('TELEGRAM_BOT_TOKEN', '')
-        telegram_bot = TelegramBot(telegram_token)
-        notification_service = NotificationManager(telegram_bot, {})
-        
-        # Format execution card
-        mode_text = "🚀 LIVE" if live else "🧪 DRY-RUN"
-        status_emoji = "✅" if execution_result else "❌"
-        
-        message = f"""
-🎯 <b>Trade Execution - {symbol}</b> {mode_text}
-
-{status_emoji} <b>Status:</b> {'Executed' if execution_result else 'Failed'}
-📊 <b>Decision:</b> {composite_signal.decision}
-💰 <b>Position Size:</b> 0.35% of portfolio
-💲 <b>Entry Price:</b> $50,000
-🎯 <b>Take Profit:</b> $49,000 (-2%)
-🛡️ <b>Stop Loss:</b> $50,500 (+1%)
-
-<b>📋 Order Details:</b>
-• Client ID: EMF2ONHS13DTI
-• Side: {composite_signal.decision.lower()}
-• Amount: 0.003 BTC
-• TP Trigger: DRY_TP_EMF2ONHS13DTI
-• SL Trigger: DRY_SL_EMF2ONHS13DTI
-
-<b>⏰ Executed:</b> {composite_signal.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}
-"""
-        
-        # Send notification
-        await notification_service.send_notification(message, "telegram")
-        logger.info(f"📱 Sent execution card to Telegram for {symbol}")
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to send execution card: {e}")
-
-
-async def _send_telegram_error_card(symbol: str, composite_signal, error_message: str, live: bool) -> None:
-    """Send Telegram error card."""
-    try:
-        from infrastructure.notification_service import NotificationManager
-        from telegram_bot.bot import TelegramBot
-        
-        # Create notification service
-        import os
-        telegram_token = os.getenv('TELEGRAM_BOT_TOKEN', '')
-        telegram_bot = TelegramBot(telegram_token)
-        notification_service = NotificationManager(telegram_bot, {})
-        
-        # Format error card
-        mode_text = "🚀 LIVE" if live else "🧪 DRY-RUN"
-        
-        message = f"""
-❌ <b>Trade Error - {symbol}</b> {mode_text}
-
-🚨 <b>Error:</b> {error_message}
-📊 <b>Decision:</b> {composite_signal.decision}
-📈 <b>Score:</b> {composite_signal.final_score:.1f}/100
-
-<b>🔍 Analysis Summary:</b>
-• TA: {composite_signal.technical.score:.1f}
-• ML: {composite_signal.ml.score:.1f}
-• News: {composite_signal.news.score:.1f}
-• Risk: {composite_signal.risk.score:.1f}
-
-<b>⏰ Timestamp:</b> {composite_signal.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}
-"""
-        
-        # Send notification
-        await notification_service.send_notification(message, "telegram")
-        logger.info(f"📱 Sent error card to Telegram for {symbol}")
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to send error card: {e}")
-
-
-def _format_technical_flags(flags: dict) -> str:
-    """Format technical flags for display."""
-    try:
-        formatted_flags = []
-        
-        if flags.get('trend_alignment'):
-            formatted_flags.append("✅ Trend Alignment")
-        else:
-            formatted_flags.append("❌ Trend Alignment")
-            
-        if flags.get('entry_confirmation'):
-            formatted_flags.append("✅ Entry Confirmation")
-        else:
-            formatted_flags.append("❌ Entry Confirmation")
-            
-        if flags.get('rsi_overbought'):
-            formatted_flags.append("⚠️ RSI Overbought")
-        elif flags.get('rsi_oversold'):
-            formatted_flags.append("⚠️ RSI Oversold")
-        else:
-            formatted_flags.append("✅ RSI Normal")
-            
-        if flags.get('macd_bullish'):
-            formatted_flags.append("🟢 MACD Bullish")
-        elif flags.get('macd_bearish'):
-            formatted_flags.append("🔴 MACD Bearish")
-        else:
-            formatted_flags.append("⚪ MACD Neutral")
-        
-        return "\n".join(formatted_flags)
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to format technical flags: {e}")
-        return "Flags unavailable"
+# Removed: _send_telegram_analysis_card, _send_telegram_execution_card, _send_telegram_error_card, _format_technical_flags
+# These functions are no longer used. Telegram cards are now handled by:
+# - application/analysis_cards.py (AnalysisCardsService)
+# - adapters/telegram/views/analysis.py (build_analysis_summary_view, build_analysis_detail_view)
+# - adapters/telegram/handlers.py (callback routing)
+# - adapters/telegram/context_resolver.py (data resolution)
+# - infrastructure/scheduler_runner.py (Telegram bot initialization)
 
 
 def run_agents(graph: str = "default", mode: str = "dry-run", dry_run: bool = True) -> int:

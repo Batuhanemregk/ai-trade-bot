@@ -364,3 +364,5 @@ Hızlanma: 60 × 60 / 37 = ~97x daha hızlı! 🚀
 
 **Tüm bu değişiklikler = 97x daha hızlı eğitim! ⚡**
 
+
+

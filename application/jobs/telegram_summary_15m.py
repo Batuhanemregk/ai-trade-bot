@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 from typing import Dict, Any
 
 from loguru import logger
@@ -14,11 +15,16 @@ class TelegramSummary15mJob(BaseJob):
     def __init__(self, policy: Dict[str, Any], semaphore: asyncio.Semaphore, runtime_state: Dict[str, Any]):
         super().__init__(policy, semaphore, runtime_state)
         self.analysis_cards: AnalysisCardsService | None = None
+        self.telegram_client = None
+
+    def set_telegram_client(self, telegram_client):
+        """Set Telegram client from scheduler."""
+        self.telegram_client = telegram_client
 
     async def initialize(self, exchange_adapter=None):
         """Initialize analysis cards service."""
         self.exchange_adapter = exchange_adapter
-        self.analysis_cards = AnalysisCardsService(self.policy)
+        self.analysis_cards = AnalysisCardsService(self.policy, telegram_client=self.telegram_client)
         logger.info("✅ TelegramSummary15mJob initialized")
 
     async def cleanup(self):
@@ -49,29 +55,37 @@ class TelegramSummary15mJob(BaseJob):
                 return
 
             latest = get_latest_analysis()
-            if not latest:
+            if not latest or not latest.get('results'):
                 logger.info(f"[JOB] name=telegram_summary_15m run_id={self.run_id} bar={bar_id} no analysis snapshot yet")
                 self.finish_run("SUCCESS")
                 return
 
-            if latest.get('bar_id') != bar_id:
+            # Get the latest analysis bar_id (may be different from current bar_id)
+            latest_bar_id = latest.get('bar_id')
+            if not latest_bar_id:
+                logger.warning(f"[JOB] name=telegram_summary_15m run_id={self.run_id} bar={bar_id} latest analysis has no bar_id")
+                self.finish_run("SUCCESS")
+                return
+
+            # Check if we already published this specific analysis (by bar_id, not current bar_id)
+            # This prevents sending the same analysis multiple times
+            last_published_bar = self.runtime_state.get('telegram_summary', {}).get('last_published_bar_id')
+            if last_published_bar == latest_bar_id:
                 logger.info(
                     f"[JOB] name=telegram_summary_15m run_id={self.run_id} bar={bar_id} "
-                    f"latest_bar={latest.get('bar_id')} mismatch, skipping"
+                    f"latest_bar={latest_bar_id} already published → skipping"
                 )
                 self.finish_run("SUCCESS")
                 return
 
-            if self.is_bar_already_processed(self.job_id, '15m'):
-                logger.info(
-                    f"[JOB] name=telegram_summary_15m run_id={self.run_id} bar={bar_id} "
-                    "already published → skipping"
-                )
-                self.finish_run("SUCCESS")
-                return
-
+            # Publish the latest analysis (regardless of current bar_id)
             await self.analysis_cards.publish_latest_summary()
-            self.mark_bar_processed(self.job_id, '15m')
+            
+            # Mark this analysis as published
+            if 'telegram_summary' not in self.runtime_state:
+                self.runtime_state['telegram_summary'] = {}
+            self.runtime_state['telegram_summary']['last_published_bar_id'] = latest_bar_id
+            self.runtime_state['telegram_summary']['last_published_time'] = datetime.now(timezone.utc).isoformat()
 
             logger.info(f"[JOB] name=telegram_summary_15m run_id={self.run_id} bar={bar_id} status=SUCCESS")
             self.finish_run("SUCCESS")

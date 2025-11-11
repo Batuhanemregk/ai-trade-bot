@@ -119,7 +119,7 @@ class AnalysisSummaryLogger:
         
         # Format and log
         message = self.formatter.format_analysis_summary(data)
-        logger.info(message)
+        logger.debug(message)
         
         # Update Prometheus metrics if available
         if self.prometheus_exporter:

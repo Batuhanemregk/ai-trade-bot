@@ -15,75 +15,95 @@ def build_analysis_summary_view(
     context: Dict[str, Any],
     formatter: TelegramFormatter,
 ) -> Tuple[str, List[List[Dict[str, str]]]]:
-    """Build summary view text and button layout."""
-    bar_id = context.get("bar_id", "-")
-    run_id = context.get("run_id", "-")
-    updated_at = context.get("generated_at")
+    """Build summary view text and button layout in TELEGRAM_CARDS.md format."""
     results = context.get("results", [])
-    counts = context.get("counts", {})
+    timeframe = context.get("timeframe", "15m")
+    last_update = context.get("last_update")
+    mode = context.get("mode", "paper")
     
-    header = [
-        "📊 <b>15m Analysis Summary</b>",
-        f"Bar: <code>{bar_id}</code>",
-        f"Run: <code>{run_id}</code>",
-    ]
-    if updated_at:
+    # Parse last_update if it's a string
+    if isinstance(last_update, str):
         try:
-            dt = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
-            header.append(f"Updated: {dt.strftime('%H:%M:%S')} UTC")
+            last_update = datetime.fromisoformat(last_update.replace("Z", "+00:00"))
         except ValueError:
-            header.append(f"Updated: {updated_at}")
+            last_update = datetime.now(timezone.utc)
+    elif last_update is None:
+        last_update = datetime.now(timezone.utc)
     
-    totals_line = (
-        f"LONG {counts.get('LONG', 0)} • "
-        f"SHORT {counts.get('SHORT', 0)} • "
-        f"FLAT {counts.get('FLAT', 0)} • "
-        f"TOTAL {len(results)}"
-    )
+    # Header: Analysis Summary • TF 15m • Last <hh:mm:ss>
+    time_str = last_update.strftime('%H:%M:%S') if isinstance(last_update, datetime) else str(last_update)
+    header = f"Analysis Summary • TF {timeframe} • Last {time_str}"
     
-    lines = header + ["", totals_line, ""]
+    lines = [header, ""]
     
-    # Show top results
-    for entry in results[:12]:
+    # Show top 6 signals (matching SIGNALS view format)
+    for entry in results[:6]:
         symbol = entry.get('symbol', 'UNKNOWN')
-        score = entry.get('final_score', 0.0)
-        grade = entry.get('grade', '-')
-        decision = entry.get('decision', 'FLAT')
+        final_score = entry.get('final_score', 0.0)
+        grade = entry.get('grade', 'D')
+        direction = entry.get('decision', 'FLAT')
         ta_score = entry.get('ta_score', 0.0)
         ml_score = entry.get('ml_score', 0.0)
         news_score = entry.get('news_score', 0.0)
         risk_score = entry.get('risk_score', 0.0)
-        lines.append(
-            f"{symbol} • {score:.1f} ({grade}) • {decision} | "
-            f"TA {ta_score:.1f} / ML {ml_score:.1f} / News {news_score:.1f} / Risk {risk_score:.1f}"
-        )
+        
+        # Persist/age/confirm info
+        persist_count = entry.get('persist_count', 0)
+        persist_required = entry.get('persist_required', 5)
+        age_bars = entry.get('age_bars', 0)
+        age_max = entry.get('age_max', 6)
+        confirm_count = entry.get('confirmation_bars', 0)
+        confirm_required = entry.get('conf_required', 2)
+        
+        # Format signal line (matching TELEGRAM_CARDS.md format)
+        line = f"{symbol}  Final {final_score:.1f} ({grade})  Dir {direction}"
+        lines.append(line)
+        
+        # Component scores
+        lines.append(f"TA {ta_score:.0f}  ML {ml_score:.0f}  News {news_score:.0f}  Risk {risk_score:.0f}")
+        
+        # Persist/Age/Confirm (if available)
+        if persist_count > 0 or age_bars > 0 or confirm_count > 0:
+            persist_str = f"Persist {persist_count}/{persist_required}"
+            age_str = f"Age {age_bars}/{age_max}"
+            confirm_str = f"Confirm {confirm_count}/{confirm_required}"
+            lines.append(f"{persist_str}  {age_str}  {confirm_str}")
+        
+        lines.append("")  # Empty line between signals
     
-    if len(results) > 12:
-        lines.append(f"... {len(results) - 12} more symbols hidden")
-    
+    # Build text
     text = "\n".join(lines)
     
-    # Build buttons (symbols rows of 2)
+    # Add footer
+    text = formatter.add_footer(text, timeframe=timeframe, mode=mode, timestamp=last_update)
+    
+    # Build buttons: Symbol buttons (top 8) + Navigation buttons
     buttons: List[List[Dict[str, str]]] = []
-    row: List[Dict[str, str]] = []
-    for entry in results[:8]:  # Limit buttons to top 8 symbols
+    
+    # Symbol buttons (2 per row, max 8 symbols)
+    symbol_row: List[Dict[str, str]] = []
+    for entry in results[:8]:
         symbol = entry.get('symbol', 'UNKNOWN')
         score = entry.get('final_score', 0.0)
         label = f"{symbol} {score:.1f}"
-        row.append({"text": label, "callback_data": f"ai:an|s={symbol}"})
-        if len(row) == 2:
-            buttons.append(row)
-            row = []
-    if row:
-        buttons.append(row)
+        symbol_row.append({"text": label, "callback_data": f"ai:an|s={symbol}"})
+        if len(symbol_row) == 2:
+            buttons.append(symbol_row)
+            symbol_row = []
+    if symbol_row:
+        buttons.append(symbol_row)
+    
+    # Navigation buttons (matching SIGNALS view)
+    buttons.append([
+        {"text": "Main", "callback_data": "ai:main"},
+        {"text": "Signals", "callback_data": "ai:sig"},
+        {"text": "Risk", "callback_data": "ai:risk"},
+        {"text": "Positions", "callback_data": "ai:pos"},
+        {"text": "Orders", "callback_data": "ai:ord"}
+    ])
     
     if not buttons:
-        buttons = [[{"text": "Refresh", "callback_data": "ai:an"}]]
-    else:
-        # Add footer row for refresh
-        buttons.append([
-            {"text": "🔄 Refresh", "callback_data": "ai:an"},
-        ])
+        buttons = [[{"text": "Main", "callback_data": "ai:main"}]]
     
     return text, buttons
 
@@ -95,50 +115,97 @@ def build_analysis_detail_view(
     """Build symbol detail view text and button layout."""
     symbol = context.get('symbol', 'UNKNOWN')
     detail = context.get('detail', {}) or {}
-    bar_id = context.get('bar_id', '-')
-    run_id = context.get('run_id', '-')
+    timeframe = context.get('timeframe', '15m')
+    last_update = context.get('last_update')
+    mode = context.get('mode', 'paper')
     
-    lines = [
-        f"📈 <b>{symbol} Detail</b>",
-        f"Bar: <code>{bar_id}</code>",
-        f"Run: <code>{run_id}</code>",
-        "",
-    ]
+    # Parse last_update if it's a string
+    if isinstance(last_update, str):
+        try:
+            last_update = datetime.fromisoformat(last_update.replace("Z", "+00:00"))
+        except ValueError:
+            last_update = datetime.now(timezone.utc)
+    elif last_update is None:
+        last_update = datetime.now(timezone.utc)
     
-    score = detail.get('final_score', 0.0)
-    grade = detail.get('grade', '-')
-    decision = detail.get('decision', 'FLAT')
-    lines.append(f"Score: {score:.1f} ({grade}) • Decision: {decision}")
+    # Header
+    time_str = last_update.strftime('%H:%M:%S') if isinstance(last_update, datetime) else str(last_update)
+    header = f"{symbol} Analysis • TF {timeframe} • Last {time_str}"
+    lines = [header, ""]
     
-    lines.append(
-        "Scores:"
-        f"\n• TA {detail.get('ta_score', 0.0):.1f}"
-        f"\n• ML {detail.get('ml_score', 0.0):.1f}"
-        f"\n• News {detail.get('news_score', 0.0):.1f}"
-        f"\n• Risk {detail.get('risk_score', 0.0):.1f}"
-    )
+    # Score and decision
+    final_score = detail.get('final_score', 0.0)
+    grade = detail.get('grade', 'D')
+    direction = detail.get('decision', 'FLAT')
+    lines.append(f"Final {final_score:.1f} ({grade})  Dir {direction}")
+    lines.append("")
     
+    # Component scores
+    ta_score = detail.get('ta_score', 0.0)
+    ml_score = detail.get('ml_score', 0.0)
+    news_score = detail.get('news_score', 0.0)
+    risk_score = detail.get('risk_score', 0.0)
+    lines.append(f"TA {ta_score:.0f}  ML {ml_score:.0f}  News {news_score:.0f}  Risk {risk_score:.0f}")
+    lines.append("")
+    
+    # Persist/Age/Confirm
+    persist_count = detail.get('persist_count', 0)
+    persist_required = detail.get('persist_required', 5)
+    age_bars = detail.get('age_bars', 0)
+    age_max = detail.get('age_max', 6)
+    confirm_count = detail.get('confirmation_bars', 0)
+    confirm_required = detail.get('conf_required', 2)
+    
+    if persist_count > 0 or age_bars > 0 or confirm_count > 0:
+        persist_str = f"Persist {persist_count}/{persist_required}"
+        age_str = f"Age {age_bars}/{age_max}"
+        confirm_str = f"Confirm {confirm_count}/{confirm_required}"
+        lines.append(f"{persist_str}  {age_str}  {confirm_str}")
+        lines.append("")
+    
+    # News info
     news_info = detail.get('news_info', {})
     if news_info:
+        news_type = news_info.get('type', 'general')
+        news_confidence = news_info.get('confidence', 0.0)
+        news_title = news_info.get('title', 'No recent news')
+        lines.append(f"📰 News: {news_type} ({news_confidence:.1f})")
+        if news_title and news_title != 'No recent news':
+            # Truncate long titles
+            if len(news_title) > 60:
+                news_title = news_title[:57] + "..."
+            lines.append(f"<i>{news_title}</i>")
         lines.append("")
-        lines.append(
-            f"📰 News: {news_info.get('type', 'general')} "
-            f"({news_info.get('confidence', 0):.1f})"
-        )
-        lines.append(f"<i>{news_info.get('title', 'No recent news')}</i>")
     
+    # Risk info
     risk_info = detail.get('risk_info', {})
     if risk_info:
-        lines.append("")
-        lines.append(f"⚠️ Risk level: {risk_info.get('level', 'medium')}")
+        risk_level = risk_info.get('level', 'medium')
         factors = risk_info.get('factors', [])
+        lines.append(f"⚠️ Risk level: {risk_level}")
         if factors:
-            lines.append("<i>" + ", ".join(factors[:4]) + "</i>")
+            factors_str = ", ".join(factors[:4])
+            if len(factors_str) > 60:
+                factors_str = factors_str[:57] + "..."
+            lines.append(f"<i>{factors_str}</i>")
+        lines.append("")
     
+    # Build text
     text = "\n".join(lines)
     
+    # Add footer
+    text = formatter.add_footer(text, timeframe=timeframe, mode=mode, timestamp=last_update)
+    
+    # Build buttons: Navigation buttons (matching detail view pattern)
     buttons = [
-        [{"text": "⬅️ Geri", "callback_data": "ai:an"}],
+        [
+            {"text": "Main", "callback_data": "ai:main"},
+            {"text": "Signals", "callback_data": "ai:sig"},
+            {"text": "Risk", "callback_data": "ai:risk"}
+        ],
+        [
+            {"text": "⬅️ Back", "callback_data": "ai:an"}
+        ]
     ]
     
     return text, buttons

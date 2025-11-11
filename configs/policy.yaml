@@ -124,10 +124,10 @@ trading:
   
   # Scoring
   scoring:
-    ta_weight: 0.7          # Technical Analysis weight (increased)
-    ml_weight: 0.1          # Machine Learning weight (reduced)
-    news_weight: 0.1        # News sentiment weight (reduced)
-    risk_weight: 0.1        # Risk score weight (reduced)
+    ta_weight: 0.3          # Technical Analysis weight
+    ml_weight: 0.5          # Machine Learning weight (increased)
+    news_weight: 0.1        # News sentiment weight
+    risk_weight: 0.07       # Risk score weight
     min_composite_score: 0.6  # Minimum score to execute trade
     
     # Signal Thresholds (Single Source of Truth) - Enhanced Hysteresis
