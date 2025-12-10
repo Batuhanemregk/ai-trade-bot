@@ -1,5 +1,6 @@
 """
-Binance API ile tam 6 aylık veri çeken collector
+Binance API ile 18 aylık veri çeken collector
+Updated for ML simplification: only 15m timeframe needed
 """
 
 import ccxt
@@ -10,7 +11,7 @@ from pathlib import Path
 from loguru import logger
 
 class BinanceDataCollector:
-    """Binance API ile tam 6 aylık veri çeken collector."""
+    """Binance API ile 18 aylık veri çeken collector (15m only)."""
     
     def __init__(self):
         self.exchange = ccxt.binance({
@@ -21,17 +22,17 @@ class BinanceDataCollector:
         self.data_dir = Path("data/ml_training")
         self.data_dir.mkdir(exist_ok=True)
         
-        # ML için gerekli semboller ve timeframes
+        # ML için gerekli semboller (15m only per simplification)
         self.symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT']
-        self.timeframes = ['15m', '1h', '4h']
+        self.timeframes = ['15m']  # Simplified: only 15m needed
         
-        logger.info("Binance data collector initialized")
+        logger.info("Binance data collector initialized (18 month, 15m only)")
     
-    def fetch_with_pagination(self, symbol, timeframe, months=6):
-        """Sayfalama ile tam veri çekme."""
+    def fetch_with_pagination(self, symbol, timeframe, months=18):
+        """Sayfalama ile tam veri çekme (18 ay)."""
         
-        # 6 ay önce
-        since = int((datetime.now(timezone.utc) - timedelta(days=180)).timestamp() * 1000)
+        # 18 ay önce (540 gün)
+        since = int((datetime.now(timezone.utc) - timedelta(days=540)).timestamp() * 1000)
         now = int(datetime.now(timezone.utc).timestamp() * 1000)
         
         logger.info(f"Fetching {months} months of {timeframe} data for {symbol}")
@@ -41,7 +42,7 @@ class BinanceDataCollector:
         all_ohlcv = []
         current_since = since
         request_count = 0
-        max_requests = 50
+        max_requests = 200  # Increased for 18 months (~52k 15m bars)
         
         while current_since < now and request_count < max_requests:
             try:

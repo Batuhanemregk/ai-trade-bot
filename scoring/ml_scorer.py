@@ -18,11 +18,10 @@ class MLScorer:
     """
     ML-based scoring using trained LightGBM models.
     
-    - Loads 9 separate models (3 symbols × 3 TFs)
-    - Uses expanded feature set (60+ features) with multi-timeframe support
-    - Generates p_up (probability of price going up)
-    - Converts to score: 0-100 scale
-    - Falls back to neutral if model unavailable
+    SIMPLIFIED: Only uses 15m timeframe models (9→3 reduction)
+    - 3 models: BTC_15m, ETH_15m, SOL_15m
+    - 1h and 4h data used as MTF features, not separate models
+    - Falls back to TA-only scoring if model unavailable
     """
     
     def __init__(self):
@@ -32,26 +31,40 @@ class MLScorer:
         self._load_all_models()
     
     def _load_all_models(self):
-        """Load all 9 LightGBM models (3 symbols × 3 TFs)."""
-        symbols = ['BTC', 'ETH', 'SOL']
-        timeframes = ['15m', '1h', '4h']
+        """Load 3 LightGBM models (3 symbols × 1 TF = 15m only).
         
-        logger.info("Loading LightGBM models...")
+        NOTE: Simplified from 9 models to 3 (USER DECISION).
+        - 1h and 4h models removed (insufficient samples for training)
+        - Multi-timeframe data still used as features in 15m model
+        """
+        symbols = ['BTC', 'ETH', 'SOL']
+        # SIMPLIFIED: Only 15m timeframe (was ['15m', '1h', '4h'])
+        timeframes = ['15m']  
+        
+        logger.info("Loading LightGBM models (15m only - simplified)...")
         
         for symbol in symbols:
             for tf in timeframes:
                 key = f"{symbol}_{tf}"
-                # Try 18-month model first (new), fallback to 6-month
-                model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m.pkl")
-                metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m_metadata.json")
                 
+                # Try new format first (advanced models with feature selection)
+                # New format: BTC_USDT_15m_last18m.pkl (from train_advanced.py)
+                model_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_last18m.pkl")
+                metadata_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_last18m_metadata.json")
+                
+                # Fallback: old format BTCUSDT_15m_last18m.pkl
+                if not model_path.exists():
+                    model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m.pkl")
+                    metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m_metadata.json")
+                
+                # Fallback: 6-month models
                 if not model_path.exists():
                     model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m.pkl")
                     metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m_metadata.json")
                 
                 try:
                     if not model_path.exists():
-                        logger.debug(f"Model not found: {model_path}, will use fallback")
+                        logger.warning(f"⚠️ Model not found: {model_path}, fallback to TA-only for {symbol}")
                         continue
                     
                     # Load model
@@ -78,10 +91,10 @@ class MLScorer:
                     continue
         
         loaded_count = len(self.models)
-        logger.info(f"Loaded {loaded_count}/9 LightGBM models")
+        logger.info(f"Loaded {loaded_count}/3 LightGBM models (15m only)")
         
         if loaded_count == 0:
-            logger.warning("⚠️ No LightGBM models loaded, will use fallback scoring")
+            logger.warning("⚠️ No LightGBM models loaded, will use TA-only scoring")
     
     def score(self, symbol: str, ohlcv_bundle: Dict[str, pd.DataFrame]) -> Tuple[float, str, Dict[str, Any]]:
         """
@@ -137,9 +150,14 @@ class MLScorer:
                 return self._fallback_score(symbol)
             
             # Get feature columns from model metadata
-            model_features = self.metadata.get(model_key, {}).get('features', [])
+            # Note: train_advanced.py saves as 'feature_columns', not 'features'
+            model_features = self.metadata.get(model_key, {}).get('feature_columns', [])
             if not model_features:
-                # Fallback: use feature builder columns
+                # Try alternate key
+                model_features = self.metadata.get(model_key, {}).get('features', [])
+            if not model_features:
+                # Fallback: use feature builder columns (NOT recommended for new models)
+                logger.warning(f"No feature_columns in metadata for {model_key}, using all features")
                 model_features = self.feature_builder.feature_columns
             
             if not model_features:
@@ -171,25 +189,26 @@ class MLScorer:
             p_up = model.predict_proba(latest_features_df)[0, 1]
             
             # Convert to 0-100 score (bidirectional mapping for SHORT/LONG)
-            # p_up >= 0.65: Strong LONG (70-100)
-            # 0.50 < p_up < 0.65: Moderate LONG (60-69)
-            # 0.35 < p_up < 0.50: Weak/NEUTRAL (40-59)
-            # 0.20 < p_up <= 0.35: Moderate SHORT (20-39)
-            # p_up <= 0.20: Strong SHORT (0-19)
-            if p_up >= 0.65:
-                ml_score = round(70 + (p_up - 0.65) / 0.35 * 30, 1)  # 70-100
+            # Updated for new 1% threshold model with sharper predictions
+            # p_up >= 0.70: Strong LONG (70-100)
+            # 0.55 < p_up < 0.70: Moderate LONG (60-69)
+            # 0.45 < p_up < 0.55: NEUTRAL (40-59)
+            # 0.30 < p_up <= 0.45: Moderate SHORT (20-39)
+            # p_up <= 0.30: Strong SHORT (0-19)
+            if p_up >= 0.70:
+                ml_score = round(70 + (p_up - 0.70) / 0.30 * 30, 1)  # 70-100
                 signal_dir = "LONG"
-            elif p_up >= 0.50:
-                ml_score = round(60 + (p_up - 0.50) / 0.15 * 10, 1)  # 60-70
+            elif p_up >= 0.55:
+                ml_score = round(60 + (p_up - 0.55) / 0.15 * 10, 1)  # 60-70
                 signal_dir = "LONG_WEAK"
-            elif p_up >= 0.35:
-                ml_score = round(40 + (p_up - 0.35) / 0.15 * 20, 1)  # 40-60
+            elif p_up >= 0.45:
+                ml_score = round(40 + (p_up - 0.45) / 0.10 * 20, 1)  # 40-60
                 signal_dir = "NEUTRAL"
-            elif p_up >= 0.20:
-                ml_score = round(20 + (p_up - 0.20) / 0.15 * 20, 1)  # 20-40
+            elif p_up >= 0.30:
+                ml_score = round(20 + (p_up - 0.30) / 0.15 * 20, 1)  # 20-40
                 signal_dir = "SHORT_WEAK"
             else:
-                ml_score = round((p_up / 0.20) * 20, 1)  # 0-20
+                ml_score = round((p_up / 0.30) * 20, 1)  # 0-20
                 signal_dir = "SHORT"
             
             # Determine confidence
@@ -274,31 +293,22 @@ class MLScorer:
         """
         Fallback scoring when model unavailable.
         
-        Returns neutral score with slight randomness to avoid constant 50.
+        Returns None score to trigger TA-only mode in composite signal.
+        The composite scorer will redistribute ML weight to TA weight.
         """
-        import random
-        import time
-        
-        # Add some variation but keep near neutral
-        base = 50.0
-        variation = random.uniform(-5, 5)  # ±5 points
-        time_var = (time.time() % 10) - 5  # ±5 points based on time
-        
-        score = base + variation + time_var
-        score = max(35.0, min(65.0, score))  # Clamp to 35-65 range
-        
-        rationale = f"ML fallback: model unavailable, using neutral score with variation"
+        rationale = f"ML unavailable for {symbol}: switching to TA-only mode"
+        logger.warning(f"⚠️ {rationale}")
         
         details = {
             'source': 'fallback',
-            'p_up': score / 100.0,
-            'p_down': 1 - (score / 100.0),
-            'ml_score': score,
-            'confidence': 'low',
-            'model_type': 'fallback'
+            'ml_available': False,
+            'fallback_reason': 'model_not_loaded',
+            'recommendation': 'redistribute_weight_to_ta'
         }
         
-        return score, rationale, details
+        # Return None to indicate ML should be excluded from composite
+        # The composite scorer will redistribute the weight to TA
+        return None, rationale, details
 
 
 # Backward compatibility - keep old interface

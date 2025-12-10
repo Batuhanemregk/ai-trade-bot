@@ -66,7 +66,7 @@ def test_enhanced_scoring():
         mock_data = create_mock_data()
         
         # Test scoring
-        score, rationale, flags = scorer.score("BTC/USDT", mock_data)
+        score, rationale, flags = scorer.score(mock_data, "BTC/USDT")
         
         print(f"PASS - Enhanced TA score: {score:.1f}")
         print(f"Rationale: {rationale[:100]}...")
@@ -212,7 +212,7 @@ def test_performance_impact():
         start_time = time.time()
         
         for _ in range(iterations):
-            scorer.score("BTC/USDT", mock_data)
+            scorer.score(mock_data, "BTC/USDT")
         
         end_time = time.time()
         total_time = end_time - start_time

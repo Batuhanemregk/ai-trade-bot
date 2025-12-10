@@ -535,9 +535,9 @@ class SimulatedNewsClient:
         
         return headlines
     
-    def get_news_for_symbol(self, symbol: str) -> list[dict]:
+    def get_news_for_symbol(self, symbol: str, limit: int = 10, **kwargs) -> list[dict]:
         """Get news for a specific symbol (alias for get_news)."""
-        return self.get_news(symbol)
+        return self.get_news(symbol)[:limit]
     
     def get_market_news(self) -> list[dict]:
         """Get general market news."""

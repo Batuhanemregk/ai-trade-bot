@@ -109,11 +109,20 @@ class TAScorer:
         """Extract indicators from DataFrame into dictionary format."""
         indicators = {}
 
-        # Extract all indicator columns
+        # Extract all indicator columns (expanded list for full TA scoring)
         indicator_columns = [
+            # Core indicators
             'sma_20', 'sma_50', 'rsi', 'macd', 'macd_signal', 'macd_histogram',
             'bb_upper', 'bb_middle', 'bb_lower', 'bb_width', 'atr',
-            'volume_sma', 'volume_ratio', 'current_price', 'high_20', 'low_20'
+            'volume_sma', 'volume_ratio', 'current_price', 'high_20', 'low_20',
+            # ADX indicators
+            'adx', 'di_plus', 'di_minus',
+            # EMA indicators
+            'ema_20', 'ema_50', 'ema_200',
+            # Stochastic indicators
+            'stoch_k', 'stoch_d',
+            # SuperTrend
+            'supertrend', 'supertrend_direction'
         ]
 
         for col in indicator_columns:

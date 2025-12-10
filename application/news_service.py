@@ -347,16 +347,47 @@ class NewsService:
             return {'type': 'general', 'confidence': score / 100.0}
     
     async def get_news_score(self, symbol: str) -> Tuple[float, List[str], str, float]:
-        """Get news score for a symbol"""
+        """Get news score for a symbol.
+        
+        Includes both symbol-specific news AND general market news.
+        Per user request: general market news should impact all active coins.
+        """
         try:
             logger.debug(f"[NEWS_SCORE] get_news_score called for {symbol}")
             
-            # Get latest cached LLM result
-            news_items = self.news_data.get(symbol, [])
-            logger.debug(f"[NEWS_SCORE] {symbol} has {len(news_items)} cached articles")
+            # Normalize symbol: BTC-USDT-SWAP -> BTC, ETH-USDT-SWAP -> ETH, etc.
+            base_symbol = symbol.split('-')[0].upper() if '-' in symbol else symbol.upper()
+            
+            # Collect news from multiple sources:
+            # 1. Symbol-specific news (e.g., "BTC", "ETH")
+            # 2. General market news (e.g., "CRYPTO", "MARKET", "general")
+            news_items = []
+            
+            # 1. Get symbol-specific news
+            symbol_news = self.news_data.get(symbol, [])
+            if not symbol_news:
+                symbol_news = self.news_data.get(base_symbol, [])
+            
+            if symbol_news:
+                news_items.extend(symbol_news)
+                logger.debug(f"[NEWS_SCORE] {symbol}: found {len(symbol_news)} symbol-specific articles")
+            
+            # 2. Get general market news (impacts ALL coins)
+            general_keys = ['general', 'GENERAL', 'CRYPTO', 'crypto', 'MARKET', 'market']
+            general_news_count = 0
+            for key in general_keys:
+                general_news = self.news_data.get(key, [])
+                if general_news:
+                    news_items.extend(general_news)
+                    general_news_count += len(general_news)
+            
+            if general_news_count > 0:
+                logger.debug(f"[NEWS_SCORE] {symbol}: added {general_news_count} general market articles")
+            
+            logger.debug(f"[NEWS_SCORE] {symbol} has {len(news_items)} total articles (symbol + general)")
             
             if not news_items:
-                logger.info(f"[NEWS_SCORE] {symbol} -> 50.0 (no articles in storage)")
+                logger.info(f"[NEWS_SCORE] {symbol} -> 50.0 (no articles for {symbol} or general market)")
                 return 50.0, ["GENERAL"], "No news data available", 0.5
             
             max_items = self.llm_config.get('digest', {}).get('max_items_per_symbol', 30)
@@ -376,8 +407,34 @@ class NewsService:
                     cached_result['volatility_impact']
                 )
             else:
+                # Try to run LLM analysis on-demand if analyzer is available
+                if self.llm_analyzer and news_items:
+                    try:
+                        logger.info(f"[NEWS_SCORE] {symbol} -> Running on-demand LLM analysis for {len(news_items)} articles")
+                        max_items = self.llm_config.get('digest', {}).get('max_items_per_symbol', 30)
+                        
+                        score, categories, rationale, volatility_impact = await self.llm_analyzer.analyze_news_batch(
+                            news_items[:max_items], symbol, self.symbol_aliases
+                        )
+                        
+                        # Cache the result
+                        result = {
+                            'score': score,
+                            'categories': categories,
+                            'rationale': rationale,
+                            'volatility_impact': volatility_impact,
+                            'timestamp': datetime.now(timezone.utc).isoformat()
+                        }
+                        self.digest_manager.cache_digest_result(base_symbol, digest_hash, result)
+                        
+                        logger.info(f"[NEWS_SCORE] {symbol} -> {score:.1f} (on-demand LLM analysis)")
+                        return score, categories, rationale, volatility_impact
+                        
+                    except Exception as llm_error:
+                        logger.warning(f"[NEWS_SCORE] {symbol} LLM analysis failed: {llm_error}, using neutral")
+                
                 # Fallback to neutral score
-                logger.info(f"[NEWS_SCORE] {symbol} -> 50.0 (no LLM analysis cached)")
+                logger.info(f"[NEWS_SCORE] {symbol} -> 50.0 (no LLM analysis available)")
                 return 50.0, ["GENERAL"], "No LLM analysis available", 0.5
                 
         except Exception as e:

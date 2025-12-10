@@ -1,0 +1,155 @@
+{
+  "symbol": "BTC_USDT",
+  "timeframe": "15m",
+  "training_period": "2024-06-17 22:00:00 to 2025-12-09 21:45:00",
+  "training_samples": 51837,
+  "n_features": 35,
+  "feature_columns": [
+    "atr_pct",
+    "roll_std_5",
+    "volume_volatility",
+    "hour_sin",
+    "macd_line",
+    "sma_50",
+    "mfi",
+    "volume_ema_20",
+    "stoch_d",
+    "upper_wick_ratio",
+    "obv",
+    "sma_20",
+    "kurtosis_20",
+    "body_ratio",
+    "volatility_zscore",
+    "ha_low",
+    "macd_signal",
+    "skewness_20",
+    "rsi_14",
+    "roll_std_10",
+    "distance_high_20",
+    "volume_momentum",
+    "volume_sma_ratio",
+    "volume_sma_20",
+    "ha_close",
+    "log_ret_5",
+    "volume_ema_ratio",
+    "bb_lower",
+    "dow_sin",
+    "hour_cos",
+    "lower_wick_ratio",
+    "bb_width",
+    "distance_low_20",
+    "roll_std_20",
+    "ha_open"
+  ],
+  "all_features_count": 68,
+  "forward_bars": 3,
+  "threshold_pct": 1.0,
+  "optuna_trials": 100,
+  "best_params": {
+    "n_estimators": 395,
+    "learning_rate": 0.018047548116441183,
+    "num_leaves": 144,
+    "max_depth": 8,
+    "reg_alpha": 0.2033143416887287,
+    "reg_lambda": 0.00011098580830684601,
+    "colsample_bytree": 0.5888443476209589,
+    "subsample": 0.5254838059682636,
+    "subsample_freq": 6,
+    "min_child_samples": 126,
+    "scale_pos_weight": 1.3716162987722142
+  },
+  "metrics": {
+    "auc_mean": 0.8180527969318534,
+    "auc_folds": [
+      0.7894242464226877,
+      0.8007156563880663,
+      0.8410300685362241,
+      0.820488940628638,
+      0.8386050726836511
+    ],
+    "optuna_best_auc": 0.8180527969318534
+  },
+  "feature_importance": [
+    {
+      "feature": "atr_pct",
+      "importance": 0.3209522140859413
+    },
+    {
+      "feature": "roll_std_5",
+      "importance": 0.316126341805282
+    },
+    {
+      "feature": "volume_volatility",
+      "importance": 0.3105667580282937
+    },
+    {
+      "feature": "hour_sin",
+      "importance": 0.23372535512288256
+    },
+    {
+      "feature": "macd_line",
+      "importance": 0.23161942245982878
+    },
+    {
+      "feature": "sma_50",
+      "importance": 0.20720772559583514
+    },
+    {
+      "feature": "mfi",
+      "importance": 0.19003570635070205
+    },
+    {
+      "feature": "volume_ema_20",
+      "importance": 0.18599237866251891
+    },
+    {
+      "feature": "stoch_d",
+      "importance": 0.17611819908829476
+    },
+    {
+      "feature": "upper_wick_ratio",
+      "importance": 0.15811212242306322
+    },
+    {
+      "feature": "obv",
+      "importance": 0.15059436063702553
+    },
+    {
+      "feature": "sma_20",
+      "importance": 0.14578742011631848
+    },
+    {
+      "feature": "kurtosis_20",
+      "importance": 0.13529945839380772
+    },
+    {
+      "feature": "body_ratio",
+      "importance": 0.13272603891958795
+    },
+    {
+      "feature": "volatility_zscore",
+      "importance": 0.13214439450587448
+    },
+    {
+      "feature": "ha_low",
+      "importance": 0.12207946986078289
+    },
+    {
+      "feature": "macd_signal",
+      "importance": 0.1091127269037181
+    },
+    {
+      "feature": "skewness_20",
+      "importance": 0.10664472219334391
+    },
+    {
+      "feature": "rsi_14",
+      "importance": 0.10249012004121846
+    },
+    {
+      "feature": "roll_std_10",
+      "importance": 0.10063435629637574
+    }
+  ],
+  "created_at": "2025-12-10T01:31:07.155371"
+}

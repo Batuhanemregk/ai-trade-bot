@@ -8,7 +8,6 @@ import re
 from typing import List, Dict, Any, Tuple, Optional
 from loguru import logger
 from openai import AsyncOpenAI
-from adapters.llm_analyzer import LLMNewsAnalyzer
 from monitoring.prometheus_exporter import get_prometheus_exporter
 
 
@@ -25,7 +24,7 @@ class NewsLLMAnalyzer:
         # Cost tracking (gpt-5-nano pricing - estimated, will be updated with official pricing)
         self.cost_per_mtok_in = float(os.getenv('LLM_COST_PER_MTOK_IN', '0.05'))  # gpt-5-nano: estimated $0.05/1M
         self.cost_per_mtok_out = float(os.getenv('LLM_COST_PER_MTOK_OUT', '0.20'))  # gpt-5-nano: estimated $0.20/1M
-        self.daily_budget_tokens = int(os.getenv('LLM_DAILY_BUDGET_TOKENS', '200000'))
+        self.daily_budget_tokens = int(os.getenv('LLM_DAILY_BUDGET_TOKENS', '10000000'))  # 10M default (high limit)
         self.daily_budget_usd = float(os.getenv('LLM_DAILY_BUDGET_USD', '999.0'))  # High default (no limit)
         
         # Daily usage tracking (resets at midnight)

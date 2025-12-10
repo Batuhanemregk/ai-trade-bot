@@ -90,8 +90,9 @@ class PersistenceProcessor(SignalProcessor):
         # Check if signal has persisted for required bars
         persistence_count = self._count_persistence(history, direction)
         
-        # Check signal age
-        signal_age = len(history) if history else 0
+        # Check signal age - only count consecutive bars with same direction
+        # This is the actual age of the current signal, not total history
+        signal_age = persistence_count  # Age = how long this signal has persisted
         
         is_valid = persistence_count >= self.persistence_bars and signal_age <= self.max_signal_age
         
@@ -168,6 +169,8 @@ class ConfirmationProcessor(SignalProcessor):
     def __init__(self, policy: Dict):
         self.policy = policy
         self.confirm_bars = policy['trading']['scoring']['signal']['rev_confirm_bars']
+        # Cache confirmation_margin for performance - read once, use many
+        self.confirmation_margin = policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('confirmation_margin', 2.0)
     
     def process(self, signal: Dict, history: List[SignalHistory], regime: RegimeInfo) -> GatedSignal:
         """Check signal confirmation requirements."""
@@ -212,7 +215,8 @@ class ConfirmationProcessor(SignalProcessor):
         
         enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
         enter_short = self.policy['trading']['scoring']['decision_thresholds']['enter_short']
-        margin = self.policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('confirmation_margin', 2.0)
+        # Use cached margin value from __init__ for better performance
+        margin = self.confirmation_margin
         
         count = 0
         for signal in reversed(history):
@@ -361,20 +365,28 @@ class HysteresisProcessor(SignalProcessor):
         self.enter_short = policy['trading']['scoring']['decision_thresholds']['enter_short']
         self.exit_short = policy['trading']['scoring']['decision_thresholds']['exit_short']
     
-    def process(self, signal: Dict, history: List[SignalHistory], regime: RegimeInfo) -> GatedSignal:
-        """Apply hysteresis logic."""
+    def process(self, signal: Dict, history: List[SignalHistory], regime: RegimeInfo, 
+                 position_info: Optional[Dict] = None) -> GatedSignal:
+        """Apply hysteresis logic with real position synchronization.
+        
+        Args:
+            signal: Signal data with final_score
+            history: Signal history for this symbol
+            regime: Market regime info
+            position_info: Optional real position info {'has_position': bool, 'side': 'long'/'short'/None}
+        """
         final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         
-        # Determine if this is an entry or exit signal based on history
-        is_entry = self._is_entry_signal(history, final_score)
+        # Determine if this is an entry or exit signal - use real position if available
+        is_entry = self._is_entry_signal(history, final_score, position_info)
         
         if is_entry:
             direction = self._get_entry_direction(final_score)
             is_valid = self._is_valid_entry(final_score)
             reason = f"Entry signal: {direction}"
         else:
-            direction = self._get_exit_direction(history, final_score)
-            is_valid = self._is_valid_exit(history, final_score)
+            direction = self._get_exit_direction(history, final_score, position_info)
+            is_valid = self._is_valid_exit(history, final_score, position_info)
             reason = f"Exit signal: {direction}"
         
         return GatedSignal(
@@ -389,12 +401,18 @@ class HysteresisProcessor(SignalProcessor):
             confirmation_bars=0
         )
     
-    def _is_entry_signal(self, history: List[SignalHistory], score: float) -> bool:
-        """Determine if this is an entry signal."""
+    def _is_entry_signal(self, history: List[SignalHistory], score: float, 
+                          position_info: Optional[Dict] = None) -> bool:
+        """Determine if this is an entry signal using real position info."""
+        # Priority 1: Use real exchange position info if available
+        if position_info is not None:
+            has_position = position_info.get('has_position', False)
+            return not has_position  # Entry if no position
+        
+        # Fallback: Use signal history
         if not history:
             return True  # First signal is always entry
         
-        # Check if we're in a position
         last_direction = history[-1].direction
         return last_direction == 'flat'
     
@@ -407,26 +425,49 @@ class HysteresisProcessor(SignalProcessor):
         else:
             return 'flat'
     
-    def _get_exit_direction(self, history: List[SignalHistory], score: float) -> str:
+    def _get_exit_direction(self, history: List[SignalHistory], score: float,
+                             position_info: Optional[Dict] = None) -> str:
         """Get exit direction based on current position."""
+        # Priority 1: Use real position side if available
+        if position_info is not None and position_info.get('has_position', False):
+            current_side = position_info.get('side', 'long')
+            if current_side == 'long' and score <= self.exit_long:
+                return 'short'  # Long to short reversal
+            elif current_side == 'short' and score >= self.exit_short:
+                return 'long'  # Short to long reversal
+            else:
+                return current_side  # Maintain current direction
+        
+        # Fallback: Use history
         if not history:
             return 'flat'
         
         last_direction = history[-1].direction
         
         if last_direction == 'long' and score <= self.exit_long:
-            return 'short'  # Long to short reversal
+            return 'short'
         elif last_direction == 'short' and score >= self.exit_short:
-            return 'long'   # Short to long reversal
+            return 'long'
         else:
-            return last_direction  # Maintain current direction
+            return last_direction
     
     def _is_valid_entry(self, score: float) -> bool:
         """Check if entry signal is valid."""
         return score >= self.enter_long or score <= self.enter_short
     
-    def _is_valid_exit(self, history: List[SignalHistory], score: float) -> bool:
+    def _is_valid_exit(self, history: List[SignalHistory], score: float,
+                        position_info: Optional[Dict] = None) -> bool:
         """Check if exit signal is valid."""
+        # Priority 1: Use real position side if available
+        if position_info is not None and position_info.get('has_position', False):
+            current_side = position_info.get('side', 'long')
+            if current_side == 'long':
+                return score <= self.exit_long
+            elif current_side == 'short':
+                return score >= self.exit_short
+            return False
+        
+        # Fallback: Use history
         if not history:
             return False
         
@@ -458,31 +499,37 @@ class SignalGate:
         
         # Initialize processors
         self.persistence_processor = PersistenceProcessor(policy)
-        self.confirmation_processor = ConfirmationProcessor(policy)
+        # NOTE: ConfirmationProcessor removed - it was redundant with PersistenceProcessor
+        # Confirmation was just a stricter version (threshold + margin) of persistence
         self.hysteresis_processor = HysteresisProcessor(policy)
         self.regime_processor = RegimeProcessor(policy)
         
-        logger.info("SignalGate initialized with persistence, confirmation, and hysteresis processors")
+        logger.info("SignalGate initialized with persistence and hysteresis processors (conf merged into persist)")
     
-    def process_signal(self, symbol: str, signal: Dict, ohlcv_1h: List[List]) -> GatedSignal:
-        """Process signal with all gating logic."""
+    def process_signal(self, symbol: str, signal: Dict, ohlcv_1h: List[List], 
+                        position_info: Optional[Dict] = None) -> GatedSignal:
+        """Process signal with all gating logic.
+        
+        Args:
+            symbol: Trading symbol
+            signal: Signal dict with final_score and other data
+            ohlcv_1h: 1H OHLCV data for regime detection
+            position_info: Optional real position info {'has_position': bool, 'side': 'long'/'short'/None}
+        """
         # Detect market regime
         regime = self.regime_processor.detect_regime(ohlcv_1h)
         
         # Get signal history
         history = self.signal_history.get(symbol, [])
         
-        # Apply persistence check
+        # Apply persistence check (includes age check)
         persistence_result = self.persistence_processor.process(signal, history, regime)
         
-        # Apply confirmation check
-        confirmation_result = self.confirmation_processor.process(signal, history, regime)
+        # Apply hysteresis check with real position info
+        hysteresis_result = self.hysteresis_processor.process(signal, history, regime, position_info)
         
-        # Apply hysteresis check
-        hysteresis_result = self.hysteresis_processor.process(signal, history, regime)
-        
-        # Combine results
-        final_result = self._combine_results(persistence_result, confirmation_result, hysteresis_result, regime)
+        # Combine results - simplified: just persistence + hysteresis
+        final_result = self._combine_results(persistence_result, hysteresis_result, regime)
         
         # Update signal history
         self._update_history(symbol, signal, final_result)
@@ -493,19 +540,19 @@ class SignalGate:
         
         return final_result
     
-    def _combine_results(self, persistence: GatedSignal, confirmation: GatedSignal, 
-                        hysteresis: GatedSignal, regime: RegimeInfo) -> GatedSignal:
-        """Combine all processing results."""
+    def _combine_results(self, persistence: GatedSignal, hysteresis: GatedSignal, 
+                        regime: RegimeInfo) -> GatedSignal:
+        """Combine persistence and hysteresis results."""
         # Check if hysteresis is disabled for testing
         import os
         hysteresis_enabled = os.environ.get('HYSTERESIS_ENABLE', 'true').lower() != 'false'
         
         if hysteresis_enabled:
-            # Signal is valid if all processors agree
-            is_valid = (persistence.is_valid and confirmation.is_valid and hysteresis.is_valid)
+            # Signal is valid if persistence passes AND hysteresis passes
+            is_valid = (persistence.is_valid and hysteresis.is_valid)
         else:
-            # Skip hysteresis check for testing
-            is_valid = (persistence.is_valid and confirmation.is_valid)
+            # Skip hysteresis check - just use persistence
+            is_valid = persistence.is_valid
         
         # Apply regime multiplier to score
         gated_score = hysteresis.gated_score * regime.confidence_multiplier
@@ -513,11 +560,11 @@ class SignalGate:
         # Determine final direction
         direction = hysteresis.direction
         
-        # Calculate combined strength
-        strength = min(persistence.strength, confirmation.strength, hysteresis.strength)
+        # Calculate combined strength (just persistence and hysteresis now)
+        strength = min(persistence.strength, hysteresis.strength)
         
         # Combine reasons
-        reason = f"Persistence: {persistence.reason}, Confirmation: {confirmation.reason}, Hysteresis: {hysteresis.reason}"
+        reason = f"Persistence: {persistence.reason}, Hysteresis: {hysteresis.reason}"
         
         return GatedSignal(
             original_score=persistence.original_score,
@@ -528,7 +575,7 @@ class SignalGate:
             reason=reason,
             regime_info=regime,
             persistence_bars=persistence.persistence_bars,
-            confirmation_bars=confirmation.confirmation_bars
+            confirmation_bars=0  # No longer used, kept for backward compatibility
         )
     
     def _update_history(self, symbol: str, signal: Dict, gated_signal: GatedSignal):
@@ -576,10 +623,9 @@ class SignalGate:
         
         # Calculate and log counters
         persist_count = self.persistence_processor._count_persistence(history, gated_signal.direction)
-        conf_count = self.confirmation_processor._count_confirmation(history, gated_signal.direction)
         age_count = len(history)
         
-        logger.debug(f"[COUNTER] {symbol} bar_id={bar_id} persist={persist_count} conf={conf_count} age={age_count}")
+        logger.debug(f"[COUNTER] {symbol} bar_id={bar_id} persist={persist_count} age={age_count}")
         
         # Keep only recent history (last 20 bars)
         max_history = 20

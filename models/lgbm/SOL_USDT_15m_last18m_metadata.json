@@ -1,0 +1,155 @@
+{
+  "symbol": "SOL_USDT",
+  "timeframe": "15m",
+  "training_period": "2024-06-17 22:00:00 to 2025-12-09 21:45:00",
+  "training_samples": 51837,
+  "n_features": 35,
+  "feature_columns": [
+    "atr_pct",
+    "atr_14",
+    "roll_std_5",
+    "obv",
+    "upper_wick_ratio",
+    "bb_lower",
+    "distance_high_20",
+    "volatility_zscore",
+    "stoch_d",
+    "volume_volatility",
+    "macd_signal",
+    "sma_20",
+    "hour_sin",
+    "roll_std_20",
+    "volume_sma_ratio",
+    "volume_ema_ratio",
+    "log_ret_3",
+    "mfi",
+    "distance_sma_50",
+    "kurtosis_20",
+    "lh",
+    "volume_sma_20",
+    "volume_ema_20",
+    "rsi_14",
+    "macd_hist",
+    "sma_10",
+    "macd_line",
+    "log_ret_5",
+    "sma_50",
+    "ha_low",
+    "volume_momentum",
+    "skewness_20",
+    "lower_wick_ratio",
+    "body",
+    "roll_std_10"
+  ],
+  "all_features_count": 68,
+  "forward_bars": 3,
+  "threshold_pct": 1.0,
+  "optuna_trials": 100,
+  "best_params": {
+    "n_estimators": 803,
+    "learning_rate": 0.008610450267037316,
+    "num_leaves": 12,
+    "max_depth": 12,
+    "reg_alpha": 0.0005319952083544081,
+    "reg_lambda": 0.0213349942710982,
+    "colsample_bytree": 0.5248120820876493,
+    "subsample": 0.6027932438569356,
+    "subsample_freq": 1,
+    "min_child_samples": 112,
+    "scale_pos_weight": 5.545672642156358
+  },
+  "metrics": {
+    "auc_mean": 0.7205051086101418,
+    "auc_folds": [
+      0.7052698732545514,
+      0.7316737548981757,
+      0.7166499909744966,
+      0.7075778383203729,
+      0.7413540856031128
+    ],
+    "optuna_best_auc": 0.7205051086101418
+  },
+  "feature_importance": [
+    {
+      "feature": "atr_pct",
+      "importance": 0.29146020637909725
+    },
+    {
+      "feature": "atr_14",
+      "importance": 0.15264029017553554
+    },
+    {
+      "feature": "roll_std_5",
+      "importance": 0.14456146941030285
+    },
+    {
+      "feature": "obv",
+      "importance": 0.12458410638140194
+    },
+    {
+      "feature": "upper_wick_ratio",
+      "importance": 0.11361238682842537
+    },
+    {
+      "feature": "bb_lower",
+      "importance": 0.11306515645210709
+    },
+    {
+      "feature": "distance_high_20",
+      "importance": 0.11143029032350621
+    },
+    {
+      "feature": "volatility_zscore",
+      "importance": 0.11112249334321073
+    },
+    {
+      "feature": "stoch_d",
+      "importance": 0.10570485847239991
+    },
+    {
+      "feature": "volume_volatility",
+      "importance": 0.10034057538387772
+    },
+    {
+      "feature": "macd_signal",
+      "importance": 0.0995078043004382
+    },
+    {
+      "feature": "sma_20",
+      "importance": 0.09812175754475641
+    },
+    {
+      "feature": "hour_sin",
+      "importance": 0.09223124718590901
+    },
+    {
+      "feature": "roll_std_20",
+      "importance": 0.09179110841255995
+    },
+    {
+      "feature": "volume_sma_ratio",
+      "importance": 0.0834460286949054
+    },
+    {
+      "feature": "volume_ema_ratio",
+      "importance": 0.0822429282864266
+    },
+    {
+      "feature": "log_ret_3",
+      "importance": 0.07281721804753115
+    },
+    {
+      "feature": "mfi",
+      "importance": 0.06653310510859645
+    },
+    {
+      "feature": "distance_sma_50",
+      "importance": 0.06637645887881304
+    },
+    {
+      "feature": "kurtosis_20",
+      "importance": 0.06324487996756009
+    }
+  ],
+  "created_at": "2025-12-10T02:21:39.864942"
+}

@@ -153,8 +153,8 @@ async def trading_main(
                 # Step 4: News Analysis
                 news_score, news_categories, news_rationale, news_volatility = await _compute_news_analysis(news_scorer, symbol)
                 
-                # Step 5: Risk Analysis (read-only)
-                risk_score, risk_details = await _compute_risk_analysis(risk_service, symbol, ohlcv_data)
+                # Step 5: Risk Analysis (read-only) - pass TA score for proper assessment
+                risk_score, risk_details = await _compute_risk_analysis(risk_service, symbol, ohlcv_data, ta_score)
                 
                 # Step 6: Composite Score & Decision
                 composite_signal = await _compute_composite_signal(
@@ -412,7 +412,14 @@ async def _compute_ta_analysis(ta_scorer, ohlcv_data: dict, symbol: str) -> tupl
 
 
 async def _compute_ml_analysis(ml_scorer, ohlcv_data: dict, symbol: str) -> tuple[float, str, dict]:
-    """Compute machine learning scores."""
+    """Compute machine learning scores.
+    
+    Returns:
+        Tuple of (score, rationale, details)
+        - score: Float 0-100 or None (None triggers TA-only mode)
+        - rationale: Explanation string
+        - details: Additional info dict
+    """
     try:
         # Prepare multi-timeframe bundle for ML
         main_df = ohlcv_data.get('main')
@@ -420,7 +427,8 @@ async def _compute_ml_analysis(ml_scorer, ohlcv_data: dict, symbol: str) -> tupl
         fourh_df = ohlcv_data.get('4h')
         
         if main_df is None or main_df.empty:
-            return 50.0, "No main timeframe data for ML", {}
+            logger.warning(f"⚠️ No main timeframe data for ML, switching to TA-only mode")
+            return None, "No main timeframe data for ML", {'fallback': True}
         
         # Create ML bundle with all available timeframes
         ml_bundle = {'main': main_df.copy(deep=True) if main_df is not None else None}
@@ -431,14 +439,20 @@ async def _compute_ml_analysis(ml_scorer, ohlcv_data: dict, symbol: str) -> tupl
         
         logger.debug(f"[ML_BUNDLE] {symbol}: timeframes={list(ml_bundle.keys())}")
         
-        # Compute ML score
+        # Compute ML score (may return None for fallback)
         score, rationale, details = ml_scorer.score(symbol, ml_bundle)
+        
+        # If ML returned None, it means TA-only mode
+        if score is None:
+            logger.info(f"[ML] {symbol}: TA-only mode active (ML unavailable)")
+            details['ta_only_mode'] = True
         
         return score, rationale, details
         
     except Exception as e:
         logger.error(f"❌ ML analysis failed: {e}")
-        return 50.0, f"ML analysis error: {e}", {}
+        # Return None to trigger TA-only mode on error
+        return None, f"ML analysis error: {e}", {'error': str(e), 'fallback': True}
 
 
 async def _compute_news_analysis(news_scorer, symbol: str) -> tuple[float, list, str, float]:
@@ -459,7 +473,7 @@ async def _compute_news_analysis(news_scorer, symbol: str) -> tuple[float, list,
         return 50.0, ["general"], f"News analysis error: {e}", 0.5
 
 
-async def _compute_risk_analysis(risk_service, symbol: str, ohlcv_data: dict) -> tuple[float, dict]:
+async def _compute_risk_analysis(risk_service, symbol: str, ohlcv_data: dict, ta_score: float = 50.0) -> tuple[float, dict]:
     """Compute risk analysis using real RiskService."""
     try:
         # Prepare market data for risk assessment
@@ -469,16 +483,13 @@ async def _compute_risk_analysis(risk_service, symbol: str, ohlcv_data: dict) ->
             'entry': ohlcv_data.get('5m', None)   # Use 5m data for entry analysis
         }
         
-        # Get composite signal score for risk assessment
-        # We need to get the current signal score to assess risk properly
-        # For now, use a default score - this will be improved when called from trading_main
-        default_score = 50.0
-        signal_type = 'long' if default_score >= 50 else 'short'
+        # Use actual TA score for risk assessment (not hardcoded 50)
+        signal_type = 'long' if ta_score >= 50 else 'short'
         
-        # Use real RiskService to assess risk
+        # Use real RiskService to assess risk with actual TA score
         risk_assessment = await risk_service.assess_risk(
             symbol=symbol,
-            score=default_score,
+            score=ta_score,  # Use real TA score instead of hardcoded 50
             signal_type=signal_type,
             market_data=market_data
         )
@@ -541,8 +552,19 @@ async def _compute_composite_signal(
             details=risk_details
         )
         
-        # Enhanced regime-adaptive weights
-        weights = _calculate_regime_adaptive_weights(ta_score, risk_score)
+        # Load weights from policy.yaml (instead of hardcoded regime-adaptive weights)
+        from configs.policy import load_policy
+        policy = load_policy()
+        scoring_config = policy.get('trading', {}).get('scoring', {})
+        
+        weights = {
+            'ta': scoring_config.get('ta_weight', 0.40),
+            'ml': scoring_config.get('ml_weight', 0.30),
+            'news': scoring_config.get('news_weight', 0.15),
+            'risk': scoring_config.get('risk_weight', 0.15)
+        }
+        
+        logger.debug(f"[COMPOSITE] Using policy weights: ta={weights['ta']}, ml={weights['ml']}, news={weights['news']}, risk={weights['risk']}")
         
         final_score = (
             weights['ta'] * ta_score +
@@ -873,33 +895,27 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         
         logger.info(f"📋 Entry order result: {entry_result}")
         
-        # Step 9: Execute TP/SL triggers (LIVE vs PAPER vs DRY-RUN)
+        # Step 9: Execute TP/SL triggers using OCO bracket (LIVE vs PAPER vs DRY-RUN)
         if mode == "LIVE":
-            logger.info(f"🎯 Executing LIVE TP/SL triggers")
-            tp_id = f"A_TP_{client_order_id}"
-            sl_id = f"A_SL_{client_order_id}"
-            # Check existing open algos and skip duplicate create
-            try:
-                open_algos = await exchange_adapter.fetch_open_trigger_orders(symbol)
-            except Exception:
-                open_algos = []
-            existing_ids = {o.get('clientOrderId') or o.get('algoClOrdId') for o in open_algos}
-            tp_result = {'skipped': False}
-            sl_result = {'skipped': False}
-            if tp_id in existing_ids:
-                tp_result = {'skipped': True, 'reason': 'duplicate'}
-            else:
-                tp_result = await _create_trigger_order(
-                    exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
-                    tp_price, -1, True, tp_id
-                )
-            if sl_id in existing_ids:
-                sl_result = {'skipped': True, 'reason': 'duplicate'}
-            else:
-                sl_result = await _create_trigger_order(
-                    exchange_adapter, symbol, "SELL" if composite_signal.decision == "LONG" else "BUY",
-                    sl_price, -1, True, sl_id
-                )
+            logger.info(f"🎯 Executing LIVE TP/SL as OCO bracket")
+            
+            # Use OCO bracket for linked TP/SL
+            oco_result = await _create_oco_bracket(
+                exchange_adapter=exchange_adapter,
+                symbol=symbol,
+                decision=composite_signal.decision,
+                tp_price=tp_price,
+                sl_price=sl_price,
+                entry_client_id=client_order_id,
+                position_size=quantized_size
+            )
+            
+            tp_result = {'algoId': oco_result.get('tp_algo_id')}
+            sl_result = {'algoId': oco_result.get('sl_algo_id')}
+            
+            # Log OCO creation
+            logger.info(f"[OCO-BRACKET] sym={symbol} oco_link={oco_result.get('oco_link_id')} "
+                       f"tp_id={oco_result.get('tp_algo_id')} sl_id={oco_result.get('sl_algo_id')}")
                 
         elif mode == "PAPER":
             logger.info(f"🧪 Executing PAPER TP/SL triggers")
@@ -969,7 +985,7 @@ def _calculate_regime_adaptive_weights(ta_score: float, risk_score: float) -> di
     volatility = (100.0 - risk_score) / 100.0  # Higher risk = lower volatility score
     
     # Regime detection
-    if trend_strength > 0.6 and volatility > 0.7:  # High trend + low risk (high volatility score)
+    if trend_strength > 0.6 and volatility > 0.65:  # High trend + low risk (high volatility score)
         # Trend↑/Vol↓ regime: Emphasize TA for trend following
         return {
             'ta': 0.50,    # Increased TA weight
@@ -1019,6 +1035,92 @@ def _calculate_confidence_multiplier(ml_confidence: str, risk_level: str) -> flo
     
     # Clamp to reasonable range
     return max(0.2, min(1.0, final_multiplier))
+
+
+def _calculate_dynamic_leverage(ohlcv_data: dict, base_leverage: float = 3.0) -> float:
+    """
+    Calculate dynamic leverage based on market volatility.
+    
+    Volatility-adaptive leverage:
+    - Low volatility (ATR < 1.5% of price) → Higher leverage (up to max)
+    - Medium volatility (1.5-3% of price) → Base leverage
+    - High volatility (> 3% of price) → Lower leverage (down to 1x)
+    
+    Args:
+        ohlcv_data: OHLCV data dict with 'main' key
+        base_leverage: Base leverage from policy (default 3x)
+    
+    Returns:
+        Calculated leverage between 1.0 and 5.0
+    """
+    import numpy as np
+    
+    # Leverage bounds
+    min_leverage = 1.0
+    max_leverage = 5.0
+    
+    # Volatility thresholds (ATR as percentage of price)
+    low_vol_threshold = 0.015   # 1.5%
+    high_vol_threshold = 0.03   # 3%
+    
+    try:
+        atr_pct = None
+        
+        if ohlcv_data and 'main' in ohlcv_data:
+            main_df = ohlcv_data['main']
+            if main_df is not None and not main_df.empty and len(main_df) >= 14:
+                try:
+                    high = main_df['high'].values
+                    low = main_df['low'].values
+                    close = main_df['close'].values
+                    
+                    # Calculate True Range
+                    tr1 = high - low
+                    tr2 = np.abs(high - np.roll(close, 1))
+                    tr3 = np.abs(low - np.roll(close, 1))
+                    tr = np.maximum(tr1, np.maximum(tr2, tr3))
+                    
+                    # ATR = 14-period simple moving average of TR
+                    atr = np.mean(tr[-14:])
+                    
+                    # ATR as percentage of current price
+                    current_price = close[-1]
+                    atr_pct = atr / current_price
+                    
+                except Exception as e:
+                    logger.warning(f"⚠️ ATR calculation for leverage failed: {e}")
+        
+        if atr_pct is None:
+            # No volatility data, use base leverage
+            logger.warning("⚠️ No volatility data for dynamic leverage, using base leverage")
+            return base_leverage
+        
+        # Calculate leverage based on volatility
+        if atr_pct < low_vol_threshold:
+            # Low volatility → higher leverage (linear interpolation to max)
+            leverage = base_leverage + (max_leverage - base_leverage) * (1 - atr_pct / low_vol_threshold)
+        elif atr_pct > high_vol_threshold:
+            # High volatility → lower leverage (linear interpolation to min)
+            volatility_excess = (atr_pct - high_vol_threshold) / (0.06 - high_vol_threshold)  # 6% = extreme vol
+            volatility_excess = min(1.0, volatility_excess)  # Cap at 100%
+            leverage = base_leverage - (base_leverage - min_leverage) * volatility_excess
+        else:
+            # Medium volatility → use base leverage
+            leverage = base_leverage
+        
+        # Clamp to bounds
+        leverage = max(min_leverage, min(max_leverage, leverage))
+        
+        # Round to 1 decimal place
+        leverage = round(leverage, 1)
+        
+        logger.info(f"⚡ Dynamic leverage: ATR={atr_pct*100:.2f}% → {leverage}x (base={base_leverage}x)")
+        
+        return leverage
+        
+    except Exception as e:
+        logger.error(f"❌ Dynamic leverage calculation failed: {e}")
+        return base_leverage
 
 
 async def _calculate_position_size(composite_signal, symbol: str, exchange_adapter) -> float:
@@ -1280,27 +1382,110 @@ async def _calculate_entry_price(current_price: float, decision: str) -> float:
         return current_price
 
 
-async def _calculate_tp_sl_levels(entry_price: float, decision: str, ta_flags: dict) -> tuple[float, float]:
-    """Calculate take profit and stop loss levels."""
+async def _calculate_tp_sl_levels(entry_price: float, decision: str, ta_flags: dict, 
+                                   ohlcv_data: dict = None) -> tuple[float, float]:
+    """
+    Calculate take profit and stop loss levels using ATR-based dynamic calculation.
+    
+    ATR-based TP/SL adapts to market volatility:
+    - High volatility → wider TP/SL
+    - Low volatility → narrower TP/SL
+    
+    Args:
+        entry_price: Entry price for the trade
+        decision: 'LONG' or 'SHORT'
+        ta_flags: Technical analysis flags
+        ohlcv_data: OHLCV data dict with 'main' key for ATR calculation
+    
+    Returns:
+        Tuple of (tp_price, sl_price)
+    """
     try:
-        # Default TP/SL percentages
-        tp_pct = 0.02  # 2% TP
-        sl_pct = 0.01  # 1% SL
+        import numpy as np
         
-        if decision == "LONG":
-            tp_price = entry_price * (1 + tp_pct)
-            sl_price = entry_price * (1 - sl_pct)
-        elif decision == "SHORT":
-            tp_price = entry_price * (1 - tp_pct)
-            sl_price = entry_price * (1 + sl_pct)
+        # Default ATR multipliers from policy
+        sl_atr_mult = 2.0  # 2 ATR for Stop Loss
+        tp_atr_mult = 4.0  # 4 ATR for Take Profit (2:1 RR ratio)
+        
+        # Fallback percentages if ATR not available
+        fallback_tp_pct = 0.03  # 3% TP
+        fallback_sl_pct = 0.015  # 1.5% SL
+        
+        # Calculate ATR from OHLCV data
+        atr = None
+        if ohlcv_data and 'main' in ohlcv_data:
+            main_df = ohlcv_data['main']
+            if main_df is not None and not main_df.empty and len(main_df) >= 14:
+                try:
+                    high = main_df['high'].values
+                    low = main_df['low'].values
+                    close = main_df['close'].values
+                    
+                    # Calculate True Range
+                    tr1 = high - low
+                    tr2 = np.abs(high - np.roll(close, 1))
+                    tr3 = np.abs(low - np.roll(close, 1))
+                    tr = np.maximum(tr1, np.maximum(tr2, tr3))
+                    
+                    # ATR = 14-period simple moving average of TR
+                    atr = np.mean(tr[-14:])
+                    
+                    logger.info(f"📊 ATR(14) = {atr:.4f} ({(atr/entry_price)*100:.2f}% of price)")
+                except Exception as e:
+                    logger.warning(f"⚠️ ATR calculation failed: {e}, using fallback percentages")
+        
+        # Calculate TP/SL based on ATR or fallback
+        if atr and atr > 0:
+            # ATR-based calculation
+            if decision == "LONG":
+                sl_price = entry_price - (sl_atr_mult * atr)
+                tp_price = entry_price + (tp_atr_mult * atr)
+            elif decision == "SHORT":
+                sl_price = entry_price + (sl_atr_mult * atr)
+                tp_price = entry_price - (tp_atr_mult * atr)
+            else:
+                tp_price = entry_price
+                sl_price = entry_price
+            
+            # Log ATR-based levels
+            sl_distance_pct = abs(entry_price - sl_price) / entry_price * 100
+            tp_distance_pct = abs(tp_price - entry_price) / entry_price * 100
+            logger.info(f"🎯 ATR-based TP/SL: SL={sl_distance_pct:.2f}% ({sl_atr_mult}×ATR), TP={tp_distance_pct:.2f}% ({tp_atr_mult}×ATR)")
         else:
-            tp_price = entry_price
-            sl_price = entry_price
+            # Fallback to percentage-based calculation
+            logger.warning(f"⚠️ No ATR data, using fallback percentages: TP={fallback_tp_pct*100}%, SL={fallback_sl_pct*100}%")
+            
+            if decision == "LONG":
+                tp_price = entry_price * (1 + fallback_tp_pct)
+                sl_price = entry_price * (1 - fallback_sl_pct)
+            elif decision == "SHORT":
+                tp_price = entry_price * (1 - fallback_tp_pct)
+                sl_price = entry_price * (1 + fallback_sl_pct)
+            else:
+                tp_price = entry_price
+                sl_price = entry_price
+        
+        # Safety check: ensure TP/SL are valid
+        if decision == "LONG":
+            if tp_price <= entry_price or sl_price >= entry_price:
+                logger.warning(f"⚠️ Invalid TP/SL for LONG, correcting...")
+                tp_price = entry_price * 1.03
+                sl_price = entry_price * 0.985
+        elif decision == "SHORT":
+            if tp_price >= entry_price or sl_price <= entry_price:
+                logger.warning(f"⚠️ Invalid TP/SL for SHORT, correcting...")
+                tp_price = entry_price * 0.97
+                sl_price = entry_price * 1.015
         
         return tp_price, sl_price
         
     except Exception as e:
         logger.error(f"❌ TP/SL calculation failed: {e}")
+        # Fallback: use 3% TP and 1.5% SL
+        if decision == "LONG":
+            return entry_price * 1.03, entry_price * 0.985
+        elif decision == "SHORT":
+            return entry_price * 0.97, entry_price * 1.015
         return entry_price, entry_price
 
 
@@ -1329,6 +1514,144 @@ async def _create_trigger_order(exchange_adapter, symbol: str, side: str, trigge
     except Exception as e:
         logger.error(f"❌ Trigger order creation failed: {e}")
         return {}
+
+
+async def _create_oco_bracket(exchange_adapter, symbol: str, decision: str, 
+                              tp_price: float, sl_price: float, 
+                              entry_client_id: str, position_size: float) -> dict:
+    """
+    Create OCO (One-Cancels-Other) bracket order for TP/SL.
+    
+    When TP triggers, SL is automatically cancelled and vice versa.
+    This prevents orphan orders and double execution.
+    
+    Args:
+        exchange_adapter: Exchange adapter instance
+        symbol: Trading symbol
+        decision: 'LONG' or 'SHORT'
+        tp_price: Take profit trigger price
+        sl_price: Stop loss trigger price
+        entry_client_id: Client order ID from entry order
+        position_size: Position size for bracket orders
+        
+    Returns:
+        Dict with tp_algo_id, sl_algo_id, and oco_link_id
+    """
+    try:
+        # Generate linked IDs for OCO bracket
+        import time
+        oco_link_id = f"OCO_{int(time.time() * 1000)}"
+        tp_client_id = f"TP_{entry_client_id}"
+        sl_client_id = f"SL_{entry_client_id}"
+        
+        # Determine sides for TP/SL
+        if decision == "LONG":
+            tp_side = "sell"  # Close long by selling
+            sl_side = "sell"
+        else:  # SHORT
+            tp_side = "buy"   # Close short by buying
+            sl_side = "buy"
+        
+        logger.info(f"🔗 Creating OCO bracket: symbol={symbol} TP={tp_price} SL={sl_price} link={oco_link_id}")
+        
+        # Check if exchange adapter supports OCO orders
+        if hasattr(exchange_adapter, 'create_oco_order'):
+            # Use native OCO API
+            result = await exchange_adapter.create_oco_order(
+                symbol=symbol,
+                side=tp_side,
+                amount=position_size,
+                tp_trigger_price=tp_price,
+                sl_trigger_price=sl_price,
+                oco_link_id=oco_link_id,
+                tp_client_id=tp_client_id,
+                sl_client_id=sl_client_id
+            )
+            logger.info(f"✅ OCO bracket created via native API: {result}")
+            return result
+            
+        elif hasattr(exchange_adapter, 'create_trigger_order'):
+            # Fallback: Create separate trigger orders with tracking
+            # Note: This doesn't provide true OCO, but we track for manual cleanup
+            logger.warning(f"⚠️ Exchange doesn't support native OCO, creating linked triggers")
+            
+            tp_result = await exchange_adapter.create_trigger_order(
+                symbol, tp_side.upper(), tp_price, -1, True, tp_client_id
+            )
+            sl_result = await exchange_adapter.create_trigger_order(
+                symbol, sl_side.upper(), sl_price, -1, True, sl_client_id
+            )
+            
+            # Store the OCO link for manual cleanup
+            oco_mapping = {
+                'oco_link_id': oco_link_id,
+                'tp_algo_id': tp_result.get('algoId', tp_client_id),
+                'sl_algo_id': sl_result.get('algoId', sl_client_id),
+                'symbol': symbol,
+                'entry_client_id': entry_client_id,
+                'created_at': datetime.now(timezone.utc).isoformat(),
+                'status': 'active'
+            }
+            
+            # Log OCO mapping for cleanup job
+            logger.info(f"[OCO-MAP] {oco_mapping}")
+            
+            return {
+                'tp_algo_id': tp_result.get('algoId'),
+                'sl_algo_id': sl_result.get('algoId'),
+                'oco_link_id': oco_link_id,
+                'tp_result': tp_result,
+                'sl_result': sl_result
+            }
+        else:
+            # Mock response for testing
+            logger.warning(f"⚠️ Exchange adapter doesn't support trigger orders, using mock OCO")
+            return {
+                'tp_algo_id': f"MOCK_TP_{tp_client_id}",
+                'sl_algo_id': f"MOCK_SL_{sl_client_id}",
+                'oco_link_id': oco_link_id,
+                'status': 'mock'
+            }
+            
+    except Exception as e:
+        logger.error(f"❌ OCO bracket creation failed: {e}")
+        return {
+            'error': str(e),
+            'tp_algo_id': None,
+            'sl_algo_id': None
+        }
+
+
+async def _cancel_oco_counterpart(exchange_adapter, symbol: str, triggered_side: str, 
+                                   oco_link_id: str, counterpart_algo_id: str) -> bool:
+    """
+    Cancel the counterpart order when one side of OCO triggers.
+    
+    Args:
+        exchange_adapter: Exchange adapter instance
+        symbol: Trading symbol
+        triggered_side: Which side triggered ('TP' or 'SL')
+        oco_link_id: OCO link ID for logging
+        counterpart_algo_id: Algo ID of order to cancel
+        
+    Returns:
+        True if cancellation successful
+    """
+    try:
+        counterpart_type = "SL" if triggered_side == "TP" else "TP"
+        logger.info(f"🔗 [OCO-CLEANUP] {triggered_side} triggered, cancelling {counterpart_type} order: {counterpart_algo_id}")
+        
+        if hasattr(exchange_adapter, 'cancel_algo_order'):
+            result = await exchange_adapter.cancel_algo_order(symbol, counterpart_algo_id)
+            logger.info(f"✅ [OCO-CLEANUP] Cancelled {counterpart_type}: {counterpart_algo_id}")
+            return True
+        else:
+            logger.warning(f"⚠️ Exchange adapter doesn't support algo order cancellation")
+            return False
+            
+    except Exception as e:
+        logger.error(f"❌ [OCO-CLEANUP] Failed to cancel counterpart order: {e}")
+        return False
 
 
 async def _send_telegram_analysis_card(symbol: str, composite_signal, live: bool) -> None:

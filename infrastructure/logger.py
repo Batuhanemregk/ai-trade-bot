@@ -119,8 +119,8 @@ def initialize_logging(config_path: Optional[str] = None, cli_level: Optional[st
             colorize=True,
             format=console_format,
             filter=console_filter,
-            encoding="utf-8",
-            errors="replace",
+            # encoding="utf-8", # Removed: Not supported for stream handlers
+            # errors="replace", # Removed: Not supported for stream handlers
             backtrace=is_dev,  # Full traceback in dev
             diagnose=is_dev,   # Variable values in dev
         )

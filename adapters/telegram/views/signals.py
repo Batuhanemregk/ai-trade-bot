@@ -50,16 +50,46 @@ def build_signals_view(context: Dict[str, Any], formatter: TelegramFormatter = N
         confirm = signal.get('confirm', 0)
         confirm_max = signal.get('confirm_max', 2)
         
-        # Format signal line
+        # Direction emoji with trend indicator
+        if direction == 'LONG':
+            dir_emoji = "📈🟢"
+            trend_text = "LONG"
+        elif direction == 'SHORT':
+            dir_emoji = "📉🔴"
+            trend_text = "SHORT"
+        else:
+            dir_emoji = "⏸️⚪"
+            trend_text = "FLAT"
+        
+        # Grade badge
+        grade_badges = {
+            'A+': '🏆', 'A': '⭐', 'B': '✨', 
+            'C': '📊', 'D': '📉', 'F': '⚠️'
+        }
+        grade_badge = grade_badges.get(grade, '📊')
+        
+        # Score bar (visual indicator)
+        if final_score >= 70:
+            score_bar = "🟩🟩🟩"
+        elif final_score >= 60:
+            score_bar = "🟩🟩⬜"
+        elif final_score >= 50:
+            score_bar = "🟨🟨⬜"
+        elif final_score >= 40:
+            score_bar = "🟨⬜⬜"
+        else:
+            score_bar = "🟥⬜⬜"
+        
+        # Format signal line with emojis
         line = (
-            f"{symbol}  Final {final_score:.1f} ({grade})  "
-            f"Dir {direction}  TA {ta:.0f}  ML {ml:.0f}  "
-            f"News {news:.0f}  Risk {risk:.0f}"
+            f"{dir_emoji} {symbol}\n"
+            f"   {score_bar} Score {final_score:.1f} {grade_badge}{grade}\n"
+            f"   📊 TA {ta:.0f} | 🤖 ML {ml:.0f} | 📰 News {news:.0f} | ⚠️ Risk {risk:.0f}"
         )
         
         # Add persist/age/confirm if available
         if persist > 0:
-            line += f"\n  Persist {persist}/{persist_max} Age {age}/{age_max} Confirm {confirm}/{confirm_max}"
+            line += f"\n   ⏱️ P {persist}/{persist_max} | 📅 Age {age}/{age_max} | ✅ C {confirm}/{confirm_max}"
         
         signal_lines.append(line)
     

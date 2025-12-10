@@ -560,3 +560,69 @@ class RiskService:
             'min_notional': min_notional,
             'mode': mode
         }
+    
+    def check_leverage_limit(self, requested_leverage: float, symbol: str = None, 
+                             mode: str = "PAPER") -> Tuple[bool, float, str, Dict[str, Any]]:
+        """
+        Check and enforce leverage limit from policy.
+        
+        Args:
+            requested_leverage: Requested leverage multiplier
+            symbol: Trading symbol (for symbol-specific limits)
+            mode: Trading mode (LIVE/PAPER/DRY-RUN)
+        
+        Returns:
+            Tuple of (should_limit, final_leverage, reason, details)
+            - should_limit: True if leverage was limited
+            - final_leverage: The leverage to use (may be adjusted)
+            - reason: 'ok', 'limited', or 'rejected'
+            - details: Additional information
+        """
+        try:
+            # Get leverage limits from policy
+            leverage_config = self.policy.get('trading', {}).get('risk', {}).get('leverage', {})
+            
+            # Default limits if not configured
+            max_leverage = leverage_config.get('max_leverage', 5.0)
+            min_leverage = leverage_config.get('min_leverage', 1.0)
+            default_leverage = leverage_config.get('default', 3.0)
+            
+            # Symbol-specific limits
+            symbol_limits = leverage_config.get('symbol_limits', {})
+            if symbol:
+                base_symbol = symbol.split('-')[0]
+                if base_symbol in symbol_limits:
+                    max_leverage = symbol_limits[base_symbol].get('max', max_leverage)
+            
+            details = {
+                'requested_leverage': requested_leverage,
+                'max_leverage': max_leverage,
+                'min_leverage': min_leverage,
+                'default_leverage': default_leverage,
+                'symbol': symbol,
+                'mode': mode
+            }
+            
+            # Validate leverage
+            if requested_leverage <= 0:
+                logger.warning(f"[LEVERAGE] Invalid leverage {requested_leverage}, using default {default_leverage}")
+                return True, default_leverage, 'invalid', details
+            
+            if requested_leverage < min_leverage:
+                logger.info(f"[LEVERAGE] Requested {requested_leverage}x below minimum {min_leverage}x, using minimum")
+                details['adjustment'] = f'{requested_leverage}x -> {min_leverage}x (below min)'
+                return True, min_leverage, 'limited_up', details
+            
+            if requested_leverage > max_leverage:
+                logger.warning(f"[LEVERAGE] Requested {requested_leverage}x exceeds max {max_leverage}x, limiting")
+                details['adjustment'] = f'{requested_leverage}x -> {max_leverage}x (above max)'
+                return True, max_leverage, 'limited_down', details
+            
+            # Leverage is within limits
+            logger.debug(f"[LEVERAGE] {requested_leverage}x within limits ({min_leverage}x-{max_leverage}x)")
+            details['status'] = 'ok'
+            return False, requested_leverage, 'ok', details
+            
+        except Exception as e:
+            logger.error(f"[LEVERAGE] Check failed: {e}, using default")
+            return True, 3.0, 'error', {'error': str(e)}

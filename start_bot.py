@@ -17,12 +17,41 @@ if env_file.exists():
     load_dotenv(env_file)
 
 from infrastructure.runtime import trading_main
+from infrastructure.logger import initialize_logging
 from adapters.telegram.client import init_telegram_app
 
 
+from datetime import datetime, timedelta
+
+
+def get_seconds_until_next_15min():
+    """Calculate seconds until next 15-minute mark (clock-aligned)."""
+    now = datetime.now()
+    # Calculate minutes until next 15-min boundary
+    minutes_past = now.minute % 15
+    if minutes_past == 0 and now.second < 10:
+        # Just started at a 15-min mark, wait for next one
+        minutes_until = 15
+    else:
+        minutes_until = 15 - minutes_past
+    
+    # Calculate next 15-min mark time
+    next_time = now.replace(second=5, microsecond=0) + timedelta(minutes=minutes_until)
+    seconds_until = (next_time - now).total_seconds()
+    
+    return max(5, int(seconds_until))  # At least 5 seconds
+
+
 async def continuous_trading():
-    """Run continuous trading cycles."""
+    """Run continuous trading cycles at clock-aligned 15-minute intervals."""
     cycle = 0
+    
+    # Wait for first aligned slot
+    initial_wait = get_seconds_until_next_15min()
+    next_slot = (datetime.now() + timedelta(seconds=initial_wait)).strftime("%H:%M")
+    print(f"[INFO] First cycle scheduled at {next_slot} (waiting {initial_wait}s)")
+    await asyncio.sleep(initial_wait)
+    
     while True:
         cycle += 1
         current_time = time.strftime("%H:%M:%S")
@@ -36,12 +65,18 @@ async def continuous_trading():
         except Exception as e:
             print(f"[ERROR] Cycle {cycle} failed: {e}")
         
-        print("[INFO] Waiting 15 minutes...")
-        await asyncio.sleep(900)  # 15 minutes
+        # Wait until next 15-minute mark (clock-aligned: :00, :15, :30, :45)
+        wait_seconds = get_seconds_until_next_15min()
+        next_slot = (datetime.now() + timedelta(seconds=wait_seconds)).strftime("%H:%M")
+        print(f"[INFO] Next cycle at {next_slot} (waiting {wait_seconds}s)")
+        await asyncio.sleep(wait_seconds)
 
 
 async def main():
     """Main entrypoint with Telegram bot integration."""
+    # Initialize logging system (writes to logs/aibotbs.log)
+    initialize_logging()
+    
     print("[INFO] Starting trading bot with Telegram integration")
     
     # Check if Telegram is enabled

@@ -23,7 +23,7 @@ def test_ttl_weight_calculation():
         (0.5, (0.95, 1.0), "Very fresh news (30 min)"),
         (1.0, (0.95, 1.0), "Fresh news (1 hour)"),
         (2.0, (0.95, 1.0), "Fresh threshold (2 hours)"),
-        (3.0, (0.90, 0.95), "Just past fresh threshold"),
+        (3.0, (0.95, 0.97), "Just past fresh threshold"),
         (6.0, (0.75, 0.85), "Moderately fresh (6 hours)"),
         (12.0, (0.50, 0.60), "Getting stale (12 hours)"),
         (18.0, (0.25, 0.35), "Quite stale (18 hours)"),

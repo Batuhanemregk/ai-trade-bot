@@ -1,11 +1,11 @@
 {
-  "start_time": "2025-10-24T19:51:44.953874",
-  "end_time": "2025-10-24T19:52:41.376727",
-  "final_status": "SUCCESS",
+  "start_time": "2025-12-10T00:47:24.194326",
+  "end_time": "2025-12-10T00:49:02.519227",
+  "final_status": "FAILED",
   "steps": {
     "data_collection": {
       "status": "SUCCESS",
-      "total_bars": 68040,
+      "total_bars": 155520,
       "symbols": [
         "BTC/USDT",
         "ETH/USDT",
@@ -15,24 +15,7 @@
     "feature_engineering": {
       "status": "SUCCESS",
       "description": "Features will be engineered during model training."
-    },
-    "model_training": {
-      "status": "SUCCESS",
-      "metrics": {
-        "auc": 0.9726028146887854,
-        "accuracy": 0.8907134667960138,
-        "precision": 0.8318732694801758,
-        "recall": 0.8932654958050618,
-        "f1_score": 0.8596897772528592,
-        "confusion_matrix": 2834.75,
-        "test_samples": 11339.0
-      },
-      "model_version": "lgb_v1"
-    },
-    "auto_deployment": {
-      "status": "NOT_DEPLOYED_WORSE",
-      "reason": "New model not better."
     }
   },
-  "error": null
+  "error": "Length of values (622080) does not match length of index (311040)"
 }

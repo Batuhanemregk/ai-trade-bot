@@ -233,11 +233,22 @@ class TradingAnalysisJob(BaseJob):
                 'ml_score': ml_score,
                 'news_score': news_score,
                 'risk_score': risk_score,
-                'timestamp': datetime.now(timezone.utc)
+                'timestamp': datetime.now(timezone.utc),
+                'bar_timestamp': datetime.now(timezone.utc)  # For signal gate bar deduplication
             }
             
-            # Process through signal gate
-            gated_signal = self.signal_gate.process_signal(symbol, signal_dict, ohlcv_1h_list)
+            # Get real position info from state manager for hysteresis sync
+            current_state = self.state_manager.get_position_state(symbol)
+            position_info = None
+            if current_state:
+                # PositionState enum: READY, LONG_OPEN, SHORT_OPEN, COOLDOWN
+                position_info = {
+                    'has_position': current_state.value in ['LONG_OPEN', 'SHORT_OPEN'],
+                    'side': 'long' if current_state.value == 'LONG_OPEN' else ('short' if current_state.value == 'SHORT_OPEN' else None)
+                }
+            
+            # Process through signal gate with real position info
+            gated_signal = self.signal_gate.process_signal(symbol, signal_dict, ohlcv_1h_list, position_info)
             
             # Step 8: Process state transition (pass gated_signal with is_valid, size, mode)
             gated_signal_dict = {
@@ -249,12 +260,12 @@ class TradingAnalysisJob(BaseJob):
             }
             transition = self.state_manager.process_signal(symbol, gated_signal_dict)
             
-            # Extract gate details for logging
+            # Extract gate details for logging (conf removed, simplified to persist only)
             gate_details = {
-                'persist_count': gated_signal.details.get('persist_count', gated_signal.persistence_bars),
-                'persist_required': gated_signal.details.get('persist_required', 5),
-                'confidence': gated_signal.details.get('confidence', 0.0),
-                'conf_required': gated_signal.details.get('conf_threshold', 0.0)
+                'persist_count': gated_signal.persistence_bars,
+                'persist_required': self.policy.get('trading', {}).get('scoring', {}).get('signal', {}).get('persistence_bars', 2),
+                'confidence': 0.0,  # Conf removed, not used anymore
+                'conf_required': 0.0
             }
             
             # Extract age from signal history (counter format)
@@ -441,46 +452,9 @@ class TradingAnalysisJob(BaseJob):
                 }
             }
             
-            # Log decision to structured JSONL
-            if self.decision_logger and hasattr(composite_signal, 'final_score'):
-                try:
-                    action = result.get('action', 'skip')
-                    gate_results = {
-                        'persistence': {'passed': gated_signal.is_valid},
-                        'bias': {'passed': True},  # TODO: Get from actual gate results
-                        'reversal': {'approved': transition.action not in ['IGNORED', 'COOLDOWN']}
-                    }
-                    
-                    # Decision logging - use getattr for backwards compatibility
-                    signal_scores = {
-                        'ta': getattr(composite_signal, 'ta_score', getattr(composite_signal.technical, 'score', 0.0)),
-                        'ml': getattr(composite_signal, 'ml_score', getattr(composite_signal.ml, 'score', 0.0)),
-                        'news': getattr(composite_signal, 'news_score', getattr(composite_signal.news, 'score', 0.0)),
-                        'risk': getattr(composite_signal, 'risk_score', getattr(composite_signal.risk, 'score', 0.0)),
-                        'final': composite_signal.final_score
-                    }
-                    
-                    self.decision_logger.log_decision(
-                        symbol=symbol,
-                        timeframe='15m',
-                        signal_scores=signal_scores,
-                        gate_result='PASS' if gated_signal.is_valid else 'FAIL',
-                        gate_details=gate_results,
-                        direction=composite_signal.decision,
-                        size=0.0,  # Will be set during execution
-                        leverage=1.0,
-                        sl_price=0.0,
-                        tp_price=0.0,
-                        risk_exp=0.0,
-                        tier='T1',
-                        cb_status='OK',
-                        state_transition=f"{transition.from_state.value}→{transition.to_state.value}",
-                        strategy='single_flip',
-                        guards=gate_results,
-                        source='trading_analysis'
-                    )
-                except Exception as log_err:
-                    logger.warning(f"⚠️ Decision logging failed for {symbol}: {log_err}")
+            # NOTE: decision_logger.log_decision is disabled to avoid duplicate logs
+            # summary_logger.log_analysis already provides full analysis info (called at line 357)
+            # If structured JSONL logging is needed, re-enable this block
             
             # Return the result dict
             return result

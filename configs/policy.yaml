@@ -51,11 +51,21 @@ trading:
   risk:
     max_position_size_pct: 0.01  # %1
     max_total_risk_pct: 0.60
-    max_leverage: 3.0
-    max_drawdown: 0.15      # 15% maximum drawdown
+    
+    # Leverage Configuration
+    leverage:
+      min_leverage: 1.0         # Minimum allowed
+      max_leverage: 5.0         # Maximum allowed (global)
+      default: 3.0              # Default if not specified
+      symbol_limits:            # Symbol-specific overrides
+        BTC: {max: 5.0}        # BTC can use up to 5x
+        ETH: {max: 5.0}        # ETH can use up to 5x
+        SOL: {max: 3.0}        # SOL limited to 3x (more volatile)
+    
+    max_drawdown: 0.15          # 15% maximum drawdown
     streak_guard:
-      max_losses: 3         # Max consecutive losses
-      cooldown_hours: 24    # Cooldown period after max losses
+      max_losses: 3             # Max consecutive losses
+      cooldown_hours: 24        # Cooldown period after max losses
     
     # Risk Assessment Configuration
     risk_assessment:

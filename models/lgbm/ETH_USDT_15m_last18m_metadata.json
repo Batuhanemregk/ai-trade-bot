@@ -1,0 +1,155 @@
+{
+  "symbol": "ETH_USDT",
+  "timeframe": "15m",
+  "training_period": "2024-06-17 22:00:00 to 2025-12-09 21:45:00",
+  "training_samples": 51837,
+  "n_features": 35,
+  "feature_columns": [
+    "atr_pct",
+    "volume_sma_ratio",
+    "roll_std_5",
+    "hour_sin",
+    "atr_14",
+    "volume_ema_20",
+    "upper_wick_ratio",
+    "sma_10",
+    "volatility_zscore",
+    "macd_line",
+    "dow_sin",
+    "sma_5",
+    "log_ret_3",
+    "volume_sma_20",
+    "macd_signal",
+    "ha_low",
+    "roll_std_10",
+    "volume_volatility",
+    "mfi",
+    "obv",
+    "ha_open",
+    "rsi_14",
+    "macd_hist",
+    "kurtosis_20",
+    "lower_wick_ratio",
+    "log_ret_1",
+    "distance_sma_20",
+    "distance_sma_50",
+    "skewness_20",
+    "ema_26",
+    "body_ratio",
+    "hour_cos",
+    "volume_ema_ratio",
+    "sma_20",
+    "log_ret_5"
+  ],
+  "all_features_count": 68,
+  "forward_bars": 3,
+  "threshold_pct": 1.0,
+  "optuna_trials": 100,
+  "best_params": {
+    "n_estimators": 687,
+    "learning_rate": 0.018078690600309397,
+    "num_leaves": 97,
+    "max_depth": 3,
+    "reg_alpha": 0.3657707726688158,
+    "reg_lambda": 0.06349074349592539,
+    "colsample_bytree": 0.34858643204269063,
+    "subsample": 0.45265095850964504,
+    "subsample_freq": 5,
+    "min_child_samples": 100,
+    "scale_pos_weight": 2.532626073447599
+  },
+  "metrics": {
+    "auc_mean": 0.7425192853104434,
+    "auc_folds": [
+      0.7362017686481341,
+      0.7533427162075248,
+      0.7435215767910308,
+      0.6962797275297276,
+      0.7832506373758001
+    ],
+    "optuna_best_auc": 0.7425192853104434
+  },
+  "feature_importance": [
+    {
+      "feature": "atr_pct",
+      "importance": 0.37263285391362105
+    },
+    {
+      "feature": "volume_sma_ratio",
+      "importance": 0.22847101568783454
+    },
+    {
+      "feature": "roll_std_5",
+      "importance": 0.21610425569814565
+    },
+    {
+      "feature": "hour_sin",
+      "importance": 0.21497432759021126
+    },
+    {
+      "feature": "atr_14",
+      "importance": 0.20817158134877367
+    },
+    {
+      "feature": "volume_ema_20",
+      "importance": 0.17500548054553947
+    },
+    {
+      "feature": "upper_wick_ratio",
+      "importance": 0.1410134081165356
+    },
+    {
+      "feature": "sma_10",
+      "importance": 0.12897419540584099
+    },
+    {
+      "feature": "volatility_zscore",
+      "importance": 0.12719773592151667
+    },
+    {
+      "feature": "macd_line",
+      "importance": 0.12674775234373806
+    },
+    {
+      "feature": "dow_sin",
+      "importance": 0.1207743919494308
+    },
+    {
+      "feature": "sma_5",
+      "importance": 0.11720352937468201
+    },
+    {
+      "feature": "log_ret_3",
+      "importance": 0.11312153282460813
+    },
+    {
+      "feature": "volume_sma_20",
+      "importance": 0.10979784169228578
+    },
+    {
+      "feature": "macd_signal",
+      "importance": 0.10944127939453221
+    },
+    {
+      "feature": "ha_low",
+      "importance": 0.10301938281036244
+    },
+    {
+      "feature": "roll_std_10",
+      "importance": 0.09952266414299374
+    },
+    {
+      "feature": "volume_volatility",
+      "importance": 0.09746651510795877
+    },
+    {
+      "feature": "mfi",
+      "importance": 0.09581382841432662
+    },
+    {
+      "feature": "obv",
+      "importance": 0.09566545383243036
+    }
+  ],
+  "created_at": "2025-12-10T01:52:21.269758"
+}
