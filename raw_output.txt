@@ -1,0 +1,59 @@
+2025-12-14 17:32:05.572 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-14 17:32:05.572 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-14 17:32:05.603 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 17:32:05.603 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-14 17:32:05.603 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-14 17:32:05.613 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+==================================================
+Symbol: SOL/USDT:USDT
+Side: short
+Contracts: 0.21
+Entry: 131.26
+Notional: 27.529827948
+InitialMargin: 5.5053600000000005
+---RAW INFO---
+pos: -0.21
+notionalUsd: 27.529827948
+margin: 
+lever: 5
+mgnMode: cross
+==================================================
+Symbol: ETH/USDT:USDT
+Side: short
+Contracts: 0.01
+Entry: 3091.6
+Notional: 3.0893497911000005
+InitialMargin: 0.6178020000000001
+---RAW INFO---
+pos: -0.01
+notionalUsd: 3.0893497911000005
+margin: 
+lever: 5
+mgnMode: cross
+==================================================
+Symbol: BTC/USDT:USDT
+Side: short
+Contracts: 0.01
+Entry: 89209.3
+Notional: 8.918040876600001
+InitialMargin: 1.7834120000000002
+---RAW INFO---
+pos: -0.01
+notionalUsd: 8.918040876600001
+margin: 
+lever: 5
+mgnMode: cross
+==================================================
+Symbol: MINA/USDT:USDT
+Side: long
+Contracts: 10617.0
+Entry: 0.0555692380145052
+Notional: 929.089688625
+InitialMargin: 92.9089688625
+---RAW INFO---
+pos: 10617
+notionalUsd: 929.089688625
+margin: 132.0166559525136701
+lever: 10
+mgnMode: isolated
+2025-12-14 17:32:09.152 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed

@@ -20,7 +20,7 @@ class TechnicalBlock:
 @dataclass
 class MLBlock:
     """Machine learning scoring block."""
-    score: float  # 0-100
+    score: float | None  # 0-100 or None for TA-only mode
     rationale: str
     details: dict[str, Any]
 
@@ -71,7 +71,7 @@ class CompositeSignal:
             self.meta = {}
 
     def finalize(self, weights: dict[str, float], thresholds: dict[str, Any],
-                 direction_hint: str | None = None) -> None:
+                 direction_hint: str | None = None, ml_boost_config: dict | None = None) -> None:
         """
         Compute final score and decision based on weighted components.
         
@@ -79,15 +79,43 @@ class CompositeSignal:
             weights: Dictionary with keys 'technical', 'ml', 'news', 'risk'
             thresholds: Dictionary with grading thresholds and min confidence
             direction_hint: Optional direction hint from technical analysis
+            ml_boost_config: Optional ML boost configuration with 'enabled' and 'tiers'
         """
         try:
             # Calculate weighted final score, handling None values (skip weight)
             news_score = self.news.score if self.news.score is not None else 50.0
             risk_score = self.risk.score if self.risk.score is not None else 50.0
+            ml_score = self.ml.score if self.ml.score is not None else 50.0
+            ta_score = self.technical.score
             
-            # Recalculate weights if news or risk is None (skip these components)
+            # Apply ML boost based on TA score thresholds
+            ml_boost_multiplier = 1.0
+            if ml_boost_config and ml_boost_config.get('enabled', False) and self.ml.score is not None:
+                tiers = ml_boost_config.get('tiers', [])
+                # Sort tiers by ta_threshold descending to find highest matching
+                sorted_tiers = sorted(tiers, key=lambda x: x.get('ta_threshold', 0), reverse=True)
+                for tier in sorted_tiers:
+                    if ta_score >= tier.get('ta_threshold', 100):
+                        ml_boost_multiplier = tier.get('multiplier', 1.0)
+                        break
+                
+                if ml_boost_multiplier > 1.0:
+                    original_ml = ml_score
+                    ml_score = min(100.0, ml_score * ml_boost_multiplier)  # Cap at 100
+                    logger.info(f"[COMPOSITE] ML Boost: TA={ta_score:.1f} >= threshold → ML {original_ml:.1f} × {ml_boost_multiplier} = {ml_score:.1f}")
+            
+            # Recalculate weights if any component is None (redistribute weight)
             adjusted_weights = weights.copy()
             total_weight = sum(adjusted_weights.values())
+            
+            # ML redistribution (for TA-only mode) - redistribute ML weight to TA
+            if self.ml.score is None:
+                ml_weight = adjusted_weights.pop('ml', 0.0)
+                ta_weight = adjusted_weights.get('technical', 0.0)
+                adjusted_weights['technical'] = ta_weight + ml_weight  # ML weight goes to TA
+                total_weight = sum(adjusted_weights.values())
+                ml_score = 50.0  # Neutral for calculation (won't affect score since weight is 0)
+                logger.info(f"[COMPOSITE] TA-only mode: ML weight ({ml_weight:.2f}) redistributed to TA")
             
             if self.news.score is None:
                 # Redistribute news weight to other components
@@ -108,7 +136,7 @@ class CompositeSignal:
             
             self.final_score = (
                 adjusted_weights.get('technical', 0.0) * self.technical.score +
-                adjusted_weights.get('ml', 0.0) * self.ml.score +
+                adjusted_weights.get('ml', 0.0) * ml_score +
                 adjusted_weights.get('news', 0.0) * news_score +
                 adjusted_weights.get('risk', 0.0) * risk_score
             )
@@ -184,6 +212,8 @@ class CompositeSignal:
     def _get_ml_direction(self) -> str:
         """Extract direction hint from ML block."""
         ml_score = self.ml.score
+        if ml_score is None:
+            return "FLAT"  # TA-only mode - no ML direction hint
         if ml_score >= 60:  # ML direction eşiği: 60 (70'ten düşürüldü)
             return "LONG"
         elif ml_score <= 40:  # ML direction eşiği: 40 (30'dan yükseltildi)
@@ -263,7 +293,10 @@ class CompositeSignal:
 
     def get_summary(self) -> str:
         """Get human-readable summary of the signal."""
+        ml_display = f"{self.ml.score:.0f}" if self.ml.score is not None else "N/A"
+        news_display = f"{self.news.score:.0f}" if self.news.score is not None else "50"
+        risk_display = f"{self.risk.score:.0f}" if self.risk.score is not None else "50"
         return (f"{self.symbol}: {self.decision} | "
                 f"Score: {self.final_score:.1f}/100 ({self.grade}) | "
-                f"TA:{self.technical.score:.0f} ML:{self.ml.score:.0f} "
-                f"News:{self.news.score:.0f} Risk:{self.risk.score:.0f}")
+                f"TA:{self.technical.score:.0f} ML:{ml_display} "
+                f"News:{news_display} Risk:{risk_display}")

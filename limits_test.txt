@@ -1,0 +1,34 @@
+2025-12-14 18:57:54.058 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-14 18:57:54.058 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-14 18:57:54.087 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 18:57:54.087 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-14 18:57:54.087 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-14 18:57:54.097 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+
+=== ETH/USDT:USDT ===
+limits.amount.min: 0.01
+limits.amount.step: None
+precision.amount: 0.01
+info.minSz: 0.01
+info.lotSz: 0.01
+info.ctVal: 0.1
+CALCULATED real_min = minSz Î ctVal = 0.01 Î 0.1 = 0.001
+
+=== BTC/USDT:USDT ===
+limits.amount.min: 0.01
+limits.amount.step: None
+precision.amount: 0.01
+info.minSz: 0.01
+info.lotSz: 0.01
+info.ctVal: 0.01
+CALCULATED real_min = minSz Î ctVal = 0.01 Î 0.01 = 0.0001
+
+=== SOL/USDT:USDT ===
+limits.amount.min: 0.01
+limits.amount.step: None
+precision.amount: 0.01
+info.minSz: 0.01
+info.lotSz: 0.01
+info.ctVal: 1
+CALCULATED real_min = minSz Î ctVal = 0.01 Î 1.0 = 0.01
+2025-12-14 18:57:57.081 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed

@@ -1,0 +1,19 @@
+2025-12-14 18:56:50.679 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-14 18:56:50.679 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-14 18:56:50.707 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 18:56:50.707 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-14 18:56:50.707 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-14 18:56:50.717 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+
+=== Testing symbol: ETH-USDT-SWAP ===
+  lotSz: 0.01
+  ctVal: 0.1
+  minSz: 0.01
+  Full info keys: ['alias', 'auctionEndTime', 'baseCcy', 'category', 'contTdSwTime', 'ctMult', 'ctType', 'ctVal', 'ctValCcy', 'expTime']
+
+=== Testing symbol: ETH/USDT:USDT ===
+  lotSz: 0.01
+  ctVal: 0.1
+  minSz: 0.01
+  Full info keys: ['alias', 'auctionEndTime', 'baseCcy', 'category', 'contTdSwTime', 'ctMult', 'ctType', 'ctVal', 'ctValCcy', 'expTime']
+2025-12-14 18:56:54.654 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed

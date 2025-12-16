@@ -1,7 +1,7 @@
 ================================================================================
 🚀 AIBOTBS CONFIGURATION BANNER
 ================================================================================
-MODE: LIVE (source=policy.yaml)
+MODE: live (source=ENV)
 STRATEGY: single_flip (source=policy.yaml)
 USE_POSITION_TPSL: True (source=policy.yaml)
 REDUCE_ONLY: True (source=policy.yaml)
@@ -16,7 +16,7 @@ RISK LIMITS:
   max_leverage: 3.0 (source=default)
 
 SYMBOLS:
-  supported_pairs: ['BTC-USDT-SWAP', 'ETH-USDT-SWAP', 'SOL-USDT-SWAP'] (source=policy.yaml)
+  supported_pairs: ['BTC-USDT-SWAP', 'ETH-USDT-SWAP', 'SOL-USDT-SWAP', 'GRT-USDT-SWAP', 'ARKM-USDT-SWAP', 'SUI-USDT-SWAP'] (source=policy.yaml)
   timeframe: 15m (source=default)
 
 SCALE-IN CONFIG (if enabled):

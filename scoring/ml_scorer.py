@@ -25,25 +25,94 @@ class MLScorer:
     """
     
     def __init__(self):
-        self.models = {}  # {symbol_tf: model}
-        self.metadata = {}  # {symbol_tf: metadata}
+        self.models = {}  # {model_key: model}
+        self.metadata = {}  # {model_key: metadata}
         self.feature_builder = FeatureBuilder()
+        
+        # Shadow testing config
+        self._shadow_testing_enabled = False
+        self._shadow_log_path = None
+        self._shadow_start_date = None
+        
+        # Tier-based model routing
+        self._tier_models = {}  # {tier: model_key}
+        self._dedicated_symbols = []  # Symbols with dedicated models
+        
         self._load_all_models()
+        self._load_shadow_config()
+    
+    def _load_shadow_config(self):
+        """Load shadow testing configuration."""
+        try:
+            from application.coin_registry import get_coin_registry
+            registry = get_coin_registry()
+            shadow_config = registry._config.get('shadow_testing', {})
+            
+            self._shadow_testing_enabled = shadow_config.get('enabled', False)
+            self._shadow_log_path = Path(shadow_config.get('log_file', 'logs/shadow_ml_predictions.jsonl'))
+            
+            if self._shadow_testing_enabled:
+                # Ensure log directory exists
+                self._shadow_log_path.parent.mkdir(parents=True, exist_ok=True)
+                logger.info(f"🔍 Shadow testing enabled, logging to: {self._shadow_log_path}")
+        except Exception as e:
+            logger.warning(f"Could not load shadow testing config: {e}")
+    
+    def _log_shadow_prediction(self, symbol: str, model_key: str, p_up: float, 
+                               ml_score: float, signal_dir: str, is_new_model: bool):
+        """Log prediction for shadow testing analysis."""
+        if not self._shadow_testing_enabled:
+            return
+        
+        try:
+            from datetime import datetime, timezone
+            import json
+            
+            log_entry = {
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'symbol': symbol,
+                'model_key': model_key,
+                'p_up': round(p_up, 4),
+                'ml_score': round(ml_score, 2),
+                'signal_direction': signal_dir,
+                'is_new_model': is_new_model,
+                'model_type': 'dedicated' if not is_new_model else 'new_dedicated'
+            }
+            
+            with open(self._shadow_log_path, 'a') as f:
+                f.write(json.dumps(log_entry) + '\n')
+                
+        except Exception as e:
+            logger.debug(f"Shadow logging failed: {e}")
     
     def _load_all_models(self):
-        """Load 3 LightGBM models (3 symbols × 1 TF = 15m only).
+        """Load LightGBM models for ML-enabled symbols.
         
-        NOTE: Simplified from 9 models to 3 (USER DECISION).
-        - 1h and 4h models removed (insufficient samples for training)
-        - Multi-timeframe data still used as features in 15m model
+        Loads:
+        1. Dedicated models for ml_enabled_symbols
+        2. Tier-based models for tiers without dedicated models
         """
-        symbols = ['BTC', 'ETH', 'SOL']
-        # SIMPLIFIED: Only 15m timeframe (was ['15m', '1h', '4h'])
-        timeframes = ['15m']  
+        # Get ML-enabled symbols from CoinRegistry
+        try:
+            from application.coin_registry import get_coin_registry
+            registry = get_coin_registry()
+            ml_symbols = registry.get_ml_enabled_symbols()
+            tier_model_config = registry._config.get('tier_models', {})
+        except Exception as e:
+            logger.warning(f"Could not load CoinRegistry, using default ML symbols: {e}")
+            ml_symbols = ['BTC', 'ETH', 'SOL']
+            tier_model_config = {}
         
-        logger.info("Loading LightGBM models (15m only - simplified)...")
+        self._dedicated_symbols = ml_symbols.copy()
         
-        for symbol in symbols:
+        # Only 15m timeframe models
+        timeframes = ['15m']
+        
+        logger.info(f"Loading LightGBM models for {len(ml_symbols)} symbols: {ml_symbols}")
+        
+        # 1. Load dedicated models for each symbol
+        loaded_dedicated = 0
+        for symbol in ml_symbols:
             for tf in timeframes:
                 key = f"{symbol}_{tf}"
                 
@@ -64,7 +133,7 @@ class MLScorer:
                 
                 try:
                     if not model_path.exists():
-                        logger.warning(f"⚠️ Model not found: {model_path}, fallback to TA-only for {symbol}")
+                        logger.warning(f"⚠️ Model not found: {model_path}, {symbol} will use tier model or TA-only")
                         continue
                     
                     # Load model
@@ -85,13 +154,37 @@ class MLScorer:
                     n_features = self.metadata[key].get('n_features', 'unknown')
                     
                     logger.info(f"✅ Loaded LGBM model: {key} (AUC={auc}, Features={n_features})")
+                    loaded_dedicated += 1
                     
                 except Exception as e:
                     logger.warning(f"⚠️ Failed to load {key}: {e}")
                     continue
         
+        # 2. Load tier-based models
+        for tier, model_key in tier_model_config.items():
+            if model_key and model_key not in self.models:
+                model_path = Path(f"models/lgbm/{model_key}.pkl")
+                metadata_path = Path(f"models/lgbm/{model_key}_metadata.json")
+                
+                if model_path.exists():
+                    try:
+                        with open(model_path, 'rb') as f:
+                            self.models[model_key] = pickle.load(f)
+                        if metadata_path.exists():
+                            with open(metadata_path, 'r') as f:
+                                self.metadata[model_key] = json.load(f)
+                        else:
+                            self.metadata[model_key] = {}
+                        
+                        self._tier_models[tier] = model_key
+                        logger.info(f"✅ Loaded tier model: {model_key} for {tier}")
+                    except Exception as e:
+                        logger.warning(f"⚠️ Failed to load tier model {model_key}: {e}")
+                else:
+                    logger.debug(f"Tier model not found: {model_key} (will be trained later)")
+        
         loaded_count = len(self.models)
-        logger.info(f"Loaded {loaded_count}/3 LightGBM models (15m only)")
+        logger.info(f"Loaded {loaded_dedicated} dedicated + {len(self._tier_models)} tier models = {loaded_count} total")
         
         if loaded_count == 0:
             logger.warning("⚠️ No LightGBM models loaded, will use TA-only scoring")
@@ -234,6 +327,12 @@ class MLScorer:
                 'n_features': len(model_features)
             }
             
+            # Determine if this is a new model (not BTC/ETH/SOL)
+            is_new_model = symbol_short not in ['BTC', 'ETH', 'SOL']
+            
+            # Shadow logging for all predictions
+            self._log_shadow_prediction(symbol, model_key, p_up, ml_score, signal_dir, is_new_model)
+            
             logger.debug(f"✅ ML scoring for {symbol} ({model_key}): p_up={p_up:.3f}, score={ml_score:.1f}")
             
             return ml_score, rationale, details
@@ -289,25 +388,24 @@ class MLScorer:
         else:  # p_up >= 0.70 or p_up <= 0.30
             return 'high'
     
-    def _fallback_score(self, symbol: str) -> Tuple[float, str, Dict[str, Any]]:
+    def _fallback_score(self, symbol: str) -> Tuple[Optional[float], str, Dict[str, Any]]:
         """
-        Fallback scoring when model unavailable.
+        Return None for coins without ML models - explicit TA-only mode.
         
-        Returns None score to trigger TA-only mode in composite signal.
-        The composite scorer will redistribute ML weight to TA weight.
+        This is NOT a fallback score. Returning None signals the composite
+        scorer to redistribute ML weight to TA scoring. No fake scores.
         """
-        rationale = f"ML unavailable for {symbol}: switching to TA-only mode"
-        logger.warning(f"⚠️ {rationale}")
+        rationale = f"No ML model for {symbol}: TA-only mode active"
+        logger.info(f"[ML_ROUTING] {rationale}")
         
         details = {
-            'source': 'fallback',
+            'source': 'no_model',
             'ml_available': False,
-            'fallback_reason': 'model_not_loaded',
-            'recommendation': 'redistribute_weight_to_ta'
+            'ta_only_mode': True,
+            'note': 'ML weight redistributed to TA scoring'
         }
         
-        # Return None to indicate ML should be excluded from composite
-        # The composite scorer will redistribute the weight to TA
+        # Return None - composite scorer will handle weight redistribution
         return None, rationale, details
 
 

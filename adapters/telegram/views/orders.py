@@ -1,6 +1,6 @@
 """
 Orders View Builder
-Builds the orders view with paginated recent orders.
+Clean order display with pagination.
 """
 
 from typing import Dict, Any, List, Tuple
@@ -10,16 +10,7 @@ from adapters.telegram.formatter import TelegramFormatter, get_formatter
 
 
 def build_orders_view(context: Dict[str, Any], formatter: TelegramFormatter = None) -> Tuple[str, List[List[Dict[str, str]]]]:
-    """
-    Build orders view.
-    
-    Args:
-        context: Context dict from ContextResolver.resolve_orders_context()
-        formatter: Optional formatter instance
-    
-    Returns:
-        Tuple of (text, buttons)
-    """
+    """Build orders view with clean format."""
     if formatter is None:
         formatter = get_formatter()
     
@@ -29,51 +20,64 @@ def build_orders_view(context: Dict[str, Any], formatter: TelegramFormatter = No
     has_next = context.get('has_next', False)
     last_update = context.get('last_update', datetime.now())
     
-    # Header
     time_str = last_update.strftime('%H:%M:%S') if isinstance(last_update, datetime) else str(last_update)
-    header = f"Orders • Last {time_str}"
     
-    # Orders list
-    order_lines = []
-    for order in orders:
-        timestamp = order.get('timestamp', 'N/A')
-        symbol = order.get('symbol', 'UNKNOWN')
-        order_type = order.get('type', 'MKT')
-        side = order.get('side', 'OPEN')
-        qty = order.get('qty', 0.0)
-        price = order.get('price', 0.0)
-        status = order.get('status', 'ok')
-        
-        line = f"{timestamp}  {symbol}  {order_type}  {side}  qty {qty:.2f}  @{formatter.format_number(price, 2)}  {status}"
-        order_lines.append(line)
+    lines = [
+        f"📋 Emirler",
+        f"━━━━━━━━━━━━━━━━━━━━",
+        "",
+    ]
     
-    if not order_lines:
-        order_lines.append("No recent orders")
+    if orders:
+        for order in orders[:6]:
+            symbol = order.get('symbol', 'UNKNOWN')
+            sym = symbol.replace('-USDT-SWAP', '').replace('/USDT:USDT', '')[:5]
+            order_type = order.get('type', 'MKT')[:3]
+            side = order.get('side', 'BUY')
+            qty = order.get('qty', 0.0)
+            price = order.get('price', 0.0)
+            status = order.get('status', 'ok')
+            
+            side_icon = "▲" if side.upper() in ['BUY', 'LONG'] else "▼"
+            status_icon = "✅" if status.lower() in ['filled', 'ok'] else "⏳" if status.lower() in ['pending', 'open'] else "❌"
+            
+            lines.append(f"{sym:5} {side_icon} {order_type} │ {qty:.3f} @ ${price:,.2f} {status_icon}")
+    else:
+        lines.append("Emir bulunamadı")
     
-    # Build text
-    lines = [header, ""] + order_lines + [""]
+    lines.append("")
+    lines.append(f"⏰ {time_str}")
+    
     text = "\n".join(lines)
     
-    # Add footer
-    text = formatter.add_footer(text)
-    
-    # Build buttons
+    # Buttons
     buttons = []
     
-    # Pagination buttons
-    nav_buttons = []
+    # Cancel buttons for pending orders
+    for order in orders[:3]:
+        status = order.get('status', 'filled').lower()
+        if status in ('pending', 'open', 'new'):
+            order_id = order.get('id', order.get('order_id', ''))
+            symbol = order.get('symbol', 'UNKNOWN').replace('-USDT-SWAP', '')[:5]
+            if order_id:
+                buttons.append([
+                    {"text": f"❌ {symbol} İptal", "callback_data": f"ai:act|t=cancel|id={order_id[:8]}"}
+                ])
+    
+    # Pagination
+    nav = []
     if has_prev:
-        nav_buttons.append({"text": "Prev", "callback_data": f"ai:ord|p=prev"})
+        nav.append({"text": "⬅️ Önceki", "callback_data": f"ai:ord|p={page-1}"})
     if has_next:
-        nav_buttons.append({"text": "Next", "callback_data": f"ai:ord|p=next"})
+        nav.append({"text": "➡️ Sonraki", "callback_data": f"ai:ord|p={page+1}"})
+    if nav:
+        buttons.append(nav)
     
-    if nav_buttons:
-        buttons.append(nav_buttons)
-    
-    # Navigation buttons
+    # Navigation
     buttons.append([
-        {"text": "Main", "callback_data": "ai:main"}
+        {"text": "🔄 Yenile", "callback_data": "ai:ord|r=1"},
+        {"text": "🏠 Ana Sayfa", "callback_data": "ai:main"},
+        {"text": "📊 Pozisyonlar", "callback_data": "ai:pos"},
     ])
     
     return text, buttons
-

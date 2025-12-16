@@ -1,6 +1,6 @@
 """
 Signals View Builder
-Builds the signals view with top 6 signals by confidence.
+Shows real signals with gate data (persist, age, confirmation).
 """
 
 from typing import Dict, Any, List, Tuple
@@ -10,105 +10,92 @@ from adapters.telegram.formatter import TelegramFormatter, get_formatter
 
 
 def build_signals_view(context: Dict[str, Any], formatter: TelegramFormatter = None) -> Tuple[str, List[List[Dict[str, str]]]]:
-    """
-    Build signals view.
-    
-    Args:
-        context: Context dict from ContextResolver.resolve_signals_context()
-        formatter: Optional formatter instance
-    
-    Returns:
-        Tuple of (text, buttons)
-    """
+    """Build signals view with real data including gate info."""
     if formatter is None:
         formatter = get_formatter()
     
     signals = context.get('signals', [])
     timeframe = context.get('timeframe', '15m')
     last_update = context.get('last_update', datetime.now())
+    issues = context.get('issues', [])
     
-    # Header
     time_str = last_update.strftime('%H:%M:%S') if isinstance(last_update, datetime) else str(last_update)
-    header = f"Signals • TF {timeframe} • Last {time_str}"
     
-    # Signals list (top 6)
-    signal_lines = []
-    for signal in signals[:6]:
-        symbol = signal.get('symbol', 'UNKNOWN')
-        final_score = signal.get('final_score', 0.0)
-        grade = signal.get('grade', 'D')
-        direction = signal.get('direction', 'FLAT')
-        ta = signal.get('ta', 0.0)
-        ml = signal.get('ml', 0.0)
-        news = signal.get('news', 0.0)
-        risk = signal.get('risk', 0.0)
-        
-        persist = signal.get('persist', 0)
-        persist_max = signal.get('persist_max', 5)
-        age = signal.get('age', 0)
-        age_max = signal.get('age_max', 6)
-        confirm = signal.get('confirm', 0)
-        confirm_max = signal.get('confirm_max', 2)
-        
-        # Direction emoji with trend indicator
-        if direction == 'LONG':
-            dir_emoji = "📈🟢"
-            trend_text = "LONG"
-        elif direction == 'SHORT':
-            dir_emoji = "📉🔴"
-            trend_text = "SHORT"
-        else:
-            dir_emoji = "⏸️⚪"
-            trend_text = "FLAT"
-        
-        # Grade badge
-        grade_badges = {
-            'A+': '🏆', 'A': '⭐', 'B': '✨', 
-            'C': '📊', 'D': '📉', 'F': '⚠️'
-        }
-        grade_badge = grade_badges.get(grade, '📊')
-        
-        # Score bar (visual indicator)
-        if final_score >= 70:
-            score_bar = "🟩🟩🟩"
-        elif final_score >= 60:
-            score_bar = "🟩🟩⬜"
-        elif final_score >= 50:
-            score_bar = "🟨🟨⬜"
-        elif final_score >= 40:
-            score_bar = "🟨⬜⬜"
-        else:
-            score_bar = "🟥⬜⬜"
-        
-        # Format signal line with emojis
-        line = (
-            f"{dir_emoji} {symbol}\n"
-            f"   {score_bar} Score {final_score:.1f} {grade_badge}{grade}\n"
-            f"   📊 TA {ta:.0f} | 🤖 ML {ml:.0f} | 📰 News {news:.0f} | ⚠️ Risk {risk:.0f}"
-        )
-        
-        # Add persist/age/confirm if available
-        if persist > 0:
-            line += f"\n   ⏱️ P {persist}/{persist_max} | 📅 Age {age}/{age_max} | ✅ C {confirm}/{confirm_max}"
-        
-        signal_lines.append(line)
+    lines = [
+        f"📡 Sinyaller │ {timeframe}",
+        f"━━━━━━━━━━━━━━━━━━━━",
+        "",
+    ]
     
-    # Build text
-    lines = [header, ""] + signal_lines + [""]
+    # Show issues if any
+    if issues:
+        for issue in issues[:2]:
+            lines.append(f"⚠️ {issue}")
+        lines.append("")
+    
+    # Signal list with gate data
+    if signals:
+        for signal in signals[:6]:
+            symbol = signal.get('symbol', 'UNKNOWN')
+            sym = symbol.replace('-USDT-SWAP', '').replace('/USDT:USDT', '').replace('-USDT', '')[:5]
+            
+            score = signal.get('final_score', 0.0)
+            grade = signal.get('grade', '?')
+            direction = signal.get('direction', 'FLAT')
+            
+            # Gate data
+            persist = signal.get('persist', 0)
+            persist_max = signal.get('persist_max', 5)
+            age = signal.get('age', 0)
+            age_max = signal.get('age_max', 6)
+            confirm = signal.get('confirm', 0)
+            confirm_max = signal.get('confirm_max', 2)
+            
+            # Component scores
+            ta = signal.get('ta', 0)
+            ml = signal.get('ml', 0)
+            
+            # Direction indicator
+            if direction == 'LONG':
+                dir_icon = "▲"
+            elif direction == 'SHORT':
+                dir_icon = "▼"
+            else:
+                dir_icon = "─"
+            
+            # Grade color
+            if grade in ['A+', 'A']:
+                grade_icon = "🟢"
+            elif grade in ['B+', 'B']:
+                grade_icon = "🟡"
+            else:
+                grade_icon = "🔴"
+            
+            # Main line
+            lines.append(f"{sym:5} {dir_icon} {score:4.0f} {grade:2} {grade_icon}")
+            
+            # Gate line (if has meaningful data)
+            if persist > 0 or age > 0:
+                lines.append(f"  P:{persist}/{persist_max} A:{age}/{age_max} C:{confirm}/{confirm_max}")
+            
+            # Component scores (compact)
+            if ta > 0 or ml > 0:
+                lines.append(f"  TA:{ta:.0f} ML:{ml:.0f}")
+            
+            lines.append("")
+    else:
+        lines.append("Sinyal bulunamadı")
+        lines.append("")
+    
+    lines.append(f"⏰ {time_str}")
+    
     text = "\n".join(lines)
     
-    # Add footer
-    text = formatter.add_footer(text, timeframe=timeframe)
-    
-    # Build buttons
     buttons = [
         [
-            {"text": "Main", "callback_data": "ai:main"},
-            {"text": "Risk", "callback_data": "ai:risk"},
-            {"text": "Positions", "callback_data": "ai:pos"},
-            {"text": "Orders", "callback_data": "ai:ord"}
+            {"text": "🔄 Yenile", "callback_data": "ai:sig|r=1"},
+            {"text": "🏠 Ana Sayfa", "callback_data": "ai:main"},
         ]
     ]
     
     return text, buttons
-

@@ -1,0 +1,37 @@
+2025-12-14 17:50:00.096 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-14 17:50:00.096 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-14 17:50:00.124 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 17:50:00.124 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-14 17:50:00.124 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-14 17:50:00.134 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+
+=== BTC-USDT-SWAP ===
+limits.amount.min: 0.01
+limits.amount.step: None
+limits.cost.min: None
+precision.amount: 0.01
+info.minSz: 0.01
+info.lotSz: 0.01
+info.ctVal: 0.01
+info.ctMult: 1
+
+=== ETH-USDT-SWAP ===
+limits.amount.min: 0.01
+limits.amount.step: None
+limits.cost.min: None
+precision.amount: 0.01
+info.minSz: 0.01
+info.lotSz: 0.01
+info.ctVal: 0.1
+info.ctMult: 1
+
+=== SOL-USDT-SWAP ===
+limits.amount.min: 0.01
+limits.amount.step: None
+limits.cost.min: None
+precision.amount: 0.01
+info.minSz: 0.01
+info.lotSz: 0.01
+info.ctVal: 1
+info.ctMult: 1
+2025-12-14 17:50:03.457 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed

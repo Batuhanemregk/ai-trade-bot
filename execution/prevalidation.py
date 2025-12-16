@@ -26,47 +26,39 @@ def ceil_to_step(x: float, step: float) -> float:
 
 
 async def _get_dynamic_minimum_cost(exchange, symbol: str, price: float) -> float:
-    """Get dynamic minimum cost based on exchange rules and market conditions."""
+    """Get dynamic minimum cost based on exchange rules.
+    
+    Note: With ctVal fix in place, this function is simplified and mainly
+    returns sensible defaults without making additional API calls.
+    """
     try:
-        # Load markets if not loaded
-        if not hasattr(exchange, 'markets') or not exchange.markets:
-            exchange.load_markets()
-        
-        market = exchange.market(symbol)
-        info = market.get('info', {})
-        
-        # Get current order book for real-time price
-        orderbook = exchange.fetch_order_book(symbol)
-        if orderbook['bids'] and orderbook['asks']:
-            current_price = (orderbook['bids'][0][0] + orderbook['asks'][0][0]) / 2
-        else:
-            current_price = price
+        # Use provided price instead of fetching orderbook
+        current_price = price if price and price > 0 else 100.0
         
         # OKX specific minimum cost rules based on symbol type
-        base_currency = symbol.split('/')[0]
+        # Extract base currency from symbol (e.g., "BTC/USDT:USDT" -> "BTC")
+        if '/' in symbol:
+            base_currency = symbol.split('/')[0]
+        else:
+            base_currency = symbol.split('-')[0]
         
         # Different minimum costs for different asset classes
         if base_currency in ['BTC', 'ETH']:
-            # Major cryptocurrencies - higher minimum
             min_cost_usdt = 5.0
         elif base_currency in ['SOL', 'ADA', 'DOT', 'MATIC', 'AVAX']:
-            # Mid-tier cryptocurrencies
             min_cost_usdt = 2.0
         elif base_currency in ['DOGE', 'SHIB', 'PEPE']:
-            # Meme coins - lower minimum
             min_cost_usdt = 1.0
         else:
-            # Default minimum
             min_cost_usdt = 1.0
         
-        # Adjust based on current price volatility
-        # If price is very high, increase minimum to avoid dust orders
+        # Adjust based on price (higher priced assets may need higher minimum)
         if current_price > 1000:
             min_cost_usdt *= 2
         elif current_price > 100:
             min_cost_usdt *= 1.5
         
-        logger.info(f"📊 {symbol} dinamik minimum cost: ${min_cost_usdt:.2f} (base: {base_currency}, price: ${current_price:.2f})")
+        logger.info(f"📊 {symbol} dynamic minimum cost: ${min_cost_usdt:.2f}")
         return min_cost_usdt
         
     except Exception as e:
@@ -132,6 +124,33 @@ async def compute_required_amount(exchange, symbol: str, price: float) -> dict:
                     amount_min = float(min_sz)
                 except:
                     amount_min = None
+        
+        # CRITICAL FIX: Always apply ctVal (contract value) multiplication
+        # OKX perpetual swaps use: real_min = minSz × ctVal, real_step = lotSz × ctVal
+        # e.g., ETH: minSz=0.01, ctVal=0.1 → real_min = 0.001 ETH, real_step = 0.001
+        # e.g., BTC: minSz=0.01, ctVal=0.01 → real_min = 0.0001 BTC, real_step = 0.0001
+        # The limits.amount.min from CCXT is already set to 0.01, but it doesn't
+        # account for ctVal, so we MUST apply the adjustment here.
+        ct_val = info.get('ctVal')
+        logger.debug(f"[CTVAL-DEBUG] {symbol}: amount_min={amount_min}, amount_step={amount_step}, ctVal={ct_val}")
+        
+        if ct_val:
+            try:
+                ct_val_float = float(ct_val)
+                if ct_val_float != 1.0:
+                    # Apply to amount_min
+                    if amount_min:
+                        original_min = amount_min
+                        amount_min = amount_min * ct_val_float
+                        logger.info(f"📊 {symbol} ctVal adjustment min: {original_min} × {ct_val_float} = {amount_min}")
+                    
+                    # ALSO apply to amount_step for correct rounding
+                    if amount_step:
+                        original_step = amount_step
+                        amount_step = amount_step * ct_val_float
+                        logger.info(f"📊 {symbol} ctVal adjustment step: {original_step} × {ct_val_float} = {amount_step}")
+            except Exception as e:
+                logger.warning(f"⚠️ {symbol} ctVal conversion failed: {e}")
 
         # Apply symbol overrides
         if symbol_overrides:
@@ -145,17 +164,11 @@ async def compute_required_amount(exchange, symbol: str, price: float) -> dict:
         if price and min_cost:
             need_by_cost = min_cost / float(price)
         
-        # OKX'te min_cost genellikle None, bu yüzden amount_min kullan
-        # Ama amount_min çok küçükse, exchange'in gerçek minimum cost'unu hesapla
-        # SOL-USDT-SWAP için özel durum: gerçek minimum çok küçük, dinamik hesaplama yapma
-        if symbol == 'SOL-USDT-SWAP' and amount_min and amount_min <= 0.01:
-            logger.info(f"📊 {symbol} için gerçek minimum kullanılıyor: {amount_min} SOL")
-            # Gerçek minimum kullan, dinamik hesaplama yapma
-        elif amount_min and amount_min < 0.01:  # Diğer semboller için dinamik hesaplama
-            # Exchange'in gerçek minimum cost'unu hesapla
-            min_cost_usdt = await _get_dynamic_minimum_cost(exchange, symbol, price)
-            need_by_cost = min_cost_usdt / float(price)
-            logger.info(f"📊 {symbol} amount_min çok küçük ({amount_min}), dinamik minimum ${min_cost_usdt:.2f} kullanılıyor")
+        # NOTE: ctVal adjustment above already gives correct minimum amounts:
+        # ETH: 0.01 × 0.1 = 0.001 ETH
+        # BTC: 0.01 × 0.01 = 0.0001 BTC
+        # SOL: 0.01 × 1 = 0.01 SOL
+        # No need for dynamic cost override - use the actual exchange minimums
 
         base_need = max(need_by_cost, amount_min or 0.0)
 
@@ -551,22 +564,38 @@ def validate_bracket_order(entry_price: float, tp_price: float, sl_price: float,
         entry_price: Entry order price
         tp_price: Take profit price
         sl_price: Stop loss price
-        side: Order side ('buy' or 'sell')
+        side: Position direction - 'buy' means LONG position, 'sell' means SHORT position
+              (This is the ENTRY order side, which determines position direction)
         min_distance: Minimum distance as percentage
     
     Returns:
         Tuple of (is_valid, list_of_errors)
+    
+    Note:
+        - For LONG (buy entry): We want to sell at higher price for profit
+          So: sl < entry < tp (TP above entry)
+        - For SHORT (sell entry): We want to buy back at lower price for profit
+          So: tp < entry < sl (TP below entry)
     """
     errors = []
     
-    if side == 'buy':
-        # For buy orders (LONG): sl < entry < tp
+    # Normalize side to lowercase
+    side_lower = side.lower() if side else 'buy'
+    
+    if side_lower == 'buy':
+        # LONG position: Entry is BUY, we exit by selling
+        # Profit when price goes UP: TP should be ABOVE entry
+        # Loss when price goes DOWN: SL should be BELOW entry
+        # Valid: sl < entry < tp
         if not (sl_price < entry_price < tp_price):
-            errors.append(f"Buy bracket: sl {sl_price} < entry {entry_price} < tp {tp_price}")
+            errors.append(f"LONG bracket invalid: expected sl {sl_price:.4f} < entry {entry_price:.4f} < tp {tp_price:.4f}")
     else:
-        # For sell orders (SHORT): tp < entry < sl
+        # SHORT position: Entry is SELL, we exit by buying
+        # Profit when price goes DOWN: TP should be BELOW entry
+        # Loss when price goes UP: SL should be ABOVE entry
+        # Valid: tp < entry < sl
         if not (tp_price < entry_price < sl_price):
-            errors.append(f"Sell bracket: tp {tp_price} < entry {entry_price} < sl {sl_price}")
+            errors.append(f"SHORT bracket invalid: expected tp {tp_price:.4f} < entry {entry_price:.4f} < sl {sl_price:.4f}")
     
     # Check minimum distances
     entry_tp_distance = abs(tp_price - entry_price) / entry_price

@@ -255,41 +255,22 @@ class RiskService:
             return 50.0
     
     async def _calculate_correlation_risk(self, symbol: str, market_data: Dict[str, Any]) -> float:
-        """Calculate correlation-based risk with market cap tiers from policy."""
+        """Calculate correlation-based risk using CoinRegistry for tier lookups."""
         try:
-            # Policy'den risk konfigürasyonunu al
-            risk_config = self.policy.get('trading', {}).get('risk', {}).get('risk_assessment', {}).get('correlation_risk', {})
+            # Use CoinRegistry for tier-based correlation risk
+            from application.coin_registry import get_coin_registry
+            registry = get_coin_registry()
             
-            if not risk_config:
-                logger.warning("No correlation risk config in policy, using defaults")
-                return 50.0
+            # Get correlation risk from registry (based on tier)
+            risk_value = registry.get_correlation_risk(symbol)
+            tier = registry.get_tier(symbol)
             
-            # Policy'den tier'ları ve risk seviyelerini al
-            market_cap_tiers = risk_config.get('market_cap_tiers', {})
-            risk_levels = risk_config.get('risk_levels', {})
-            default_unknown = risk_config.get('default_unknown', 60.0)
-            
-            if not market_cap_tiers or not risk_levels:
-                logger.warning("Incomplete correlation risk config in policy, using defaults")
-                return 50.0
-            
-            # Symbol'ü temizle (BTC-USDT-SWAP → BTC)
-            base_symbol = symbol.split('-')[0]
-            
-            # Tier'ı bul
-            for tier, symbols in market_cap_tiers.items():
-                if base_symbol in symbols:
-                    risk_value = risk_levels.get(tier, default_unknown)
-                    logger.debug(f"Correlation risk for {symbol}: {risk_value} (tier: {tier})")
-                    return risk_value
-            
-            # Bilinmeyen coin için varsayılan
-            logger.warning(f"Unknown symbol {symbol}, using default correlation risk: {default_unknown}")
-            return default_unknown
+            logger.debug(f"[RISK] {symbol} correlation_risk={risk_value} (tier={tier})")
+            return risk_value
             
         except Exception as e:
             logger.warning(f"Failed to calculate correlation risk for {symbol}: {e}")
-            return 50.0
+            return 60.0  # Conservative default
     
     def _calculate_score_risk(self, score: float, signal_type: str) -> float:
         """Calculate risk based on signal score with policy-based thresholds."""
@@ -531,6 +512,11 @@ class RiskService:
         Returns:
             Tuple of (should_skip, reason, details)
         """
+        # Handle None values with defaults
+        min_size = min_size if min_size is not None else 0.001
+        min_notional = min_notional if min_notional is not None else 5.0
+        price = price if price is not None else 0.0
+        
         # Check size constraints
         if size < min_size:
             return True, "below_min_size", {

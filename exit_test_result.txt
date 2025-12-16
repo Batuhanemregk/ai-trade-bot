@@ -1,0 +1,58 @@
+2025-12-15 01:09:23.591 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - ­şöæ Initializing OKX client with API key: bafb2c4b...
+2025-12-15 01:09:23.591 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - ­şöæ Testnet mode: False, Default type: swap
+2025-12-15 01:09:23.600 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - Ô£à OKX CCXT adapter initialized successfully
+2025-12-15 01:09:26.936 | INFO     | adapters.exchange_okx_ccxt:fetch_algo_orders:1254 - ­şôï Fetched 6 algo orders for all
+2025-12-15 01:09:27.199 | INFO     | adapters.exchange_okx_ccxt:close:1012 - Ô£à OKX CCXT adapter closed
+2025-12-15 01:09:27.252 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-15 01:09:27.252 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-15 01:09:27.279 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+============================================================
+EXIT STRATEGY IMPLEMENTATION TEST
+============================================================
+
+=== Testing Exchange Adapter Methods ===
+  Ô£à fetch_algo_orders exists
+  Ô£à cancel_algo_order exists
+  Ô£à create_algo_stop_loss exists
+  Ô£à update_stop_loss exists
+  Ô£à close_position_market exists
+  Ô£à get_position_sl_order exists
+
+  Testing fetch_algo_orders...
+    Ô£à Fetched 6 algo orders
+  Ô£à Adapter closed
+
+=== Testing Policy Toggle ===
+  Current trailing.enabled: True
+  trailing.enabled: True
+  partial_tp.enabled: True
+  time_exit.enabled: True
+  dynamic_tpsl.enabled: True
+
+=== Testing Trailing Job Config ===
+  Trailing: enabled=True
+    activation_r_multiple: 0.5
+    breakeven_r_multiple: 1.0
+    tight_r_multiple: 1.5
+
+  Partial TP: enabled=True
+    Level 1: R=1.0, close=33.0%
+    Level 2: R=2.0, close=33.0%
+    Level 3: R=4.0, close=34.0%
+
+  Time Exit: enabled=True
+    max_position_age_hours: 24
+    warning_hours: 20
+
+  Dynamic TP/SL: enabled=True
+
+=== Testing Context Resolver ===
+2025-12-15 01:09:27.531 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+  trailing_enabled: True
+  partial_tp_enabled: True
+  time_exit_enabled: True
+  dynamic_tpsl_enabled: True
+
+============================================================
+TEST COMPLETE
+============================================================

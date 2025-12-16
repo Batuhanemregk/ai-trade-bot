@@ -1,0 +1,27 @@
+2025-12-14 16:54:32.267 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-14 16:54:32.267 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-14 16:54:32.304 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 16:54:32.304 | INFO     | scoring.ml_scorer:_load_all_models:44 - Loading LightGBM models (15m only - simplified)...
+2025-12-14 16:54:33.164 | INFO     | scoring.ml_scorer:_load_all_models:87 - \u2705 Loaded LGBM model: BTC_15m (AUC=0.8180527969318534, Features=35)
+2025-12-14 16:54:33.169 | INFO     | scoring.ml_scorer:_load_all_models:87 - \u2705 Loaded LGBM model: ETH_15m (AUC=0.7425192853104434, Features=35)
+2025-12-14 16:54:33.177 | INFO     | scoring.ml_scorer:_load_all_models:87 - \u2705 Loaded LGBM model: SOL_15m (AUC=0.7205051086101418, Features=35)
+2025-12-14 16:54:33.177 | INFO     | scoring.ml_scorer:_load_all_models:94 - Loaded 3/3 LightGBM models (15m only)
+Loaded models: ['BTC_15m', 'ETH_15m', 'SOL_15m']
+2025-12-14 16:54:33.177 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-14 16:54:33.177 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-14 16:54:33.192 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+
+--- Testing predictions ---
+2025-12-14 16:54:37.410 | DEBUG    | ml.features.builder:build_features:52 - Building features for 100 bars...
+2025-12-14 16:54:37.455 | DEBUG    | ml.features.builder:build_features:72 - Created 74 features
+2025-12-14 16:54:37.458 | DEBUG    | scoring.ml_scorer:score:237 - \u2705 ML scoring for BTC-USDT-SWAP (BTC_15m): p_up=0.012, score=0.8
+BTC-USDT-SWAP: score=0.8, p_up=0.0117, signal=SHORT
+2025-12-14 16:54:38.512 | DEBUG    | ml.features.builder:build_features:52 - Building features for 100 bars...
+2025-12-14 16:54:38.548 | DEBUG    | ml.features.builder:build_features:72 - Created 74 features
+2025-12-14 16:54:38.551 | DEBUG    | scoring.ml_scorer:score:237 - \u2705 ML scoring for ETH-USDT-SWAP (ETH_15m): p_up=0.070, score=4.7
+ETH-USDT-SWAP: score=4.7, p_up=0.0699, signal=SHORT
+2025-12-14 16:54:39.615 | DEBUG    | ml.features.builder:build_features:52 - Building features for 100 bars...
+2025-12-14 16:54:39.655 | DEBUG    | ml.features.builder:build_features:72 - Created 74 features
+2025-12-14 16:54:39.658 | DEBUG    | scoring.ml_scorer:score:237 - \u2705 ML scoring for SOL-USDT-SWAP (SOL_15m): p_up=0.021, score=1.4
+SOL-USDT-SWAP: score=1.4, p_up=0.0205, signal=SHORT
+2025-12-14 16:54:39.919 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed

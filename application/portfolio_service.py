@@ -37,6 +37,10 @@ class PortfolioService:
                 if currency == 'USDT':
                     continue
                 
+                # Skip non-dict entries (like 'info', 'timestamp', 'free', 'used', 'total' summary keys)
+                if not isinstance(amounts, dict):
+                    continue
+                
                 total = float(amounts.get('total', 0))
                 if total > 0:
                     # Get current price for this currency

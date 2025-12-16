@@ -1,0 +1,134 @@
+classification_rules:
+  tier_1_volume_min: 500000000     # $500M+ (BTC, ETH)
+  tier_2_volume_min: 50000000      # $50M-500M (Major alts)
+  tier_3_volume_min: 10000000      # $10M-50M (Mid alts)
+  tier_4_volume_min: 1000000       # $1M-10M (Small alts)
+  tier_5_volume_min: 0             # <$1M (Micro, TA-only)
+
+tier_settings:
+  tier_1:
+    correlation_risk: 25.0
+    leverage_max: 10
+    volatility_thresholds:
+      low: 0.15
+      medium: 0.35
+      high: 0.55
+    volume_thresholds:
+      high: 50000000
+      medium: 10000000
+      low: 1000000
+    ml_enabled: true
+    
+  tier_2:
+    correlation_risk: 35.0
+    leverage_max: 10
+    volatility_thresholds:
+      low: 0.2
+      medium: 0.4
+      high: 0.6
+    volume_thresholds:
+      high: 10000000
+      medium: 2000000
+      low: 200000
+    ml_enabled: true
+    
+  tier_3:
+    correlation_risk: 50.0
+    leverage_max: 7
+    volatility_thresholds:
+      low: 0.25
+      medium: 0.45
+      high: 0.65
+    volume_thresholds:
+      high: 5000000
+      medium: 1000000
+      low: 100000
+    ml_enabled: true
+    
+  tier_4:
+    correlation_risk: 60.0
+    leverage_max: 5
+    volatility_thresholds:
+      low: 0.3
+      medium: 0.5
+      high: 0.7
+    volume_thresholds:
+      high: 1000000
+      medium: 200000
+      low: 20000
+    ml_enabled: true  # Tier-based model only
+    
+  tier_5:
+    correlation_risk: 70.0
+    leverage_max: 3
+    volatility_thresholds:
+      low: 0.35
+      medium: 0.55
+      high: 0.75
+    volume_thresholds:
+      high: 500000
+      medium: 100000
+      low: 10000
+    ml_enabled: false  # TA-only, no ML
+
+# Symbols with dedicated ML models
+ml_enabled_symbols:
+  # Core (existing models)
+  - BTC
+  - ETH
+  - SOL
+  # New dedicated models (to be trained)
+  - XRP
+  - DOGE
+  - AVAX
+  - VET
+  - OP
+  - RENDER
+  - WLD
+  - SUI
+  - UNI
+  - ARB
+  - ATOM
+  - NEAR
+
+# Tier-based shared models (for coins without dedicated model)
+tier_models:
+  tier_2: TIER_2_ALT_15m
+  tier_3: TIER_3_15m
+  tier_4: TIER_4_15m
+  # tier_5: null (TA-only)
+
+# Shadow testing config
+shadow_testing:
+  enabled: true
+  duration_days: 7
+  log_file: logs/shadow_ml_predictions.jsonl
+  start_date: null  # Will be set when models are deployed
+  
+# Coin tier assignments
+coin_tiers:
+  # Tier 1 - Top coins
+  BTC: tier_1
+  ETH: tier_1
+  # Tier 2 - Major alts
+  SOL: tier_2
+  XRP: tier_2
+  DOGE: tier_2
+  AVAX: tier_2
+  # Tier 3 - Mid alts
+  VET: tier_3
+  OP: tier_3
+  RENDER: tier_3
+  WLD: tier_3
+  SUI: tier_3
+  UNI: tier_3
+  ARB: tier_3
+  ATOM: tier_3
+  NEAR: tier_3
+  # Tier 4 - Small alts (will be classified by volume)
+  ARKM: tier_4
+  GRT: tier_4
+  # Tier 5 - Micro alts (TA-only)
+  TEST: tier_5
+
+last_updated: '2025-12-16T00:17:00.000000+00:00'

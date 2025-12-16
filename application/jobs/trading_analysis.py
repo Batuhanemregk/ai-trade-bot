@@ -29,6 +29,13 @@ from application.analysis_summary_logger import get_analysis_summary_logger
 from monitoring.prometheus_exporter import get_prometheus_exporter
 from application.decision_tracer import get_decision_tracer, DecisionSnapshot
 
+# Install alert history loguru sink to capture warnings/errors
+try:
+    from application.alert_history import install_loguru_sink
+    install_loguru_sink()
+except Exception:
+    pass  # Silent fail - alert history is optional
+
 
 class TradingAnalysisJob(BaseJob):
     """15-minute trading analysis job with bar-aligned execution."""
@@ -68,8 +75,9 @@ class TradingAnalysisJob(BaseJob):
             self.news_scorer = NewsScorer()
             self.risk_service = RiskService(self.policy)
             
-            # Initialize state management
-            self.state_manager = PositionStateManager(self.policy)
+            # Initialize state management - USE SINGLETON for consistent state
+            from application.position_state_manager import get_state_manager
+            self.state_manager = get_state_manager(self.policy)
             self.signal_gate = SignalGate(self.policy)
             self.reversal_manager = ReversalManager(self.policy)
             
@@ -187,6 +195,12 @@ class TradingAnalysisJob(BaseJob):
         try:
             logger.debug(f"🔍 Processing {symbol}")
             
+            # Step 0: Sync position state with real exchange positions FIRST
+            # This prevents duplicate position opening by ensuring state matches reality
+            has_position = await self._sync_position_from_exchange(symbol)
+            if has_position:
+                logger.info(f"[SYNC] {symbol}: Real position exists, state synced")
+            
             # Step 1: Fetch OHLCV data (multi-timeframe) - GUARANTEED FIRST
             ohlcv_data = await _fetch_multi_timeframe_data(self.exchange_adapter, symbol, True)
             
@@ -200,6 +214,7 @@ class TradingAnalysisJob(BaseJob):
             
             # Step 3: ML Analysis - Uses cached OHLCV data
             ml_score, ml_rationale, ml_details = await _compute_ml_analysis(self.ml_scorer, ohlcv_data, symbol)
+            # NOTE: ml_score may be None for TA-only mode - finalize() will redistribute ML weight to TA
             
             # Step 4: News Analysis - Independent of OHLCV
             news_score, news_categories, news_rationale, news_volatility = await _compute_news_analysis(self.news_scorer, symbol)
@@ -249,6 +264,22 @@ class TradingAnalysisJob(BaseJob):
             
             # Process through signal gate with real position info
             gated_signal = self.signal_gate.process_signal(symbol, signal_dict, ohlcv_1h_list, position_info)
+            
+            # Record signal to history store for Telegram visualization
+            try:
+                from application.signal_history import record_signal
+                record_signal(
+                    symbol=symbol,
+                    ta_score=ta_score if ta_score else 0.0,
+                    ml_score=ml_score if ml_score else 0.0,
+                    news_score=news_score if news_score else 50.0,
+                    risk_score=risk_score if risk_score else 50.0,
+                    final_score=gated_signal.original_score,
+                    direction=gated_signal.direction,
+                    gate_status='PASS' if gated_signal.is_valid else 'PENDING'
+                )
+            except Exception as e:
+                logger.debug(f"Signal history recording failed: {e}")
             
             # Step 8: Process state transition (pass gated_signal with is_valid, size, mode)
             gated_signal_dict = {
@@ -305,7 +336,7 @@ class TradingAnalysisJob(BaseJob):
                     
                     # Scores
                     ta_score=ta_score,
-                    ml_score=ml_score,
+                    ml_score=ml_score if ml_score is not None else 0.0,  # Handle TA-only mode
                     news_score=news_score,
                     risk_score=risk_score,
                     final_score=composite_signal.final_score,
@@ -400,7 +431,7 @@ class TradingAnalysisJob(BaseJob):
                 self.prometheus_exporter.update_scores(symbol, {
                     'composite': composite_signal.final_score,
                     'ta': ta_score,
-                    'ml': ml_score,
+                    'ml': ml_score if ml_score is not None else 0.0,
                     'news': news_score,
                     'risk': risk_score
                 })
@@ -411,17 +442,28 @@ class TradingAnalysisJob(BaseJob):
             composite_signal.state_before = transition.from_state.value
             composite_signal.decision = gated_signal.direction
             
+            # Log all actions for debugging
+            logger.info(f"[ACTION] {symbol}: transition={transition.action} from={transition.from_state.value} to={transition.to_state.value}")
+            
+            # NOTE: Position sync at start of cycle already guarantees state correctness.
+            # If transition.from_state was READY and action is OPEN_*, it's a legitimate new trade.
+            # The sync_from_exchange at _process_symbol start ensures we don't open duplicates.
+            
             if transition.action == 'OPEN_LONG':
-                logger.info(f"🚀 {symbol}: Opening LONG position")
-                await self._execute_trade(symbol, 'long', composite_signal.final_score, composite_signal)
+                logger.info(f"🚀 {symbol}: Opening LONG position (from={transition.from_state.value})")
+                await self._execute_trade(symbol, 'long', composite_signal.final_score, composite_signal, ohlcv_data)
                 
             elif transition.action == 'OPEN_SHORT':
-                logger.info(f"🚀 {symbol}: Opening SHORT position")
-                await self._execute_trade(symbol, 'short', composite_signal.final_score, composite_signal)
+                logger.info(f"🚀 {symbol}: Opening SHORT position (from={transition.from_state.value})")
+                await self._execute_trade(symbol, 'short', composite_signal.final_score, composite_signal, ohlcv_data)
                 
-            elif transition.action == 'CLOSE_REVERSE':
+            elif transition.action == 'CLOSE_REVERSE' or transition.action == 'REVERSE':
                 logger.info(f"🔄 {symbol}: Close & Reverse - {transition.reason}")
-                await self._execute_close_and_reverse(symbol, gated_signal.direction, composite_signal.final_score, composite_signal)
+                await self._execute_close_and_reverse(symbol, gated_signal.direction, composite_signal.final_score, composite_signal, ohlcv_data)
+                
+            elif transition.action == 'IGNORE':
+                # Same direction signal - ignore to prevent duplicate position
+                logger.info(f"🚫 {symbol}: IGNORE - {transition.reason}")
                 
             elif transition.action == 'MAINTAIN':
                 logger.debug(f"⏸️ {symbol}: MAINTAIN - No state change")
@@ -466,7 +508,7 @@ class TradingAnalysisJob(BaseJob):
                 self.prometheus_exporter.record_error('symbol_processing', 'trading_analysis')
             return None
     
-    async def _execute_trade(self, symbol: str, side: str, score: float, composite_signal=None):
+    async def _execute_trade(self, symbol: str, side: str, score: float, composite_signal=None, ohlcv_data: dict = None):
         """Execute a real trade using the existing trading logic."""
         try:
             # Import the real trading execution logic from runtime
@@ -491,23 +533,174 @@ class TradingAnalysisJob(BaseJob):
                 exchange_adapter=self.exchange_adapter,
                 symbol=symbol,
                 composite_signal=composite_signal,
-                live=True  # This is the scheduler, so always live
+                live=True,  # This is the scheduler, so always live
+                ohlcv_data=ohlcv_data  # Pass OHLCV for ATR-based TP/SL
             )
             
         except Exception as e:
             logger.error(f"❌ Failed to execute trade for {symbol}: {e}")
             raise
     
-    async def _execute_close_and_reverse(self, symbol: str, new_direction: str, score: float, composite_signal=None):
+    async def _execute_close_and_reverse(self, symbol: str, new_direction: str, score: float, composite_signal=None, ohlcv_data: dict = None):
         """Execute close and reverse using real trading logic."""
         try:
-            # First close existing position
-            logger.info(f"🔄 Closing existing position for {symbol}")
-            # Close logic would go here
+            # Step 1: Close existing position
+            logger.info(f"🔄 [REVERSE] Step 1: Closing existing position for {symbol}")
             
-            # Then open new position
-            await self._execute_trade(symbol, new_direction, score, composite_signal)
+            try:
+                # Fetch current position
+                if hasattr(self.exchange_adapter, 'fetch_positions'):
+                    positions = await self.exchange_adapter.fetch_positions()
+                else:
+                    positions = await self.exchange_adapter.ccxt_client.fetch_positions()
+                
+                # Find position for this symbol
+                for pos in positions:
+                    pos_symbol_raw = pos.get('symbol', '')
+                    info = pos.get('info', {})
+                    pos_symbol_okx = info.get('instId', '')
+                    pos_symbol_normalized = pos_symbol_raw.replace('/', '-').replace(':USDT', '-SWAP').replace(':USD', '-SWAP')
+                    
+                    symbol_matches = (
+                        pos_symbol_raw == symbol or
+                        pos_symbol_normalized == symbol or
+                        pos_symbol_okx == symbol
+                    )
+                    
+                    contracts = float(pos.get('contracts', 0) or 0)
+                    if contracts == 0:
+                        contracts = abs(float(pos.get('notional', 0) or 0))
+                    if contracts == 0:
+                        contracts = abs(float(info.get('pos', 0) or 0))
+                    
+                    if symbol_matches and contracts != 0:
+                        # Found position - close it
+                        side = pos.get('side', '').lower()
+                        close_side = 'buy' if side == 'short' else 'sell'
+                        
+                        logger.info(f"🔄 [REVERSE] Closing {side.upper()} position: {contracts} contracts")
+                        
+                        # Create close order (reduce only)
+                        close_result = await self.exchange_adapter.create_market_order(
+                            symbol=symbol,
+                            side=close_side,
+                            amount=contracts,
+                            params={'reduceOnly': True}
+                        )
+                        logger.info(f"✅ [REVERSE] Position closed: {close_result.get('id', 'N/A')}")
+                        break
+                else:
+                    logger.warning(f"⚠️ [REVERSE] No position found to close for {symbol}")
+                    
+            except Exception as e:
+                logger.error(f"❌ [REVERSE] Failed to close position: {e}")
+                # Continue to open new position anyway
+            
+            # Step 2: Open new position
+            logger.info(f"🔄 [REVERSE] Step 2: Opening {new_direction.upper()} position for {symbol}")
+            await self._execute_trade(symbol, new_direction, score, composite_signal, ohlcv_data)
+            
+            logger.info(f"✅ [REVERSE] Complete: {symbol} now {new_direction.upper()}")
             
         except Exception as e:
             logger.error(f"❌ Failed to execute close and reverse for {symbol}: {e}")
             raise
+    
+    async def _sync_position_from_exchange(self, symbol: str) -> bool:
+        """
+        Fetch real positions from exchange and sync with state manager.
+        
+        This is called at the START of each analysis cycle to ensure
+        the in-memory position state matches the real exchange state.
+        This prevents duplicate position opening.
+        
+        Args:
+            symbol: Trading symbol to check
+            
+        Returns:
+            True if a real position exists, False otherwise
+        """
+        try:
+            # Fetch all positions from exchange
+            if hasattr(self.exchange_adapter, 'fetch_positions'):
+                positions = await self.exchange_adapter.fetch_positions()
+            elif hasattr(self.exchange_adapter, 'ccxt_client'):
+                positions = await self.exchange_adapter.ccxt_client.fetch_positions()
+            else:
+                logger.warning(f"⚠️ Cannot fetch positions - adapter doesn't support it")
+                return False
+            
+            # DEBUG: Log first position to see format
+            if positions and len(positions) > 0:
+                logger.debug(f"[SYNC-DEBUG] Sample position keys: {list(positions[0].keys())}")
+            
+            # Find position for this symbol
+            for pos in positions:
+                pos_symbol_raw = pos.get('symbol', '')
+                
+                # CRITICAL: Normalize CCXT symbol format to our format
+                # CCXT returns: 'BTC/USDT:USDT' or 'BTC/USDT'
+                # Our format: 'BTC-USDT-SWAP'
+                # Also check info.instId which is OKX native format: 'BTC-USDT-SWAP'
+                info = pos.get('info', {})
+                pos_symbol_okx = info.get('instId', '')  # OKX native format
+                
+                # Normalize CCXT format to our format
+                pos_symbol_normalized = pos_symbol_raw.replace('/', '-').replace(':USDT', '-SWAP').replace(':USD', '-SWAP')
+                
+                # Check both formats
+                symbol_matches = (
+                    pos_symbol_raw == symbol or  # Exact match
+                    pos_symbol_normalized == symbol or  # Normalized CCXT -> OKX
+                    pos_symbol_okx == symbol  # OKX native from info
+                )
+                
+                # CCXT uses 'contracts' or 'notional' or 'info.pos'
+                contracts = float(pos.get('contracts', 0) or 0)
+                if contracts == 0:
+                    # Try alternative field names from CCXT
+                    contracts = abs(float(pos.get('notional', 0) or 0))
+                if contracts == 0:
+                    # Try info dict (raw exchange data)
+                    contracts = abs(float(info.get('pos', 0) or 0))
+                
+                # DEBUG: Log all positions we're checking
+                if contracts != 0:
+                    logger.debug(f"[SYNC-CHECK] pos_raw={pos_symbol_raw} pos_okx={pos_symbol_okx} pos_norm={pos_symbol_normalized} target={symbol} match={symbol_matches} contracts={contracts}")
+                
+                if symbol_matches and contracts != 0:
+                    # Real position exists - sync to state manager
+                    side = pos.get('side', '').lower()  # 'long' or 'short'
+                    
+                    # CCXT uses 'entryPrice' or 'info.avgPx'
+                    entry_price = float(pos.get('entryPrice', 0) or pos.get('avgPrice', 0) or 0)
+                    if entry_price == 0:
+                        entry_price = float(info.get('avgPx', 0) or info.get('entryPrice', 0) or 0)
+                    
+                    size = abs(contracts)
+                    
+                    logger.info(f"[SYNC] {symbol}: Found REAL {side.upper()} position, size={size:.4f}, entry=${entry_price:.2f}")
+                    
+                    self.state_manager.sync_from_exchange(
+                        symbol=symbol,
+                        side=side,
+                        entry_price=entry_price,
+                        size=size
+                    )
+                    
+                    # Verify sync worked
+                    current_state = self.state_manager.get_position_state(symbol)
+                    logger.info(f"[SYNC] {symbol}: State after sync = {current_state.value}")
+                    
+                    return True
+            
+            # No position found - sync as no position
+            self.state_manager.sync_no_position(symbol)
+            logger.debug(f"[SYNC] {symbol}: No real position found, state=READY")
+            return False
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to sync position for {symbol}: {e}")
+            import traceback
+            logger.debug(f"[SYNC-ERROR] {traceback.format_exc()}")
+            return False

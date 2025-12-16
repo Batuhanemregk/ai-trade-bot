@@ -103,6 +103,9 @@ class ScoringService:
         self._scores_generated = 0
         self._signals_generated = 0
         self._last_score = None
+        
+        # Cache all symbol scores for Telegram display
+        self._latest_scores: dict[str, CompositeScore] = {}
 
         self.logger.info(f"Scoring service initialized with weights: {self.weights}")
 
@@ -247,6 +250,9 @@ class ScoringService:
 
             self._scores_generated += 1
             self._last_score = composite_score
+            
+            # Cache score for Telegram signals view
+            self._latest_scores[symbol] = composite_score
 
             self.logger.info(f"Generated composite score for {symbol}: {grade} ({overall_score:.2f})")
             return composite_score
@@ -320,11 +326,12 @@ class ScoringService:
         return ". ".join(rationale_parts) + "."
 
     def get_score_summary(self, symbol: str) -> dict[str, Any]:
-        """Get a summary of the latest score for a symbol."""
-        if not self._last_score or self._last_score.symbol != symbol:
+        """Get a summary of the latest score for a symbol from cache."""
+        # Check cache first
+        score = self._latest_scores.get(symbol)
+        if not score:
             return {"error": "No score available for symbol"}
 
-        score = self._last_score
         return {
             "symbol": score.symbol,
             "grade": score.grade,
@@ -343,22 +350,26 @@ class ScoringService:
         }
 
     async def get_top_symbols(self, limit: int = 5) -> list[dict[str, Any]]:
-        """Get top symbols based on composite scores."""
-        # Default symbols from policy
-        default_symbols = ["BTC-USDT", "ETH-USDT", "SOL-USDT", "ADA-USDT", "DOT-USDT"]
-        
-        # Return mock top symbols for now
+        """Get top symbols based on cached composite scores."""
+        # Return real scores from cache
         top_symbols = []
-        for i, symbol in enumerate(default_symbols[:limit]):
+        
+        for symbol, score in self._latest_scores.items():
             top_symbols.append({
                 "symbol": symbol,
-                "score": 75.0 - (i * 5),  # Mock descending scores
-                "signal": "HOLD",
-                "confidence": 0.8 - (i * 0.1),
-                "grade": ["A", "B+", "B", "C+", "C"][i] if i < 5 else "D"
+                "score": score.overall_score,
+                "signal": score.overall_signal.value,
+                "confidence": score.overall_confidence,
+                "grade": score.grade,
+                "ta": score.ta_score,
+                "ml": score.ml_score,
+                "news": score.news_score
             })
         
-        return top_symbols
+        # Sort by score distance from 50 (most extreme signals first)
+        top_symbols.sort(key=lambda x: abs(x['score'] - 50), reverse=True)
+        
+        return top_symbols[:limit]
 
     def get_service_status(self) -> dict[str, Any]:
         """Get service status and performance metrics."""

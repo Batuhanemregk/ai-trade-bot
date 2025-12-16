@@ -21,9 +21,11 @@ class OKXExchangeAdapter:
     """OKX exchange adapter using CCXT library for entry orders."""
     
     def __init__(self, config: dict = None, ccxt_client: Any = None):
+        import os
         self.config = config or {}
         self.ccxt_client = ccxt_client
-        self.mode = self.config.get('mode', 'dry-run')
+        # Get mode from config, or env var TRADING_MODE, default to paper (safer than dry-run)
+        self.mode = self.config.get('mode') or os.getenv('TRADING_MODE', 'paper')
         
         # Initialize CCXT client if not provided
         if not self.ccxt_client:
@@ -188,6 +190,47 @@ class OKXExchangeAdapter:
         except Exception as e:
             logger.error(f"❌ Positions fetch failed: {e}")
             raise map_ccxt_error(e) if hasattr(map_ccxt_error, '__call__') else e
+    
+    async def fetch_balance(self) -> dict:
+        """Fetch account balance."""
+        try:
+            if self.mode == 'dry-run':
+                return {'USDT': {'free': 10000.0, 'used': 0.0, 'total': 10000.0}}
+            
+            result = self.ccxt_client.fetch_balance()
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Balance fetch failed: {e}")
+            raise map_ccxt_error(e) if hasattr(map_ccxt_error, '__call__') else e
+    
+    async def set_leverage(self, symbol: str, leverage: int) -> bool:
+        """
+        Set leverage for a symbol.
+        
+        Args:
+            symbol: Trading symbol (e.g., 'BTC-USDT-SWAP')
+            leverage: Leverage multiplier (e.g., 5)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            if self.mode == 'dry-run':
+                logger.info(f"[DRY-RUN] Would set leverage for {symbol} to {leverage}x")
+                return True
+            
+            # Convert symbol to CCXT format
+            ccxt_symbol = okx_to_ccxt_symbol(symbol)
+            
+            # Set leverage via CCXT
+            result = self.ccxt_client.set_leverage(leverage, ccxt_symbol)
+            logger.info(f"[LEVERAGE] Set {symbol} leverage to {leverage}x")
+            return True
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to set leverage for {symbol}: {e}")
+            return False
     
     def fetch_open_orders(self, symbol: str = None) -> list:
         """Fetch open orders."""
@@ -533,6 +576,31 @@ class OKXCCXTAdapter:
                     delay = self._base_delay * (2 ** attempt)
                     logger.warning(f"⚠️ Request failed (attempt {attempt + 1}), retrying in {delay}s: {e}")
                     await asyncio.sleep(delay)
+    
+    async def set_leverage(self, symbol: str, leverage: int) -> bool:
+        """
+        Set leverage for a symbol.
+        
+        Args:
+            symbol: Trading symbol (e.g., 'BTC-USDT-SWAP')
+            leverage: Leverage multiplier (e.g., 5)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Convert symbol to CCXT format
+            ccxt_symbol = self.normalize_symbol_for_ccxt(symbol)
+            
+            # Set leverage via CCXT
+            result = self.exchange.set_leverage(leverage, ccxt_symbol)
+            logger.info(f"[LEVERAGE] Set {symbol} leverage to {leverage}x")
+            return True
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to set leverage for {symbol}: {e}")
+            # Don't raise - leverage setting failure shouldn't block trade
+            return False
     
     async def create_order(self, symbol: str, order_type: str, side: str, 
                           amount: float, price: Optional[float] = None,
@@ -1006,6 +1074,30 @@ class OKXCCXTAdapter:
             if params:
                 order_params.update(params)
             
+            # CRITICAL FIX: Convert base amount to contract count for OKX swaps
+            # OKX expects contract count, not base amount!
+            # contracts = base_amount / ctVal
+            # e.g., 0.0005 BTC / 0.01 ctVal = 0.05 contracts
+            market = self.ccxt_client.market(ccxt_symbol)
+            ct_val = float(market.get('info', {}).get('ctVal', 1))
+            if ct_val and ct_val != 1.0:
+                contracts = q_amount / ct_val
+                logger.info(f"📊 {symbol}: Converting base {q_amount} to contracts: {q_amount} / {ct_val} = {contracts}")
+                q_amount = contracts
+            
+            # Ensure minimum 0.01 contracts
+            min_contracts = 0.01
+            if q_amount < min_contracts:
+                logger.warning(f"⚠️ {symbol}: Contracts {q_amount} below minimum {min_contracts}, bumping up")
+                q_amount = min_contracts
+            
+            # Round to lot size (0.01 for OKX swaps)
+            lot_sz = float(market.get('info', {}).get('lotSz', 0.01))
+            from decimal import Decimal, ROUND_HALF_UP
+            q_amount = float(Decimal(str(q_amount)).quantize(Decimal(str(lot_sz)), rounding=ROUND_HALF_UP))
+            
+            logger.info(f"📊 {symbol}: Final order contracts: {q_amount}")
+            
             # Create order
             result = self.ccxt_client.create_order(
                 ccxt_symbol, 'market', side, q_amount, None, order_params
@@ -1130,6 +1222,360 @@ class OKXCCXTAdapter:
             error_info = normalize_error(e, {'operation': 'create_limit_order', 'symbol': symbol})
             logger.error(f"❌ Limit order failed for {symbol}: {error_info}")
             raise
+    
+    # ============================================================
+    # EXIT STRATEGY METHODS (Trailing Stop, Partial TP, etc.)
+    # ============================================================
+    
+    async def fetch_algo_orders(self, symbol: str = None, order_type: str = 'conditional') -> list:
+        """
+        Fetch algo orders (TP/SL/conditional orders) from OKX.
+        
+        Args:
+            symbol: Trading symbol (optional, all if None)
+            order_type: 'conditional' for TP/SL orders
+            
+        Returns:
+            List of algo orders
+        """
+        try:
+            from execution.okx_symbol import okx_to_ccxt_symbol, ccxt_to_okx_symbol
+            
+            # OKX uses instId format for algo orders
+            params = {'ordType': order_type}
+            if symbol:
+                okx_symbol = ccxt_to_okx_symbol(symbol) if '/' in symbol else symbol
+                params['instId'] = okx_symbol
+            
+            # CCXT doesn't have native algo order support, use private API
+            result = self.exchange.private_get_trade_orders_algo_pending(params)
+            
+            orders = result.get('data', [])
+            logger.info(f"📋 Fetched {len(orders)} algo orders for {symbol or 'all'}")
+            return orders
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to fetch algo orders: {e}")
+            return []
+    
+    async def cancel_algo_order(self, algo_order_id: str, symbol: str) -> bool:
+        """
+        Cancel an algo order (TP/SL).
+        
+        Args:
+            algo_order_id: The algoId from OKX
+            symbol: Trading symbol
+            
+        Returns:
+            True if cancelled successfully
+        """
+        try:
+            from execution.okx_symbol import ccxt_to_okx_symbol
+            
+            okx_symbol = ccxt_to_okx_symbol(symbol) if '/' in symbol else symbol
+            
+            params = {
+                'algoId': algo_order_id,
+                'instId': okx_symbol
+            }
+            
+            result = self.exchange.private_post_trade_cancel_algos([params])
+            
+            if result.get('code') == '0':
+                logger.info(f"✅ Cancelled algo order {algo_order_id} for {symbol}")
+                return True
+            else:
+                logger.warning(f"⚠️ Cancel algo order response: {result}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to cancel algo order {algo_order_id}: {e}")
+            return False
+    
+    async def create_algo_stop_loss(self, symbol: str, side: str, size: float, 
+                                    trigger_price: float, client_id: str = None) -> dict:
+        """
+        Create an algo stop-loss order.
+        
+        Args:
+            symbol: Trading symbol
+            side: 'buy' to close short, 'sell' to close long
+            size: Position size
+            trigger_price: Stop loss trigger price
+            client_id: Optional client order ID
+            
+        Returns:
+            Algo order result
+        """
+        try:
+            from execution.okx_symbol import ccxt_to_okx_symbol
+            from execution.id_utils import generate_client_id
+            import os
+            
+            okx_symbol = ccxt_to_okx_symbol(symbol) if '/' in symbol else symbol
+            
+            if client_id is None:
+                client_id = generate_client_id('A')  # Use 'A' for algo orders
+            
+            td_mode = os.getenv('OKX_TD_MODE', 'cross')
+            
+            # Convert size to contracts for swaps - MUST be integer (lot size multiple)
+            market = self.exchange.market(symbol if '/' in symbol else f"{symbol.split('-')[0]}/USDT:USDT")
+            ct_val = float(market.get('info', {}).get('ctVal', 1))
+            if ct_val != 1.0:
+                contracts = int(size / ct_val)  # Must be integer for lot size
+            else:
+                contracts = int(size)  # Must be integer
+            
+            # Ensure at least 1 contract
+            if contracts < 1:
+                contracts = 1
+            
+            # OKX algo order params
+            algo_params = {
+                'instId': okx_symbol,
+                'tdMode': td_mode,
+                'side': side,
+                'ordType': 'conditional',
+                'sz': str(contracts),
+                'slTriggerPx': str(trigger_price),
+                'slOrdPx': '-1',  # Market order when triggered
+                'reduceOnly': True,
+                'algoClOrdId': client_id
+            }
+            
+            result = self.exchange.private_post_trade_order_algo(algo_params)
+            
+            if result.get('code') == '0' and result.get('data'):
+                algo_id = result['data'][0].get('algoId', '')
+                logger.info(f"✅ Created SL algo order {algo_id} for {symbol} @ {trigger_price}")
+                return {
+                    'success': True,
+                    'algoId': algo_id,
+                    'symbol': symbol,
+                    'triggerPrice': trigger_price,
+                    'size': size
+                }
+            else:
+                logger.error(f"❌ Failed to create SL algo order: {result}")
+                return {'success': False, 'error': str(result)}
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to create algo SL for {symbol}: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    async def create_algo_take_profit(self, symbol: str, side: str, size: float, 
+                                      trigger_price: float, client_id: str = None) -> dict:
+        """
+        Create an algo take-profit order.
+        
+        Args:
+            symbol: Trading symbol
+            side: 'buy' to close short, 'sell' to close long
+            size: Position size
+            trigger_price: Take profit trigger price
+            client_id: Optional client order ID
+            
+        Returns:
+            Algo order result
+        """
+        try:
+            from execution.okx_symbol import ccxt_to_okx_symbol
+            from execution.id_utils import generate_client_id
+            import os
+            
+            okx_symbol = ccxt_to_okx_symbol(symbol) if '/' in symbol else symbol
+            
+            if client_id is None:
+                client_id = generate_client_id('A')  # Use 'A' for algo orders
+            
+            td_mode = os.getenv('OKX_TD_MODE', 'cross')
+            
+            # Convert size to contracts for swaps - MUST be integer (lot size multiple)
+            market = self.exchange.market(symbol if '/' in symbol else f"{symbol.split('-')[0]}/USDT:USDT")
+            ct_val = float(market.get('info', {}).get('ctVal', 1))
+            if ct_val != 1.0:
+                contracts = int(size / ct_val)  # Must be integer for lot size
+            else:
+                contracts = int(size)  # Must be integer
+            
+            # Ensure at least 1 contract
+            if contracts < 1:
+                contracts = 1
+            
+            # OKX algo order params
+            algo_params = {
+                'instId': okx_symbol,
+                'tdMode': td_mode,
+                'side': side,
+                'ordType': 'conditional',
+                'sz': str(contracts),
+                'tpTriggerPx': str(trigger_price),
+                'tpOrdPx': '-1',  # Market order when triggered
+                'reduceOnly': True,
+                'algoClOrdId': client_id
+            }
+            
+            result = self.exchange.private_post_trade_order_algo(algo_params)
+            
+            if result.get('code') == '0' and result.get('data'):
+                algo_id = result['data'][0].get('algoId', '')
+                logger.info(f"✅ Created TP algo order {algo_id} for {symbol} @ {trigger_price}")
+                return {
+                    'success': True,
+                    'algoId': algo_id,
+                    'symbol': symbol,
+                    'triggerPrice': trigger_price,
+                    'size': size
+                }
+            else:
+                logger.error(f"❌ Failed to create TP algo order: {result}")
+                return {'success': False, 'error': str(result)}
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to create algo TP for {symbol}: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    async def update_stop_loss(self, symbol: str, new_stop_price: float, 
+                               position_size: float, side: str,
+                               current_algo_id: str = None) -> dict:
+        """
+        Update stop loss - cancels old SL and creates new one.
+        
+        Args:
+            symbol: Trading symbol
+            new_stop_price: New stop loss price
+            position_size: Current position size
+            side: Position side ('long' or 'short')
+            current_algo_id: Current SL algo order ID to cancel
+            
+        Returns:
+            Result dict with new algo order info
+        """
+        try:
+            logger.info(f"🔄 Updating SL for {symbol}: new_price={new_stop_price:.4f}")
+            
+            # Step 1: Cancel existing SL if provided
+            if current_algo_id:
+                cancelled = await self.cancel_algo_order(current_algo_id, symbol)
+                if not cancelled:
+                    logger.warning(f"⚠️ Could not cancel existing SL {current_algo_id}")
+            
+            # Step 2: Create new SL
+            # For long position: SL is sell order
+            # For short position: SL is buy order
+            sl_side = 'sell' if side == 'long' else 'buy'
+            
+            result = await self.create_algo_stop_loss(
+                symbol=symbol,
+                side=sl_side,
+                size=position_size,
+                trigger_price=new_stop_price
+            )
+            
+            if result.get('success'):
+                logger.info(f"✅ Updated SL for {symbol} to {new_stop_price:.4f}, algo_id={result.get('algoId')}")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to update SL for {symbol}: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    async def close_position_market(self, symbol: str, size: float, 
+                                    side: str, reason: str = "Manual") -> dict:
+        """
+        Close a position with market order.
+        
+        Args:
+            symbol: Trading symbol
+            size: Position size to close
+            side: Position side ('long' or 'short')
+            reason: Reason for closing
+            
+        Returns:
+            Order result
+        """
+        try:
+            logger.info(f"🔴 Closing {side} position for {symbol}, size={size}, reason={reason}")
+            
+            # To close: long → sell, short → buy
+            close_side = 'sell' if side == 'long' else 'buy'
+            
+            result = await self.create_market_order(
+                symbol=symbol,
+                side=close_side,
+                amount=size,
+                reduce_only=True,
+                params={'reduceOnly': True}
+            )
+            
+            if result.get('id'):
+                logger.info(f"✅ Position closed: {symbol} {side} {size}, order_id={result.get('id')}")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to close position {symbol}: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    async def get_position_sl_order(self, symbol: str) -> dict:
+        """
+        Get the current SL order for a position.
+        
+        Args:
+            symbol: Trading symbol
+            
+        Returns:
+            SL order info or None
+        """
+        try:
+            orders = await self.fetch_algo_orders(symbol)
+            
+            for order in orders:
+                # Check if it's a SL order
+                if order.get('slTriggerPx') and float(order.get('slTriggerPx', 0)) > 0:
+                    return {
+                        'algoId': order.get('algoId'),
+                        'triggerPrice': float(order.get('slTriggerPx')),
+                        'size': float(order.get('sz', 0)),
+                        'side': order.get('side')
+                    }
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to get SL order for {symbol}: {e}")
+            return None
+    
+    async def get_position_tp_order(self, symbol: str) -> dict:
+        """
+        Get the current TP order for a position.
+        
+        Args:
+            symbol: Trading symbol
+            
+        Returns:
+            TP order info or None
+        """
+        try:
+            orders = await self.fetch_algo_orders(symbol)
+            
+            for order in orders:
+                # Check if it's a TP order
+                if order.get('tpTriggerPx') and float(order.get('tpTriggerPx', 0)) > 0:
+                    return {
+                        'algoId': order.get('algoId'),
+                        'triggerPrice': float(order.get('tpTriggerPx')),
+                        'size': float(order.get('sz', 0)),
+                        'side': order.get('side')
+                    }
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to get TP order for {symbol}: {e}")
+            return None
 
     def __repr__(self):
         return (f"OKXCCXTAdapter(sandbox={self.sandbox}, testnet={self.testnet}, "

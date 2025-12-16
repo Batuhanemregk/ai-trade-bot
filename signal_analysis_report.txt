@@ -1,0 +1,104 @@
+====================================================================================================
+SIGNAL ANALYSIS - Since 19:34
+====================================================================================================
+
+Symbol               Total    Long     Short    Flat     Avg Final    Last Dir  
+----------------------------------------------------------------------------------------------------
+ARKM-USDT-SWAP       25       0        0        25       53.3         flat      
+BTC-USDT-SWAP        25       0        25       0        27.0         short     
+ETH-USDT-SWAP        25       0        25       0        21.5         short     
+GRT-USDT-SWAP        25       0        0        25       53.0         flat      
+SOL-USDT-SWAP        25       0        25       0        25.3         short     
+SUI-USDT-SWAP        26       0        26       0        29.2         short     
+
+====================================================================================================
+DETAILED SCORES (Last signal per coin)
+====================================================================================================
+Symbol               Time       TA       ML       News     Risk     Final    Dir     
+----------------------------------------------------------------------------------------------------
+ARKM-USDT-SWAP       21:25:18   53.2     0.0      50.0     50.5     52.9     flat    
+BTC-USDT-SWAP        21:25:05   54.2     1.7      60.0     43.5     27.7     short   
+ETH-USDT-SWAP        21:25:08   29.8     7.4      50.0     43.5     20.3     short   
+GRT-USDT-SWAP        21:25:16   53.0     0.0      50.0     50.5     52.7     flat    
+SOL-USDT-SWAP        21:25:13   47.2     2.1      60.0     45.5     25.2     short   
+SUI-USDT-SWAP        21:25:21   51.5     4.2      50.0     48.5     27.6     short   
+
+====================================================================================================
+STATE TRANSITIONS (position changes)
+====================================================================================================
+
+ARKM-USDT-SWAP:
+  21:16:14 | MAINTAIN     | READY           -> READY
+  21:17:14 | MAINTAIN     | READY           -> READY
+  21:18:14 | MAINTAIN     | READY           -> READY
+  21:19:14 | MAINTAIN     | READY           -> READY
+  21:20:19 | MAINTAIN     | READY           -> READY
+  21:21:14 | MAINTAIN     | READY           -> READY
+  21:22:15 | MAINTAIN     | READY           -> READY
+  21:23:17 | MAINTAIN     | READY           -> READY
+  21:24:21 | MAINTAIN     | READY           -> READY
+  21:25:18 | MAINTAIN     | READY           -> READY
+
+BTC-USDT-SWAP:
+  21:16:04 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:17:03 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:18:03 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:19:03 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:20:05 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:21:03 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:22:03 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:23:04 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:24:04 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:25:05 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+
+ETH-USDT-SWAP:
+  21:16:07 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:17:07 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:18:06 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:19:07 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:20:08 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:21:07 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:22:07 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:23:08 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:24:07 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:25:08 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+
+GRT-USDT-SWAP:
+  21:16:12 | MAINTAIN     | READY           -> READY
+  21:17:12 | MAINTAIN     | READY           -> READY
+  21:18:12 | MAINTAIN     | READY           -> READY
+  21:19:12 | MAINTAIN     | READY           -> READY
+  21:20:16 | MAINTAIN     | READY           -> READY
+  21:21:12 | MAINTAIN     | READY           -> READY
+  21:22:13 | MAINTAIN     | READY           -> READY
+  21:23:14 | MAINTAIN     | READY           -> READY
+  21:24:19 | MAINTAIN     | READY           -> READY
+  21:25:16 | MAINTAIN     | READY           -> READY
+
+SOL-USDT-SWAP:
+  21:16:10 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:17:10 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:18:10 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:19:10 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:20:12 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:21:10 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:22:11 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:23:12 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:24:16 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:25:13 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+
+SUI-USDT-SWAP:
+  21:16:18 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:17:19 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:18:17 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:19:17 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:20:22 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:21:18 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:22:18 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:23:20 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:24:24 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+  21:25:21 | IGNORE       | SHORT_OPEN      -> SHORT_OPEN
+
+====================================================================================================
+POTENTIAL REVERSALS (Short position with Long signal or vice versa)
+====================================================================================================

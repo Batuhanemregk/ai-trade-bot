@@ -70,10 +70,10 @@ class LogFormatter:
         symbol = data.get('symbol', 'UNKNOWN')
         tf = data.get('timeframe', '?')
         
-        ta = data.get('ta_score', 0.0)
-        ml = data.get('ml_score', 0.0)
-        news = data.get('news_score', 0.0)
-        risk = data.get('risk_score', 0.0)
+        ta = data.get('ta_score', 0.0) or 0.0
+        ml = data.get('ml_score', 0.0) or 0.0  # Handle None for TA-only mode
+        news = data.get('news_score', 0.0) or 0.0
+        risk = data.get('risk_score', 0.0) or 0.0
         
         final = data.get('final_score', 0.0)
         grade = data.get('grade', '?')
@@ -82,7 +82,6 @@ class LogFormatter:
         gate_status = data.get('gate_status', 'UNKNOWN')
         gate_details = data.get('gate_details', {})
         persist = f"{gate_details.get('persist_count', 0)}/{gate_details.get('persist_required', 0)}"
-        conf = f"{gate_details.get('confidence', 0):.2f}/{gate_details.get('conf_required', 0):.2f}"
         
         # Age (optional) - Counter format: age=3/6 or time format: age=2.3h
         age_str = ""
@@ -132,7 +131,7 @@ class LogFormatter:
             f"ℹ️ {ts} | {symbol} | tf={tf} | "
             f"TA={ta:.1f} ML={ml:.1f} News={news:.1f} Risk={risk:.1f} | "
             f"Final={final:.1f} ({grade}) | Dir={direction}{age_str} | "
-            f"Gate={gate_status} (persist {persist}, conf {conf})"
+            f"Gate={gate_status} (persist {persist})"
         )
         
         # Add enhanced features if available
@@ -158,10 +157,10 @@ class LogFormatter:
         tf = data.get('timeframe', '?')
         ts = data.get('timestamp', datetime.now()).strftime('%H:%M:%S')
         
-        ta = data.get('ta_score', 0.0)
-        ml = data.get('ml_score', 0.0)
-        news = data.get('news_score', 0.0)
-        risk = data.get('risk_score', 0.0)
+        ta = data.get('ta_score', 0.0) or 0.0
+        ml = data.get('ml_score', 0.0) or 0.0  # Handle None for TA-only mode
+        news = data.get('news_score', 0.0) or 0.0
+        risk = data.get('risk_score', 0.0) or 0.0
         
         final = data.get('final_score', 0.0)
         grade = data.get('grade', '?')

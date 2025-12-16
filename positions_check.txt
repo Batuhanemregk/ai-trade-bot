@@ -1,0 +1,11 @@
+2025-12-14 17:08:51.656 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-14 17:08:51.656 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-14 17:08:51.687 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 17:08:51.687 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-14 17:08:51.687 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-14 17:08:51.699 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+SOL/USDT:USDT: short contracts=0.05 entry=131.64 notional=6.57 margin=1.31
+ETH/USDT:USDT: short contracts=0.01 entry=3104.3 notional=3.10 margin=0.62
+BTC/USDT:USDT: short contracts=0.01 entry=89485.0 notional=8.94 margin=1.79
+MINA/USDT:USDT: long contracts=10617.0 entry=0.0555692380145052 notional=933.38 margin=186.68
+2025-12-14 17:08:55.431 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed

@@ -390,3 +390,104 @@ class PositionStateManager:
         
         remaining = position.cooldown_until - datetime.now()
         return remaining if remaining.total_seconds() > 0 else None
+    
+    def sync_from_exchange(self, symbol: str, side: str, entry_price: float, size: float) -> None:
+        """
+        Sync position state from real exchange data.
+        Called at start of each analysis cycle to ensure state matches reality.
+        
+        Args:
+            symbol: Trading symbol (e.g., 'BTC-USDT-SWAP')
+            side: Position side ('long' or 'short')
+            entry_price: Entry price from exchange
+            size: Position size in contracts
+        """
+        state = PositionState.LONG_OPEN if side.lower() == 'long' else PositionState.SHORT_OPEN
+        
+        if symbol in self.positions:
+            # Update existing position info
+            self.positions[symbol].state = state
+            self.positions[symbol].entry_price = entry_price
+            self.positions[symbol].size = size
+            self.positions[symbol].side = side.lower()
+            logger.info(f"[SYNC] {symbol}: Updated state to {state.value} (side={side}, size={size})")
+        else:
+            # Create new position info from exchange data
+            self.positions[symbol] = PositionInfo(
+                symbol=symbol,
+                state=state,
+                entry_time=datetime.now(),  # Approximate, real entry time not available
+                entry_price=entry_price,
+                size=size,
+                side=side.lower(),
+                holding_bars=0,
+                r_multiple=0.0,
+                consecutive_losses=0
+            )
+            logger.info(f"[SYNC] {symbol}: Created state {state.value} from exchange (side={side}, entry={entry_price})")
+    
+    def sync_no_position(self, symbol: str) -> None:
+        """
+        Sync state when no real position exists on exchange.
+        Resets to READY if in-memory state shows open position but exchange has none.
+        """
+        if symbol in self.positions:
+            current_state = self.positions[symbol].state
+            if current_state in [PositionState.LONG_OPEN, PositionState.SHORT_OPEN]:
+                logger.info(f"[SYNC] {symbol}: No real position on exchange, resetting {current_state.value} -> READY")
+                self._transition_to_ready(symbol)
+        # If not in positions dict, already READY (default state)
+    
+    def has_open_position(self, symbol: str) -> bool:
+        """Check if symbol has an open position (not READY or COOLDOWN)."""
+        state = self.get_position_state(symbol)
+        return state in [PositionState.LONG_OPEN, PositionState.SHORT_OPEN]
+
+
+# ============================================================================
+# GLOBAL SINGLETON PATTERN
+# ============================================================================
+# All modules MUST use get_state_manager() to access position state.
+# This ensures position state is shared and persisted across:
+# - TradingAnalysisJob
+# - runtime._execute_trade
+# - PositionMonitor
+# ============================================================================
+
+_global_state_manager: Optional[PositionStateManager] = None
+
+
+def get_state_manager(policy: Dict = None) -> PositionStateManager:
+    """
+    Get the global PositionStateManager singleton.
+    
+    This ensures all modules share the same position state, preventing
+    duplicate position opening due to state loss between calls.
+    
+    Args:
+        policy: Optional policy dict. Only used on first call to create instance.
+               Subsequent calls ignore this parameter.
+    
+    Returns:
+        The global PositionStateManager instance
+    """
+    global _global_state_manager
+    
+    if _global_state_manager is None:
+        if policy is None:
+            from infrastructure.bootstrap import load_policy
+            policy = load_policy()
+        _global_state_manager = PositionStateManager(policy)
+        logger.info("[SINGLETON] Global PositionStateManager created")
+    
+    return _global_state_manager
+
+
+def reset_state_manager() -> None:
+    """
+    Reset the singleton (for testing or restart scenarios).
+    """
+    global _global_state_manager
+    if _global_state_manager is not None:
+        logger.info("[SINGLETON] Global PositionStateManager reset")
+    _global_state_manager = None

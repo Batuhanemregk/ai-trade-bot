@@ -1,490 +1,530 @@
-# AiBotBS Policy Configuration
-# Single source of truth for all trading and system policies
-
-# Scheduler Configuration
 schedule:
-  trailing_5m: "*/5 * * * *"    # Every 5 minutes (second=5)
-  trading_15m: "*/15 * * * *"   # Every 15 minutes (second=7)
-  regime_1h: "0 * * * *"        # Every hour (second=9)
-  risk_1m: "* * * * *"          # Every minute (second=12)
-  market_overview: "*/15 * * * *" # Every 15 minutes (second=3)
-  telegram_summary_15m: "*/15 * * * *"  # Every 15 minutes (second=11)
-
+  trailing_5m: '*/5 * * * *'
+  trading_15m: '*/15 * * * *'
+  regime_1h: 0 * * * *
+  risk_1m: '* * * * *'
+  market_overview: '*/15 * * * *'
+  # telegram_summary_15m: '*/15 * * * *'  # DISABLED - market analysis summary cards
 scheduler:
-  semaphore_limit: 2            # Max concurrent jobs
+  semaphore_limit: 2
   retry:
     attempts: 3
-    backoff_seconds: [15, 30, 60]
+    backoff_seconds:
+    - 15
+    - 30
+    - 60
   job_defaults:
     coalesce: true
     max_instances: 1
     misfire_grace_time: 60
-
 idempotency:
-  persist_path: "data/runtime_state.json"
+  persist_path: data/runtime_state.json
   cleanup_interval_hours: 24
-
-# Trading Configuration
 trading:
-  # Mode Configuration (Single Source of Truth)
-  mode: LIVE             # LIVE | PAPER | DRY_RUN
+  mode: LIVE
   use_position_tpsl: true
   reduce_only: true
   entry_cooldown_bars: 2
-
-  # Strategy Configuration
   strategy:
-    type: single_flip     # single_flip | scale_in
+    type: single_flip
     once_per_bar: true
     same_direction_block: true
     reversal_enabled: true
-
-    # Scale-in strategy (when type=scale_in)
     scale_in:
       enabled: false
       max_ladders: 2
       ladder_size_usdt: 5
-      min_dist_pct: 0.5        # her ekleme önceki avg fiyattan en az %0.5 uzak
-      add_on_profit_only: true # sadece kâra geçince ekle
-
-  # Risk Management
+      min_dist_pct: 0.5
+      add_on_profit_only: true
   risk:
-    max_position_size_pct: 0.01  # %1
-    max_total_risk_pct: 0.60
-    
-    # Leverage Configuration
+    max_position_size_pct: 0.01
+    max_total_risk_pct: 0.6
     leverage:
-      min_leverage: 1.0         # Minimum allowed
-      max_leverage: 5.0         # Maximum allowed (global)
-      default: 3.0              # Default if not specified
-      symbol_limits:            # Symbol-specific overrides
-        BTC: {max: 5.0}        # BTC can use up to 5x
-        ETH: {max: 5.0}        # ETH can use up to 5x
-        SOL: {max: 3.0}        # SOL limited to 3x (more volatile)
-    
-    max_drawdown: 0.15          # 15% maximum drawdown
+      min_leverage: 1
+      max_leverage: 10
+      default: 5
+      symbol_limits:
+        BTC:
+          max: 10
+        ETH:
+          max: 10
+        SOL:
+          max: 10
+    max_drawdown: 0.15
     streak_guard:
-      max_losses: 3             # Max consecutive losses
-      cooldown_hours: 24        # Cooldown period after max losses
-    
-    # Risk Assessment Configuration
+      max_losses: 3
+      cooldown_hours: 24
     risk_assessment:
       correlation_risk:
         market_cap_tiers:
-          tier_1: ['BTC', 'ETH']  # >100B market cap
-          tier_2: ['ADA', 'SOL', 'DOT', 'AVAX', 'LINK', 'UNI', 'ATOM']  # 10B-100B
-          tier_3: ['NEAR', 'ALGO', 'ICP', 'XRP', 'CFX', 'CRO', 'LDO', 'TAO', 'ARB', 'SUI', 'RENDER', 'JUP', 'OP']  # 1B-10B
-          tier_4: ['BIO', 'PENGU']  # <1B
+          tier_1:
+          - BTC
+          - ETH
+          tier_2:
+          - ADA
+          - SOL
+          - DOT
+          - AVAX
+          - LINK
+          - UNI
+          - ATOM
+          tier_3:
+          - NEAR
+          - ALGO
+          - ICP
+          - XRP
+          - CFX
+          - CRO
+          - LDO
+          - TAO
+          - ARB
+          - SUI
+          - RENDER
+          - JUP
+          - OP
+          tier_4:
+          - BIO
+          - PENGU
         risk_levels:
-          tier_1: 25.0  # En düşük korelasyon riski
-          tier_2: 35.0  # Orta korelasyon riski
-          tier_3: 50.0  # Yüksek korelasyon riski
-          tier_4: 70.0  # En yüksek korelasyon riski
-        default_unknown: 60.0  # Bilinmeyen coinler için
-      
+          tier_1: 25.0
+          tier_2: 35.0
+          tier_3: 50.0
+          tier_4: 70.0
+        default_unknown: 60.0
       liquidity_risk:
         volume_thresholds:
-          BTC: {high: 50000000, medium: 10000000, low: 1000000}
-          ETH: {high: 30000000, medium: 5000000, low: 500000}
-          tier_2: {high: 10000000, medium: 2000000, low: 200000}
-          tier_3: {high: 5000000, medium: 1000000, low: 100000}
-          tier_4: {high: 1000000, medium: 200000, low: 20000}
+          BTC:
+            high: 50000000
+            medium: 10000000
+            low: 1000000
+          ETH:
+            high: 30000000
+            medium: 5000000
+            low: 500000
+          tier_2:
+            high: 10000000
+            medium: 2000000
+            low: 200000
+          tier_3:
+            high: 5000000
+            medium: 1000000
+            low: 100000
+          tier_4:
+            high: 1000000
+            medium: 200000
+            low: 20000
         default_unknown: 50.0
-      
       volatility_risk:
         volatility_thresholds:
-          BTC: {low: 0.15, medium: 0.35, high: 0.55}  # BTC daha stabil
-          ETH: {low: 0.20, medium: 0.40, high: 0.60}  # ETH orta volatilite
-          tier_2: {low: 0.25, medium: 0.45, high: 0.65}  # Major altcoinler
-          tier_3: {low: 0.30, medium: 0.50, high: 0.70}  # Mid-cap altcoinler
-          tier_4: {low: 0.35, medium: 0.55, high: 0.75}  # Small-cap altcoinler
-        default_unknown: 0.40
-      
+          BTC:
+            low: 0.15
+            medium: 0.35
+            high: 0.55
+          ETH:
+            low: 0.2
+            medium: 0.4
+            high: 0.6
+          tier_2:
+            low: 0.25
+            medium: 0.45
+            high: 0.65
+          tier_3:
+            low: 0.3
+            medium: 0.5
+            high: 0.7
+          tier_4:
+            low: 0.35
+            medium: 0.55
+            high: 0.75
+        default_unknown: 0.4
       market_risk:
-        base_risk: 30.0  # Temel piyasa riski
-        volatility_penalty: 20.0  # Volatilite cezası
-        trend_bonus: 10.0  # Trend bonusu
-        extreme_change_threshold: 0.2  # %20 değişim eşiği
-        strong_trend_threshold: 0.1  # %10 trend gücü eşiği
+        base_risk: 30.0
+        volatility_penalty: 20.0
+        trend_bonus: 10.0
+        extreme_change_threshold: 0.2
+        strong_trend_threshold: 0.1
         min_risk: 10.0
         max_risk: 90.0
-      
       score_risk:
         long_thresholds:
-          strong: 80.0  # Güçlü sinyal
-          medium: 60.0  # Orta sinyal
-          weak: 50.0    # Zayıf sinyal
+          strong: 80.0
+          medium: 60.0
+          weak: 50.0
         short_thresholds:
-          strong: 20.0  # Güçlü sinyal
-          medium: 40.0  # Orta sinyal
-          weak: 50.0    # Zayıf sinyal
+          strong: 20.0
+          medium: 40.0
+          weak: 50.0
         risk_levels:
-          strong: 20.0  # Düşük risk
-          medium: 40.0  # Orta risk
-          weak: 60.0    # Yüksek risk
-          very_weak: 80.0  # Çok yüksek risk
-  
-  # Execution
+          strong: 20.0
+          medium: 40.0
+          weak: 60.0
+          very_weak: 80.0
   execution:
-    default_timeout: 30     # Seconds to wait for order execution
-    retry_attempts: 3       # Number of retry attempts
-    slippage_tolerance: 0.001  # 0.1% slippage tolerance
-    min_order_size: 10      # Minimum order size in USD
-    max_order_size: 10000   # Maximum order size in USD
-  
-  # Scoring
+    default_timeout: 30
+    retry_attempts: 3
+    slippage_tolerance: 0.001
+    min_order_size: 10
+    max_order_size: 10000
   scoring:
-    ta_weight: 0.7          # Technical Analysis weight (increased)
-    ml_weight: 0.1          # Machine Learning weight (reduced)
-    news_weight: 0.1        # News sentiment weight (reduced)
-    risk_weight: 0.1        # Risk score weight (reduced)
-    min_composite_score: 0.6  # Minimum score to execute trade
-    
-    # Signal Thresholds (Single Source of Truth) - Enhanced Hysteresis
+    ta_weight: 0.55
+    ml_weight: 0.35
+    news_weight: 0.05
+    risk_weight: 0.05
+    min_composite_score: 0.6
     decision_thresholds:
-      enter_long: 60        # Score >= 60: LONG entry
-      exit_long: 45         # Score <= 45: LONG exit/reversal
-      enter_short: 40       # Score <= 40: SHORT entry
-      exit_short: 55        # Score >= 55: SHORT exit/reversal
-      flat_range: [47, 53]  # 47-53 arası: FLAT (narrower neutral zone - reduced from 45-55)
-    
-    # Signal Gating
+      enter_long: 60
+      exit_long: 45
+      enter_short: 35
+      exit_short: 52
+      flat_range:
+      - 45
+      - 55
     signal:
-      persistence_bars: 2     # Signal must persist N bars
-      rev_confirm_bars: 2     # Reversal confirmation bars
-      rev_strength_min: 0.6   # Minimum reversal strength (0-1)
-      max_signal_age_bars: 6  # Maximum signal age
-      confirmation_margin: 2.0  # Extra points for confirmation counter
-      
-    # Position Sizing
-    position_sizing:
-      min_percentage: 0.01  # %1 minimum
-      max_percentage: 0.10  # %10 maximum
-      score_multiplier: 0.09 # Skor çarpanı
-      regime_multiplier: 0.6 # Low ADX regime multiplier
-      
-    # Risk Management (NO daily loss limits)
+      persistence_bars: 2
+      rev_confirm_bars: 2
+      rev_strength_min: 0.6
+      max_signal_age_bars: 6
+      confirmation_margin: 2.0
+    ml_boost:
+      enabled: true
+      tiers:
+        - ta_threshold: 65
+          multiplier: 3
+        - ta_threshold: 70
+          multiplier: 4
     risk_management:
-      fees_bps: 6                 # Trading fees in basis points
-      slippage_bps: 3             # Slippage buffer in basis points
-      batch_size: 5               # Symbols per batch for processing
-      max_position_age_hours: 24  # Max 24h position age
-      max_position_size_pct: 0.10 # Max 10% per position
-      max_total_risk_pct: 0.60    # Max 60% total risk
-      max_concurrent_positions: 20 # Max 20 positions
-      
-    # Regime Filtering
+      fees_bps: 6
+      slippage_bps: 3
+      batch_size: 5
+      max_position_age_hours: 24
+      max_position_size_pct: 0.1
+      max_total_risk_pct: 0.6
+      max_concurrent_positions: 20
     regime:
-      adx_1h_min: 22              # Minimum ADX for trend mode
-      low_adx_threshold: 15       # Low ADX threshold
-      
-    # Position Management
+      adx_1h_min: 22
+      low_adx_threshold: 20
     position_management:
-      min_hold_bars: 3            # Min bars before signal-based exit
+      min_hold_bars: 3
       cooldown:
-        base_bars: 2              # Base cooldown (15m: 30min)
-        max_bars: 16              # Max cooldown (15m: 4h)
-        loss_multiplier: 0.5      # +50% per consecutive loss
-        same_direction_delay: 1   # +1 bar for same direction re-entry
-      
-    # Trailing Stops
+        base_bars: 2
+        max_bars: 16
+        loss_multiplier: 0.5
+        same_direction_delay: 1
     trailing:
-      activation_r_multiple: 0.5  # Activate at +0.5R
-      breakeven_r_multiple: 1.0   # Move to BE at +1.0R
-      tight_r_multiple: 1.5       # Tight stop at +1.5R
-      tight_offset: 0.3           # Tight stop offset (+0.3R)
-      
-    # Regime Filtering
-    regime:
-      adx_1h_min: 22              # Min ADX for trend mode
-      low_adx_threshold: 20       # Below this: mean reversion mode
-      
-    # Reversal Policy
+      enabled: true
+      activation_r_multiple: 0.5
+      breakeven_r_multiple: 1.0
+      tight_r_multiple: 1.5
+      tight_offset: 0.3
+      update_interval_seconds: 60
+    partial_tp:
+      enabled: true
+      levels:
+      - r_multiple: 1.0
+        close_pct: 0.33
+      - r_multiple: 2.0
+        close_pct: 0.33
+      - r_multiple: 4.0
+        close_pct: 0.34
+    time_exit:
+      enabled: true
+      max_position_age_hours: 24
+      stale_position_action: close
+      warning_hours: 20
+    scalable_sizing:
+      enabled: true
+      max_portfolio_allocation: 0.6
+      per_position_max: 0.1
+      dynamic_sizing: true
+    position_sizing:
+      strategy: tier_based
+      min_percentage: 0.05
+      max_percentage: 0.15
+      score_multiplier: 0.09
+      regime_multiplier: 0.6
+      tiers:
+        weak:
+          min_strength: 0.0
+          max_strength: 0.3
+          position_pct: 0.02
+        medium:
+          min_strength: 0.3
+          max_strength: 0.5
+          position_pct: 0.04
+        strong:
+          min_strength: 0.5
+          max_strength: 0.7
+          position_pct: 0.06
+        extreme:
+          min_strength: 0.7
+          max_strength: 1.0
+          position_pct: 0.08
+      balance:
+        use_type: free
+        snapshot_interval_sec: 600
+        update_after_trade: true
+      risk_score:
+        affects_sizing: false
+        warning_threshold: 70
+    max_concurrent:
+      enabled: true
+      hard_limit: 20
+      per_symbol_limit: 1
+      enforce_before_trade: true
+    dynamic_tpsl:
+      enabled: true
+      volatility_threshold: 0.2
+      min_check_interval_min: 15
+    oco_cleanup:
+      enabled: true
+      run_on_startup: true
+      run_interval_min: 60
     reversal:
-      edge_cost_ratio_min: 1.5    # Expected move / (fees + slippage)
-      atr_coefficient: 1.0        # ATR multiplier for expected move
-      score_distance_coefficient: 0.1 # Score distance multiplier
-      fees_bps: 0.05              # Trading fees (0.05%)
-      slippage_bps: 0.02          # Slippage buffer (0.02%)
-
-# Agent System Configuration
+      confirmation_bar: false
+      edge_cost_ratio_min: 1.5
+      atr_coefficient: 1.0
+      score_distance_coefficient: 0.1
+      fees_bps: 0.05
+      slippage_bps: 0.02
+  trailing:
+    enabled: true
+  partial_tp:
+    enabled: true
+  dynamic_tpsl:
+    enabled: true
+  time_exit:
+    enabled: true
 agents:
-  # Orchestrator
   orchestrator:
     enabled: true
     max_concurrent_tasks: 5
-    task_timeout: 300       # 5 minutes
+    task_timeout: 300
     retry_policy:
       max_retries: 3
       backoff_factor: 2
-  
-  # Signal Agents
   signal_agent:
     enabled: true
-    update_interval: 60     # 1 minute
+    update_interval: 60
     max_signals_per_hour: 10
-  
   ta_agent:
     enabled: true
-    indicators: ["RSI", "MACD", "BB", "ATR", "SMA"]
+    indicators:
+    - RSI
+    - MACD
+    - BB
+    - ATR
+    - SMA
     warmup_periods: 100
-    update_interval: 300    # 5 minutes
-  
+    update_interval: 300
   ml_agent:
     enabled: true
-    model_path: "pipelines/training/models/"
-    fallback_score: 0.5     # Neutral score when model fails
-    update_interval: 3600   # 1 hour
-  
+    model_path: pipelines/training/models/
+    fallback_score: 0.5
+    update_interval: 3600
   news_agent:
     enabled: true
-    sources: ["cryptocompare", "cryptopanic", "coinstats"]
-    update_interval: 900    # 15 minutes
+    sources:
+    - cryptocompare
+    - cryptopanic
+    - coinstats
+    update_interval: 900
     sentiment_threshold: 0.6
-  
   risk_agent:
     enabled: true
-    check_interval: 60      # 1 minute
-    max_risk_score: 0.8     # Maximum allowed risk score
-  
+    check_interval: 60
+    max_risk_score: 0.8
   execution_agent:
     enabled: true
-    order_timeout: 60       # 1 minute
-    bracket_timeout: 300    # 5 minutes
-    partial_fill_threshold: 0.9  # 90% fill threshold
-  
+    order_timeout: 60
+    bracket_timeout: 300
+    partial_fill_threshold: 0.9
   portfolio_agent:
     enabled: true
-    rebalance_interval: 3600  # 1 hour
+    rebalance_interval: 3600
     max_positions: 10
-  
   qa_agent:
     enabled: true
-    health_check_interval: 300  # 5 minutes
-    consistency_check_interval: 1800  # 30 minutes
-
-# Exchange Configuration
+    health_check_interval: 300
+    consistency_check_interval: 1800
 exchange:
-  name: "okx"
+  name: okx
   testnet: false
-  mode: "live"  # paper, live
-  api_key: "${OKX_API_KEY}"
-  secret: "${OKX_API_SECRET}"
-  passphrase: "${OKX_API_PASSPHRASE}"
+  mode: live
+  api_key: ${OKX_API_KEY}
+  secret: ${OKX_API_SECRET}
+  passphrase: ${OKX_API_PASSPHRASE}
   sandbox: false
   rate_limit:
     requests_per_second: 10
     burst_limit: 20
-  
-  # Symbol mapping
   symbols:
-    default_quote: "USDT"
-    # Majors only (cost optimization, reduced from 23 → 3 symbols)
-    # ENV override: SYMBOLS env variable can override this list
-    supported_pairs: ["BTC", "ETH", "SOL"]
-    # Trading symbols (pairs)
-    trading_pairs: ["BTC-USDT-SWAP", "ETH-USDT-SWAP", "SOL-USDT-SWAP"]
-  
-  # Symbol-specific overrides for minimum order requirements (disabled - using dynamic calculation)
-  # symbol_overrides: {}
-
-# Telegram Configuration
+    default_quote: USDT
+    supported_pairs:
+    - BTC
+    - ETH
+    - SOL
+    trading_pairs:
+    - BTC-USDT-SWAP
+    - ETH-USDT-SWAP
+    - SOL-USDT-SWAP
+    - GRT-USDT-SWAP
+    - ARKM-USDT-SWAP
+    - SUI-USDT-SWAP
 telegram:
   enabled: true
-  token: "${TELEGRAM_BOT_TOKEN}"
-  chat_id: "${TELEGRAM_CHAT_ID}"
+  token: ${TELEGRAM_BOT_TOKEN}
+  chat_id: ${TELEGRAM_CHAT_ID}
   notifications:
     trading_signals: true
     risk_alerts: true
     portfolio_updates: true
     system_status: true
-  
-  # Order types
   order_types:
-    - "market"
-    - "limit"
-    - "stop"
-    - "trigger"
-
-# Notification Configuration
+  - market
+  - limit
+  - stop
+  - trigger
 notifications:
   telegram:
     enabled: true
-    bot_token: "${TELEGRAM_BOT_TOKEN}"
-    chat_id: "${TELEGRAM_CHAT_ID}"
+    bot_token: ${TELEGRAM_BOT_TOKEN}
+    chat_id: ${TELEGRAM_CHAT_ID}
     alerts:
-      - "trade_executed"
-      - "risk_alert"
-      - "system_status"
-      - "daily_summary"
-  
+    - trade_executed
+    - risk_alert
+    - system_status
+    - daily_summary
   email:
     enabled: false
-    smtp_server: ""
+    smtp_server: ''
     smtp_port: 587
-    username: ""
-    password: ""
-
-# Logging Configuration
+    username: ''
+    password: ''
 logging:
-  level: "INFO"
-  format: "json"
-  summary_mode: "line"  # line (single line) or block (multi-line panel)
+  level: INFO
+  format: json
+  summary_mode: line
   handlers:
-    - "console"
-    - "file"
+  - console
+  - file
   file:
-    path: "logs/"
-    max_size: "100MB"
+    path: logs/
+    max_size: 100MB
     backup_count: 5
   dedup:
     enabled: true
-    ttl_seconds: 3600  # Only log same message once per hour
-  news_verbosity: "summary"  # summary (compact) or full (verbose)
-
-# Performance Monitoring
+    ttl_seconds: 3600
+  news_verbosity: summary
 performance:
   enabled: true
-  metrics_interval: 60      # 1 minute
+  metrics_interval: 60
   storage:
-    type: "sqlite"
-    path: "data/performance.db"
-  
-  # Key metrics to track
+    type: sqlite
+    path: data/performance.db
   metrics:
-    - "pnl"
-    - "win_rate"
-    - "sharpe_ratio"
-    - "max_drawdown"
-    - "total_trades"
-    - "avg_trade_duration"
-
-# Bias Service Configuration
+  - pnl
+  - win_rate
+  - sharpe_ratio
+  - max_drawdown
+  - total_trades
+  - avg_trade_duration
 bias:
-  enabled: false  # Disabled by default for safety
-  
-  # Trend filter: block shorts in uptrend, block longs in downtrend
+  enabled: false
   trend_filter:
     enabled: true
-  
-  # News guard: block trades on high-impact news
   news_guard:
     enabled: true
-    threshold: 0.7          # News score threshold (0.0-1.0)
-    categories: ["REGULATION", "SECURITY"]  # High-impact categories
-    action: "block"         # block, downgrade
-    cooldown_sec: 3600      # 1 hour cooldown
-  
-  # Volatility guard: downgrade on high volatility
+    threshold: 0.7
+    categories:
+    - REGULATION
+    - SECURITY
+    action: block
+    cooldown_sec: 3600
   volatility_guard:
     enabled: true
-    atr_limit_pct: 0.05     # 5% ATR threshold
-    penalty: 15             # Score penalty for high volatility
-  
-  # Funding guard: optional funding rate bias
+    atr_limit_pct: 0.05
+    penalty: 15
   funding_guard:
-    enabled: false          # Disabled by default
-    min_abs: 0.0001        # Minimum absolute funding rate
-    action: "downgrade"     # downgrade, block
-    penalty: 10             # Score penalty
-  
-  # Correlation guard: block high correlation trades
+    enabled: false
+    min_abs: 0.0001
+    action: downgrade
+    penalty: 10
   corr_guard:
     enabled: true
-    max_correlation: 0.8    # Maximum correlation threshold
-    max_exposure: 0.15      # Maximum portfolio exposure
-
-# Development Configuration
+    max_correlation: 0.8
+    max_exposure: 0.15
 development:
   debug_mode: false
   mock_exchange: false
   mock_news: false
   test_mode: false
-  
-  # Feature flags
   features:
     advanced_risk_management: true
     ml_scoring: true
     news_integration: true
     telegram_bot: true
     performance_tracking: true
-
-# Machine Learning Configuration
 ml_scoring:
   enabled: true
   model:
-    type: "LightGBM"  # Only LightGBM models supported
-    auto_reload: false  # Auto-reload if new model detected
-  
+    type: LightGBM
+    auto_reload: false
   scoring:
-    # Confidence thresholds
     confidence:
-      high_threshold: 0.30    # |p_up - 0.5| > 0.30 = high confidence
-      medium_threshold: 0.15  # |p_up - 0.5| > 0.15 = medium
-      # low: rest
-    
-    # Neutral band (ignore weak signals)
+      high_threshold: 0.3
+      medium_threshold: 0.15
     neutral_band:
       enabled: true
-      lower: 0.45  # If p_up in [0.45, 0.55], treat as neutral
+      lower: 0.45
       upper: 0.55
-    
-    # Score adjustment
-    score_multiplier: 1.0  # Multiply ML score if needed
-  
+    score_multiplier: 1.0
   fallback:
     enabled: true
-    neutral_score: 50.0  # Fallback to neutral if model unavailable
-    variation: 5.0       # Add random [-5, +5] variation to avoid bias
-
-# News System Configuration
+    neutral_score: 50.0
+    variation: 5.0
 news:
   lookback_hours_bootstrap: 24
   poll_interval_sec: 300
-  overlap_minutes: 15  # Reduced from 30 (less duplicate CHANGED triggers)
+  overlap_minutes: 15
   dedupe:
-    key_fields: ["url", "title"]
+    key_fields:
+    - url
+    - title
   storage_paths:
-    watermarks: "data/news_watermarks.json"
-    digests: "data/news_llm_digest.json"
-    news_store: "data/news_storage.json"
-  
+    watermarks: data/news_watermarks.json
+    digests: data/news_llm_digest.json
+    news_store: data/news_storage.json
 news_llm:
   enabled: true
   digest:
     max_items_per_symbol: 30
   cache:
-    ttl_minutes: 120  # Increased from 60 (better cache hit rate, lower cost)
+    ttl_minutes: 120
     invalidate_on_digest_change: true
-
 news_scoring:
   thresholds:
-    specific: 0.70
-    mixed: 0.30
+    specific: 0.7
+    mixed: 0.3
   weights:
     symbol_specific: 1.0
     mixed_shared: 0.6
     general_market: 0.2
-  majors_bonus: 0.1  # BTC/ETH için ek ağırlık
-
-# Analysis Cards Configuration
+  majors_bonus: 0.1
 analysis_cards:
-  enabled: true  # 0/1 ile aç/kapa
-  send_on_startup: true  # Başlangıçta gönder
-  send_on_shutdown: true  # Kapanışta gönder
+  enabled: true
+  send_on_startup: true
+  send_on_shutdown: true
   trading_analysis:
-    enabled: true  # 15dk analiz kartları
+    enabled: true
     include_scores: true
     include_news: true
     include_risk: true
     include_decision: true
-
-# Monitoring Configuration
 monitoring:
   prometheus:
     enabled: true
     port: 8000
   alerts:
-    drawdown_threshold: 0.10
-    exposure_threshold: 0.70
+    drawdown_threshold: 0.1
+    exposure_threshold: 0.7
     loss_streak_threshold: 3

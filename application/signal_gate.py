@@ -369,25 +369,38 @@ class HysteresisProcessor(SignalProcessor):
                  position_info: Optional[Dict] = None) -> GatedSignal:
         """Apply hysteresis logic with real position synchronization.
         
-        Args:
-            signal: Signal data with final_score
-            history: Signal history for this symbol
-            regime: Market regime info
-            position_info: Optional real position info {'has_position': bool, 'side': 'long'/'short'/None}
+        Three states:
+        - ENTRY: First signal or coming from flat position
+        - CONTINUE: Same direction as previous bar (always valid)
+        - EXIT: Direction reversal (must meet exit thresholds)
         """
         final_score = signal.get('final_score', 0) if isinstance(signal, dict) else getattr(signal, 'final_score', 0)
         
-        # Determine if this is an entry or exit signal - use real position if available
+        # Get current signal direction
+        current_direction = self._get_entry_direction(final_score)
+        
+        # Determine state: ENTRY, CONTINUE, or EXIT
         is_entry = self._is_entry_signal(history, final_score, position_info)
         
         if is_entry:
-            direction = self._get_entry_direction(final_score)
+            # First signal or from flat - check entry thresholds
+            direction = current_direction
             is_valid = self._is_valid_entry(final_score)
             reason = f"Entry signal: {direction}"
         else:
-            direction = self._get_exit_direction(history, final_score, position_info)
-            is_valid = self._is_valid_exit(history, final_score, position_info)
-            reason = f"Exit signal: {direction}"
+            # Get previous direction (from second-to-last history entry)
+            prev_direction = history[-2].direction if len(history) >= 2 else 'flat'
+            
+            if current_direction == prev_direction:
+                # CONTINUE: Same direction, always valid for persistence counting
+                direction = current_direction
+                is_valid = True
+                reason = f"Continue signal: {direction}"
+            else:
+                # EXIT/REVERSAL: Direction changed, check exit thresholds
+                direction = current_direction
+                is_valid = self._is_valid_exit(history, final_score, position_info)
+                reason = f"Exit/Reversal signal: {prev_direction} -> {direction}"
         
         return GatedSignal(
             original_score=final_score,
@@ -410,11 +423,14 @@ class HysteresisProcessor(SignalProcessor):
             return not has_position  # Entry if no position
         
         # Fallback: Use signal history
-        if not history:
+        # Note: history now includes current bar (added before this check)
+        # So length <= 1 means this is the first signal
+        if not history or len(history) <= 1:
             return True  # First signal is always entry
         
-        last_direction = history[-1].direction
-        return last_direction == 'flat'
+        # Check the second-to-last direction (the previous bar, not current)
+        prev_direction = history[-2].direction if len(history) >= 2 else 'flat'
+        return prev_direction == 'flat'
     
     def _get_entry_direction(self, score: float) -> str:
         """Get entry direction."""
@@ -519,20 +535,27 @@ class SignalGate:
         # Detect market regime
         regime = self.regime_processor.detect_regime(ohlcv_1h)
         
-        # Get signal history
+        # CRITICAL FIX: Add current signal to history FIRST, then check persistence
+        # Previously history was updated AFTER persistence check, so persist was always 0
+        # because the current bar wasn't in history yet!
+        
+        # Step 1: Add current signal to history BEFORE persistence check
+        self._add_signal_to_history(symbol, signal)
+        
+        # Step 2: Get updated signal history (now includes current bar)
         history = self.signal_history.get(symbol, [])
         
-        # Apply persistence check (includes age check)
+        # Step 3: Apply persistence check (now includes current bar in history)
         persistence_result = self.persistence_processor.process(signal, history, regime)
         
-        # Apply hysteresis check with real position info
+        # Step 4: Apply hysteresis check with real position info
         hysteresis_result = self.hysteresis_processor.process(signal, history, regime, position_info)
         
         # Combine results - simplified: just persistence + hysteresis
         final_result = self._combine_results(persistence_result, hysteresis_result, regime)
         
-        # Update signal history
-        self._update_history(symbol, signal, final_result)
+        # Update history entry with gated direction (for logging/tracking)
+        self._finalize_history_entry(symbol, final_result)
         
         # Log regime information
         if regime.trend_throttle:
@@ -578,8 +601,12 @@ class SignalGate:
             confirmation_bars=0  # No longer used, kept for backward compatibility
         )
     
-    def _update_history(self, symbol: str, signal: Dict, gated_signal: GatedSignal):
-        """Update signal history with bar-based deduplication."""
+    def _add_signal_to_history(self, symbol: str, signal: Dict):
+        """Add signal to history BEFORE persistence check (for proper counting).
+        
+        This is called first in process_signal to ensure the current bar
+        is included when counting consecutive bars for persistence.
+        """
         if symbol not in self.signal_history:
             self.signal_history[symbol] = []
         
@@ -588,7 +615,7 @@ class SignalGate:
         bar_id = round_to_bar(bar_timestamp) if bar_timestamp else None
         
         if bar_id is None:
-            logger.warning(f"[COUNTER] {symbol} bar_id is None, using current time")
+            logger.debug(f"[COUNTER] {symbol} bar_id is None, using current time")
             bar_id = round_to_bar(datetime.now())
         
         # Check if this bar already processed (deduplication)
@@ -602,36 +629,80 @@ class SignalGate:
                     existing_entry_idx = len(history) - 1 - idx
                     break
         
+        # Get preliminary direction from score
+        final_score = signal.get('final_score', 0)
+        enter_long = self.policy['trading']['scoring']['decision_thresholds']['enter_long']
+        enter_short = self.policy['trading']['scoring']['decision_thresholds']['enter_short']
+        
+        if final_score >= enter_long:
+            direction = 'long'
+        elif final_score <= enter_short:
+            direction = 'short'
+        else:
+            direction = 'flat'
+        
+        # Calculate preliminary strength
+        if direction == 'long':
+            strength = min(1.0, (final_score - 50) / 10)
+        elif direction == 'short':
+            strength = min(1.0, (50 - final_score) / 10)
+        else:
+            strength = 0.0
+        
         if existing_entry_idx is not None:
             # Update existing entry for this bar
             logger.debug(f"[COUNTER] {symbol} Updating existing bar_id={bar_id} entry")
-            history[existing_entry_idx].final_score = signal.get('final_score', 0)
-            history[existing_entry_idx].direction = gated_signal.direction
-            history[existing_entry_idx].strength = gated_signal.strength
+            history[existing_entry_idx].final_score = final_score
+            history[existing_entry_idx].direction = direction
+            history[existing_entry_idx].strength = strength
         else:
             # Add new signal to history
             new_signal = SignalHistory(
                 timestamp=bar_timestamp if bar_timestamp else datetime.now(),
-                final_score=signal.get('final_score', 0),
-                direction=gated_signal.direction,
-                strength=gated_signal.strength,
+                final_score=final_score,
+                direction=direction,
+                strength=strength,
                 age_bars=0
             )
             # Add bar_id for deduplication
             new_signal.bar_id = bar_id
             history.append(new_signal)
         
-        # Calculate and log counters
-        persist_count = self.persistence_processor._count_persistence(history, gated_signal.direction)
-        age_count = len(history)
-        
-        logger.debug(f"[COUNTER] {symbol} bar_id={bar_id} persist={persist_count} age={age_count}")
-        
         # Keep only recent history (last 20 bars)
         max_history = 20
         if len(history) > max_history:
             self.signal_history[symbol] = history[-max_history:]
     
+    def _finalize_history_entry(self, symbol: str, gated_signal: GatedSignal):
+        """Finalize the most recent history entry with gated direction.
+        
+        Called after gating decision to update the direction/strength
+        based on the final gated result.
+        """
+        history = self.signal_history.get(symbol, [])
+        if not history:
+            return
+        
+        # Update the most recent entry with gated values
+        latest = history[-1]
+        latest.direction = gated_signal.direction
+        latest.strength = gated_signal.strength
+        
+        # Calculate and log counters
+        persist_count = self.persistence_processor._count_persistence(history, gated_signal.direction)
+        age_count = len(history)
+        
+        logger.debug(f"[COUNTER] {symbol} persist={persist_count}/{self.policy['trading']['scoring']['signal']['persistence_bars']} age={age_count}")
+    
+    def _update_history(self, symbol: str, signal: Dict, gated_signal: GatedSignal):
+        """Update signal history with bar-based deduplication.
+        
+        DEPRECATED: Use _add_signal_to_history + _finalize_history_entry instead.
+        Kept for backward compatibility.
+        """
+        self._add_signal_to_history(symbol, signal)
+        self._finalize_history_entry(symbol, gated_signal)
+
     def get_signal_history(self, symbol: str) -> List[SignalHistory]:
         """Get signal history for symbol."""
         return self.signal_history.get(symbol, [])

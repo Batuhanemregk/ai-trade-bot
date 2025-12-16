@@ -1,0 +1,34 @@
+2025-12-15 00:08:01.031 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-15 00:08:01.031 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-15 00:08:01.062 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-15 00:08:01.062 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-15 00:08:01.062 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-15 00:08:01.073 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+
+=== ETH-USDT-SWAP ===
+  ctVal: 0.1
+  contractSize: 0.1
+  precision.amount: 0.01
+  limits.amount.min: 0.01
+  To get 0.001 base amount:
+    Send as contracts: 0.01
+    Or send base_amount directly: 0.001
+
+=== BTC-USDT-SWAP ===
+  ctVal: 0.01
+  contractSize: 0.01
+  precision.amount: 0.01
+  limits.amount.min: 0.01
+  To get 0.0001 base amount:
+    Send as contracts: 0.01
+    Or send base_amount directly: 0.0001
+
+=== SOL-USDT-SWAP ===
+  ctVal: 1.0
+  contractSize: 1.0
+  precision.amount: 0.01
+  limits.amount.min: 0.01
+  To get 0.01 base amount:
+    Send as contracts: 0.01
+    Or send base_amount directly: 0.01
+2025-12-15 00:08:04.446 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed

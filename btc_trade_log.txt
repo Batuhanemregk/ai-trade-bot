@@ -1,0 +1,64 @@
+2025-12-14 19:26:00.077 | DEBUG    | application.jobs.trading_analysis:_process_symbol:189 - 🔍 Processing BTC-USDT-SWAP
+2025-12-14 19:26:00.463 | DEBUG    | application.jobs.trading_analysis:_sync_position_from_exchange:644 - [SYNC-CHECK] pos_raw=SOL/USDT:USDT pos_okx=SOL-USDT-SWAP pos_norm=SOL-USDT-SWAP target=BTC-USDT-SWAP match=False contracts=0.22
+2025-12-14 19:26:00.463 | DEBUG    | application.jobs.trading_analysis:_sync_position_from_exchange:644 - [SYNC-CHECK] pos_raw=ETH/USDT:USDT pos_okx=ETH-USDT-SWAP pos_norm=ETH-USDT-SWAP target=BTC-USDT-SWAP match=False contracts=0.01
+2025-12-14 19:26:00.463 | DEBUG    | application.jobs.trading_analysis:_sync_position_from_exchange:644 - [SYNC-CHECK] pos_raw=MINA/USDT:USDT pos_okx=MINA-USDT-SWAP pos_norm=MINA-USDT-SWAP target=BTC-USDT-SWAP match=False contracts=10617.0
+2025-12-14 19:26:00.463 | DEBUG    | application.jobs.trading_analysis:_sync_position_from_exchange:674 - [SYNC] BTC-USDT-SWAP: No real position found, state=READY
+2025-12-14 19:26:00.463 | INFO     | infrastructure.runtime:_fetch_multi_timeframe_data:356 - 📊 Fetching 1h data for BTC-USDT-SWAP
+2025-12-14 19:26:00.987 | INFO     | infrastructure.runtime:_fetch_multi_timeframe_data:356 - 📊 Fetching 15m data for BTC-USDT-SWAP
+2025-12-14 19:26:01.344 | INFO     | infrastructure.runtime:_fetch_multi_timeframe_data:356 - 📊 Fetching 5m data for BTC-USDT-SWAP
+2025-12-14 19:26:01.696 | INFO     | infrastructure.runtime:_fetch_multi_timeframe_data:356 - 📊 Fetching 4h data for BTC-USDT-SWAP
+2025-12-14 19:26:02.102 | DEBUG    | scoring.ta_scorer:score:73 - [TA_INDICATORS] BTC-USDT-SWAP: RSI=46.17, MACD_hist=20.6476, SMA20=89166.51, SMA50=89696.21
+2025-12-14 19:26:02.103 | DEBUG    | scoring.ta_scorer:score:86 - [TA_COMPONENTS] BTC-USDT-SWAP: trend=30.0, momentum=70.0, volatility=50.0, volume=60.0
+2025-12-14 19:26:02.103 | DEBUG    | scoring.ta_scorer:score:104 - [TA_FINAL] BTC-USDT-SWAP: score=50.0, dir=SHORT
+2025-12-14 19:26:02.130 | DEBUG    | scoring.ta_scorer:score:73 - [TA_INDICATORS] BTC-USDT-SWAP: RSI=31.89, MACD_hist=-88.1109, SMA20=89869.51, SMA50=90067.16
+2025-12-14 19:26:02.131 | DEBUG    | scoring.ta_scorer:score:86 - [TA_COMPONENTS] BTC-USDT-SWAP: trend=15.0, momentum=37.5, volatility=50.0, volume=40.0
+2025-12-14 19:26:02.131 | DEBUG    | scoring.ta_scorer:score:104 - [TA_FINAL] BTC-USDT-SWAP: score=37.8, dir=SHORT
+2025-12-14 19:26:02.159 | DEBUG    | scoring.ta_scorer:score:73 - [TA_INDICATORS] BTC-USDT-SWAP: RSI=58.51, MACD_hist=37.2665, SMA20=89003.19, SMA50=89160.38
+2025-12-14 19:26:02.160 | DEBUG    | scoring.ta_scorer:score:86 - [TA_COMPONENTS] BTC-USDT-SWAP: trend=30.0, momentum=70.0, volatility=50.0, volume=20.0
+2025-12-14 19:26:02.161 | DEBUG    | scoring.ta_scorer:score:104 - [TA_FINAL] BTC-USDT-SWAP: score=48.0, dir=SHORT
+2025-12-14 19:26:02.161 | DEBUG    | infrastructure.runtime:_compute_ml_analysis:442 - [ML_BUNDLE] BTC-USDT-SWAP: timeframes=['main', '1h', '4h']
+2025-12-14 19:26:02.229 | DEBUG    | scoring.ml_scorer:score:237 - ✅ ML scoring for BTC-USDT-SWAP (BTC_15m): p_up=0.025, score=1.7
+2025-12-14 19:26:02.229 | DEBUG    | scoring.news_scorer:score:78 - [NEWS_SCORE] Using news_service for BTC-USDT-SWAP
+2025-12-14 19:26:02.229 | DEBUG    | application.news_service:get_news_score:356 - [NEWS_SCORE] get_news_score called for BTC-USDT-SWAP
+2025-12-14 19:26:02.229 | DEBUG    | application.news_service:get_news_score:373 - [NEWS_SCORE] BTC-USDT-SWAP: found 45 symbol-specific articles
+2025-12-14 19:26:02.229 | DEBUG    | application.news_service:get_news_score:387 - [NEWS_SCORE] BTC-USDT-SWAP has 45 total articles (symbol + general)
+2025-12-14 19:26:02.230 | INFO     | application.news_digest_manager:get_digest_status:128 - 📊 [LLM] sym=BTC-USDT-SWAP digest=CHANGED run=YES items=45
+2025-12-14 19:26:02.230 | DEBUG    | application.news_service:get_news_score:398 - [NEWS_SCORE] BTC-USDT-SWAP digest_status: changed=True, has_cache=False
+2025-12-14 19:26:02.230 | INFO     | application.news_service:get_news_score:413 - [NEWS_SCORE] BTC-USDT-SWAP -> Running on-demand LLM analysis for 45 articles
+2025-12-14 19:26:03.251 | INFO     | application.news_llm_analyzer:_log_llm_request_success:367 - 📊 [LLM] sym=BTC-USDT-SWAP req_id=None tokens=1439+49 cost=$0.0036 left=$999.00
+2025-12-14 19:26:03.251 | DEBUG    | application.news_llm_analyzer:_log_llm_request_success:371 - LLM_SUCCESS | symbol=BTC-USDT-SWAP | request_id=None | model=gpt-5-nano | prompt_tokens=1439 | completion_tokens=49 | status=200 | daily_cost=$0.0036
+2025-12-14 19:26:03.395 | DEBUG    | application.news_digest_manager:cache_digest_result:149 - 💾 Cached digest result for BTC (digest: c59125e8...)
+2025-12-14 19:26:03.396 | INFO     | application.news_service:get_news_score:430 - [NEWS_SCORE] BTC-USDT-SWAP -> 55.0 (on-demand LLM analysis)
+2025-12-14 19:26:03.396 | DEBUG    | application.risk_service:_calculate_correlation_risk:283 - Correlation risk for BTC-USDT-SWAP: 25.0 (tier: tier_1)
+2025-12-14 19:26:03.396 | DEBUG    | application.risk_service:assess_risk:65 - Risk assessment for BTC-USDT-SWAP: medium (43.5) - proceed_with_caution
+2025-12-14 19:26:03.396 | DEBUG    | infrastructure.runtime:_compute_risk_analysis:513 - Risk analysis for BTC-USDT-SWAP: 43.5 (medium) - proceed_with_caution
+2025-12-14 19:26:03.447 | DEBUG    | application.signal_gate:_add_signal_to_history:654 - [COUNTER] BTC-USDT-SWAP Updating existing bar_id=2025-12-14 16:15:00+00:00 entry
+2025-12-14 19:26:03.447 | DEBUG    | application.signal_gate:_finalize_history_entry:695 - [COUNTER] BTC-USDT-SWAP persist=2/2 age=2
+2025-12-14 19:26:03.447 | INFO     | application.position_state_manager:_apply_transition:359 - [STATE] BTC-USDT-SWAP: READY -> SHORT_OPEN action=OPEN_SHORT reason=Short signal: score=45.0 <= 48
+2025-12-14 19:26:03.448 | INFO     | application.analysis_summary_logger:log_analysis:94 - ℹ️ 16:26:03 | BTC-USDT-SWAP | tf=15m | TA=50.0 ML=1.7 News=55.0 Risk=43.5 | Final=45.0 (D) | Dir=short age=2/6 | Gate=PASS (persist 2/2)
+2025-12-14 19:26:03.448 | DEBUG    | monitoring.prometheus_exporter:set_last_signal:640 - Updated last_signal metric: BTC-USDT-SWAP short score=45.0
+2025-12-14 19:26:03.448 | DEBUG    | monitoring.prometheus_exporter:update_scores:537 - Updated scores for BTC-USDT-SWAP: composite=45.0
+2025-12-14 19:26:03.448 | INFO     | application.jobs.trading_analysis:_process_symbol:422 - [ACTION] BTC-USDT-SWAP: transition=OPEN_SHORT from=READY to=SHORT_OPEN
+2025-12-14 19:26:03.449 | INFO     | application.jobs.trading_analysis:_process_symbol:433 - 🚀 BTC-USDT-SWAP: Opening SHORT position (from=READY)
+2025-12-14 19:26:03.449 | INFO     | application.protection_guards:comprehensive_check:317 - [GUARDS] All protection checks passed for BTC-USDT-SWAP short
+2025-12-14 19:26:03.449 | INFO     | infrastructure.runtime:_execute_trade:740 - 📝 Generated client order ID: BTCH12141626
+2025-12-14 19:26:03.449 | INFO     | infrastructure.runtime:_execute_trade:743 - [ENTRY] sym=BTC-USDT-SWAP dir=short size=0.000000 px=0.000000 reason=score>=45.02 state=READY tf=15m bar=2025-12-14T16:26Z
+2025-12-14 19:26:03.748 | INFO     | infrastructure.runtime:_get_current_price:1408 - 📊 Real price for BTC-USDT-SWAP: 89208.4
+2025-12-14 19:26:04.758 | INFO     | infrastructure.runtime:_get_exchange_minimum_cost:1344 - 📊 BTC-USDT-SWAP minimum: 0.01 contracts × 0.01 ctVal = 0.000100 base = $8.92
+2025-12-14 19:26:04.803 | DEBUG    | execution.prevalidation:compute_required_amount:135 - [CTVAL-DEBUG] BTC-USDT-SWAP: amount_min=0.01, amount_step=0.01, ctVal=0.01
+2025-12-14 19:26:04.803 | INFO     | execution.prevalidation:compute_required_amount:145 - 📊 BTC-USDT-SWAP ctVal adjustment min: 0.01 × 0.01 = 0.0001
+2025-12-14 19:26:04.803 | INFO     | execution.prevalidation:compute_required_amount:151 - 📊 BTC-USDT-SWAP ctVal adjustment step: 0.01 × 0.01 = 0.0001
+2025-12-14 19:26:04.803 | INFO     | infrastructure.runtime:_execute_trade:793 - [OKX-LIMITS] sym=BTC-USDT-SWAP min_cost=None, min_amount=0.0001, step=0.0001, px=89208.4, requested=0.0004999644091811982, adjusted=0.0005
+2025-12-14 19:26:04.804 | INFO     | infrastructure.runtime:_execute_trade:796 - [SIZE] sym=BTC-USDT-SWAP size_calc=0.0005 min_notional=None final_qty=0.0005
+2025-12-14 19:26:04.804 | INFO     | infrastructure.runtime:_execute_trade:823 - 📊 BTC-USDT-SWAP: lotSz=0.01 × ctVal=0.01 = lot_size=0.0001
+2025-12-14 19:26:04.805 | INFO     | infrastructure.runtime:_execute_trade:861 - [ORDER] sym=BTC-USDT-SWAP clientId=BTCH12141626 side=sell amount=0.0005 price=89208.4
+2025-12-14 19:26:04.828 | INFO     | infrastructure.runtime:_execute_trade:874 - ⚡ Setting leverage to 5x for BTC-USDT-SWAP
+2025-12-14 19:26:05.133 | INFO     | adapters.exchange_okx_ccxt:set_leverage:597 - [LEVERAGE] Set BTC-USDT-SWAP leverage to 5x
+2025-12-14 19:26:05.688 | DEBUG    | execution.prevalidation:compute_required_amount:135 - [CTVAL-DEBUG] BTC/USDT:USDT: amount_min=0.01, amount_step=0.01, ctVal=0.01
+2025-12-14 19:26:05.688 | INFO     | execution.prevalidation:compute_required_amount:145 - 📊 BTC/USDT:USDT ctVal adjustment min: 0.01 × 0.01 = 0.0001
+2025-12-14 19:26:05.688 | INFO     | execution.prevalidation:compute_required_amount:151 - 📊 BTC/USDT:USDT ctVal adjustment step: 0.01 × 0.01 = 0.0001
+2025-12-14 19:26:05.688 | ERROR    | adapters.exchange_okx_ccxt:create_market_order:1097 - ❌ Market order failed for BTC-USDT-SWAP: okx amount of BTC/USDT:USDT must be greater than minimum amount precision of 0.01
+2025-12-14 19:26:05.689 | ERROR    | infrastructure.runtime:_execute_trade:896 - [ORDER] sym=BTC-USDT-SWAP clientId=BTCH12141626 status=ERROR error=okx amount of BTC/USDT:USDT must be greater than minimum amount precision of 0.01
+2025-12-14 19:26:05.689 | ERROR    | infrastructure.runtime:_execute_trade:1004 - ❌ Trade execution failed: okx amount of BTC/USDT:USDT must be greater than minimum amount precision of 0.01
+2025-12-14 19:26:05.689 | DEBUG    | application.jobs.trading_analysis:_process_symbol:450 - ✅ BTC-USDT-SWAP processed successfully
+2025-12-14 19:26:05.689 | DEBUG    | application.jobs.base_job:mark_bar_processed:98 - [BAR] tf=15m symbol=BTC-USDT-SWAP bar=2025-12-14T16:15:00+00:00 processed

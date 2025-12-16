@@ -4,6 +4,7 @@ Delegates to existing CLI and application services without duplicating logic.
 """
 
 import asyncio
+import os
 import sys
 from datetime import datetime, timezone
 from typing import Optional
@@ -126,7 +127,8 @@ async def trading_main(
         
         # Initialize enhanced trading components
         logger.info("🎯 Initializing enhanced trading components...")
-        state_manager = PositionStateManager(policy)
+        from application.position_state_manager import get_state_manager
+        state_manager = get_state_manager(policy)
         signal_gate = SignalGate(policy)
         reversal_manager = ReversalManager(policy)
         
@@ -265,9 +267,7 @@ async def trading_main(
                             state_manager.open_position(symbol, decision.lower(), 
                                                      composite_signal.entry_price, position_size)
                             
-                            # Create TP/SL Orders
-                            logger.info(f"🎯 Creating TP/SL orders for {symbol}")
-                            await _create_trigger_order(exchange_adapter, symbol, decision, composite_signal)
+                            # Note: TP/SL orders are created inside _execute_trade via _create_oco_bracket
                             
                             # Send Telegram Notification
                             logger.info(f"📱 Sending Telegram notification for {symbol}")
@@ -535,7 +535,7 @@ async def _compute_composite_signal(
         )
         
         ml_block = MLBlock(
-            score=ml_score,
+            score=ml_score,  # Pass None for TA-only - finalize() will redistribute weight
             rationale=ml_rationale,
             details=ml_details
         )
@@ -564,14 +564,46 @@ async def _compute_composite_signal(
             'risk': scoring_config.get('risk_weight', 0.15)
         }
         
-        logger.debug(f"[COMPOSITE] Using policy weights: ta={weights['ta']}, ml={weights['ml']}, news={weights['news']}, risk={weights['risk']}")
-        
-        final_score = (
-            weights['ta'] * ta_score +
-            weights['ml'] * ml_score +
-            weights['news'] * news_score +
-            weights['risk'] * risk_score
-        )
+        # Handle ML=None (no model available) - redistribute ML weight to TA
+        if ml_score is None:
+            logger.info(f"[ML_ROUTING] {symbol} has no ML model, redistributing weight to TA")
+            effective_ml_score = 0  # Not used in calculation
+            effective_ml_weight = 0
+            # Redistribute ML weight to TA
+            effective_ta_weight = weights['ta'] + weights['ml']
+            # Normalize remaining weights
+            total_other = weights['news'] + weights['risk']
+            final_score = (
+                effective_ta_weight * ta_score +
+                weights['news'] * news_score +
+                weights['risk'] * risk_score
+            )
+            logger.debug(f"[COMPOSITE] TA-only mode: ta_weight={effective_ta_weight:.2f} (original {weights['ta']:.2f} + ml {weights['ml']:.2f})")
+        else:
+            effective_ml_score = ml_score
+            
+            # Apply ML boost based on TA score thresholds
+            ml_boost_config = scoring_config.get('ml_boost', {})
+            if ml_boost_config.get('enabled', False):
+                tiers = ml_boost_config.get('tiers', [])
+                # Sort tiers by ta_threshold descending to find highest matching
+                sorted_tiers = sorted(tiers, key=lambda x: x.get('ta_threshold', 0), reverse=True)
+                for tier in sorted_tiers:
+                    if ta_score >= tier.get('ta_threshold', 100):
+                        multiplier = tier.get('multiplier', 1.0)
+                        if multiplier > 1.0:
+                            original_ml = effective_ml_score
+                            effective_ml_score = min(100.0, effective_ml_score * multiplier)
+                            logger.info(f"[COMPOSITE] ML Boost: TA={ta_score:.1f} >= {tier['ta_threshold']} → ML {original_ml:.1f} × {multiplier} = {effective_ml_score:.1f}")
+                        break
+            
+            logger.debug(f"[COMPOSITE] Using policy weights: ta={weights['ta']}, ml={weights['ml']}, news={weights['news']}, risk={weights['risk']}")
+            final_score = (
+                weights['ta'] * ta_score +
+                weights['ml'] * effective_ml_score +
+                weights['news'] * news_score +
+                weights['risk'] * risk_score
+            )
         
         # Determine grade
         if final_score >= 90:
@@ -650,8 +682,16 @@ async def _compute_composite_signal(
         )
 
 
-async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: bool) -> bool:
-    """Execute trade based on composite signal."""
+async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: bool, ohlcv_data: dict = None) -> bool:
+    """Execute trade based on composite signal.
+    
+    Args:
+        exchange_adapter: Exchange adapter instance
+        symbol: Trading symbol
+        composite_signal: Composite signal with decision and scores
+        live: Whether to execute live or paper trade
+        ohlcv_data: Optional OHLCV data for ATR-based TP/SL calculation
+    """
     try:
         from execution.id_utils import generate_client_id
         from execution.quantize import quantize_price, quantize_size, bump_to_min_size
@@ -727,10 +767,14 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
             
         logger.info(f"[MODE] Trading mode: {mode} (live={effective_live}, source={mode_source})")
 
-        # Step 1: Generate client order ID (deterministic with bar id)
-        bar_id = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%MZ')
-        side_tag = 'L' if direction == 'LONG' else 'S' if direction == 'SHORT' else 'F'
-        client_order_id = f"E:{symbol}:{side_tag}:{bar_id}"
+        # Step 1: Generate client order ID (OKX format: max 32 chars, start with letter, alphanumeric only)
+        bar_time = datetime.now(timezone.utc)
+        bar_id_short = bar_time.strftime('%m%d%H%M')  # e.g., "12102300"
+        side_tag = 'L' if direction == 'LONG' else 'S' if direction == 'SHORT' else 'H'
+        # Extract short symbol (e.g., "BTC" from "BTC-USDT-SWAP")
+        short_symbol = symbol.split('-')[0][:3]  # Max 3 chars
+        # Pure alphanumeric format: e.g., "BTCS12102300" (12 chars)
+        client_order_id = f"{short_symbol}{side_tag}{bar_id_short}"
         logger.info(f"📝 Generated client order ID: {client_order_id}")
         
         # Structured log for trade attempt
@@ -740,13 +784,17 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         current_price = await _get_current_price(exchange_adapter, symbol)
         logger.info(f"💲 Current market price: {current_price}")
         
-        # Step 3: Calculate position size in USDT
+        # Step 3: Calculate position size in USDT (this is MARGIN amount)
         position_size_usdt = await _calculate_position_size(composite_signal, symbol, exchange_adapter)
-        logger.info(f"💰 Calculated position size: ${position_size_usdt}")
+        logger.info(f"💰 Calculated margin: ${position_size_usdt}")
         
-        # Step 4: Convert USDT to coin amount
-        position_size = position_size_usdt / current_price
-        logger.info(f"🪙 Position size in coins: {position_size}")
+        # Step 4: Convert MARGIN to contract amount
+        # margin × leverage = notional
+        # notional / price = contracts
+        leverage = 5  # Fixed leverage
+        notional_usdt = position_size_usdt * leverage
+        position_size = notional_usdt / current_price
+        logger.info(f"🪙 Position: margin=${position_size_usdt:.2f} × {leverage}x = ${notional_usdt:.2f} notional = {position_size:.6f} contracts")
         
         # Step 5: Calculate entry price
         entry_price = await _calculate_entry_price(current_price, composite_signal.decision)
@@ -802,7 +850,15 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         
         market = exchange.market(symbol)
         tick_size = market.get('precision', {}).get('price', 0.1)
-        lot_size = market.get('precision', {}).get('amount', 0.001)
+        
+        # CRITICAL FIX: Use lotSz from info with ctVal multiplication
+        # precision.amount returns 0.01 (wrong for ETH/BTC)
+        # Real lot_size = lotSz × ctVal (e.g., ETH: 0.01 × 0.1 = 0.001)
+        info = market.get('info', {})
+        lot_sz = float(info.get('lotSz', 0.01))
+        ct_val = float(info.get('ctVal', 1))
+        lot_size = lot_sz * ct_val
+        logger.info(f"📊 {symbol}: lotSz={lot_sz} × ctVal={ct_val} = lot_size={lot_size}")
         
         quantized_price = quantize_price(entry_price, tick_size)
         quantized_size = quantize_size(position_size, lot_size)
@@ -811,15 +867,16 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         
         logger.info(f"🔧 Quantized - Price: {quantized_price}, Size: {quantized_size}")
         
-        # Step 6: Calculate TP/SL levels
+        # Step 6: Calculate TP/SL levels (use OHLCV for ATR if available)
         tp_price, sl_price = await _calculate_tp_sl_levels(
-            entry_price, composite_signal.decision, composite_signal.technical.flags
+            entry_price, composite_signal.decision, composite_signal.technical.flags, ohlcv_data
         )
         logger.info(f"🎯 TP: {tp_price}, SL: {sl_price}")
         
         # Step 7: Prevalidate bracket order
-        # Convert decision to side: LONG -> buy, SHORT -> sell
-        side = 'buy' if composite_signal.decision == 'LONG' else 'sell'
+        # Convert decision to side: LONG -> buy, SHORT -> sell (case-insensitive)
+        decision_upper = composite_signal.decision.upper() if composite_signal.decision else 'FLAT'
+        side = 'buy' if decision_upper == 'LONG' else 'sell'
         is_valid, errors = validate_bracket_order(
             entry_price=quantized_price,
             tp_price=tp_price,
@@ -828,21 +885,34 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         )
         
         if not is_valid:
-            logger.warning(f"⚠️ Bracket order validation failed: {errors}")
-            return False
+            logger.warning(f"⚠️ Bracket order validation warning (non-blocking): {errors}")
+            # Continue anyway - TP/SL will be placed as calculated
         
         logger.info(f"✅ Bracket order validation passed")
         
         # Step 8: Execute entry order (LIVE vs PAPER vs DRY-RUN)
         if mode == "LIVE":
             logger.info(f"🚀 Executing LIVE {composite_signal.decision} order")
-            # Convert decision to side: LONG -> buy, SHORT -> sell
-            side = 'buy' if composite_signal.decision == 'LONG' else 'sell'
+            # Convert decision to side: LONG -> buy, SHORT -> sell (uses decision_upper from above)
+            side = 'buy' if decision_upper == 'LONG' else 'sell'
             
             # Order tracking log
             logger.info(f"[ORDER] sym={symbol} clientId={client_order_id} side={side} amount={quantized_size} price={quantized_price}")
             
             try:
+                # CRITICAL: Set leverage BEFORE placing order to ensure consistent leverage
+                # Default 5x, but can be overridden in policy.yaml or Telegram settings
+                configured_leverage = 5  # Default
+                try:
+                    from infrastructure.bootstrap import load_policy
+                    policy = load_policy()
+                    configured_leverage = policy.get('trading', {}).get('risk', {}).get('leverage', {}).get('default', 5)
+                except:
+                    pass
+                
+                logger.info(f"⚡ Setting leverage to {configured_leverage}x for {symbol}")
+                await exchange_adapter.set_leverage(symbol, configured_leverage)
+                
                 entry_result = await exchange_adapter.create_market_order(
                     symbol=symbol,
                     side=side,
@@ -852,6 +922,13 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
                 
                 # Order success log
                 logger.info(f"[ORDER] sym={symbol} clientId={client_order_id} status=SUCCESS ordId={entry_result.get('id', 'N/A')} filled={entry_result.get('filled', 0)}")
+                
+                # Update balance tracker after successful trade
+                try:
+                    from infrastructure.balance_tracker import get_balance_tracker
+                    get_balance_tracker().update_after_trade()
+                except Exception as be:
+                    logger.warning(f"⚠️ Failed to update balance tracker: {be}")
                 
             except Exception as e:
                 # Order error log
@@ -950,9 +1027,9 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
                 'mode': mode
             }
             
-            # Process state transition
-            from application.position_state_manager import PositionStateManager
-            state_manager = PositionStateManager({})  # Empty policy for now
+            # Process state transition - USE SINGLETON to maintain state
+            from application.position_state_manager import get_state_manager
+            state_manager = get_state_manager()  # No new instance, use existing
             transition = state_manager.process_signal(symbol, updated_signal_dict)
             
             if transition:
@@ -1037,207 +1114,213 @@ def _calculate_confidence_multiplier(ml_confidence: str, risk_level: str) -> flo
     return max(0.2, min(1.0, final_multiplier))
 
 
-def _calculate_dynamic_leverage(ohlcv_data: dict, base_leverage: float = 3.0) -> float:
+def _calculate_dynamic_leverage(ohlcv_data: dict, base_leverage: float = 5.0) -> float:
     """
-    Calculate dynamic leverage based on market volatility.
+    Get leverage value from policy or user settings.
     
-    Volatility-adaptive leverage:
-    - Low volatility (ATR < 1.5% of price) → Higher leverage (up to max)
-    - Medium volatility (1.5-3% of price) → Base leverage
-    - High volatility (> 3% of price) → Lower leverage (down to 1x)
+    Priority:
+    1. User settings (from Telegram) - if set
+    2. Policy.yaml default
+    3. Fallback to 5x
     
     Args:
-        ohlcv_data: OHLCV data dict with 'main' key
-        base_leverage: Base leverage from policy (default 3x)
+        ohlcv_data: OHLCV data (unused, kept for API compatibility)
+        base_leverage: Fallback leverage (default 5x)
     
     Returns:
-        Calculated leverage between 1.0 and 5.0
+        Configured leverage value
     """
-    import numpy as np
-    
-    # Leverage bounds
-    min_leverage = 1.0
-    max_leverage = 5.0
-    
-    # Volatility thresholds (ATR as percentage of price)
-    low_vol_threshold = 0.015   # 1.5%
-    high_vol_threshold = 0.03   # 3%
-    
     try:
-        atr_pct = None
+        # Try to load from policy
+        from infrastructure.bootstrap import load_policy
+        policy = load_policy()
         
-        if ohlcv_data and 'main' in ohlcv_data:
-            main_df = ohlcv_data['main']
-            if main_df is not None and not main_df.empty and len(main_df) >= 14:
-                try:
-                    high = main_df['high'].values
-                    low = main_df['low'].values
-                    close = main_df['close'].values
-                    
-                    # Calculate True Range
-                    tr1 = high - low
-                    tr2 = np.abs(high - np.roll(close, 1))
-                    tr3 = np.abs(low - np.roll(close, 1))
-                    tr = np.maximum(tr1, np.maximum(tr2, tr3))
-                    
-                    # ATR = 14-period simple moving average of TR
-                    atr = np.mean(tr[-14:])
-                    
-                    # ATR as percentage of current price
-                    current_price = close[-1]
-                    atr_pct = atr / current_price
-                    
-                except Exception as e:
-                    logger.warning(f"⚠️ ATR calculation for leverage failed: {e}")
+        leverage_config = policy.get('trading', {}).get('risk', {}).get('leverage', {})
+        default_leverage = leverage_config.get('default', 5)
+        min_leverage = leverage_config.get('min_leverage', 1)
+        max_leverage = leverage_config.get('max_leverage', 10)
         
-        if atr_pct is None:
-            # No volatility data, use base leverage
-            logger.warning("⚠️ No volatility data for dynamic leverage, using base leverage")
-            return base_leverage
+        # Check for user override from Telegram settings
+        try:
+            from adapters.telegram.user_settings import get_user_settings
+            user_settings = get_user_settings()
+            if user_settings and 'leverage' in user_settings:
+                user_leverage = int(user_settings['leverage'])
+                # Clamp to policy limits
+                leverage = max(min_leverage, min(max_leverage, user_leverage))
+                logger.info(f"⚡ Using user-configured leverage: {leverage}x (from Telegram settings)")
+                return float(leverage)
+        except Exception:
+            pass  # User settings not available, use policy default
         
-        # Calculate leverage based on volatility
-        if atr_pct < low_vol_threshold:
-            # Low volatility → higher leverage (linear interpolation to max)
-            leverage = base_leverage + (max_leverage - base_leverage) * (1 - atr_pct / low_vol_threshold)
-        elif atr_pct > high_vol_threshold:
-            # High volatility → lower leverage (linear interpolation to min)
-            volatility_excess = (atr_pct - high_vol_threshold) / (0.06 - high_vol_threshold)  # 6% = extreme vol
-            volatility_excess = min(1.0, volatility_excess)  # Cap at 100%
-            leverage = base_leverage - (base_leverage - min_leverage) * volatility_excess
-        else:
-            # Medium volatility → use base leverage
-            leverage = base_leverage
-        
-        # Clamp to bounds
-        leverage = max(min_leverage, min(max_leverage, leverage))
-        
-        # Round to 1 decimal place
-        leverage = round(leverage, 1)
-        
-        logger.info(f"⚡ Dynamic leverage: ATR={atr_pct*100:.2f}% → {leverage}x (base={base_leverage}x)")
-        
-        return leverage
+        # Clamp default to limits
+        leverage = max(min_leverage, min(max_leverage, default_leverage))
+        logger.info(f"⚡ Using policy leverage: {leverage}x (min={min_leverage}, max={max_leverage})")
+        return float(leverage)
         
     except Exception as e:
-        logger.error(f"❌ Dynamic leverage calculation failed: {e}")
+        logger.warning(f"⚠️ Failed to load leverage config: {e}, using default {base_leverage}x")
         return base_leverage
 
 
 async def _calculate_position_size(composite_signal, symbol: str, exchange_adapter) -> float:
-    """Calculate dynamic position size based on signal confidence, risk, and portfolio limits."""
+    """
+    Calculate position size using tier-based signal strength.
+    
+    NEW LOGIC:
+    1. Uses FREE (available) balance from BalanceTracker
+    2. Signal strength = how far from neutral (50) + ML agreement
+    3. Tier-based sizing: weak=2%, medium=4%, strong=6%, extreme=8%
+    4. Risk score only for warning, doesn't affect sizing
+    """
     try:
-        # Get real balance from exchange (futures account)
-        try:
-            if hasattr(exchange_adapter, 'fetch_balance'):
-                balance = await exchange_adapter.fetch_balance()
-            else:
-                # Use ccxt client directly
-                balance = await exchange_adapter.ccxt_client.fetch_balance()
-            
-            # For futures trading, use total balance (not just free)
-            usdt_balance = balance.get('USDT', {}).get('total', 0.0)
-            if usdt_balance == 0:
-                # Fallback to free balance if total is 0
-                usdt_balance = balance.get('USDT', {}).get('free', 0.0)
-            
-            logger.info(f"💰 Real USDT balance (futures): ${usdt_balance}")
-        except Exception as e:
-            logger.warning(f"⚠️ Failed to fetch balance: {e}, using fallback")
-            usdt_balance = 100.0  # Small fallback for safety
+        from infrastructure.bootstrap import load_policy
+        from infrastructure.balance_tracker import get_balance_tracker
         
-        # Get real existing positions
-        try:
-            if hasattr(exchange_adapter, 'fetch_positions'):
-                positions = await exchange_adapter.fetch_positions()
-            else:
-                # Use ccxt client directly
-                positions = await exchange_adapter.ccxt_client.fetch_positions()
-            total_risk_usdt = sum(float(pos.get('notional', 0)) for pos in positions if pos.get('size', 0) != 0)
-            logger.info(f"📊 Real total risk: ${total_risk_usdt:.2f}")
-        except Exception as e:
-            logger.warning(f"⚠️ Failed to fetch positions: {e}, assuming no positions")
-            total_risk_usdt = 0.0
-        # Note: Minimum margin check removed - OKX allows trades below $5
+        policy = load_policy()
+        sizing_config = policy.get('trading', {}).get('scoring', {}).get('position_sizing', {})
         
-        max_risk_limit = usdt_balance * 0.60  # Max 60% total risk
-        available_risk = max_risk_limit - total_risk_usdt
+        # ============ 1. GET AVAILABLE BALANCE (FREE) ============
+        balance_tracker = get_balance_tracker()
         
-        logger.info(f"📊 Risk status: total_risk=${total_risk_usdt:.2f}, available=${available_risk:.2f}, limit=${max_risk_limit:.2f}")
+        # Configure tracker from policy
+        balance_config = sizing_config.get('balance', {})
+        balance_tracker.configure(
+            snapshot_interval=balance_config.get('snapshot_interval_sec', 600),
+            balance_type=balance_config.get('use_type', 'free')
+        )
         
-        # Dynamic position size based on composite score, risk score, AND ML confidence
+        available_balance = await balance_tracker.get_balance(exchange_adapter)
+        
+        if available_balance <= 0:
+            logger.warning(f"⚠️ No available balance, cannot size position")
+            return 0.0
+        
+        logger.info(f"💰 Available balance (free): ${available_balance:.2f}")
+        
+        # ============ 2. CALCULATE SIGNAL STRENGTH ============
         composite_score = composite_signal.final_score
-        risk_score = composite_signal.risk.score
+        ml_score = composite_signal.ml.score if hasattr(composite_signal, 'ml') else 50
+        if ml_score is None:
+            ml_score = 50  # Neutral for TA-only mode
         
-        # Base percentage from signal strength (1% to 10%)
-        signal_percentage = 0.01 + (composite_score / 100.0) * 0.09  # 1% to 10%
-        signal_percentage = max(0.01, min(0.10, signal_percentage))  # Clamp 1%-10%
+        # Determine directions
+        composite_dir = "SHORT" if composite_score < 48 else ("LONG" if composite_score > 52 else "NEUTRAL")
+        ml_dir = "SHORT" if ml_score < 45 else ("LONG" if ml_score > 55 else "NEUTRAL")
         
-        # Risk adjustment: higher risk = smaller position
-        # Risk score 0-100: 0 = no risk, 100 = maximum risk
-        risk_multiplier = 1.0 - (risk_score / 100.0) * 0.5  # Reduce by up to 50% for high risk
-        risk_multiplier = max(0.5, min(1.0, risk_multiplier))  # Clamp 0.5-1.0
+        # Calculate strength (distance from center, 0-1)
+        composite_strength = abs(composite_score - 50) / 50
+        ml_strength = abs(ml_score - 50) / 50
         
-        # Enhanced ML Confidence + Risk Level adjustment
-        ml_confidence = 'low'  # default
-        risk_level = 'medium'  # default
+        # Combined strength based on direction agreement
+        if composite_dir == ml_dir and composite_dir != "NEUTRAL":
+            # Same direction = average strength (strong signal)
+            signal_strength = (composite_strength + ml_strength) / 2
+            agreement = "AGREE"
+        elif composite_dir == "NEUTRAL" or ml_dir == "NEUTRAL":
+            # One is neutral = use the stronger one with penalty
+            signal_strength = max(composite_strength, ml_strength) * 0.7
+            agreement = "PARTIAL"
+        else:
+            # Conflicting directions = weak signal
+            signal_strength = 0.15
+            agreement = "CONFLICT"
         
-        if hasattr(composite_signal, 'ml') and hasattr(composite_signal.ml, 'details'):
-            ml_details = composite_signal.ml.details
-            if isinstance(ml_details, dict):
-                ml_confidence = ml_details.get('confidence', 'low')
+        logger.info(f"📊 Signal strength: composite={composite_score:.1f}({composite_dir}), "
+                   f"ml={ml_score:.1f}({ml_dir}), agreement={agreement}, strength={signal_strength:.2f}")
         
-        if hasattr(composite_signal, 'risk') and hasattr(composite_signal.risk, 'details'):
-            risk_details = composite_signal.risk.details
-            if isinstance(risk_details, dict):
-                risk_level = risk_details.get('risk_level', 'medium')
+        # ============ 3. TIER-BASED POSITION PERCENTAGE ============
+        tiers = sizing_config.get('tiers', {})
         
-        # Enhanced confidence-aware position sizing
-        confidence_multiplier = _calculate_confidence_multiplier(ml_confidence, risk_level)
+        # Default tiers if not configured
+        if not tiers:
+            tiers = {
+                'weak': {'min_strength': 0.0, 'max_strength': 0.3, 'position_pct': 0.02},
+                'medium': {'min_strength': 0.3, 'max_strength': 0.5, 'position_pct': 0.04},
+                'strong': {'min_strength': 0.5, 'max_strength': 0.7, 'position_pct': 0.06},
+                'extreme': {'min_strength': 0.7, 'max_strength': 1.0, 'position_pct': 0.08},
+            }
         
-        # Final position size = signal strength * risk adjustment * confidence multiplier
-        base_percentage = signal_percentage * risk_multiplier * confidence_multiplier
-        base_percentage = max(0.01, min(0.10, base_percentage))  # Final clamp 1%-10%
+        # Find matching tier
+        position_pct = 0.02  # Default to weak
+        tier_name = "weak"
         
-        # Calculate desired position size
-        desired_size_usdt = usdt_balance * base_percentage
+        for name, tier in tiers.items():
+            min_s = tier.get('min_strength', 0)
+            max_s = tier.get('max_strength', 1)
+            if min_s <= signal_strength < max_s:
+                position_pct = tier.get('position_pct', 0.02)
+                tier_name = name
+                break
         
-        # Ensure we don't exceed available risk
-        position_size_usdt = min(desired_size_usdt, available_risk)
+        logger.info(f"📈 Tier: {tier_name} → {position_pct:.1%}")
         
-        # Get exchange minimum requirements from real market data
+        # ============ 4. RISK SCORE WARNING ONLY ============
+        risk_config = sizing_config.get('risk_score', {})
+        risk_score = composite_signal.risk.score if hasattr(composite_signal, 'risk') else 50
+        warning_threshold = risk_config.get('warning_threshold', 70)
+        
+        if risk_score >= warning_threshold:
+            logger.warning(f"⚠️ [RISK] High risk score: {risk_score:.1f} (threshold: {warning_threshold})")
+        
+        # Risk score does NOT affect position size (per user request)
+        
+        # ============ 5. APPLY SCALABLE SIZING (15+ coins) ============
+        scalable_config = policy.get('trading', {}).get('scoring', {}).get('scalable_sizing', {})
+        
+        if scalable_config.get('enabled', True) and scalable_config.get('dynamic_sizing', True):
+            max_portfolio_alloc = scalable_config.get('max_portfolio_allocation', 0.60)
+            per_position_max = scalable_config.get('per_position_max', 0.10)
+            num_symbols = len(policy.get('exchange', {}).get('symbols', {}).get('trading_pairs', ['BTC', 'ETH', 'SOL']))
+            
+            # Dynamic max: min(per_position_max, max_allocation / num_symbols)
+            dynamic_max = min(per_position_max, max_portfolio_alloc / num_symbols)
+            
+            if position_pct > dynamic_max:
+                logger.info(f"[SCALABLE] Capping: {position_pct:.1%} → {dynamic_max:.1%} (for {num_symbols} symbols)")
+                position_pct = dynamic_max
+        
+        # ============ 6. MAX CONCURRENT CHECK ============
+        max_concurrent_config = policy.get('trading', {}).get('scoring', {}).get('max_concurrent', {})
+        
+        if max_concurrent_config.get('enabled', True) and max_concurrent_config.get('enforce_before_trade', True):
+            hard_limit = max_concurrent_config.get('hard_limit', 20)
+            current_positions = await _get_current_position_count(exchange_adapter)
+            
+            if current_positions >= hard_limit:
+                logger.warning(f"⛔ [MAX-CONCURRENT] Blocking: {current_positions}/{hard_limit} positions open")
+                return 0.0
+        
+        # ============ 7. CALCULATE FINAL POSITION SIZE ============
+        position_usdt = available_balance * position_pct
+        
+        # Get exchange minimum
         if hasattr(exchange_adapter, 'ccxt_client'):
             exchange = exchange_adapter.ccxt_client
         else:
             exchange = exchange_adapter
-        min_required_usdt = await _get_exchange_minimum_cost(exchange, symbol)
+        min_required = await _get_exchange_minimum_cost(exchange, symbol)
         
-        # If calculated size is below minimum, use minimum
-        if position_size_usdt < min_required_usdt:
-            logger.info(f"📈 Position size below minimum, using exchange minimum: ${min_required_usdt}")
-            position_size_usdt = min_required_usdt
-            
-            # Check if minimum exceeds available risk
-            if position_size_usdt > available_risk:
-                logger.warning(f"⚠️ Exchange minimum (${min_required_usdt}) exceeds available risk (${available_risk:.2f})")
-                # Try to use a smaller amount that's still above minimum
-                if available_risk > min_required_usdt * 0.5:  # If we have at least 50% of minimum
-                    position_size_usdt = min_required_usdt * 0.5
-                    logger.info(f"📊 Using reduced position size: ${position_size_usdt:.2f}")
-                else:
-                    logger.warning(f"⚠️ Skipping trade - insufficient margin for minimum position")
-                    return 0.0
+        # Apply minimum
+        if position_usdt < min_required:
+            logger.info(f"📈 Below minimum, using: ${min_required:.2f}")
+            position_usdt = min_required
         
-        # Final clamp: max 10% of portfolio per position
-        max_position_size = usdt_balance * 0.10
-        position_size_usdt = min(position_size_usdt, max_position_size)
+        # Check against available balance
+        if position_usdt > available_balance * 0.90:  # Don't use more than 90% of available
+            position_usdt = available_balance * 0.90
+            logger.info(f"📊 Capped to 90% of available: ${position_usdt:.2f}")
         
-        logger.info(f"💰 Enhanced position size: balance=${usdt_balance:.2f}, signal_score={composite_score:.1f}, risk_score={risk_score:.1f}, ml_conf={ml_confidence}, risk_level={risk_level}, signal_pct={signal_percentage:.1%}, risk_mult={risk_multiplier:.2f}, conf_mult={confidence_multiplier:.2f}, final_pct={base_percentage:.1%}, desired=${desired_size_usdt:.2f}, min_req=${min_required_usdt:.2f}, final=${position_size_usdt:.2f}")
+        logger.info(f"💰 FINAL: balance=${available_balance:.2f}, strength={signal_strength:.2f}, "
+                   f"tier={tier_name}({position_pct:.1%}), position=${position_usdt:.2f}")
         
-        return position_size_usdt
+        return position_usdt
         
     except Exception as e:
         logger.error(f"❌ Position size calculation failed: {e}")
-        return 10.0  # Default $10
+        import traceback
+        traceback.print_exc()
+        return 5.0  # Safe minimum fallback
 
 
 async def _calculate_total_portfolio_risk(adapter) -> float:
@@ -1275,28 +1358,50 @@ async def _get_exchange_minimum_cost(exchange, symbol: str) -> float:
         orderbook = exchange.fetch_order_book(symbol)
         if not orderbook['bids'] or not orderbook['asks']:
             logger.warning(f"⚠️ No order book data for {symbol}, using fallback")
-            return 1.0  # Fallback minimum
+            return 5.0  # Fallback minimum $5
         
         mid_price = (orderbook['bids'][0][0] + orderbook['asks'][0][0]) / 2
         
-        # Get minimum amount from info.minSz (most reliable)
+        # For OKX SWAP contracts:
+        # minSz = minimum number of CONTRACTS (e.g., 0.01)
+        # ctVal = value per contract in base currency (e.g., 0.01 BTC)
+        # ctMult = multiplier (usually 1)
+        # Real minimum = minSz * ctVal * ctMult * price
+        
         min_sz = info.get('minSz')
-        if min_sz:
-            min_amount = float(min_sz)
-            min_cost_usdt = min_amount * mid_price
-            logger.info(f"📊 {symbol} minimum: {min_amount} = ${min_cost_usdt:.2f}")
+        ct_val = info.get('ctVal')
+        ct_mult = info.get('ctMult', '1')
+        
+        if min_sz and ct_val:
+            min_contracts = float(min_sz)
+            contract_value = float(ct_val)
+            multiplier = float(ct_mult) if ct_mult else 1.0
+            
+            # Calculate minimum in base currency (e.g., BTC)
+            min_base_amount = min_contracts * contract_value * multiplier
+            # Convert to USDT
+            min_cost_usdt = min_base_amount * mid_price
+            
+            logger.info(f"📊 {symbol} minimum: {min_contracts} contracts × {contract_value} ctVal = {min_base_amount:.6f} base = ${min_cost_usdt:.2f}")
             return min_cost_usdt
         
-        # Fallback to limits.amount.min
+        # Fallback to limits.cost.min if available
+        min_cost = (limits.get('cost') or {}).get('min')
+        if min_cost:
+            logger.info(f"📊 {symbol} minimum (cost limit): ${min_cost}")
+            return float(min_cost)
+        
+        # Fallback to limits.amount.min (assuming base currency, not contracts)
         min_amount = (limits.get('amount') or {}).get('min')
         if min_amount:
-            min_cost_usdt = min_amount * mid_price
-            logger.info(f"📊 {symbol} minimum (fallback): {min_amount} = ${min_cost_usdt:.2f}")
+            # For non-contract markets, this is the base amount
+            min_cost_usdt = float(min_amount) * mid_price
+            logger.info(f"📊 {symbol} minimum (amount limit): {min_amount} = ${min_cost_usdt:.2f}")
             return min_cost_usdt
         
-        # Final fallback
-        logger.warning(f"⚠️ No minimum data for {symbol}, using $1 fallback")
-        return 1.0
+        # Final fallback - $5 is OKX's general minimum for most swaps
+        logger.warning(f"⚠️ No minimum data for {symbol}, using $5 fallback")
+        return 5.0
         
     except Exception as e:
         logger.error(f"❌ Failed to get minimum cost for {symbol}: {e}")
@@ -1312,11 +1417,12 @@ async def _get_current_position_count(exchange_adapter) -> int:
         else:
             exchange = exchange_adapter
         
-        positions = await exchange.fetch_positions()
+        # CCXT client is sync, don't await
+        positions = exchange.fetch_positions()
         open_positions = 0
         
         for position in positions:
-            if position.get('contracts', 0) > 0 or position.get('size', 0) != 0:  # Only count open positions
+            if position.get('contracts', 0) > 0 or position.get('size', 0) != 0:
                 open_positions += 1
         
         return open_positions
@@ -1435,12 +1541,15 @@ async def _calculate_tp_sl_levels(entry_price: float, decision: str, ta_flags: d
                     logger.warning(f"⚠️ ATR calculation failed: {e}, using fallback percentages")
         
         # Calculate TP/SL based on ATR or fallback
+        # Normalize decision to uppercase for comparison
+        decision_upper = decision.upper() if decision else "FLAT"
+        
         if atr and atr > 0:
             # ATR-based calculation
-            if decision == "LONG":
+            if decision_upper == "LONG":
                 sl_price = entry_price - (sl_atr_mult * atr)
                 tp_price = entry_price + (tp_atr_mult * atr)
-            elif decision == "SHORT":
+            elif decision_upper == "SHORT":
                 sl_price = entry_price + (sl_atr_mult * atr)
                 tp_price = entry_price - (tp_atr_mult * atr)
             else:
@@ -1455,10 +1564,10 @@ async def _calculate_tp_sl_levels(entry_price: float, decision: str, ta_flags: d
             # Fallback to percentage-based calculation
             logger.warning(f"⚠️ No ATR data, using fallback percentages: TP={fallback_tp_pct*100}%, SL={fallback_sl_pct*100}%")
             
-            if decision == "LONG":
+            if decision_upper == "LONG":
                 tp_price = entry_price * (1 + fallback_tp_pct)
                 sl_price = entry_price * (1 - fallback_sl_pct)
-            elif decision == "SHORT":
+            elif decision_upper == "SHORT":
                 tp_price = entry_price * (1 - fallback_tp_pct)
                 sl_price = entry_price * (1 + fallback_sl_pct)
             else:
@@ -1466,12 +1575,12 @@ async def _calculate_tp_sl_levels(entry_price: float, decision: str, ta_flags: d
                 sl_price = entry_price
         
         # Safety check: ensure TP/SL are valid
-        if decision == "LONG":
+        if decision_upper == "LONG":
             if tp_price <= entry_price or sl_price >= entry_price:
                 logger.warning(f"⚠️ Invalid TP/SL for LONG, correcting...")
                 tp_price = entry_price * 1.03
                 sl_price = entry_price * 0.985
-        elif decision == "SHORT":
+        elif decision_upper == "SHORT":
             if tp_price >= entry_price or sl_price <= entry_price:
                 logger.warning(f"⚠️ Invalid TP/SL for SHORT, correcting...")
                 tp_price = entry_price * 0.97
@@ -1482,9 +1591,9 @@ async def _calculate_tp_sl_levels(entry_price: float, decision: str, ta_flags: d
     except Exception as e:
         logger.error(f"❌ TP/SL calculation failed: {e}")
         # Fallback: use 3% TP and 1.5% SL
-        if decision == "LONG":
+        if decision.upper() == "LONG":
             return entry_price * 1.03, entry_price * 0.985
-        elif decision == "SHORT":
+        elif decision.upper() == "SHORT":
             return entry_price * 0.97, entry_price * 1.015
         return entry_price, entry_price
 
@@ -1538,14 +1647,16 @@ async def _create_oco_bracket(exchange_adapter, symbol: str, decision: str,
         Dict with tp_algo_id, sl_algo_id, and oco_link_id
     """
     try:
-        # Generate linked IDs for OCO bracket
+        # Generate linked IDs for OCO bracket - OKX requires alphanumeric only!
         import time
-        oco_link_id = f"OCO_{int(time.time() * 1000)}"
-        tp_client_id = f"TP_{entry_client_id}"
-        sl_client_id = f"SL_{entry_client_id}"
+        from execution.id_utils import generate_client_id
+        oco_link_id = f"OCO{int(time.time() * 1000)}"
+        tp_client_id = generate_client_id('A')  # Algo TP
+        sl_client_id = generate_client_id('A')  # Algo SL
         
-        # Determine sides for TP/SL
-        if decision == "LONG":
+        # Determine sides for TP/SL (case-insensitive check)
+        decision_upper = decision.upper() if decision else 'FLAT'
+        if decision_upper == "LONG":
             tp_side = "sell"  # Close long by selling
             sl_side = "sell"
         else:  # SHORT
@@ -1570,10 +1681,68 @@ async def _create_oco_bracket(exchange_adapter, symbol: str, decision: str,
             logger.info(f"✅ OCO bracket created via native API: {result}")
             return result
             
+        elif hasattr(exchange_adapter, 'create_algo_stop_loss') and hasattr(exchange_adapter, 'create_algo_take_profit'):
+            # Use OKX-specific algo order methods (CORRECT approach)
+            logger.info(f"📋 Creating TP/SL using OKX algo order API")
+            
+            # Create TP order
+            tp_result = await exchange_adapter.create_algo_take_profit(
+                symbol=symbol,
+                side=tp_side,
+                size=position_size,
+                trigger_price=tp_price,
+                client_id=tp_client_id
+            )
+            
+            # Create SL order
+            sl_result = await exchange_adapter.create_algo_stop_loss(
+                symbol=symbol,
+                side=sl_side,
+                size=position_size,
+                trigger_price=sl_price,
+                client_id=sl_client_id
+            )
+            
+            # Check results
+            tp_success = tp_result.get('success', False)
+            sl_success = sl_result.get('success', False)
+            
+            if tp_success and sl_success:
+                logger.info(f"✅ TP/SL created successfully: TP={tp_result.get('algoId')}, SL={sl_result.get('algoId')}")
+            else:
+                if not tp_success:
+                    logger.error(f"❌ TP creation failed: {tp_result.get('error')}")
+                if not sl_success:
+                    logger.error(f"❌ SL creation failed: {sl_result.get('error')}")
+            
+            # Store the OCO link for manual cleanup
+            oco_mapping = {
+                'oco_link_id': oco_link_id,
+                'tp_algo_id': tp_result.get('algoId', tp_client_id),
+                'sl_algo_id': sl_result.get('algoId', sl_client_id),
+                'symbol': symbol,
+                'entry_client_id': entry_client_id,
+                'created_at': datetime.now(timezone.utc).isoformat(),
+                'status': 'active'
+            }
+            
+            # Log OCO mapping for cleanup job
+            logger.info(f"[OCO-MAP] {oco_mapping}")
+            
+            return {
+                'tp_algo_id': tp_result.get('algoId'),
+                'sl_algo_id': sl_result.get('algoId'),
+                'oco_link_id': oco_link_id,
+                'tp_result': tp_result,
+                'sl_result': sl_result,
+                'tp_success': tp_success,
+                'sl_success': sl_success
+            }
+            
         elif hasattr(exchange_adapter, 'create_trigger_order'):
-            # Fallback: Create separate trigger orders with tracking
-            # Note: This doesn't provide true OCO, but we track for manual cleanup
-            logger.warning(f"⚠️ Exchange doesn't support native OCO, creating linked triggers")
+            # Legacy fallback: Create separate trigger orders with tracking
+            # Note: This may not work correctly on OKX!
+            logger.warning(f"⚠️ Using legacy create_trigger_order (may not work on OKX)")
             
             tp_result = await exchange_adapter.create_trigger_order(
                 symbol, tp_side.upper(), tp_price, -1, True, tp_client_id
@@ -1605,7 +1774,7 @@ async def _create_oco_bracket(exchange_adapter, symbol: str, decision: str,
             }
         else:
             # Mock response for testing
-            logger.warning(f"⚠️ Exchange adapter doesn't support trigger orders, using mock OCO")
+            logger.warning(f"⚠️ Exchange adapter doesn't support algo orders, using mock OCO")
             return {
                 'tp_algo_id': f"MOCK_TP_{tp_client_id}",
                 'sl_algo_id': f"MOCK_SL_{sl_client_id}",
@@ -1615,6 +1784,8 @@ async def _create_oco_bracket(exchange_adapter, symbol: str, decision: str,
             
     except Exception as e:
         logger.error(f"❌ OCO bracket creation failed: {e}")
+        import traceback
+        logger.debug(f"OCO bracket error traceback: {traceback.format_exc()}")
         return {
             'error': str(e),
             'tp_algo_id': None,

@@ -134,7 +134,9 @@ class ContextResolver:
             
             # Get policy
             policy = self._get_policy()
-            mode = policy.get('trading', {}).get('mode', 'paper')
+            # Get mode: env var takes priority over policy
+            import os
+            mode = os.environ.get('TRADING_MODE') or policy.get('trading', {}).get('mode', 'paper')
             context['mode'] = mode
             
             # Get symbols count from policy
@@ -144,10 +146,16 @@ class ContextResolver:
             # Get portfolio data
             try:
                 from application.portfolio_service import PortfolioService
-                portfolio_service = self._get_service('portfolio', lambda: PortfolioService(None))
+                from adapters.exchange_okx_ccxt import OKXExchangeAdapter
+                
+                # Get or create exchange adapter first
+                exchange_adapter = self._get_service('exchange', lambda: OKXExchangeAdapter())
+                
+                # Create portfolio service with exchange adapter
+                portfolio_service = self._get_service('portfolio', lambda: PortfolioService(exchange_adapter))
                 
                 if portfolio_service:
-                    balance = await portfolio_service.get_portfolio_value()
+                    balance = await portfolio_service.get_available_balance()
                     context['portfolio']['balance'] = balance
                     
                     # Calculate PnL from positions
@@ -221,108 +229,66 @@ class ContextResolver:
     
     async def resolve_signals_context(self, limit: int = 6, symbol_filter: Optional[str] = None) -> Dict[str, Any]:
         """
-        Resolve context for signals view with real data from ScoringService.
-        
-        Args:
-            limit: Maximum number of signals to return
-            symbol_filter: Optional symbol filter
-        
-        Returns:
-            Dict with: signals list, timeframe, last_update, issues (if any)
+        Resolve context for signals view with real data from ScoringService cache.
         """
-        cache_key = f"signals:{limit}:{symbol_filter or 'all'}"
         issues = []
+        signals = []
         
         try:
-            # Check cache first
-            cached = self._get_cached_data(cache_key)
-            if cached:
-                return cached
-            
-            signals = []
-            
-            # Get policy
             policy = self._get_policy()
-            symbols = policy.get('trading', {}).get('symbols', [])
+            timeframe = policy.get('trading', {}).get('timeframe', '15m')
             
-            if isinstance(symbols, str):
-                symbols = [s.strip() for s in symbols.split(',')]
-            
-            # Filter by symbol if specified
-            if symbol_filter:
-                symbols = [s for s in symbols if symbol_filter.upper() in s.upper()]
-            
-            # Get top signals from ScoringService
+            # Get real signal data from ScoringService cache
             try:
                 from application.scoring_service import ScoringService
                 scoring_service = self._get_service('scoring', lambda: ScoringService({}))
                 
                 if scoring_service:
-                    # Get top symbols from scoring service
-                    top_symbols = await scoring_service.get_top_symbols(limit=limit * 2)  # Get more to filter
+                    # Get top symbols from cache (now returns real data)
+                    top_symbols = await scoring_service.get_top_symbols(limit=limit)
                     
-                    for symbol_data in top_symbols[:limit]:
-                        # Try to get detailed score summary for component scores
-                        symbol = symbol_data.get('symbol', 'UNKNOWN')
-                        score_summary = scoring_service.get_score_summary(symbol)
-                        
-                        # Extract component scores if available
-                        ta_score = 75.0
-                        ml_score = 68.0
-                        news_score = 55.0
-                        risk_score = 42.0
-                        
-                        if 'error' not in score_summary and 'components' in score_summary:
-                            components = score_summary.get('components', {})
-                            ta_score = components.get('ta', {}).get('score', 75.0)
-                            ml_score = components.get('ml', {}).get('score', 68.0)
-                            news_score = components.get('news', {}).get('score', 55.0)
-                            
+                    for symbol_data in top_symbols:
                         signal = {
-                            'symbol': symbol,
-                            'final_score': symbol_data.get('score', score_summary.get('overall_score', 0.0)),
-                            'grade': symbol_data.get('grade', score_summary.get('grade', 'D')),
-                            'direction': symbol_data.get('signal', score_summary.get('signal', 'FLAT')),
-                            'ta': ta_score,
-                            'ml': ml_score,
-                            'news': news_score,
-                            'risk': risk_score,
-                            'persist': 3,
+                            'symbol': symbol_data.get('symbol', 'UNKNOWN'),
+                            'final_score': symbol_data.get('score', 0.0),
+                            'grade': symbol_data.get('grade', '?'),
+                            'direction': symbol_data.get('signal', 'HOLD'),
+                            'ta': symbol_data.get('ta', 0.0),
+                            'ml': symbol_data.get('ml', 0.0),
+                            'news': symbol_data.get('news', 0.0),
+                            'risk': 0.0,
+                            'persist': 0,
                             'persist_max': 5,
-                            'age': 2,
+                            'age': 0,
                             'age_max': 6,
-                            'confirm': 1,
+                            'confirm': 0,
                             'confirm_max': 2
                         }
                         signals.append(signal)
+                    
+                    if not signals:
+                        issues.append("Henüz sinyal verisi yok - sonraki analiz döngüsünü bekleyin")
                 else:
                     issues.append("ScoringService unavailable")
+                    
             except Exception as e:
                 self.logger.warning(f"Failed to get signals from ScoringService: {e}")
-                issues.append(f"Signals service error: {str(e)[:50]}")
-                self.metrics_hook.record_error('resolver', 'telegram')
+                issues.append(f"Scoring error: {str(e)[:30]}")
             
-            result = {
+            return {
                 'signals': signals[:limit],
-                'timeframe': policy.get('trading', {}).get('timeframe', '15m'),
+                'timeframe': timeframe,
                 'last_update': datetime.now(timezone.utc),
                 'issues': issues
             }
             
-            # Cache result
-            if not issues:  # Only cache successful fetches
-                self._set_cached_data(cache_key, result)
-            
-            return result
-            
         except Exception as e:
             self.logger.error(f"Failed to resolve signals context: {e}", exc_info=True)
-            self.metrics_hook.record_error('resolver', 'telegram')
             return {
                 'signals': [],
                 'timeframe': '15m',
                 'last_update': datetime.now(timezone.utc),
-                'issues': [f"Signals resolver error: {str(e)[:50]}"]
+                'issues': [f"Error: {str(e)[:50]}"]
             }
     
     async def resolve_risk_context(self) -> Dict[str, Any]:
@@ -334,24 +300,26 @@ class ContextResolver:
         """
         try:
             policy = self._get_policy()
+            risk_config = policy.get('trading', {}).get('risk', {})
             
+            # Initialize with policy-driven defaults, NOT hardcoded mocks
             context = {
-                'exposure_pct': 18.0,
-                'exposure_max': 60.0,
+                'exposure_pct': 0.0,  # Will be calculated from positions
+                'exposure_max': risk_config.get('max_exposure_pct', 60.0),
                 'open_positions': 0,
-                'max_positions': 20,
+                'max_positions': risk_config.get('max_positions', 20),
                 'cb_state': 'OFF',
-                'tier_alloc': {'T1': 40.0, 'T2': 35.0, 'T3': 25.0},
+                'tier_alloc': policy.get('trading', {}).get('tier_alloc', {'T1': 40.0, 'T2': 35.0, 'T3': 25.0}),
                 'limits': {
-                    'max_position_size_pct': 10.0,
-                    'stop_loss_pct': 1.5,
-                    'leverage': 3.0
+                    'max_position_size_pct': risk_config.get('max_position_size_pct', 0.10) * 100,
+                    'stop_loss_pct': risk_config.get('stop_loss_pct', 0.015) * 100,
+                    'leverage': risk_config.get('max_leverage', 3.0)
                 },
                 'guards': {
-                    'persist': 3,
-                    'age': 6,
-                    'confirm': 2,
-                    'hyster': '±5'
+                    'persist': risk_config.get('persist_bars', 3),
+                    'age': risk_config.get('max_age_bars', 6),
+                    'confirm': risk_config.get('confirmations', 2),
+                    'hyster': f"±{risk_config.get('hysteresis', 5)}"
                 },
                 'alerts': []
             }
@@ -362,7 +330,8 @@ class ContextResolver:
                 from application.portfolio_service import PortfolioService
                 
                 exchange_adapter = self._get_service('exchange', lambda: OKXExchangeAdapter())
-                portfolio_service = self._get_service('portfolio', lambda: PortfolioService(None))
+                # Create portfolio service WITH exchange adapter
+                portfolio_service = self._get_service('portfolio', lambda: PortfolioService(exchange_adapter))
                 
                 if exchange_adapter and portfolio_service:
                     # Get positions and calculate exposure
@@ -483,12 +452,15 @@ class ContextResolver:
             self.logger.error(f"Failed to resolve orders context: {e}", exc_info=True)
             return {'orders': [], 'page': 0, 'has_prev': False, 'has_next': False, 'last_update': datetime.now(timezone.utc)}
     
-    async def resolve_tpsl_context(self) -> Dict[str, Any]:
+    async def resolve_tpsl_context(self, symbol_filter: Optional[str] = None) -> Dict[str, Any]:
         """
         Resolve context for TP/SL view.
         
+        Args:
+            symbol_filter: Optional symbol to filter positions
+        
         Returns:
-            Dict with: positions list (each with symbol, entry, sl, tp, rr, sl_atr, tp_atr)
+            Dict with: positions list (each with symbol, entry, sl, tp, rr, sl_atr, tp_atr), symbol_filter
         """
         try:
             positions = []
@@ -509,7 +481,7 @@ class ContextResolver:
                             continue
                         
                         symbol = pos_data.get('symbol', 'UNKNOWN')
-                        entry = float(pos_data.get('avgPrice', 0))
+                        entry = float(pos_data.get('entryPrice', 0) or pos_data.get('avgPrice', 0) or 0)
                         side = pos_data.get('side', 'long')
                         
                         # Calculate TP/SL levels (simplified - would need ATR calculation)
@@ -814,19 +786,36 @@ class ContextResolver:
             user_id: Optional user ID for user-specific settings
         
         Returns:
-            Dict with: settings (compact_mode, emojis, confirmations, timeframe)
+            Dict with: settings (compact_mode, emojis, confirmations, timeframe, leverage, trading features)
         """
         try:
             policy = self._get_policy()
             
-            # Get user settings (in-memory for now)
-            # TODO: Implement persistent user settings storage
+            # Get user settings from persistent storage
+            from adapters.telegram.user_settings import get_user_settings
+            settings_manager = get_user_settings()
+            
+            # Get trading feature states from policy (directly under trading, not scoring)
+            trading = policy.get('trading', {})
+            trailing_config = trading.get('trailing', {})
+            partial_tp_config = trading.get('partial_tp', {})
+            time_exit_config = trading.get('time_exit', {})
+            dynamic_tpsl_config = trading.get('dynamic_tpsl', {})
+            
             user_settings = {
-                'compact_mode': True,
-                'emojis': False,
-                'confirmations': True,
+                'compact_mode': settings_manager.get(user_id, 'compact', True),
+                'emojis': settings_manager.get(user_id, 'emojis', False),
+                'confirmations': settings_manager.get(user_id, 'confirmations', True),
                 'timeframe': policy.get('trading', {}).get('timeframe', '15m'),
-                'timeframe_locked': True  # Locked by policy
+                'timeframe_locked': True,  # Locked by policy
+                # Leverage from policy (not user_settings)
+                'leverage': trading.get('risk', {}).get('leverage', {}).get('default', 5),
+                
+                # Trading features from policy
+                'trailing_enabled': trailing_config.get('enabled', False),
+                'partial_tp_enabled': partial_tp_config.get('enabled', False),
+                'time_exit_enabled': time_exit_config.get('enabled', False),
+                'dynamic_tpsl_enabled': dynamic_tpsl_config.get('enabled', False),
             }
             
             return user_settings
@@ -838,8 +827,281 @@ class ContextResolver:
                 'emojis': False,
                 'confirmations': True,
                 'timeframe': '15m',
-                'timeframe_locked': True
+                'timeframe_locked': True,
+                'leverage': 5,
+                'trailing_enabled': False,
+                'partial_tp_enabled': False,
+                'time_exit_enabled': False,
+                'dynamic_tpsl_enabled': False,
             }
+    
+    async def resolve_emergency_context(self) -> Dict[str, Any]:
+        """
+        Resolve context for emergency view.
+        
+        Returns:
+            Dict with: open_positions, total_exposure, total_upnl, cb_state, mode
+        """
+        try:
+            policy = self._get_policy()
+            mode = policy.get('trading', {}).get('mode', 'PAPER')
+            
+            context = {
+                'open_positions': 0,
+                'total_exposure': 0.0,
+                'total_upnl': 0.0,
+                'cb_state': 'OFF',
+                'mode': mode
+            }
+            
+            # Get position data
+            try:
+                from adapters.exchange_okx_ccxt import OKXExchangeAdapter
+                exchange_adapter = self._get_service('exchange', lambda: OKXExchangeAdapter())
+                
+                if exchange_adapter:
+                    positions = await exchange_adapter.get_positions()
+                    if positions:
+                        context['open_positions'] = len(positions)
+                        total_exposure = 0.0
+                        total_upnl = 0.0
+                        
+                        for pos in positions:
+                            size = abs(float(pos.get('contracts', 0) or pos.get('size', 0)))
+                            mark = float(pos.get('mark_price', 0) or pos.get('markPrice', 0) or 0)
+                            upnl = float(pos.get('unrealized_pnl', 0) or pos.get('unrealizedPnl', 0) or 0)
+                            
+                            total_exposure += size * mark
+                            total_upnl += upnl
+                        
+                        context['total_exposure'] = total_exposure
+                        context['total_upnl'] = total_upnl
+            except Exception as e:
+                self.logger.warning(f"Failed to get emergency context positions: {e}")
+            
+            # Get circuit breaker state
+            try:
+                from application.circuit_breaker import CircuitBreaker
+                cb = self._get_service('circuit_breaker', lambda: CircuitBreaker())
+                if cb:
+                    context['cb_state'] = 'ON' if cb.is_tripped else 'OFF'
+            except Exception as e:
+                self.logger.debug(f"Circuit breaker check failed: {e}")
+            
+            return context
+            
+        except Exception as e:
+            self.logger.error(f"Failed to resolve emergency context: {e}", exc_info=True)
+            return {
+                'open_positions': 0,
+                'total_exposure': 0.0,
+                'total_upnl': 0.0,
+                'cb_state': 'OFF',
+                'mode': 'PAPER'
+            }
+    
+    # ==================== ADVANCED SETTINGS CONTEXT ====================
+    
+    async def resolve_position_size_context(self) -> Dict[str, Any]:
+        """Resolve position sizing settings from policy."""
+        try:
+            policy = self._get_policy()
+            scoring = policy.get('trading', {}).get('scoring', {})
+            pos_sizing = scoring.get('position_sizing', {})
+            
+            return {
+                'min_percentage': pos_sizing.get('min_percentage', 0.01),
+                'max_percentage': pos_sizing.get('max_percentage', 0.10),
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve position size context: {e}")
+            return {'min_percentage': 0.01, 'max_percentage': 0.10}
+    
+    async def resolve_coins_context(self) -> Dict[str, Any]:
+        """Resolve active coins from policy."""
+        try:
+            policy = self._get_policy()
+            trading_pairs = policy.get('exchange', {}).get('symbols', {}).get('trading_pairs', [])
+            
+            return {
+                'active_coins': trading_pairs,
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve coins context: {e}")
+            return {'active_coins': []}
+    
+    async def resolve_coin_category_context(self, category: str) -> Dict[str, Any]:
+        """Resolve coin list for a category - static or dynamic."""
+        try:
+            from adapters.telegram.views.advanced import COIN_CATEGORIES
+            
+            policy = self._get_policy()
+            active_coins = policy.get('exchange', {}).get('symbols', {}).get('trading_pairs', [])
+            
+            coins = []
+            category_name = category
+            
+            # Static categories
+            if category in COIN_CATEGORIES:
+                cat_info = COIN_CATEGORIES[category]
+                coins = cat_info['coins']
+                category_name = cat_info['name']
+            
+            # Dynamic categories (OKX fetch)
+            elif category in ['volume', 'trending', 'losers', 'all']:
+                # Fallback coins if API fails
+                FALLBACK_COINS = {
+                    'volume': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK'],
+                    'trending': ['PEPE', 'WIF', 'BONK', 'FET', 'TAO', 'RENDER', 'SUI', 'APT', 'SEI', 'TIA'],
+                    'losers': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK'],
+                    'all': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK', 
+                            'DOT', 'ATOM', 'NEAR', 'FET', 'ARB', 'OP', 'SUI', 'APT', 'SEI', 'TIA'],
+                }
+                CATEGORY_NAMES = {
+                    'volume': '📈 Top Hacim',
+                    'trending': '🔥 Trending',
+                    'losers': '📉 Düşenler',
+                    'all': '💰 Tüm Coinler',
+                }
+                
+                category_name = CATEGORY_NAMES.get(category, category)
+                try:
+                    # Use cached exchange adapter
+                    from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+                    adapter = self._get_service('exchange_adapter', OKXCCXTAdapter)
+                    
+                    if adapter:
+                        if category == 'all':
+                            markets = await adapter.fetch_markets()
+                            coins = [m['id'] for m in markets if 'SWAP' in m.get('id', '') and 'USDT' in m.get('id', '')][:50]
+                        else:
+                            tickers = await adapter.fetch_tickers()
+                            swap_tickers = {k: v for k, v in tickers.items() if 'SWAP' in k and 'USDT' in k}
+                            
+                            if category == 'volume':
+                                sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('quoteVolume', 0) or 0, reverse=True)
+                                coins = [k for k, _ in sorted_t[:20]]
+                            elif category == 'trending':
+                                sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('percentage', 0) or 0, reverse=True)
+                                coins = [k for k, _ in sorted_t[:20]]
+                            elif category == 'losers':
+                                sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('percentage', 0) or 0)
+                                coins = [k for k, _ in sorted_t[:20]]
+                    else:
+                        coins = FALLBACK_COINS.get(category, [])
+                except Exception as e:
+                    self.logger.warning(f"Failed to fetch dynamic coins: {e}, using fallback")
+                    coins = FALLBACK_COINS.get(category, [])
+            
+            return {
+                'category': category,
+                'category_name': category_name,
+                'coins': coins,
+                'active_coins': active_coins,
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve coin category context: {e}")
+            return {'category': category, 'category_name': category, 'coins': [], 'active_coins': []}
+    
+    async def resolve_thresholds_context(self) -> Dict[str, Any]:
+        """Resolve decision thresholds from policy."""
+        try:
+            policy = self._get_policy()
+            thresholds = policy.get('trading', {}).get('scoring', {}).get('decision_thresholds', {})
+            
+            return {
+                'enter_long': thresholds.get('enter_long', 52),
+                'exit_long': thresholds.get('exit_long', 40),
+                'enter_short': thresholds.get('enter_short', 48),
+                'exit_short': thresholds.get('exit_short', 60),
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve thresholds context: {e}")
+            return {'enter_long': 52, 'exit_long': 40, 'enter_short': 48, 'exit_short': 60}
+    
+    async def resolve_age_context(self) -> Dict[str, Any]:
+        """Resolve position age settings from policy."""
+        try:
+            policy = self._get_policy()
+            time_exit = policy.get('trading', {}).get('time_exit', {})
+            
+            return {
+                'max_position_age_hours': time_exit.get('max_position_age_hours', 24),
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve age context: {e}")
+            return {'max_position_age_hours': 24}
+    
+    async def resolve_weights_context(self) -> Dict[str, Any]:
+        """Resolve score weights from policy."""
+        try:
+            policy = self._get_policy()
+            scoring = policy.get('trading', {}).get('scoring', {})
+            
+            return {
+                'ta_weight': scoring.get('ta_weight', 0.7),
+                'ml_weight': scoring.get('ml_weight', 0.1),
+                'news_weight': scoring.get('news_weight', 0.1),
+                'risk_weight': scoring.get('risk_weight', 0.1),
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve weights context: {e}")
+            return {'ta_weight': 0.7, 'ml_weight': 0.1, 'news_weight': 0.1, 'risk_weight': 0.1}
+    
+    async def resolve_ml_boost_context(self) -> Dict[str, Any]:
+        """Resolve ML boost settings from policy."""
+        try:
+            policy = self._get_policy()
+            ml_boost = policy.get('trading', {}).get('scoring', {}).get('ml_boost', {})
+            
+            return {
+                'ml_boost': {
+                    'enabled': ml_boost.get('enabled', False),
+                    'tiers': ml_boost.get('tiers', [])
+                }
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve ML boost context: {e}")
+            return {'ml_boost': {'enabled': False, 'tiers': []}}
+    
+    async def resolve_signal_history_context(self) -> Dict[str, Any]:
+        """Resolve signal history main menu context."""
+        try:
+            from application.signal_history import get_all_symbols, get_stats
+            
+            return {
+                'symbols': get_all_symbols(),
+                'stats': get_stats()
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve signal history context: {e}")
+            return {'symbols': [], 'stats': {}}
+    
+    async def resolve_coin_signals_context(self, symbol: str) -> Dict[str, Any]:
+        """Resolve signal history for a specific coin."""
+        try:
+            from application.signal_history import get_signals
+            
+            return {
+                'symbol': symbol,
+                'signals': get_signals(symbol, limit=50)
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve coin signals context: {e}")
+            return {'symbol': symbol, 'signals': []}
+    
+    async def resolve_alerts_context(self, level: str = None) -> Dict[str, Any]:
+        """Resolve alerts history context."""
+        try:
+            from application.alert_history import get_alerts, get_alert_counts
+            
+            return {
+                'alerts': get_alerts(level=level, limit=30),
+                'counts': get_alert_counts()
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve alerts context: {e}")
+            return {'alerts': [], 'counts': {}}
 
 
 # Global instance

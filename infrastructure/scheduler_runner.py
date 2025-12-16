@@ -371,6 +371,9 @@ class SchedulerRunner:
             for job in self.scheduler.get_jobs():
                 logger.info(f"  - {job.name} ({job.id}): {job.next_run_time}")
             
+            # Start Telegram bot with handlers for /start, etc.
+            await self._start_telegram_bot()
+            
             # Send startup message
             await self._send_startup_message()
             
@@ -380,6 +383,25 @@ class SchedulerRunner:
         except Exception as e:
             logger.error(f"❌ Failed to start scheduler: {e}")
             raise
+    
+    async def _start_telegram_bot(self):
+        """Start Telegram bot with command handlers."""
+        try:
+            # Get token from environment
+            token = os.getenv('TELEGRAM_BOT_TOKEN', '')
+            if not token:
+                logger.warning("⚠️ TELEGRAM_BOT_TOKEN not set, Telegram commands disabled")
+                return
+            
+            # Import and create client with handlers
+            from adapters.telegram.client import init_telegram_app
+            self.telegram_client = await init_telegram_app(token)
+            
+            logger.info("✅ Telegram bot started with /start, /positions, etc. handlers")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to start Telegram bot: {e}")
+            # Don't raise - scheduler should still work without Telegram commands
     
     async def stop(self):
         """Stop the scheduler gracefully."""

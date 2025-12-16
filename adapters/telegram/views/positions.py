@@ -1,6 +1,6 @@
 """
 Positions View Builder
-Builds the positions view with current open positions.
+Clean, compact position display.
 """
 
 from typing import Dict, Any, List, Tuple
@@ -10,80 +10,70 @@ from adapters.telegram.formatter import TelegramFormatter, get_formatter
 
 
 def build_positions_view(context: Dict[str, Any], formatter: TelegramFormatter = None) -> Tuple[str, List[List[Dict[str, str]]]]:
-    """
-    Build positions view.
-    
-    Args:
-        context: Context dict from ContextResolver.resolve_positions_context()
-        formatter: Optional formatter instance
-    
-    Returns:
-        Tuple of (text, buttons)
-    """
+    """Build positions view with clean, compact format."""
     if formatter is None:
         formatter = get_formatter()
     
     positions = context.get('positions', [])
     open_positions = context.get('open_positions', 0)
     last_update = context.get('last_update', datetime.now())
-    issues = context.get('issues', [])
     
     # Header
     time_str = last_update.strftime('%H:%M:%S') if isinstance(last_update, datetime) else str(last_update)
-    header = f"Positions • {open_positions} open • Last {time_str}"
     
-    # Show issues if any
-    issue_lines = []
-    if issues:
-        issue_lines.append("⚠️ " + ", ".join(issues))
-    
-    # Position lines
-    position_lines = []
-    for pos in positions:
-        symbol = pos.get('symbol', 'UNKNOWN')
-        side = pos.get('side', 'LONG')
-        size = pos.get('size', 0.0)
-        entry = pos.get('entry_price', 0.0)
-        mark = pos.get('current_price', 0.0)
-        upnl = pos.get('unrealized_pnl', 0.0)
-        upnl_pct = pos.get('upnl_pct', 0.0)
-        
-        # Format side with emoji
-        side_emoji = formatter.format_emoji('long' if side == 'LONG' else 'short', fallback=side)
-        
-        line = (
-            f"{symbol}  {side_emoji} {side}  "
-            f"size {size:.2f}  entry {formatter.format_number(entry, 2)}  "
-            f"mark {formatter.format_number(mark, 2)}  "
-            f"UPNL ${formatter.format_number(upnl, 2)} ({upnl_pct:.2f}%)"
-        )
-        position_lines.append(line)
-    
-    if not position_lines:
-        position_lines.append("No open positions")
-    
-    # Build text
-    lines = [header]
-    if issue_lines:
-        lines.append("")  # Empty line before issues
-        lines.extend(issue_lines)
-    lines.append("")  # Empty line before positions
-    lines.extend(position_lines if position_lines else ["No open positions"])
-    lines.append("")  # Empty line before footer
-    text = "\n".join(lines)
-    
-    # Add footer
-    text = formatter.add_footer(text)
-    
-    # Build buttons
-    buttons = [
-        [
-            {"text": "Main", "callback_data": "ai:main"},
-            {"text": "PnL", "callback_data": "ai:pnl"},
-            {"text": "TP/SL", "callback_data": "ai:tpsl"},
-            {"text": "Orders", "callback_data": "ai:ord"}
-        ]
+    lines = [
+        f"📊 Pozisyonlar │ {open_positions} açık",
+        f"━━━━━━━━━━━━━━━━━━━━",
+        "",
     ]
     
+    # Position list
+    if positions:
+        for pos in positions:
+            symbol = pos.get('symbol', 'UNKNOWN')
+            # Clean symbol
+            sym = symbol.replace('-USDT-SWAP', '').replace('/USDT:USDT', '').replace('-USDT', '')[:5]
+            
+            side = pos.get('side', 'LONG').upper()
+            size = pos.get('size', 0.0)
+            entry = pos.get('entry_price', 0.0)
+            upnl = pos.get('unrealized_pnl', 0.0)
+            upnl_pct = pos.get('upnl_pct', 0.0)
+            
+            # Direction indicator
+            side_icon = "▲" if side == 'LONG' else "▼"
+            pnl_icon = "🟢" if upnl >= 0 else "🔴"
+            
+            # Compact line
+            line = f"{sym:5} {side_icon} {side:5} │ {size:.4f} │ {pnl_icon} ${upnl:+.2f}"
+            lines.append(line)
+    else:
+        lines.append("Açık pozisyon yok")
+    
+    lines.append("")
+    lines.append(f"⏰ {time_str}")
+    
+    text = "\n".join(lines)
+    
+    # Buttons - per position actions
+    buttons = []
+    
+    for pos in positions[:4]:
+        symbol = pos.get('symbol', 'UNKNOWN')
+        short_sym = symbol.replace('-USDT-SWAP', '').replace('/USDT:USDT', '')[:5]
+        side = pos.get('side', 'LONG').upper()
+        side_icon = "🟢" if side == 'LONG' else "🔴"
+        
+        buttons.append([
+            {"text": f"{side_icon} {short_sym} Kapat", "callback_data": f"ai:act|t=close|s={short_sym}"},
+            {"text": f"🎯 TP/SL", "callback_data": f"ai:tpsl|s={short_sym}"},
+        ])
+    
+    # Navigation
+    buttons.append([
+        {"text": "🔄 Yenile", "callback_data": "ai:pos|r=1"},
+        {"text": "🏠 Ana Sayfa", "callback_data": "ai:main"},
+        {"text": "💰 PnL", "callback_data": "ai:pnl"},
+    ])
+    
     return text, buttons
-

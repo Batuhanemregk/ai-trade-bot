@@ -21,6 +21,7 @@ from adapters.telegram.views import (
     build_pnl_view,
     build_settings_view,
     build_positions_view,
+    build_emergency_view,
 )
 from adapters.telegram.keyboards import build_keyboard
 from adapters.telegram.callback_registry import get_callback_registry
@@ -31,6 +32,9 @@ from adapters.telegram.middleware import (
     get_logging_middleware,
     get_metrics_hook,
 )
+from adapters.telegram.action_dispatcher import get_action_dispatcher
+from adapters.telegram.confirmation import get_confirmation_manager
+from adapters.telegram.user_settings import get_user_settings
 
 
 class TelegramHandlers:
@@ -54,6 +58,112 @@ class TelegramHandlers:
         self.error_handler = get_error_handler()
         self.logging_middleware = get_logging_middleware()
         self.metrics_hook = get_metrics_hook()
+        # Phase 1: Action routing components
+        self.action_dispatcher = get_action_dispatcher()
+        self.confirmation_manager = get_confirmation_manager()
+        self.user_settings = get_user_settings()
+    
+    async def _build_view(self, view_id: str, params: Dict[str, Any] = None) -> tuple:
+        """
+        Build a view by view_id.
+        
+        Args:
+            view_id: View identifier (main, settings, pos, etc.)
+            params: Optional parameters
+            
+        Returns:
+            Tuple of (text, buttons)
+        """
+        params = params or {}
+        user_id = params.get('u')
+        
+        # View ID to builder mapping
+        if view_id == 'main':
+            context = await self.context_resolver.resolve_main_context()
+            return build_main_view(context, self.formatter)
+        elif view_id in ['set', 'settings']:
+            context = await self.context_resolver.resolve_settings_context(user_id)
+            return build_settings_view(context, self.formatter)
+        elif view_id in ['pos', 'positions']:
+            context = await self.context_resolver.resolve_positions_context()
+            return build_positions_view(context, self.formatter)
+        elif view_id == 'sig':
+            context = await self.context_resolver.resolve_signals_context()
+            return build_signals_view(context, self.formatter)
+        elif view_id == 'risk':
+            context = await self.context_resolver.resolve_risk_context()
+            return build_risk_view(context, self.formatter)
+        elif view_id == 'orders':
+            context = await self.context_resolver.resolve_orders_context()
+            return build_orders_view(context, self.formatter)
+        elif view_id == 'pnl':
+            context = await self.context_resolver.resolve_pnl_context()
+            return build_pnl_view(context, self.formatter)
+        elif view_id == 'emg':
+            context = await self.context_resolver.resolve_emergency_context()
+            return build_emergency_view(context, self.formatter)
+        # Advanced settings views
+        elif view_id == 'adv':
+            from adapters.telegram.views.advanced import build_advanced_menu
+            context = {}
+            return build_advanced_menu(context, self.formatter)
+        elif view_id == 'adv_size':
+            from adapters.telegram.views.advanced import build_position_size_view
+            context = await self.context_resolver.resolve_position_size_context()
+            return build_position_size_view(context, self.formatter)
+        elif view_id == 'adv_coins':
+            from adapters.telegram.views.advanced import build_coins_menu
+            context = await self.context_resolver.resolve_coins_context()
+            return build_coins_menu(context, self.formatter)
+        elif view_id == 'adv_active':
+            from adapters.telegram.views.advanced import build_active_coins_view
+            context = await self.context_resolver.resolve_coins_context()
+            return build_active_coins_view(context, self.formatter)
+        elif view_id == 'adv_add':
+            from adapters.telegram.views.advanced import build_add_coins_menu
+            context = {}
+            return build_add_coins_menu(context, self.formatter)
+        elif view_id == 'adv_cat':
+            from adapters.telegram.views.advanced import build_coin_category_view
+            category = params.get('c', 'all')
+            context = await self.context_resolver.resolve_coin_category_context(category)
+            return build_coin_category_view(context, self.formatter)
+        elif view_id == 'adv_thresh':
+            from adapters.telegram.views.advanced import build_thresholds_view
+            context = await self.context_resolver.resolve_thresholds_context()
+            return build_thresholds_view(context, self.formatter)
+        elif view_id == 'adv_age':
+            from adapters.telegram.views.advanced import build_age_view
+            context = await self.context_resolver.resolve_age_context()
+            return build_age_view(context, self.formatter)
+        elif view_id == 'adv_weight':
+            from adapters.telegram.views.advanced import build_weights_view
+            context = await self.context_resolver.resolve_weights_context()
+            return build_weights_view(context, self.formatter)
+        elif view_id == 'adv_mlboost':
+            from adapters.telegram.views.advanced import build_ml_boost_view
+            context = await self.context_resolver.resolve_ml_boost_context()
+            return build_ml_boost_view(context, self.formatter)
+        # Signal history views
+        elif view_id == 'sig_hist':
+            from adapters.telegram.views.signals_history import build_signal_history_menu
+            context = await self.context_resolver.resolve_signal_history_context()
+            return build_signal_history_menu(context, self.formatter)
+        elif view_id == 'sig_coin':
+            from adapters.telegram.views.signals_history import build_coin_signals_view
+            symbol = params.get('s', '')
+            context = await self.context_resolver.resolve_coin_signals_context(symbol)
+            return build_coin_signals_view(context, self.formatter)
+        # Alerts view
+        elif view_id == 'alerts':
+            from adapters.telegram.views.alerts_history import build_alerts_view
+            level = params.get('l', None)
+            context = await self.context_resolver.resolve_alerts_context(level)
+            return build_alerts_view(context, self.formatter)
+        else:
+            # Default to main view
+            context = await self.context_resolver.resolve_main_context()
+            return build_main_view(context, self.formatter)
     
     def register_handlers(self, application):
         """
@@ -272,6 +382,20 @@ Use /start to view dashboard."""
                 self.metrics_hook.record_rate_limit()
                 return
             
+            # ═══════════════════════════════════════════════════════════
+            # ACTION ROUTING: ai:act|t=<action_type>|s=<symbol>|...
+            # ═══════════════════════════════════════════════════════════
+            if view_id == 'act':
+                await self._handle_action(query, user_id, params)
+                return
+            
+            # ═══════════════════════════════════════════════════════════
+            # CONFIRMATION ROUTING: ai:cfm|tok=<token>|a=<accept|reject>
+            # ═══════════════════════════════════════════════════════════
+            if view_id == 'cfm':
+                await self._handle_confirmation(query, user_id, params)
+                return
+            
             # Route to view builder
             text, buttons = await self._build_view(view_id, params)
             
@@ -358,42 +482,118 @@ Use /start to view dashboard."""
         
         return {'view': view, 'params': params}
     
-    async def _build_view(self, view_id: str, params: Dict[str, Any]) -> tuple[str, list]:
+    async def _handle_action(self, query, user_id: int, params: Dict[str, Any]):
         """
-        Build view text and buttons based on view ID.
+        Handle action callbacks (ai:act|t=<type>|s=<symbol>|...).
         
-        Args:
-            view_id: View ID (main, sig, risk, ord, tpsl, trl, pnl, set)
-            params: View parameters
-        
-        Returns:
-            Tuple of (text, buttons)
+        Actions:
+        - close: Close a position
+        - edit_sl: Edit stop loss
+        - edit_tp: Edit take profit
+        - cancel: Cancel an order
+        - toggle: Toggle a setting
+        - emergency: Emergency stop all
         """
-        view_id_map = {
-            'main': ('main', self.context_resolver.resolve_main_context, build_main_view),
-            'sig': ('signals', lambda: self.context_resolver.resolve_signals_context(limit=6, symbol_filter=params.get('sym')), build_signals_view),
-            'risk': ('risk', self.context_resolver.resolve_risk_context, build_risk_view),
-            'ord': ('orders', lambda: self.context_resolver.resolve_orders_context(page=int(params.get('p', 0))), build_orders_view),
-            'tpsl': ('tpsl', self.context_resolver.resolve_tpsl_context, build_tpsl_view),
-            'trl': ('trailing', self.context_resolver.resolve_trailing_context, build_trailing_view),
-            'pnl': ('pnl', self.context_resolver.resolve_pnl_context, build_pnl_view),
-            'set': ('settings', lambda: self.context_resolver.resolve_settings_context(user_id=None), build_settings_view),
-            'pos': ('positions', self.context_resolver.resolve_positions_context, build_positions_view),
-        }
+        action_type = params.get('t', '')
+        symbol = params.get('s', '')
         
-        if view_id not in view_id_map:
-            # Default to main
-            view_id = 'main'
+        # Check if action needs confirmation
+        needs_confirm = self.action_dispatcher.needs_confirmation(action_type)
         
-        view_name, context_resolver, view_builder = view_id_map[view_id]
+        if needs_confirm:
+            # Request confirmation first
+            confirm_text, confirm_buttons = self.confirmation_manager.request_confirmation(
+                action_type=action_type,
+                symbol=symbol,
+                params=params,
+                user_id=user_id
+            )
+            keyboard = build_keyboard(confirm_buttons)
+            await query.edit_message_text(
+                confirm_text,
+                reply_markup=keyboard,
+                parse_mode='HTML'
+            )
+            return
         
-        # Resolve context
-        context = await context_resolver()
+        # Execute action directly - params dict contains symbol and user_id
+        params['u'] = user_id  # Add user_id to params
+        result = await self.action_dispatcher.dispatch(action_type, params)
         
-        # Build view
-        text, buttons = view_builder(context, self.formatter)
+        # Determine which view to return to
+        next_view = result.next_view if result.next_view else params.get('back', 'main')
         
-        return text, buttons
+        # If action has next_view, redirect there with fresh data
+        # For actions that require restart, show the message first
+        if result.success and 'Restart' in result.message:
+            # Show restart warning message with continue button
+            text = f"✅ {result.message}"
+            buttons = [[{'text': '◀️ Ayarlara Dön', 'callback_data': 'ai:set|r=1'}]]
+            keyboard = build_keyboard(buttons)
+            await query.edit_message_text(text, reply_markup=keyboard, parse_mode='HTML')
+        elif result.success and next_view in ['settings', 'main', 'pos', 'positions']:
+            # Build the target view directly
+            text, buttons = await self._build_view(next_view if next_view != 'positions' else 'pos', {'r': '1'})
+            keyboard = build_keyboard(buttons)
+            await query.edit_message_text(text, reply_markup=keyboard, parse_mode='HTML')
+        else:
+            # Build response with back button
+            if result.success:
+                text = f"✅ {result.message}"
+            else:
+                text = f"❌ {result.message}"
+            
+            buttons = [[{'text': '◀️ Geri', 'callback_data': f'ai:{next_view}'}]]
+            keyboard = build_keyboard(buttons)
+            await query.edit_message_text(text, reply_markup=keyboard, parse_mode='HTML')
+        
+        # Log action
+        self.logger.info(f"Action executed: {action_type} {symbol} -> {result.success}")
+        self.metrics_hook.record_callback('action', action_type, success=result.success)
+    
+    async def _handle_confirmation(self, query, user_id: int, params: Dict[str, Any]):
+        """
+        Handle confirmation callbacks (ai:cfm|tok=<token>|a=<accept|reject>).
+        """
+        token = params.get('tok', '')
+        action = params.get('a', 'reject')  # accept or reject
+        
+        if action == 'accept':
+            # Validate and execute the confirmed action
+            pending = self.confirmation_manager.validate_token(token, user_id)
+            
+            if pending is None:
+                await query.edit_message_text(
+                    "❌ Onay süresi doldu veya geçersiz token.",
+                    parse_mode='HTML'
+                )
+                return
+            
+            # Execute the action
+            result = await self.action_dispatcher.dispatch(
+                pending['action_type'],
+                pending['symbol'],
+                pending['params'],
+                user_id
+            )
+            
+            if result.success:
+                text = f"✅ {result.message}"
+            else:
+                text = f"❌ {result.message}"
+            
+            back_view = pending['params'].get('back', 'pos')
+            buttons = [[{'text': '◀️ Geri', 'callback': f'ai:{back_view}'}]]
+            keyboard = build_keyboard(buttons)
+            
+            await query.edit_message_text(text, reply_markup=keyboard, parse_mode='HTML')
+            
+        else:
+            # Rejected - go back
+            back_view = params.get('back', 'pos')
+            text, buttons = await self._build_view(back_view, {})
+            keyboard = build_keyboard(buttons)
+            await query.edit_message_text(text, reply_markup=keyboard, parse_mode='HTML')
 
 
 # Global instance

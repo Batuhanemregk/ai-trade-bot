@@ -62,8 +62,9 @@ class PositionMonitor:
         self.max_position_age_hours = policy['trading']['scoring']['risk_management']['max_position_age_hours']
         self.pnl_alert_threshold = config.get('pnl_alert_threshold', 0.02)  # 2% PnL change
         
-        # Initialize enhanced components
-        self.state_manager = PositionStateManager(policy)
+        # Initialize enhanced components - USE SINGLETON for consistent state
+        from application.position_state_manager import get_state_manager
+        self.state_manager = get_state_manager(policy)
         self.reversal_manager = ReversalManager(policy)
         
         logger.info("Enhanced Position Monitor initialized with state management and reversal logic")
@@ -187,6 +188,18 @@ class PositionMonitor:
                 # Check trailing stops
                 await self._check_trailing_stops(symbol, position, current_price)
                 
+                # Check partial take profit levels
+                await self._check_partial_tp(symbol, position, current_price)
+                
+                # Check time-based exit
+                await self._check_time_exit(symbol, position)
+                
+                # Check TP/SL health (orders exist)
+                await self._check_tpsl_health(symbol, position)
+                
+                # Dynamically adjust TP/SL based on volatility changes
+                await self._adjust_tpsl_for_volatility(symbol, position, current_price)
+                
                 # Check if PnL change is significant
                 pnl_change = abs(position.unrealized_pnl - old_pnl)
                 if pnl_change > (position.entry_price * position.size * self.pnl_alert_threshold):
@@ -236,6 +249,11 @@ class PositionMonitor:
     async def _check_trailing_stops(self, symbol: str, position: Position, current_price: float):
         """Check and update trailing stops."""
         try:
+            # Check if trailing stops are enabled in policy
+            trailing_config = self.policy.get('trading', {}).get('scoring', {}).get('trailing', {})
+            if not trailing_config.get('enabled', False):
+                return
+            
             metrics = self.position_metrics.get(symbol, {})
             r_multiple = metrics.get('r_multiple', 0.0)
             
@@ -694,3 +712,302 @@ class PositionMonitor:
     async def get_position_info(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Get position information for a specific symbol."""
         return self.get_position_details(symbol)
+    
+    # ==================== PARTIAL TAKE PROFIT ====================
+    
+    async def _check_partial_tp(self, symbol: str, position: Position, current_price: float):
+        """Check and execute partial take profit levels."""
+        try:
+            partial_tp_config = self.policy.get('trading', {}).get('scoring', {}).get('partial_tp', {})
+            if not partial_tp_config.get('enabled', False):
+                return
+            
+            metrics = self.position_metrics.get(symbol, {})
+            r_multiple = metrics.get('r_multiple', 0.0)
+            
+            # Track filled levels per symbol
+            if symbol not in hasattr(self, '_partial_tp_filled'):
+                self._partial_tp_filled = {}
+            if symbol not in self._partial_tp_filled:
+                self._partial_tp_filled[symbol] = set()
+            
+            filled_levels = self._partial_tp_filled[symbol]
+            levels = partial_tp_config.get('levels', [])
+            
+            for level in levels:
+                level_r = level.get('r_multiple', 0)
+                close_pct = level.get('close_pct', 0)
+                
+                # Skip if already filled this level
+                if level_r in filled_levels:
+                    continue
+                
+                # Check if R-multiple reached this level
+                if r_multiple >= level_r:
+                    logger.info(f"[PARTIAL-TP] {symbol}: R={r_multiple:.2f} reached level {level_r}R, closing {close_pct*100:.0f}%")
+                    
+                    # Calculate amount to close
+                    close_amount = position.size * close_pct
+                    
+                    # Execute partial close
+                    await self._execute_partial_close(symbol, position, close_amount, level_r)
+                    
+                    # Mark level as filled
+                    filled_levels.add(level_r)
+                    
+        except Exception as e:
+            logger.error(f"Failed to check partial TP for {symbol}: {e}")
+    
+    async def _execute_partial_close(self, symbol: str, position: Position, close_amount: float, level_r: float):
+        """Execute partial position close."""
+        try:
+            close_side = 'buy' if position.side == 'short' else 'sell'
+            
+            logger.info(f"[PARTIAL-TP] Executing: {symbol} close {close_amount:.4f} at {level_r}R")
+            
+            result = await self.exchange_adapter.create_market_order(
+                symbol=symbol,
+                side=close_side,
+                amount=close_amount,
+                params={'reduceOnly': True}
+            )
+            
+            logger.info(f"✅ [PARTIAL-TP] {symbol}: Closed {close_amount:.4f} at {level_r}R (order: {result.get('id', 'N/A')})")
+            
+        except Exception as e:
+            logger.error(f"❌ [PARTIAL-TP] Failed to execute partial close for {symbol}: {e}")
+    
+    # ==================== TIME-BASED EXIT ====================
+    
+    async def _check_time_exit(self, symbol: str, position: Position):
+        """Check if position should be closed due to age."""
+        try:
+            time_exit_config = self.policy.get('trading', {}).get('scoring', {}).get('time_exit', {})
+            if not time_exit_config.get('enabled', False):
+                return
+            
+            max_age_hours = time_exit_config.get('max_position_age_hours', 24)
+            warning_hours = time_exit_config.get('warning_hours', 20)
+            action = time_exit_config.get('stale_position_action', 'close')
+            
+            # Calculate position age
+            if hasattr(position, 'timestamp') and position.timestamp:
+                position_age = datetime.now() - position.timestamp
+                age_hours = position_age.total_seconds() / 3600
+            else:
+                return  # Can't determine age
+            
+            # Check warning threshold
+            if age_hours >= warning_hours and age_hours < max_age_hours:
+                if not hasattr(self, '_time_exit_warned'):
+                    self._time_exit_warned = set()
+                if symbol not in self._time_exit_warned:
+                    logger.warning(f"⚠️ [TIME-EXIT] {symbol}: Position age {age_hours:.1f}h, will close at {max_age_hours}h")
+                    self._time_exit_warned.add(symbol)
+            
+            # Check exit threshold
+            if age_hours >= max_age_hours:
+                logger.info(f"🕐 [TIME-EXIT] {symbol}: Position age {age_hours:.1f}h >= {max_age_hours}h, action={action}")
+                
+                if action == 'close':
+                    await self._execute_time_exit(symbol, position)
+                elif action == 'reduce':
+                    # Close 50% of position
+                    await self._execute_partial_close(symbol, position, position.size * 0.5, 0)
+                elif action == 'alert':
+                    logger.warning(f"🔔 [TIME-EXIT] ALERT: {symbol} stale position ({age_hours:.1f}h)")
+                    
+        except Exception as e:
+            logger.error(f"Failed to check time exit for {symbol}: {e}")
+    
+    async def _execute_time_exit(self, symbol: str, position: Position):
+        """Execute time-based position close."""
+        try:
+            close_side = 'buy' if position.side == 'short' else 'sell'
+            
+            logger.info(f"🕐 [TIME-EXIT] Closing stale position: {symbol} {position.size}")
+            
+            result = await self.exchange_adapter.create_market_order(
+                symbol=symbol,
+                side=close_side,
+                amount=position.size,
+                params={'reduceOnly': True}
+            )
+            
+            logger.info(f"✅ [TIME-EXIT] {symbol}: Position closed (order: {result.get('id', 'N/A')})")
+            
+            # Clean up warning set
+            if hasattr(self, '_time_exit_warned') and symbol in self._time_exit_warned:
+                self._time_exit_warned.remove(symbol)
+                
+        except Exception as e:
+            logger.error(f"❌ [TIME-EXIT] Failed to close stale position {symbol}: {e}")
+    
+    # ==================== TP/SL HEALTH CHECK ====================
+    
+    async def _check_tpsl_health(self, symbol: str, position: Position):
+        """Check if TP and SL orders exist for position, recreate if missing."""
+        try:
+            # Get open orders for this symbol
+            if hasattr(self.exchange_adapter, 'fetch_open_orders'):
+                orders = await self.exchange_adapter.fetch_open_orders(symbol)
+            else:
+                orders = await self.exchange_adapter.ccxt_client.fetch_open_orders(symbol)
+            
+            # Check for TP and SL orders
+            has_tp = any(o.get('type', '').lower() in ['take_profit', 'limit'] or 'tp' in o.get('clientOrderId', '').lower() for o in orders)
+            has_sl = any(o.get('type', '').lower() in ['stop_loss', 'stop'] or 'sl' in o.get('clientOrderId', '').lower() for o in orders)
+            
+            if not has_tp or not has_sl:
+                logger.warning(f"⚠️ [HEALTH] {symbol}: Missing TP={not has_tp}, SL={not has_sl}")
+                
+                # Recreate missing orders using ATR-based calculation
+                await self._recreate_missing_tpsl(symbol, position, has_tp, has_sl)
+                
+        except Exception as e:
+            logger.error(f"Failed to check TP/SL health for {symbol}: {e}")
+    
+    async def _recreate_missing_tpsl(self, symbol: str, position: Position, has_tp: bool, has_sl: bool):
+        """Recreate missing TP or SL orders."""
+        try:
+            entry_price = position.entry_price
+            current_price = position.current_price
+            
+            # Calculate ATR-based levels (fallback to 3% TP, 1.5% SL)
+            if position.side == 'long':
+                tp_price = entry_price * 1.03  # 3% profit
+                sl_price = entry_price * 0.985  # 1.5% loss
+            else:  # short
+                tp_price = entry_price * 0.97  # 3% profit
+                sl_price = entry_price * 1.015  # 1.5% loss
+            
+            close_side = 'buy' if position.side == 'short' else 'sell'
+            
+            if not has_tp:
+                logger.info(f"🔧 [HEALTH] Recreating TP order for {symbol} at {tp_price}")
+                try:
+                    await self.exchange_adapter.create_order(
+                        symbol=symbol,
+                        order_type='limit',
+                        side=close_side,
+                        amount=position.size,
+                        price=tp_price,
+                        params={'reduceOnly': True}
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to recreate TP: {e}")
+            
+            if not has_sl:
+                logger.info(f"🔧 [HEALTH] Recreating SL order for {symbol} at {sl_price}")
+                try:
+                    # Use trigger order for stop loss
+                    await self.exchange_adapter.create_order(
+                        symbol=symbol,
+                        order_type='stop',
+                        side=close_side,
+                        amount=position.size,
+                        price=sl_price,
+                        params={'reduceOnly': True, 'stopPrice': sl_price}
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to recreate SL: {e}")
+                    
+        except Exception as e:
+            logger.error(f"Failed to recreate TP/SL for {symbol}: {e}")
+    
+    # ==================== OCO CLEANUP (ORPHAN ORDERS) ====================
+    
+    async def cleanup_orphan_orders(self):
+        """Cancel orders that don't have corresponding positions (orphan orders)."""
+        try:
+            logger.info("🧹 [OCO-CLEANUP] Checking for orphan orders...")
+            
+            # Get all open orders
+            if hasattr(self.exchange_adapter, 'fetch_open_orders'):
+                all_orders = await self.exchange_adapter.fetch_open_orders()
+            else:
+                all_orders = await self.exchange_adapter.ccxt_client.fetch_open_orders()
+            
+            # Get all open positions
+            if hasattr(self.exchange_adapter, 'fetch_positions'):
+                positions = await self.exchange_adapter.fetch_positions()
+            else:
+                positions = await self.exchange_adapter.ccxt_client.fetch_positions()
+            
+            # Get symbols with real positions
+            position_symbols = set()
+            for pos in positions:
+                contracts = float(pos.get('contracts', 0) or pos.get('info', {}).get('pos', 0) or 0)
+                if contracts != 0:
+                    pos_symbol = pos.get('symbol', '') or pos.get('info', {}).get('instId', '')
+                    # Normalize symbol
+                    pos_symbol_normalized = pos_symbol.replace('/', '-').replace(':USDT', '-SWAP').replace(':USD', '-SWAP')
+                    position_symbols.add(pos_symbol_normalized)
+                    position_symbols.add(pos_symbol)
+            
+            # Find and cancel orphan orders
+            cancelled = 0
+            for order in all_orders:
+                order_symbol = order.get('symbol', '') or order.get('info', {}).get('instId', '')
+                order_symbol_normalized = order_symbol.replace('/', '-').replace(':USDT', '-SWAP').replace(':USD', '-SWAP')
+                
+                # Check if order has no corresponding position
+                if order_symbol not in position_symbols and order_symbol_normalized not in position_symbols:
+                    order_id = order.get('id', order.get('info', {}).get('ordId', ''))
+                    logger.info(f"🧹 [OCO-CLEANUP] Cancelling orphan order: {order_symbol} ID={order_id}")
+                    
+                    try:
+                        await self.exchange_adapter.cancel_order(order_id, order_symbol)
+                        cancelled += 1
+                    except Exception as e:
+                        logger.warning(f"Failed to cancel orphan order {order_id}: {e}")
+            
+            if cancelled > 0:
+                logger.info(f"✅ [OCO-CLEANUP] Cancelled {cancelled} orphan orders")
+            else:
+                logger.debug("[OCO-CLEANUP] No orphan orders found")
+                
+        except Exception as e:
+            logger.error(f"Failed to cleanup orphan orders: {e}")
+    
+    # ==================== DYNAMIC TP/SL ADJUSTMENT ====================
+    
+    async def _adjust_tpsl_for_volatility(self, symbol: str, position: Position, current_price: float):
+        """Adjust TP/SL levels based on current volatility changes."""
+        try:
+            # Features are directly under trading, not trading.scoring
+            dynamic_tpsl_config = self.policy.get('trading', {}).get('dynamic_tpsl', {})
+            if not dynamic_tpsl_config.get('enabled', False):
+                return
+            
+            # Track volatility changes
+            if not hasattr(self, '_last_volatility'):
+                self._last_volatility = {}
+            
+            # Get current ATR/volatility from exchange
+            try:
+                ticker = await self.exchange_adapter.fetch_ticker(symbol)
+                current_volatility = abs(ticker.get('percentage', 0)) / 100  # Daily % change
+            except:
+                return
+            
+            last_vol = self._last_volatility.get(symbol, current_volatility)
+            vol_change = abs(current_volatility - last_vol) / (last_vol + 0.0001)
+            
+            # If volatility changed significantly (>20%), adjust TP/SL
+            if vol_change > 0.20:
+                logger.info(f"📊 [DYNAMIC-TPSL] {symbol}: Volatility changed {vol_change:.1%}, considering TP/SL adjustment")
+                
+                # Update volatility tracking
+                self._last_volatility[symbol] = current_volatility
+                
+                # For now, log the recommendation (actual adjustment requires order modification)
+                if current_volatility > last_vol:
+                    logger.info(f"💡 [DYNAMIC-TPSL] {symbol}: Volatility UP - consider widening TP/SL")
+                else:
+                    logger.info(f"💡 [DYNAMIC-TPSL] {symbol}: Volatility DOWN - consider tightening TP/SL")
+                    
+        except Exception as e:
+            logger.error(f"Failed to adjust TP/SL for volatility: {e}")
+
+

@@ -1,0 +1,33 @@
+2025-12-14 19:01:57.444 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: market_overview_15m (*/15 * * * *)
+2025-12-14 19:01:57.444 | INFO     | infrastructure.scheduler:register_job:477 - Registered job: health_check_5m (*/5 * * * *)
+2025-12-14 19:01:57.473 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 19:01:57.474 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-14 19:01:57.474 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-14 19:01:57.484 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+
+=== ETH/USDT:USDT (price=$3100) ===
+2025-12-14 19:01:57.509 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 19:02:00.292 | DEBUG    | execution.prevalidation:compute_required_amount:134 - [CTVAL-DEBUG] ETH/USDT:USDT: amount_min=0.01, ctVal=0.1, info keys=['alias', 'auctionEndTime', 'baseCcy', 'category', 'contTdSwTime']
+2025-12-14 19:02:00.292 | INFO     | execution.prevalidation:compute_required_amount:142 - \U0001f4ca ETH/USDT:USDT ctVal adjustment: 0.01 Î 0.1 = 0.001
+  amount_min: 0.001
+  amount_step: 0.01
+  required_amount: 0.01
+  raw_info: {'minSz': '0.01', 'lotSz': '0.01'}
+
+=== BTC/USDT:USDT (price=$90000) ===
+2025-12-14 19:02:00.317 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 19:02:00.317 | DEBUG    | execution.prevalidation:compute_required_amount:134 - [CTVAL-DEBUG] BTC/USDT:USDT: amount_min=0.01, ctVal=0.01, info keys=['alias', 'auctionEndTime', 'baseCcy', 'category', 'contTdSwTime']
+2025-12-14 19:02:00.318 | INFO     | execution.prevalidation:compute_required_amount:142 - \U0001f4ca BTC/USDT:USDT ctVal adjustment: 0.01 Î 0.01 = 0.0001
+  amount_min: 0.0001
+  amount_step: 0.01
+  required_amount: 0.01
+  raw_info: {'minSz': '0.01', 'lotSz': '0.01'}
+
+=== SOL/USDT:USDT (price=$130) ===
+2025-12-14 19:02:00.345 | INFO     | infrastructure.bootstrap:load_policy:108 - Loaded policy from configs/policy.yaml
+2025-12-14 19:02:00.345 | DEBUG    | execution.prevalidation:compute_required_amount:134 - [CTVAL-DEBUG] SOL/USDT:USDT: amount_min=0.01, ctVal=1, info keys=['alias', 'auctionEndTime', 'baseCcy', 'category', 'contTdSwTime']
+  amount_min: 0.01
+  amount_step: 0.01
+  required_amount: 0.01
+  raw_info: {'minSz': '0.01', 'lotSz': '0.01'}
+2025-12-14 19:02:00.607 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed

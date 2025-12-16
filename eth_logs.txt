@@ -1,0 +1,30 @@
+2025-12-14 17:30:20.610 | DEBUG    | monitoring.prometheus_exporter:update_scores:537 - Updated scores for ETH-USDT-SWAP: composite=38.2
+2025-12-14 17:30:20.610 | INFO     | application.jobs.trading_analysis:_process_symbol:422 - [ACTION] ETH-USDT-SWAP: transition=OPEN_SHORT from=READY to=SHORT_OPEN
+2025-12-14 17:30:20.610 | INFO     | application.jobs.trading_analysis:_process_symbol:433 - 🚀 ETH-USDT-SWAP: Opening SHORT position (from=READY)
+2025-12-14 17:30:20.610 | INFO     | application.protection_guards:comprehensive_check:317 - [GUARDS] All protection checks passed for ETH-USDT-SWAP short
+2025-12-14 17:30:20.611 | INFO     | infrastructure.runtime:_execute_trade:740 - 📝 Generated client order ID: ETHH12141430
+2025-12-14 17:30:20.611 | INFO     | infrastructure.runtime:_execute_trade:743 - [ENTRY] sym=ETH-USDT-SWAP dir=short size=0.000000 px=0.000000 reason=score>=38.195 state=READY tf=15m bar=2025-12-14T14:30Z
+2025-12-14 17:30:20.919 | INFO     | infrastructure.runtime:_get_current_price:1399 - 📊 Real price for ETH-USDT-SWAP: 3091.61
+2025-12-14 17:30:21.949 | INFO     | infrastructure.runtime:_get_exchange_minimum_cost:1336 - 📊 ETH-USDT-SWAP minimum: 0.01 contracts × 0.1 ctVal = 0.001000 base = $3.09
+2025-12-14 17:30:21.976 | INFO     | infrastructure.runtime:_execute_trade:793 - [OKX-LIMITS] sym=ETH-USDT-SWAP min_cost=None, min_amount=0.01, step=0.01, px=3091.61, requested=0.00887807714082328, adjusted=0.01
+2025-12-14 17:30:21.977 | INFO     | infrastructure.runtime:_execute_trade:796 - [SIZE] sym=ETH-USDT-SWAP size_calc=0.01 min_notional=None final_qty=0.01
+2025-12-14 17:30:21.978 | INFO     | infrastructure.runtime:_execute_trade:853 - [ORDER] sym=ETH-USDT-SWAP clientId=ETHH12141430 side=sell amount=0.01 price=3091.61
+2025-12-14 17:30:22.004 | INFO     | infrastructure.runtime:_execute_trade:866 - ⚡ Setting leverage to 5x for ETH-USDT-SWAP
+2025-12-14 17:30:22.318 | INFO     | adapters.exchange_okx_ccxt:set_leverage:597 - [LEVERAGE] Set ETH-USDT-SWAP leverage to 5x
+2025-12-14 17:30:23.147 | INFO     | infrastructure.runtime:_execute_trade:877 - [ORDER] sym=ETH-USDT-SWAP clientId=ETHH12141430 status=SUCCESS ordId=3127951622298132480 filled=0
+2025-12-14 17:30:23.147 | INFO     | infrastructure.runtime:_execute_trade:926 - 📋 Entry order result: {'id': '3127951622298132480', 'status': None, 'symbol': 'ETH-USDT-SWAP', 'side': 'sell', 'type': 'market', 'amount': 0.01, 'price': None, 'clientOrderId': 'ETHH12141430'}
+2025-12-14 17:30:23.148 | INFO     | infrastructure.runtime:_create_oco_bracket:1614 - 🔗 Creating OCO bracket: symbol=ETH-USDT-SWAP TP=2998.8617 SL=3137.9841499999998 link=OCO_1765722623148
+2025-12-14 17:30:23.453 | INFO     | adapters.exchange_okx_ccxt:create_trigger_order:1127 - ✅ Trigger order created: TP_ETHH12141430 - BUY @ 2998.8617
+2025-12-14 17:30:23.770 | INFO     | adapters.exchange_okx_ccxt:create_trigger_order:1127 - ✅ Trigger order created: SL_ETHH12141430 - BUY @ 3137.9841499999998
+2025-12-14 17:30:23.770 | INFO     | infrastructure.runtime:_create_oco_bracket:1656 - [OCO-MAP] {'oco_link_id': 'OCO_1765722623148', 'tp_algo_id': '3127951632538177536', 'sl_algo_id': '3127951643107823616', 'symbol': 'ETH-USDT-SWAP', 'entry_client_id': 'ETHH12141430', 'created_at': '2025-12-14T14:30:23.770527+00:00', 'status': 'active'}
+2025-12-14 17:30:23.770 | INFO     | infrastructure.runtime:_execute_trade:947 - [OCO-BRACKET] sym=ETH-USDT-SWAP oco_link=OCO_1765722623148 tp_id=3127951632538177536 sl_id=3127951643107823616
+2025-12-14 17:30:23.771 | INFO     | application.position_state_manager:_apply_transition:359 - [STATE] ETH-USDT-SWAP: READY -> SHORT_OPEN action=OPEN_SHORT reason=Short signal: score=38.2 <= 48
+2025-12-14 17:30:23.771 | DEBUG    | application.jobs.trading_analysis:_process_symbol:450 - ✅ ETH-USDT-SWAP processed successfully
+2025-12-14 17:30:23.772 | DEBUG    | application.jobs.base_job:mark_bar_processed:98 - [BAR] tf=15m symbol=ETH-USDT-SWAP bar=2025-12-14T14:30:00+00:00 processed
+2025-12-14 17:30:24.173 | DEBUG    | application.jobs.trading_analysis:_sync_position_from_exchange:644 - [SYNC-CHECK] pos_raw=ETH/USDT:USDT pos_okx=ETH-USDT-SWAP pos_norm=ETH-USDT-SWAP target=SOL-USDT-SWAP match=False contracts=0.01
+2025-12-14 17:30:27.098 | DEBUG    | monitoring.prometheus_exporter:record_llm_cost:713 - Recorded LLM cost: $0.000079
+2025-12-14 17:30:27.098 | DEBUG    | monitoring.prometheus_exporter:record_llm_request:675 - Recorded LLM request: status=2xx, model=gpt-5-nano
+2025-12-14 17:30:27.098 | DEBUG    | monitoring.prometheus_exporter:record_llm_tokens:703 - Recorded LLM tokens: model=gpt-5-nano, req=1379, resp=49
+2025-12-14 17:30:27.099 | DEBUG    | monitoring.prometheus_exporter:record_news_items:735 - Recorded news items: count=17, sent_to_llm=True, reason=success
+2025-12-14 17:30:27.295 | DEBUG    | monitoring.prometheus_exporter:set_last_signal:640 - Updated last_signal metric: SOL-USDT-SWAP short score=37.5
+2025-12-14 17:30:27.295 | DEBUG    | monitoring.prometheus_exporter:update_scores:537 - Updated scores for SOL-USDT-SWAP: composite=37.5

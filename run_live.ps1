@@ -473,7 +473,7 @@ function Show-Menu {
         "1" { Start-TradingBot -Live }
         "2" { Start-TradingBot -DryRun }
         "3" { Start-TradingBot -Live -UseScheduler }
-        "4" { Start-TradingBot -Live -AutoRestart }
+        "4" { Start-TradingBot -Live -UseScheduler -AutoRestart }
         "5" { Test-Health; Read-Host "Press Enter to continue" }
         "6" { Watch-Logs }
         "7" { Stop-Bot; Read-Host "Press Enter to continue" }
