@@ -26,7 +26,7 @@ from application.jobs.regime_1h import Regime1hJob
 from application.jobs.risk_monitor import RiskMonitorJob
 from application.jobs.market_overview import MarketOverviewJob
 from application.jobs.news_incremental_5m import NewsIncremental5mJob
-from application.jobs.telegram_summary_15m import TelegramSummary15mJob
+# from application.jobs.telegram_summary_15m import TelegramSummary15mJob  # DISABLED
 from application.jobs.run_watchdog import RunWatchdog
 
 # Monitoring
@@ -169,7 +169,7 @@ class SchedulerRunner:
                 'risk_monitor': RiskMonitorJob(self.policy, self.semaphore, self.runtime_state),
                 'market_overview': MarketOverviewJob(self.policy, self.semaphore, self.runtime_state),
                 'news_incremental_5m': NewsIncremental5mJob(self.policy, self.semaphore, self.runtime_state),
-                'telegram_summary_15m': TelegramSummary15mJob(self.policy, self.semaphore, self.runtime_state),
+                # 'telegram_summary_15m': TelegramSummary15mJob(self.policy, self.semaphore, self.runtime_state),  # DISABLED
             }
             
             # Pass global adapters to jobs
@@ -257,16 +257,16 @@ class SchedulerRunner:
             second=3  # Align to 15m boundaries
         )
         
-        # Telegram Summary (15m)
-        self.scheduler.add_job(
-            self._execute_job,
-            CronTrigger.from_crontab(schedule_config['telegram_summary_15m'], timezone="Europe/Istanbul"),
-            args=['telegram_summary_15m'],
-            id='telegram_summary_15m',
-            name='Telegram Summary (15m)',
-            replace_existing=True,
-            second=11  # Align to 15m boundaries
-        )
+        # Telegram Summary (15m) - DISABLED
+        # self.scheduler.add_job(
+        #     self._execute_job,
+        #     CronTrigger.from_crontab(schedule_config.get('telegram_summary_15m', '*/15 * * * *'), timezone="Europe/Istanbul"),
+        #     args=['telegram_summary_15m'],
+        #     id='telegram_summary_15m',
+        #     name='Telegram Summary (15m)',
+        #     replace_existing=True,
+        #     second=11
+        # )
         
         logger.info("✅ All jobs registered with scheduler")
     

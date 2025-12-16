@@ -4,7 +4,6 @@ schedule:
   regime_1h: 0 * * * *
   risk_1m: '* * * * *'
   market_overview: '*/15 * * * *'
-  # telegram_summary_15m: '*/15 * * * *'  # DISABLED - market analysis summary cards
 scheduler:
   semaphore_limit: 2
   retry:
