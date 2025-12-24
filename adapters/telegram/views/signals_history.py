@@ -5,7 +5,7 @@ Shows per-coin signal history with TA, ML, Final scores.
 """
 
 from typing import Dict, Any, List, Tuple
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 def build_signal_history_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
@@ -25,35 +25,38 @@ def build_signal_history_menu(context: Dict[str, Any], formatter) -> Tuple[str, 
     lines = [
         "📊 <b>Sinyal Geçmişi</b>",
         "",
-        f"Toplam: <b>{stats.get('total_signals', 0)}</b> sinyal",
-        f"Coin sayısı: <b>{stats.get('symbols', 0)}</b>",
+        f"Toplam: <b>{stats.get('total_signals', 0)}</b> sinyal | <b>{stats.get('symbols', 0)}</b> coin",
         "",
         "<i>Görüntülemek için coin seçin:</i>",
     ]
     
-    # Build coin buttons (2 per row)
+    # Build coin buttons (5 per row, max 5 rows = 25 coins)
     buttons = []
     row = []
+    max_coin_rows = 5  # Limit to stay within 8 row telegram limit
+    
     for sym in symbols:
         # Shorten symbol name
         short = sym.replace('-USDT-SWAP', '').replace('USDT', '')
         count = stats.get('per_symbol', {}).get(sym, 0)
         
         row.append({
-            "text": f"{short} ({count})",
+            "text": f"{short}({count})",
             "callback_data": f"ai:sig_coin|s={sym}"
         })
         
-        if len(row) == 3:
+        if len(row) == 5:
             buttons.append(row)
             row = []
+            if len(buttons) >= max_coin_rows:
+                break
     
-    if row:
+    if row and len(buttons) < max_coin_rows:
         buttons.append(row)
     
     # Add action buttons
     buttons.append([
-        {"text": "🗑️ Tümünü Temizle", "callback_data": "ai:act|t=clear_all_sig"},
+        {"text": "🗑️ Temizle", "callback_data": "ai:act|t=clear_all_sig"},
         {"text": "🔄 Yenile", "callback_data": "ai:sig_hist"},
     ])
     buttons.append([
@@ -93,7 +96,13 @@ def build_coin_signals_view(context: Dict[str, Any], formatter) -> Tuple[str, Li
         lines.append("─" * 32)
         
         for sig in signals[:20]:  # Max 20 in view
-            time_str = sig['time'].strftime('%H:%M') if isinstance(sig['time'], datetime) else str(sig['time'])[:5]
+            # Convert UTC to Turkey time (UTC+3)
+            if isinstance(sig['time'], datetime):
+                turkey_tz = timezone(timedelta(hours=3))
+                local_time = sig['time'].astimezone(turkey_tz) if sig['time'].tzinfo else sig['time'].replace(tzinfo=timezone.utc).astimezone(turkey_tz)
+                time_str = local_time.strftime('%H:%M')
+            else:
+                time_str = str(sig['time'])[:5]
             ta = sig.get('ta', 0)
             ml = sig.get('ml', 0)
             final = sig.get('final', 0)

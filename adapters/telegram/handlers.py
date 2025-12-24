@@ -144,6 +144,10 @@ class TelegramHandlers:
             from adapters.telegram.views.advanced import build_ml_boost_view
             context = await self.context_resolver.resolve_ml_boost_context()
             return build_ml_boost_view(context, self.formatter)
+        elif view_id == 'adv_atr':
+            from adapters.telegram.views.advanced import build_atr_view
+            context = await self.context_resolver.resolve_atr_context()
+            return build_atr_view(context, self.formatter)
         # Signal history views
         elif view_id == 'sig_hist':
             from adapters.telegram.views.signals_history import build_signal_history_menu
@@ -151,7 +155,8 @@ class TelegramHandlers:
             return build_signal_history_menu(context, self.formatter)
         elif view_id == 'sig_coin':
             from adapters.telegram.views.signals_history import build_coin_signals_view
-            symbol = params.get('s', '')
+            # Support both 's' and 'sym' parameter names for compatibility
+            symbol = params.get('s', params.get('sym', ''))
             context = await self.context_resolver.resolve_coin_signals_context(symbol)
             return build_coin_signals_view(context, self.formatter)
         # Alerts view

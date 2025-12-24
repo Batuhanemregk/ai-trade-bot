@@ -66,6 +66,14 @@ class Trailing5mJob(BaseJob):
                 policy=self.policy
             )
             
+            # Initialize notification service for Telegram alerts
+            try:
+                from infrastructure.notification_service import NotificationService
+                self.notification_service = NotificationService()
+            except Exception as e:
+                logger.warning(f"⚠️ Notification service not available: {e}")
+                self.notification_service = None
+            
             logger.info("✅ Trailing5mJob initialized")
             
         except Exception as e:
@@ -381,6 +389,17 @@ class Trailing5mJob(BaseJob):
             if result.get('success'):
                 self.current_sl_orders[symbol] = result.get('algoId')
                 logger.info(f"✅ [TRAIL] {symbol} SL synced to OKX: {new_stop:.4f}")
+                
+                # Send Telegram notification
+                if self.notification_service:
+                    is_tight = r_multiple >= tight_r
+                    is_breakeven = r_multiple >= breakeven_r
+                    short_sym = symbol.replace('-USDT-SWAP', '')
+                    await self.notification_service.send_trailing_notification(
+                        symbol=short_sym,
+                        be_price=new_stop,
+                        tightened=is_tight
+                    )
             else:
                 logger.warning(f"⚠️ [TRAIL] {symbol} Failed to sync SL: {result.get('error')}")
             
@@ -433,6 +452,18 @@ class Trailing5mJob(BaseJob):
                         self.partial_tp_executed[symbol].append(i)
                         
                         logger.info(f"✅ [PARTIAL_TP] {symbol} Level {i+1} executed: {close_size:.4f} closed")
+                        
+                        # Send Telegram notification
+                        if self.notification_service:
+                            short_sym = symbol.replace('-USDT-SWAP', '')
+                            remaining = position['size'] - close_size
+                            pnl_estimate = close_size * current_price * (level_r * 0.02)  # Approximate
+                            await self.notification_service.send_exit_notification(
+                                symbol=short_sym,
+                                reason=f"Partial TP Lvl{i+1} ({close_pct*100:.0f}% @ {level_r}R)",
+                                pnl=pnl_estimate,
+                                r_multiple=r_multiple
+                            )
                     else:
                         logger.warning(f"⚠️ [PARTIAL_TP] {symbol} Level {i+1} failed: {result.get('error')}")
             
@@ -482,6 +513,16 @@ class Trailing5mJob(BaseJob):
                     
                     if result.get('id'):
                         logger.info(f"✅ [TIME_EXIT] {symbol} Force closed after {age_hours:.1f}h")
+                        
+                        # Send Telegram notification
+                        if self.notification_service:
+                            short_sym = symbol.replace('-USDT-SWAP', '')
+                            await self.notification_service.send_exit_notification(
+                                symbol=short_sym,
+                                reason=f"Time Exit ({age_hours:.1f}h)",
+                                pnl=0,  # PnL unknown at this point
+                                r_multiple=0
+                            )
                         
                         # Clean up tracking
                         if symbol in self.partial_tp_executed:

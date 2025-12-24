@@ -32,6 +32,13 @@ from application.jobs.run_watchdog import RunWatchdog
 # Monitoring
 from monitoring.prometheus_exporter import get_prometheus_exporter
 
+# Install alert history loguru sink early to capture all warnings/errors
+try:
+    from application.alert_history import install_loguru_sink
+    install_loguru_sink()
+except Exception as e:
+    logger.warning(f"Failed to install alert history sink: {e}")
+
 
 class SchedulerRunner:
     """Professional scheduler runner with production features."""
@@ -414,6 +421,9 @@ class SchedulerRunner:
             # Save final state
             await self._save_runtime_state()
             
+            # Close HTTP sessions to prevent warnings
+            await self._close_http_sessions()
+            
             # Shutdown scheduler
             if self.scheduler:
                 self.scheduler.shutdown(wait=True)
@@ -423,6 +433,26 @@ class SchedulerRunner:
             
         except Exception as e:
             logger.error(f"❌ Error during shutdown: {e}")
+    
+    async def _close_http_sessions(self):
+        """Close all HTTP client sessions to prevent 'Unclosed client session' warnings."""
+        # Close REST adapter session
+        try:
+            from adapters.exchange_okx_rest import _rest_adapter
+            if _rest_adapter is not None:
+                await _rest_adapter.close()
+                logger.debug("✅ Closed REST adapter session")
+        except Exception as e:
+            logger.debug(f"REST adapter close: {e}")
+        
+        # Close news API sessions
+        try:
+            from application.news_llm_analyzer import _news_client
+            if _news_client is not None:
+                await _news_client.close()
+                logger.debug("✅ Closed news API session")
+        except Exception as e:
+            logger.debug(f"News API close: {e}")
     
     def _setup_signal_handlers(self):
         """Setup signal handlers for graceful shutdown."""

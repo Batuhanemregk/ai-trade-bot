@@ -347,7 +347,7 @@ _logging_middleware: Optional[LoggingMiddleware] = None
 _metrics_hook: Optional[MetricsHook] = None
 
 
-def get_rate_limiter(max_requests: int = 10, window_seconds: int = 60) -> RateLimiter:
+def get_rate_limiter(max_requests: int = 60, window_seconds: int = 60) -> RateLimiter:
     """Get global rate limiter instance."""
     global _rate_limiter
     if _rate_limiter is None:

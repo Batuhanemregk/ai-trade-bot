@@ -126,11 +126,11 @@ class LogFormatter:
         if ta_features_count and ta_active_features:
             ta_features_str = f" ta_features={ta_active_features}/{ta_features_count}"
         
-        # Build enhanced line
+        # Build enhanced line (age removed - no longer used in gating)
         base_line = (
             f"ℹ️ {ts} | {symbol} | tf={tf} | "
             f"TA={ta:.1f} ML={ml:.1f} News={news:.1f} Risk={risk:.1f} | "
-            f"Final={final:.1f} ({grade}) | Dir={direction}{age_str} | "
+            f"Final={final:.1f} ({grade}) | Dir={direction} | "
             f"Gate={gate_status} (persist {persist})"
         )
         

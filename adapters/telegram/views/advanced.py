@@ -83,6 +83,9 @@ def build_advanced_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[L
             {"text": "🚀 ML Boost", "callback_data": "ai:adv_mlboost"},
         ],
         [
+            {"text": "🎯 ATR TP/SL", "callback_data": "ai:adv_atr"},
+        ],
+        [
             {"text": "◀️ Ayarlara Dön", "callback_data": "ai:set"},
         ],
     ]
@@ -91,28 +94,88 @@ def build_advanced_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[L
 
 
 def build_position_size_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
-    """Build position size settings view."""
-    min_pct = context.get('min_percentage', 0.01)
-    max_pct = context.get('max_percentage', 0.10)
+    """Build tier-based position sizing view - adjusts actual values used by runtime."""
+    # Current tier values from policy (trading.scoring.position_sizing.tiers)
+    tiers = context.get('tiers', {})
+    weak_pct = tiers.get('weak', {}).get('position_pct', 0.02)
+    medium_pct = tiers.get('medium', {}).get('position_pct', 0.04)
+    strong_pct = tiers.get('strong', {}).get('position_pct', 0.06)
+    extreme_pct = tiers.get('extreme', {}).get('position_pct', 0.08)
+    
+    # Pending values (from session)
+    pending = context.get('pending_tiers', {})
+    p_weak = pending.get('weak', weak_pct)
+    p_medium = pending.get('medium', medium_pct)
+    p_strong = pending.get('strong', strong_pct)
+    p_extreme = pending.get('extreme', extreme_pct)
+    
+    # Check for pending changes
+    has_changes = bool(pending) and (
+        p_weak != weak_pct or p_medium != medium_pct or 
+        p_strong != strong_pct or p_extreme != extreme_pct
+    )
+    
+    # Display percentages
+    d_weak = int(p_weak * 100)
+    d_medium = int(p_medium * 100)
+    d_strong = int(p_strong * 100)
+    d_extreme = int(p_extreme * 100)
+    
+    status = "📝 Değişiklikler bekliyor..." if has_changes else "✅ Kayıtlı"
     
     lines = [
-        "📊 <b>Pozisyon Boyutu Ayarları</b>",
+        "📊 <b>Pozisyon Boyutu (Tier-Based)</b>",
         "",
-        f"Min: <b>{min_pct*100:.0f}%</b>",
-        f"Max: <b>{max_pct*100:.0f}%</b>",
+        "Sinyal gücüne göre pozisyon yüzdesi:",
         "",
-        "Değiştirmek için butona basın:",
+        f"🟢 Weak:    <b>{d_weak}%</b>  (strength 0.0-0.3)",
+        f"🟡 Medium:  <b>{d_medium}%</b>  (strength 0.3-0.5)",
+        f"🟠 Strong:  <b>{d_strong}%</b>  (strength 0.5-0.7)",
+        f"🔴 Extreme: <b>{d_extreme}%</b>  (strength 0.7-1.0)",
+        "",
+        f"<i>{status}</i>",
     ]
     
-    # Min buttons
-    min_buttons = [{"text": f"Min {p}%", "callback_data": f"ai:act|t=set_min_size|v={p}"} for p in [1, 2, 3, 5]]
-    max_buttons = [{"text": f"Max {p}%", "callback_data": f"ai:act|t=set_max_size|v={p}"} for p in [5, 10, 15, 20]]
-    
+    # +/- 1% buttons for each tier
     buttons = [
-        min_buttons,
-        max_buttons,
-        [{"text": "◀️ Geri", "callback_data": "ai:adv"}],
+        # Weak row
+        [
+            {"text": "🟢 Weak", "callback_data": "ai:noop"},
+            {"text": "◀ -1%", "callback_data": "ai:act|t=adj_tier|k=weak|d=down"},
+            {"text": f"{d_weak}%", "callback_data": "ai:noop"},
+            {"text": "+1% ▶", "callback_data": "ai:act|t=adj_tier|k=weak|d=up"},
+        ],
+        # Medium row
+        [
+            {"text": "🟡 Medium", "callback_data": "ai:noop"},
+            {"text": "◀ -1%", "callback_data": "ai:act|t=adj_tier|k=medium|d=down"},
+            {"text": f"{d_medium}%", "callback_data": "ai:noop"},
+            {"text": "+1% ▶", "callback_data": "ai:act|t=adj_tier|k=medium|d=up"},
+        ],
+        # Strong row
+        [
+            {"text": "🟠 Strong", "callback_data": "ai:noop"},
+            {"text": "◀ -1%", "callback_data": "ai:act|t=adj_tier|k=strong|d=down"},
+            {"text": f"{d_strong}%", "callback_data": "ai:noop"},
+            {"text": "+1% ▶", "callback_data": "ai:act|t=adj_tier|k=strong|d=up"},
+        ],
+        # Extreme row
+        [
+            {"text": "🔴 Extreme", "callback_data": "ai:noop"},
+            {"text": "◀ -1%", "callback_data": "ai:act|t=adj_tier|k=extreme|d=down"},
+            {"text": f"{d_extreme}%", "callback_data": "ai:noop"},
+            {"text": "+1% ▶", "callback_data": "ai:act|t=adj_tier|k=extreme|d=up"},
+        ],
     ]
+    
+    # Save/Cancel if pending
+    if has_changes:
+        buttons.append([
+            {"text": "✅ Kaydet", "callback_data": "ai:act|t=save_tiers"},
+            {"text": "❌ İptal", "callback_data": "ai:act|t=cancel_tiers"},
+        ])
+    
+    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons
 
@@ -150,14 +213,21 @@ def build_active_coins_view(context: Dict[str, Any], formatter) -> Tuple[str, Li
     lines = [
         "📋 <b>Aktif Coinler</b>",
         "",
+        f"Toplam: {len(active_coins)} coin",
         "Kaldırmak için butona basın:",
-        "",
     ]
     
+    # Group coins into rows of 4 to respect 8 row limit
     buttons = []
+    row = []
     for coin in active_coins:
         base = coin.split('-')[0]
-        buttons.append([{"text": f"❌ {base}", "callback_data": f"ai:act|t=remove_coin|s={coin}"}])
+        row.append({"text": f"❌ {base}", "callback_data": f"ai:act|t=remove_coin|s={coin}"})
+        if len(row) == 4:
+            buttons.append(row)
+            row = []
+    if row:
+        buttons.append(row)
     
     buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv_coins"}])
     
@@ -174,13 +244,19 @@ def build_add_coins_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[
     ]
     
     buttons = [
-        # Dynamic categories
+        # Dynamic categories - row 1
         [
             {"text": "📈 Top Hacim", "callback_data": "ai:adv_cat|c=volume"},
             {"text": "🔥 Trending", "callback_data": "ai:adv_cat|c=trending"},
         ],
+        # Dynamic categories - row 2
         [
+            {"text": "📈 Top Gainers", "callback_data": "ai:adv_cat|c=gainers"},
             {"text": "📉 Düşenler", "callback_data": "ai:adv_cat|c=losers"},
+        ],
+        # Dynamic categories - row 3
+        [
+            {"text": "🆕 New Listings", "callback_data": "ai:adv_cat|c=new_listings"},
             {"text": "💰 Tüm Coinler", "callback_data": "ai:adv_cat|c=all"},
         ],
         # Static categories - row 1
@@ -244,41 +320,75 @@ def build_coin_category_view(context: Dict[str, Any], formatter) -> Tuple[str, L
 
 
 def build_thresholds_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
-    """Build thresholds settings view."""
+    """Build thresholds settings view with preview mode."""
+    # Current saved values
     enter_long = context.get('enter_long', 52)
     exit_long = context.get('exit_long', 40)
     enter_short = context.get('enter_short', 48)
     exit_short = context.get('exit_short', 60)
     
+    # Pending values
+    pending = context.get('pending_thresh', {})
+    p_el = pending.get('enter_long', enter_long)
+    p_xl = pending.get('exit_long', exit_long)
+    p_es = pending.get('enter_short', enter_short)
+    p_xs = pending.get('exit_short', exit_short)
+    
+    # Check for pending changes
+    has_changes = bool(pending) and (
+        p_el != enter_long or p_xl != exit_long or 
+        p_es != enter_short or p_xs != exit_short
+    )
+    
+    status = "📝 Değişiklikler bekliyor..." if has_changes else "✅ Kayıtlı"
+    
     lines = [
         "📈 <b>Threshold Ayarları</b>",
         "",
-        f"LONG Giriş: <b>{enter_long}</b>",
-        f"LONG Çıkış: <b>{exit_long}</b>",
-        f"SHORT Giriş: <b>{enter_short}</b>",
-        f"SHORT Çıkış: <b>{exit_short}</b>",
+        f"LONG Giriş: <b>{p_el}</b>",
+        f"LONG Çıkış: <b>{p_xl}</b>",
+        f"SHORT Giriş: <b>{p_es}</b>",
+        f"SHORT Çıkış: <b>{p_xs}</b>",
         "",
+        f"<i>{status}</i>",
     ]
     
+    # +/- buttons for each threshold (adj_thresh for preview)
     buttons = [
         [
-            {"text": f"↑ Long Giriş", "callback_data": "ai:act|t=set_thresh|k=enter_long|d=up"},
-            {"text": f"↓ Long Giriş", "callback_data": "ai:act|t=set_thresh|k=enter_long|d=down"},
+            {"text": "L.Giriş", "callback_data": "ai:noop"},
+            {"text": "◀ -2", "callback_data": "ai:act|t=adj_thresh|k=enter_long|d=down"},
+            {"text": f"{p_el}", "callback_data": "ai:noop"},
+            {"text": "+2 ▶", "callback_data": "ai:act|t=adj_thresh|k=enter_long|d=up"},
         ],
         [
-            {"text": f"↑ Long Çıkış", "callback_data": "ai:act|t=set_thresh|k=exit_long|d=up"},
-            {"text": f"↓ Long Çıkış", "callback_data": "ai:act|t=set_thresh|k=exit_long|d=down"},
+            {"text": "L.Çıkış", "callback_data": "ai:noop"},
+            {"text": "◀ -2", "callback_data": "ai:act|t=adj_thresh|k=exit_long|d=down"},
+            {"text": f"{p_xl}", "callback_data": "ai:noop"},
+            {"text": "+2 ▶", "callback_data": "ai:act|t=adj_thresh|k=exit_long|d=up"},
         ],
         [
-            {"text": f"↑ Short Giriş", "callback_data": "ai:act|t=set_thresh|k=enter_short|d=up"},
-            {"text": f"↓ Short Giriş", "callback_data": "ai:act|t=set_thresh|k=enter_short|d=down"},
+            {"text": "S.Giriş", "callback_data": "ai:noop"},
+            {"text": "◀ -2", "callback_data": "ai:act|t=adj_thresh|k=enter_short|d=down"},
+            {"text": f"{p_es}", "callback_data": "ai:noop"},
+            {"text": "+2 ▶", "callback_data": "ai:act|t=adj_thresh|k=enter_short|d=up"},
         ],
         [
-            {"text": f"↑ Short Çıkış", "callback_data": "ai:act|t=set_thresh|k=exit_short|d=up"},
-            {"text": f"↓ Short Çıkış", "callback_data": "ai:act|t=set_thresh|k=exit_short|d=down"},
+            {"text": "S.Çıkış", "callback_data": "ai:noop"},
+            {"text": "◀ -2", "callback_data": "ai:act|t=adj_thresh|k=exit_short|d=down"},
+            {"text": f"{p_xs}", "callback_data": "ai:noop"},
+            {"text": "+2 ▶", "callback_data": "ai:act|t=adj_thresh|k=exit_short|d=up"},
         ],
-        [{"text": "◀️ Geri", "callback_data": "ai:adv"}],
     ]
+    
+    # Save/Cancel if pending
+    if has_changes:
+        buttons.append([
+            {"text": "✅ Kaydet", "callback_data": "ai:act|t=save_thresh"},
+            {"text": "❌ İptal", "callback_data": "ai:act|t=cancel_thresh"},
+        ])
+    
+    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons
 
@@ -314,45 +424,92 @@ def build_age_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[D
 
 
 def build_weights_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
-    """Build score weights settings view with preset options."""
-    ta_weight = context.get('ta_weight', 0.4)
-    ml_weight = context.get('ml_weight', 0.6)
+    """Build score weights settings view with individual +/- controls and save/cancel."""
+    # Current saved values from policy
+    ta_weight = context.get('ta_weight', 0.55)
+    ml_weight = context.get('ml_weight', 0.35)
     news_weight = context.get('news_weight', 0.05)
     risk_weight = context.get('risk_weight', 0.05)
     
-    # Determine current preset
-    ta_pct = int(ta_weight * 100)
-    ml_pct = int(ml_weight * 100)
-    current = f"{ta_pct}/{ml_pct}"
+    # Pending values (from session, if any adjustments made)
+    pending = context.get('pending_weights', {})
+    p_ta = pending.get('ta', ta_weight)
+    p_ml = pending.get('ml', ml_weight)
+    p_news = pending.get('news', news_weight)
+    p_risk = pending.get('risk', risk_weight)
+    
+    # Check if there are pending changes
+    has_changes = bool(pending) and (
+        p_ta != ta_weight or p_ml != ml_weight or 
+        p_news != news_weight or p_risk != risk_weight
+    )
+    
+    # Calculate percentages (use pending if available)
+    ta_pct = int(p_ta * 100)
+    ml_pct = int(p_ml * 100)
+    news_pct = int(p_news * 100)
+    risk_pct = int(p_risk * 100)
+    total = ta_pct + ml_pct + news_pct + risk_pct
+    
+    # Total check indicator
+    total_ok = "✅" if total == 100 else f"⚠️ {total}%"
+    
+    # Show pending changes indicator
+    status = "📝 Değişiklikler bekliyor..." if has_changes else "✅ Kayıtlı"
     
     lines = [
-        "⚖️ <b>TA/ML Ağırlık Oranı</b>",
+        "⚖️ <b>Score Ağırlıkları</b>",
         "",
-        f"📊 Şu anki: <b>TA {ta_pct}% / ML {ml_pct}%</b>",
-        f"📰 News: {news_weight:.0%} | 🛡️ Risk: {risk_weight:.0%}",
+        f"📊 TA:    <b>{ta_pct}%</b>",
+        f"🤖 ML:    <b>{ml_pct}%</b>",
+        f"📰 News:  <b>{news_pct}%</b>",
+        f"🛡️ Risk:  <b>{risk_pct}%</b>",
         "",
-        "Bir preset seç:",
+        f"Toplam: <b>{total}%</b> {total_ok}",
         "",
+        f"<i>{status}</i>",
     ]
     
-    # Preset buttons - TA/ML ratios (News=%5, Risk=%5 sabit)
+    # +/- 5% buttons for each weight (adj_ prefix for adjustment without saving)
     buttons = [
+        # TA row
         [
-            {"text": "✅ 20/80" if current == "20/80" else "20/80", "callback_data": "ai:act|t=set_preset|ta=20|ml=80"},
-            {"text": "✅ 30/70" if current == "30/70" else "30/70", "callback_data": "ai:act|t=set_preset|ta=30|ml=70"},
-            {"text": "✅ 40/60" if current == "40/60" else "40/60", "callback_data": "ai:act|t=set_preset|ta=40|ml=60"},
+            {"text": "📊 TA", "callback_data": "ai:noop"},
+            {"text": "◀ -5%", "callback_data": "ai:act|t=adj_weight|k=ta|d=down"},
+            {"text": f"{ta_pct}%", "callback_data": "ai:noop"},
+            {"text": "+5% ▶", "callback_data": "ai:act|t=adj_weight|k=ta|d=up"},
         ],
+        # ML row
         [
-            {"text": "✅ 50/50" if current == "50/50" else "50/50", "callback_data": "ai:act|t=set_preset|ta=50|ml=50"},
-            {"text": "✅ 60/40" if current == "60/40" else "60/40", "callback_data": "ai:act|t=set_preset|ta=60|ml=40"},
-            {"text": "✅ 70/30" if current == "70/30" else "70/30", "callback_data": "ai:act|t=set_preset|ta=70|ml=30"},
+            {"text": "🤖 ML", "callback_data": "ai:noop"},
+            {"text": "◀ -5%", "callback_data": "ai:act|t=adj_weight|k=ml|d=down"},
+            {"text": f"{ml_pct}%", "callback_data": "ai:noop"},
+            {"text": "+5% ▶", "callback_data": "ai:act|t=adj_weight|k=ml|d=up"},
         ],
+        # News row
         [
-            {"text": "✅ 80/20" if current == "80/20" else "80/20", "callback_data": "ai:act|t=set_preset|ta=80|ml=20"},
-            {"text": "✅ 90/10" if current == "90/10" else "90/10", "callback_data": "ai:act|t=set_preset|ta=90|ml=10"},
+            {"text": "📰 News", "callback_data": "ai:noop"},
+            {"text": "◀ -5%", "callback_data": "ai:act|t=adj_weight|k=news|d=down"},
+            {"text": f"{news_pct}%", "callback_data": "ai:noop"},
+            {"text": "+5% ▶", "callback_data": "ai:act|t=adj_weight|k=news|d=up"},
         ],
-        [{"text": "◀️ Geri", "callback_data": "ai:adv"}],
+        # Risk row
+        [
+            {"text": "🛡️ Risk", "callback_data": "ai:noop"},
+            {"text": "◀ -5%", "callback_data": "ai:act|t=adj_weight|k=risk|d=down"},
+            {"text": f"{risk_pct}%", "callback_data": "ai:noop"},
+            {"text": "+5% ▶", "callback_data": "ai:act|t=adj_weight|k=risk|d=up"},
+        ],
     ]
+    
+    # Save/Cancel buttons if there are pending changes
+    if has_changes:
+        buttons.append([
+            {"text": "✅ Kaydet", "callback_data": "ai:act|t=save_weights"},
+            {"text": "❌ İptal", "callback_data": "ai:act|t=cancel_weights"},
+        ])
+    
+    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons
 
@@ -388,6 +545,10 @@ def build_ml_boost_view(context: Dict[str, Any], formatter) -> Tuple[str, List[L
         "<i>final skoru artırır.</i>",
     ])
     
+    # Buttons for tier 0 (60 threshold)
+    tier0 = next((t for t in tiers if t.get('ta_threshold') == 60), {})
+    tier0_mult = tier0.get('multiplier', 0)
+    
     # Buttons for tier 1 (65 threshold)
     tier1 = next((t for t in tiers if t.get('ta_threshold') == 65), {})
     tier1_mult = tier1.get('multiplier', 0)
@@ -398,17 +559,25 @@ def build_ml_boost_view(context: Dict[str, Any], formatter) -> Tuple[str, List[L
     
     buttons = [
         [{"text": f"{'✅' if enabled else '❌'} ML Boost {'Kapat' if enabled else 'Aç'}", "callback_data": f"ai:act|t=toggle_mlboost|v={0 if enabled else 1}"}],
-        [{"text": "── TA ≥ 65 Multiplier ──", "callback_data": "ai:noop"}],
+        # TA ≥ 60 row
         [
-            {"text": f"{'✅' if tier1_mult == 1 else ''} 1x", "callback_data": "ai:act|t=set_ml_tier|th=65|m=1"},
+            {"text": "60:", "callback_data": "ai:noop"},
+            {"text": f"{'✅' if tier0_mult == 2 else ''} 2x", "callback_data": "ai:act|t=set_ml_tier|th=60|m=2"},
+            {"text": f"{'✅' if tier0_mult == 3 else ''} 3x", "callback_data": "ai:act|t=set_ml_tier|th=60|m=3"},
+            {"text": f"{'✅' if tier0_mult == 4 else ''} 4x", "callback_data": "ai:act|t=set_ml_tier|th=60|m=4"},
+            {"text": f"{'✅' if tier0_mult == 5 else ''} 5x", "callback_data": "ai:act|t=set_ml_tier|th=60|m=5"},
+        ],
+        # TA ≥ 65 row
+        [
+            {"text": "65:", "callback_data": "ai:noop"},
             {"text": f"{'✅' if tier1_mult == 2 else ''} 2x", "callback_data": "ai:act|t=set_ml_tier|th=65|m=2"},
             {"text": f"{'✅' if tier1_mult == 3 else ''} 3x", "callback_data": "ai:act|t=set_ml_tier|th=65|m=3"},
             {"text": f"{'✅' if tier1_mult == 4 else ''} 4x", "callback_data": "ai:act|t=set_ml_tier|th=65|m=4"},
             {"text": f"{'✅' if tier1_mult == 5 else ''} 5x", "callback_data": "ai:act|t=set_ml_tier|th=65|m=5"},
         ],
-        [{"text": "── TA ≥ 70 Multiplier ──", "callback_data": "ai:noop"}],
+        # TA ≥ 70 row
         [
-            {"text": f"{'✅' if tier2_mult == 1 else ''} 1x", "callback_data": "ai:act|t=set_ml_tier|th=70|m=1"},
+            {"text": "70:", "callback_data": "ai:noop"},
             {"text": f"{'✅' if tier2_mult == 2 else ''} 2x", "callback_data": "ai:act|t=set_ml_tier|th=70|m=2"},
             {"text": f"{'✅' if tier2_mult == 3 else ''} 3x", "callback_data": "ai:act|t=set_ml_tier|th=70|m=3"},
             {"text": f"{'✅' if tier2_mult == 4 else ''} 4x", "callback_data": "ai:act|t=set_ml_tier|th=70|m=4"},
@@ -416,5 +585,68 @@ def build_ml_boost_view(context: Dict[str, Any], formatter) -> Tuple[str, List[L
         ],
         [{"text": "◀️ Geri", "callback_data": "ai:adv"}],
     ]
+    
+    return "\n".join(lines), buttons
+
+
+def build_atr_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
+    """Build ATR TP/SL multiplier settings view with preview mode."""
+    # Current values from policy
+    sl_mult = context.get('sl_atr_mult', 2.0)
+    tp_mult = context.get('tp_atr_mult', 4.0)
+    fallback_sl = context.get('fallback_sl_pct', 1.5)
+    fallback_tp = context.get('fallback_tp_pct', 3.0)
+    
+    # Pending values (from session)
+    pending = context.get('pending_atr', {})
+    p_sl = pending.get('sl', sl_mult)
+    p_tp = pending.get('tp', tp_mult)
+    
+    # Check for pending changes
+    has_changes = bool(pending) and (p_sl != sl_mult or p_tp != tp_mult)
+    
+    # Calculate R:R ratio using display values
+    rr_ratio = p_tp / p_sl if p_sl > 0 else 0
+    
+    status = "📝 Değişiklikler bekliyor..." if has_changes else "✅ Kayıtlı"
+    
+    lines = [
+        "🎯 <b>ATR TP/SL Ayarları</b>",
+        "",
+        f"🛡️ Stop Loss: <b>{p_sl} ATR</b>",
+        f"🎯 Take Profit: <b>{p_tp} ATR</b>",
+        f"📊 Risk/Reward: <b>1:{rr_ratio:.1f}</b>",
+        "",
+        f"<i>Fallback: SL %{fallback_sl}, TP %{fallback_tp}</i>",
+        "",
+        f"<i>{status}</i>",
+    ]
+    
+    # +/- buttons for SL and TP
+    buttons = [
+        # SL row
+        [
+            {"text": "🛡️ SL", "callback_data": "ai:noop"},
+            {"text": "◀ -0.5", "callback_data": "ai:act|t=adj_atr|k=sl|d=down"},
+            {"text": f"{p_sl} ATR", "callback_data": "ai:noop"},
+            {"text": "+0.5 ▶", "callback_data": "ai:act|t=adj_atr|k=sl|d=up"},
+        ],
+        # TP row
+        [
+            {"text": "🎯 TP", "callback_data": "ai:noop"},
+            {"text": "◀ -0.5", "callback_data": "ai:act|t=adj_atr|k=tp|d=down"},
+            {"text": f"{p_tp} ATR", "callback_data": "ai:noop"},
+            {"text": "+0.5 ▶", "callback_data": "ai:act|t=adj_atr|k=tp|d=up"},
+        ],
+    ]
+    
+    # Save/Cancel if pending
+    if has_changes:
+        buttons.append([
+            {"text": "✅ Kaydet", "callback_data": "ai:act|t=save_atr"},
+            {"text": "❌ İptal", "callback_data": "ai:act|t=cancel_atr"},
+        ])
+    
+    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons

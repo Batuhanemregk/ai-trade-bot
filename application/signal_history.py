@@ -16,6 +16,8 @@ MAX_SIGNALS_PER_SYMBOL = 100
 # Thread-safe storage
 _lock = Lock()
 _signal_store: Dict[str, deque] = {}
+_store_id = id(_signal_store)
+logger.info(f"[SIGNAL_STORE] Initialized with id={_store_id}")
 
 
 def record_signal(
@@ -125,6 +127,7 @@ def get_stats() -> Dict[str, Any]:
     """Get signal store statistics."""
     with _lock:
         total = sum(len(q) for q in _signal_store.values())
+        logger.debug(f"[SIGNAL_STORE] get_stats called, store_id={id(_signal_store)}, symbols={list(_signal_store.keys())}, total={total}")
         return {
             'symbols': len(_signal_store),
             'total_signals': total,

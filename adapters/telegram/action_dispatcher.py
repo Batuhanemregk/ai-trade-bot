@@ -60,17 +60,37 @@ class ActionDispatcher:
             'add_coin': self._handle_add_coin,
             'remove_coin': self._handle_remove_coin,
             'set_thresh': self._handle_set_threshold,
+            'adj_thresh': self._handle_adjust_threshold,  # Threshold preview
+            'save_thresh': self._handle_save_thresholds,  # Save pending thresholds
+            'cancel_thresh': self._handle_cancel_thresholds,  # Cancel pending thresholds
             'set_age': self._handle_set_age,
             'set_weight': self._handle_set_weight,
+            'adj_weight': self._handle_adjust_weight,  # Score weight preview
+            'save_weights': self._handle_save_weights,  # Save pending weights
+            'cancel_weights': self._handle_cancel_weights,  # Cancel pending weights
             'set_preset': self._handle_set_preset,
             'toggle_mlboost': self._handle_toggle_mlboost,
             'set_ml_tier': self._handle_set_ml_tier,
+            'set_atr': self._handle_set_atr,  # ATR TP/SL adjustment
+            'adj_atr': self._handle_adjust_atr,  # ATR preview mode
+            'save_atr': self._handle_save_atr,  # Save pending ATR
+            'cancel_atr': self._handle_cancel_atr,  # Cancel pending ATR
+            # Tier-based position sizing handlers
+            'adj_tier': self._handle_adjust_tier,
+            'save_tiers': self._handle_save_tiers,
+            'cancel_tiers': self._handle_cancel_tiers,
             # Signal history handlers
             'clear_sig': self._handle_clear_signal_history,
             'clear_all_sig': self._handle_clear_all_signals,
             # Alert history handlers
             'clear_alerts': self._handle_clear_alerts,
         }
+        
+        # Session states for pending adjustments
+        self._pending_tiers: Dict[str, float] = {}
+        self._pending_weights: Dict[str, float] = {}
+        self._pending_atr: Dict[str, float] = {}
+        self._pending_thresh: Dict[str, int] = {}
     
     def _get_exchange_adapter(self):
         """Lazy load exchange adapter."""
@@ -1108,6 +1128,286 @@ class ActionDispatcher:
             from application.alert_history import clear_alerts
             count = clear_alerts()
             return ActionResult(True, f"🗑️ Tüm uyarılar temizlendi ({count} mesaj)", next_view='alerts')
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    # ==================== SCORE WEIGHTS PREVIEW MODE ====================
+    
+    async def _handle_adjust_weight(self, params: Dict) -> ActionResult:
+        """Adjust a score weight without saving (preview mode)."""
+        key = params.get('k', '')  # ta, ml, news, risk
+        direction = params.get('d', '')
+        
+        if not key or not direction:
+            return ActionResult(False, "Key and direction required")
+        
+        try:
+            policy = self._get_policy()
+            scoring = policy.get('trading', {}).get('scoring', {})
+            weight_key = f'{key}_weight'
+            
+            # Use pending value if exists, else policy value
+            if key in self._pending_weights:
+                current = self._pending_weights[key]
+            else:
+                current = scoring.get(weight_key, 0.1)
+            
+            step = 0.05  # 5%
+            if direction == 'up':
+                new_val = min(1.0, round(current + step, 2))
+            else:
+                new_val = max(0.0, round(current - step, 2))
+            
+            # Store in pending
+            self._pending_weights[key] = new_val
+            
+            return ActionResult(True, f"{key.upper()}: {int(new_val * 100)}%", next_view='adv_weight')
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_save_weights(self, params: Dict) -> ActionResult:
+        """Save all pending weight changes."""
+        try:
+            if not self._pending_weights:
+                return ActionResult(False, "Bekleyen değişiklik yok")
+            
+            saved = []
+            for key, value in self._pending_weights.items():
+                weight_key = f'{key}_weight'
+                if self._save_to_policy(f'trading.scoring.{weight_key}', value):
+                    saved.append(f"{key.upper()}: {int(value * 100)}%")
+            
+            self._pending_weights.clear()
+            
+            if saved:
+                msg = "✅ Kaydedildi:\n" + "\n".join(saved) + "\n\n⚠️ Restart gerektirir"
+                return ActionResult(True, msg, next_view='adv_weight')
+            return ActionResult(False, "Kaydetme başarısız")
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_cancel_weights(self, params: Dict) -> ActionResult:
+        """Cancel pending weight changes."""
+        try:
+            self._pending_weights.clear()
+            return ActionResult(True, "❌ Değişiklikler iptal edildi", next_view='adv_weight')
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    # ==================== THRESHOLD PREVIEW MODE ====================
+    
+    async def _handle_adjust_threshold(self, params: Dict) -> ActionResult:
+        """Adjust a threshold without saving (preview mode)."""
+        key = params.get('k', '')  # enter_long, exit_long, enter_short, exit_short
+        direction = params.get('d', '')
+        
+        if not key or not direction:
+            return ActionResult(False, "Key and direction required")
+        
+        try:
+            policy = self._get_policy()
+            thresholds = policy.get('trading', {}).get('scoring', {}).get('decision_thresholds', {})
+            
+            # Use pending value if exists, else policy value
+            defaults = {'enter_long': 52, 'exit_long': 40, 'enter_short': 48, 'exit_short': 60}
+            if key in self._pending_thresh:
+                current = self._pending_thresh[key]
+            else:
+                current = thresholds.get(key, defaults.get(key, 50))
+            
+            step = 2
+            if direction == 'up':
+                new_val = min(100, current + step)
+            else:
+                new_val = max(0, current - step)
+            
+            # Store in pending
+            self._pending_thresh[key] = new_val
+            
+            labels = {'enter_long': 'L.Giriş', 'exit_long': 'L.Çıkış', 'enter_short': 'S.Giriş', 'exit_short': 'S.Çıkış'}
+            return ActionResult(True, f"{labels.get(key, key)}: {new_val}", next_view='adv_thresh')
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_save_thresholds(self, params: Dict) -> ActionResult:
+        """Save all pending threshold changes."""
+        try:
+            if not self._pending_thresh:
+                return ActionResult(False, "Bekleyen değişiklik yok")
+            
+            saved = []
+            labels = {'enter_long': 'L.Giriş', 'exit_long': 'L.Çıkış', 'enter_short': 'S.Giriş', 'exit_short': 'S.Çıkış'}
+            
+            for key, value in self._pending_thresh.items():
+                path = f'trading.scoring.decision_thresholds.{key}'
+                if self._save_to_policy(path, value):
+                    saved.append(f"{labels.get(key, key)}: {value}")
+            
+            self._pending_thresh.clear()
+            
+            if saved:
+                msg = "✅ Kaydedildi:\n" + "\n".join(saved) + "\n\n⚠️ Restart gerektirir"
+                return ActionResult(True, msg, next_view='adv_thresh')
+            return ActionResult(False, "Kaydetme başarısız")
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_cancel_thresholds(self, params: Dict) -> ActionResult:
+        """Cancel pending threshold changes."""
+        try:
+            self._pending_thresh.clear()
+            return ActionResult(True, "❌ Değişiklikler iptal edildi", next_view='adv_thresh')
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    # ==================== ATR TP/SL HANDLERS ====================
+    
+    async def _handle_set_atr(self, params: Dict) -> ActionResult:
+        """Set ATR TP/SL multiplier directly (legacy instant save)."""
+        key = params.get('k', '')  # 'tp' or 'sl'
+        value = params.get('v', '')
+        
+        if not key or not value:
+            return ActionResult(False, "Key and value required")
+        
+        try:
+            val = float(value)
+            policy_key = 'tp_atr_mult' if key == 'tp' else 'sl_atr_mult'
+            
+            if self._save_to_policy(f'trading.risk.tp_sl_atr.{policy_key}', val):
+                label = "TP" if key == 'tp' else "SL"
+                return ActionResult(True, f"{label} ATR: {val}×\n\n⚠️ Restart gerektirir", next_view='adv_atr')
+            return ActionResult(False, "Save failed")
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_adjust_atr(self, params: Dict) -> ActionResult:
+        """Adjust ATR multiplier without saving (preview mode)."""
+        key = params.get('k', '')  # 'tp' or 'sl'
+        direction = params.get('d', '')
+        
+        if not key or not direction:
+            return ActionResult(False, "Key and direction required")
+        
+        try:
+            policy = self._get_policy()
+            atr_config = policy.get('trading', {}).get('risk', {}).get('tp_sl_atr', {})
+            policy_key = 'tp_atr_mult' if key == 'tp' else 'sl_atr_mult'
+            
+            # Use pending value if exists
+            if key in self._pending_atr:
+                current = self._pending_atr[key]
+            else:
+                default = 4.0 if key == 'tp' else 2.0
+                current = atr_config.get(policy_key, default)
+            
+            step = 0.5
+            if direction == 'up':
+                new_val = min(10.0, round(current + step, 1))
+            else:
+                new_val = max(0.5, round(current - step, 1))
+            
+            # Store in pending
+            self._pending_atr[key] = new_val
+            
+            label = "TP" if key == 'tp' else "SL"
+            return ActionResult(True, f"{label}: {new_val}×", next_view='adv_atr')
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_save_atr(self, params: Dict) -> ActionResult:
+        """Save all pending ATR changes."""
+        try:
+            if not self._pending_atr:
+                return ActionResult(False, "Bekleyen değişiklik yok")
+            
+            saved = []
+            for key, value in self._pending_atr.items():
+                policy_key = 'tp_atr_mult' if key == 'tp' else 'sl_atr_mult'
+                if self._save_to_policy(f'trading.risk.tp_sl_atr.{policy_key}', value):
+                    label = "TP" if key == 'tp' else "SL"
+                    saved.append(f"{label}: {value}×")
+            
+            self._pending_atr.clear()
+            
+            if saved:
+                msg = "✅ Kaydedildi:\n" + "\n".join(saved) + "\n\n⚠️ Restart gerektirir"
+                return ActionResult(True, msg, next_view='adv_atr')
+            return ActionResult(False, "Kaydetme başarısız")
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_cancel_atr(self, params: Dict) -> ActionResult:
+        """Cancel pending ATR changes."""
+        try:
+            self._pending_atr.clear()
+            return ActionResult(True, "❌ Değişiklikler iptal edildi", next_view='adv_atr')
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    # ==================== TIER-BASED POSITION SIZING ====================
+    
+    async def _handle_adjust_tier(self, params: Dict) -> ActionResult:
+        """Adjust a tier position percentage without saving (preview mode)."""
+        key = params.get('k', '')  # weak, medium, strong, extreme
+        direction = params.get('d', '')
+        
+        if not key or not direction:
+            return ActionResult(False, "Key and direction required")
+        
+        try:
+            policy = self._get_policy()
+            tiers = policy.get('trading', {}).get('scoring', {}).get('position_sizing', {}).get('tiers', {})
+            
+            # Use pending value if exists, else policy value
+            if key in self._pending_tiers:
+                current = self._pending_tiers[key]
+            else:
+                current = tiers.get(key, {}).get('position_pct', 0.02)
+            
+            step = 0.01  # 1%
+            if direction == 'up':
+                new_val = min(0.30, round(current + step, 2))  # Max 30%
+            else:
+                new_val = max(0.01, round(current - step, 2))  # Min 1%
+            
+            # Store in pending
+            self._pending_tiers[key] = new_val
+            
+            tier_names = {'weak': '🟢 Weak', 'medium': '🟡 Medium', 'strong': '🟠 Strong', 'extreme': '🔴 Extreme'}
+            return ActionResult(True, f"{tier_names.get(key, key)}: {int(new_val * 100)}%", next_view='adv_size')
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_save_tiers(self, params: Dict) -> ActionResult:
+        """Save all pending tier changes to policy."""
+        try:
+            if not self._pending_tiers:
+                return ActionResult(False, "Bekleyen değişiklik yok")
+            
+            saved = []
+            tier_names = {'weak': 'Weak', 'medium': 'Medium', 'strong': 'Strong', 'extreme': 'Extreme'}
+            
+            for key, value in self._pending_tiers.items():
+                # Path: trading.scoring.position_sizing.tiers.{key}.position_pct
+                path = f'trading.scoring.position_sizing.tiers.{key}.position_pct'
+                if self._save_to_policy(path, value):
+                    saved.append(f"{tier_names.get(key, key)}: {int(value * 100)}%")
+            
+            self._pending_tiers.clear()
+            
+            if saved:
+                msg = "✅ Kaydedildi:\n" + "\n".join(saved) + "\n\n⚠️ Restart gerektirir"
+                return ActionResult(True, msg, next_view='adv_size')
+            return ActionResult(False, "Kaydetme başarısız")
+        except Exception as e:
+            return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_cancel_tiers(self, params: Dict) -> ActionResult:
+        """Cancel pending tier changes."""
+        try:
+            self._pending_tiers.clear()
+            return ActionResult(True, "❌ Değişiklikler iptal edildi", next_view='adv_size')
         except Exception as e:
             return ActionResult(False, f"Error: {e}")
 

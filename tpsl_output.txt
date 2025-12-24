@@ -1,0 +1,129 @@
+2025-12-19 01:37:06.929 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:473 - \U0001f511 Initializing OKX client with API key: bafb2c4b...
+2025-12-19 01:37:06.929 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:474 - \U0001f511 Testnet mode: False, Default type: swap
+2025-12-19 01:37:06.939 | INFO     | adapters.exchange_okx_ccxt:_init_exchange:484 - \u2705 OKX CCXT adapter initialized successfully
+2025-12-19 01:37:11.647 | INFO     | adapters.exchange_okx_ccxt:close:1012 - \u2705 OKX CCXT adapter closed
+============================================================
+OKX TP/SL Distance Analysis
+============================================================
+
+Fetching positions...
+Found 7 open positions
+
+Fetching TP/SL orders...
+
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Position: DOGE/USDT:USDT
+  Side: SHORT
+  Size: 0.64
+  Entry: $0.123320
+  Mark:  $0.122960
+  uPnL:  $0.23
+
+  TP/SL Analysis:
+  TP: $0.119470 (3.12% from entry)
+  SL: $0.125190 (1.52% from entry)
+  R:R = 1:2.06
+
+  Estimated ATR:
+    From TP (4x): $0.000962 (0.780%)
+    From SL (2x): $0.000935 (0.758%)
+
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Position: XRP/USDT:USDT
+  Side: SHORT
+  Size: 0.44
+  Entry: $1.817500
+  Mark:  $1.816000
+  uPnL:  $0.07
+
+  TP/SL Analysis:
+  TP: $1.741000 (4.21% from entry)
+  SL: $1.856000 (2.12% from entry)
+  R:R = 1:1.99
+
+  Estimated ATR:
+    From TP (4x): $0.019125 (1.052%)
+    From SL (2x): $0.019250 (1.059%)
+
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Position: SUI/USDT:USDT
+  Side: SHORT
+  Size: 63.0
+  Entry: $1.341300
+  Mark:  $1.352100
+  uPnL:  $-0.68
+
+  TP/SL Analysis:
+  TP: $1.261700 (5.93% from entry)
+  SL: $1.381500 (3.00% from entry)
+  R:R = 1:1.98
+
+  Estimated ATR:
+    From TP (4x): $0.019900 (1.484%)
+    From SL (2x): $0.020100 (1.499%)
+
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Position: ETH/USDT:USDT
+  Side: SHORT
+  Size: 0.32
+  Entry: $2799.260000
+  Mark:  $2823.950000
+  uPnL:  $-0.79
+
+  TP/SL Analysis:
+  TP: $2664.520000 (4.81% from entry)
+  SL: $2866.980000 (2.42% from entry)
+  R:R = 1:1.99
+
+  Estimated ATR:
+    From TP (4x): $33.685000 (1.203%)
+    From SL (2x): $33.860000 (1.210%)
+
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Position: BTC/USDT:USDT
+  Side: SHORT
+  Size: 0.16
+  Entry: $84971.900000
+  Mark:  $85503.100000
+  uPnL:  $-0.85
+
+  TP/SL Analysis:
+  TP: $82118.800000 (3.36% from entry)
+  SL: $86435.300000 (1.72% from entry)
+  R:R = 1:1.95
+
+  Estimated ATR:
+    From TP (4x): $713.275000 (0.839%)
+    From SL (2x): $731.700000 (0.861%)
+
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Position: SOL/USDT:USDT
+  Side: SHORT
+  Size: 0.72
+  Entry: $117.680000
+  Mark:  $119.580000
+  uPnL:  $-1.37
+
+  TP/SL Analysis:
+  TP: $111.480000 (5.27% from entry)
+  SL: $120.710000 (2.57% from entry)
+  R:R = 1:2.05
+
+  Estimated ATR:
+    From TP (4x): $1.550000 (1.317%)
+    From SL (2x): $1.515000 (1.287%)
+
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+Position: MINA/USDT:USDT
+  Side: LONG
+  Size: 10617.0
+  Entry: $0.055569
+  Mark:  $0.074890
+  uPnL:  $205.13
+
+  TP/SL Analysis:
+  TP: Not found
+  SL: Not found
+
+============================================================
+Analysis complete

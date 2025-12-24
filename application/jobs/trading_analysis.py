@@ -694,8 +694,19 @@ class TradingAnalysisJob(BaseJob):
                     
                     return True
             
-            # No position found - sync as no position
+            # No position found - check if we had a position before (SL/TP triggered)
+            current_state = self.state_manager.get_position_state(symbol)
+            was_in_position = current_state.value in ['LONG', 'SHORT']
+            
             self.state_manager.sync_no_position(symbol)
+            
+            # CRITICAL FIX: If we were in a position but now we're not,
+            # the position was closed by SL/TP. Clear signal history so we can re-enter.
+            # Without this, signal age keeps incrementing and blocks new trades.
+            if was_in_position:
+                logger.info(f"[SYNC] {symbol}: Position CLOSED (SL/TP), clearing signal history to enable re-entry")
+                self.signal_gate.clear_history(symbol)
+            
             logger.debug(f"[SYNC] {symbol}: No real position found, state=READY")
             return False
             

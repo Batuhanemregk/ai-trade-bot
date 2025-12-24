@@ -4,6 +4,7 @@ schedule:
   regime_1h: 0 * * * *
   risk_1m: '* * * * *'
   market_overview: '*/15 * * * *'
+  coin_listings_4h: 0 */4 * * *
 scheduler:
   semaphore_limit: 2
   retry:
@@ -41,7 +42,7 @@ trading:
     leverage:
       min_leverage: 1
       max_leverage: 10
-      default: 5
+      default: 7
       symbol_limits:
         BTC:
           max: 10
@@ -53,6 +54,11 @@ trading:
     streak_guard:
       max_losses: 3
       cooldown_hours: 24
+    tp_sl_atr:
+      sl_atr_mult: 2.0
+      tp_atr_mult: 3.0
+      fallback_sl_pct: 1.5
+      fallback_tp_pct: 3.0
     risk_assessment:
       correlation_risk:
         market_cap_tiers:
@@ -165,16 +171,16 @@ trading:
     min_order_size: 10
     max_order_size: 10000
   scoring:
-    ta_weight: 0.55
-    ml_weight: 0.35
+    ta_weight: 0.6
+    ml_weight: 0.3
     news_weight: 0.05
     risk_weight: 0.05
     min_composite_score: 0.6
     decision_thresholds:
-      enter_long: 60
-      exit_long: 45
-      enter_short: 35
-      exit_short: 52
+      enter_long: 54
+      exit_long: 43
+      enter_short: 30
+      exit_short: 50
       flat_range:
       - 45
       - 55
@@ -187,10 +193,12 @@ trading:
     ml_boost:
       enabled: true
       tiers:
-        - ta_threshold: 65
-          multiplier: 3
-        - ta_threshold: 70
-          multiplier: 4
+      - ta_threshold: 60
+        multiplier: 3
+      - ta_threshold: 65
+        multiplier: 5
+      - ta_threshold: 70
+        multiplier: 4
     risk_management:
       fees_bps: 6
       slippage_bps: 3
@@ -293,6 +301,7 @@ trading:
     enabled: true
   time_exit:
     enabled: true
+    max_position_age_hours: 24
 agents:
   orchestrator:
     enabled: true
@@ -366,9 +375,6 @@ exchange:
     - BTC-USDT-SWAP
     - ETH-USDT-SWAP
     - SOL-USDT-SWAP
-    - GRT-USDT-SWAP
-    - ARKM-USDT-SWAP
-    - SUI-USDT-SWAP
 telegram:
   enabled: true
   token: ${TELEGRAM_BOT_TOKEN}

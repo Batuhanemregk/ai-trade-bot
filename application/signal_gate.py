@@ -90,13 +90,12 @@ class PersistenceProcessor(SignalProcessor):
         # Check if signal has persisted for required bars
         persistence_count = self._count_persistence(history, direction)
         
-        # Check signal age - only count consecutive bars with same direction
-        # This is the actual age of the current signal, not total history
-        signal_age = persistence_count  # Age = how long this signal has persisted
+        # SIMPLIFIED: Only check persistence, age check REMOVED
+        # Age check was blocking valid signals after SL exits
+        # Same-bar protection is handled by once_per_bar and position close history clear
+        is_valid = persistence_count >= self.persistence_bars
         
-        is_valid = persistence_count >= self.persistence_bars and signal_age <= self.max_signal_age
-        
-        reason = f"Persistence: {persistence_count}/{self.persistence_bars}, Age: {signal_age}/{self.max_signal_age}"
+        reason = f"Persist: {persistence_count}/{self.persistence_bars}"
         
         return GatedSignal(
             original_score=final_score,
@@ -688,11 +687,10 @@ class SignalGate:
         latest.direction = gated_signal.direction
         latest.strength = gated_signal.strength
         
-        # Calculate and log counters
+        # Calculate and log counters (age removed - no longer used)
         persist_count = self.persistence_processor._count_persistence(history, gated_signal.direction)
-        age_count = len(history)
         
-        logger.debug(f"[COUNTER] {symbol} persist={persist_count}/{self.policy['trading']['scoring']['signal']['persistence_bars']} age={age_count}")
+        logger.debug(f"[COUNTER] {symbol} persist={persist_count}/{self.policy['trading']['scoring']['signal']['persistence_bars']}")
     
     def _update_history(self, symbol: str, signal: Dict, gated_signal: GatedSignal):
         """Update signal history with bar-based deduplication.

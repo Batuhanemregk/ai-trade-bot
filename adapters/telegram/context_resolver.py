@@ -903,19 +903,29 @@ class ContextResolver:
     # ==================== ADVANCED SETTINGS CONTEXT ====================
     
     async def resolve_position_size_context(self) -> Dict[str, Any]:
-        """Resolve position sizing settings from policy."""
+        """Resolve tier-based position sizing settings from policy with pending changes."""
         try:
             policy = self._get_policy()
             scoring = policy.get('trading', {}).get('scoring', {})
             pos_sizing = scoring.get('position_sizing', {})
+            tiers = pos_sizing.get('tiers', {})
+            
+            # Get pending tiers from action dispatcher
+            pending_tiers = {}
+            try:
+                from adapters.telegram.action_dispatcher import get_action_dispatcher
+                dispatcher = get_action_dispatcher()
+                pending_tiers = getattr(dispatcher, '_pending_tiers', {})
+            except Exception:
+                pass
             
             return {
-                'min_percentage': pos_sizing.get('min_percentage', 0.01),
-                'max_percentage': pos_sizing.get('max_percentage', 0.10),
+                'tiers': tiers,
+                'pending_tiers': pending_tiers,
             }
         except Exception as e:
             self.logger.error(f"Failed to resolve position size context: {e}")
-            return {'min_percentage': 0.01, 'max_percentage': 0.10}
+            return {'tiers': {}, 'pending_tiers': {}}
     
     async def resolve_coins_context(self) -> Dict[str, Any]:
         """Resolve active coins from policy."""
@@ -947,51 +957,74 @@ class ContextResolver:
                 coins = cat_info['coins']
                 category_name = cat_info['name']
             
-            # Dynamic categories (OKX fetch)
-            elif category in ['volume', 'trending', 'losers', 'all']:
-                # Fallback coins if API fails
-                FALLBACK_COINS = {
-                    'volume': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK'],
-                    'trending': ['PEPE', 'WIF', 'BONK', 'FET', 'TAO', 'RENDER', 'SUI', 'APT', 'SEI', 'TIA'],
-                    'losers': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK'],
-                    'all': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK', 
-                            'DOT', 'ATOM', 'NEAR', 'FET', 'ARB', 'OP', 'SUI', 'APT', 'SEI', 'TIA'],
-                }
+            # Dynamic categories - try cache first, then OKX fetch
+            elif category in ['volume', 'trending', 'losers', 'gainers', 'new_listings', 'all']:
+                # Category names
                 CATEGORY_NAMES = {
                     'volume': '📈 Top Hacim',
                     'trending': '🔥 Trending',
                     'losers': '📉 Düşenler',
+                    'gainers': '📈 Top Gainers',
+                    'new_listings': '🆕 New Listings',
                     'all': '💰 Tüm Coinler',
+                }
+                # Fallback coins if cache/API fails
+                FALLBACK_COINS = {
+                    'volume': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK'],
+                    'trending': ['PEPE', 'WIF', 'BONK', 'FET', 'TAO', 'RENDER', 'SUI', 'APT', 'SEI', 'TIA'],
+                    'losers': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK'],
+                    'gainers': ['PEPE', 'WIF', 'BONK', 'FET', 'TAO', 'RENDER', 'SUI', 'APT', 'SEI', 'TIA'],
+                    'new_listings': ['MOVE', 'USUAL', 'PENGU', 'VANA', 'ACX', 'ORCA', 'MORPHO'],
+                    'all': ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'AVAX', 'TRX', 'LINK', 
+                            'DOT', 'ATOM', 'NEAR', 'FET', 'ARB', 'OP', 'SUI', 'APT', 'SEI', 'TIA'],
                 }
                 
                 category_name = CATEGORY_NAMES.get(category, category)
+                
+                # Try to use cached coin listings first
                 try:
-                    # Use cached exchange adapter
-                    from adapters.exchange_okx_ccxt import OKXCCXTAdapter
-                    adapter = self._get_service('exchange_adapter', OKXCCXTAdapter)
-                    
-                    if adapter:
-                        if category == 'all':
-                            markets = await adapter.fetch_markets()
-                            coins = [m['id'] for m in markets if 'SWAP' in m.get('id', '') and 'USDT' in m.get('id', '')][:50]
-                        else:
-                            tickers = await adapter.fetch_tickers()
-                            swap_tickers = {k: v for k, v in tickers.items() if 'SWAP' in k and 'USDT' in k}
-                            
-                            if category == 'volume':
-                                sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('quoteVolume', 0) or 0, reverse=True)
-                                coins = [k for k, _ in sorted_t[:20]]
-                            elif category == 'trending':
-                                sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('percentage', 0) or 0, reverse=True)
-                                coins = [k for k, _ in sorted_t[:20]]
-                            elif category == 'losers':
-                                sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('percentage', 0) or 0)
-                                coins = [k for k, _ in sorted_t[:20]]
+                    from application.jobs.coin_listings_job import get_coin_listings_cache
+                    cache = get_coin_listings_cache()
+                    if category in cache and cache[category].get('coins'):
+                        coins = cache[category]['coins']
+                        self.logger.info(f"[COINS] Using cached {category} coins: {len(coins)} items")
                     else:
+                        raise ValueError("Cache empty or not available")
+                except Exception as cache_err:
+                    self.logger.debug(f"Cache not available: {cache_err}, fetching from OKX")
+                    # Fallback to direct OKX fetch
+                    try:
+                        from adapters.exchange_okx_ccxt import OKXCCXTAdapter
+                        adapter = self._get_service('exchange_adapter', OKXCCXTAdapter)
+                        
+                        if adapter:
+                            if category == 'all':
+                                markets = await adapter.fetch_markets()
+                                coins = [m['id'] for m in markets if 'SWAP' in m.get('id', '') and 'USDT' in m.get('id', '')][:50]
+                            else:
+                                tickers = await adapter.fetch_tickers()
+                                swap_tickers = {k: v for k, v in tickers.items() if 'SWAP' in k and 'USDT' in k}
+                                
+                                if category == 'volume':
+                                    sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('quoteVolume', 0) or 0, reverse=True)
+                                elif category in ['trending', 'gainers']:
+                                    sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('percentage', 0) or 0, reverse=True)
+                                elif category == 'losers':
+                                    sorted_t = sorted(swap_tickers.items(), key=lambda x: x[1].get('percentage', 0) or 0)
+                                elif category == 'new_listings':
+                                    # Approximate new listings by low-moderate volume
+                                    sorted_t = sorted(
+                                        [(k, v) for k, v in swap_tickers.items() if (v.get('quoteVolume', 0) or 0) > 10000],
+                                        key=lambda x: x[1].get('quoteVolume', 0) or 0
+                                    )
+                                else:
+                                    sorted_t = []
+                                coins = [k for k, _ in sorted_t[:20]]
+                        else:
+                            coins = FALLBACK_COINS.get(category, [])
+                    except Exception as e:
+                        self.logger.warning(f"Failed to fetch dynamic coins: {e}, using fallback")
                         coins = FALLBACK_COINS.get(category, [])
-                except Exception as e:
-                    self.logger.warning(f"Failed to fetch dynamic coins: {e}, using fallback")
-                    coins = FALLBACK_COINS.get(category, [])
             
             return {
                 'category': category,
@@ -1004,20 +1037,30 @@ class ContextResolver:
             return {'category': category, 'category_name': category, 'coins': [], 'active_coins': []}
     
     async def resolve_thresholds_context(self) -> Dict[str, Any]:
-        """Resolve decision thresholds from policy."""
+        """Resolve decision thresholds from policy with pending changes."""
         try:
             policy = self._get_policy()
             thresholds = policy.get('trading', {}).get('scoring', {}).get('decision_thresholds', {})
+            
+            # Get pending thresholds from action dispatcher
+            pending_thresh = {}
+            try:
+                from adapters.telegram.action_dispatcher import get_action_dispatcher
+                dispatcher = get_action_dispatcher()
+                pending_thresh = getattr(dispatcher, '_pending_thresh', {})
+            except Exception:
+                pass
             
             return {
                 'enter_long': thresholds.get('enter_long', 52),
                 'exit_long': thresholds.get('exit_long', 40),
                 'enter_short': thresholds.get('enter_short', 48),
                 'exit_short': thresholds.get('exit_short', 60),
+                'pending_thresh': pending_thresh,
             }
         except Exception as e:
             self.logger.error(f"Failed to resolve thresholds context: {e}")
-            return {'enter_long': 52, 'exit_long': 40, 'enter_short': 48, 'exit_short': 60}
+            return {'enter_long': 52, 'exit_long': 40, 'enter_short': 48, 'exit_short': 60, 'pending_thresh': {}}
     
     async def resolve_age_context(self) -> Dict[str, Any]:
         """Resolve position age settings from policy."""
@@ -1033,20 +1076,30 @@ class ContextResolver:
             return {'max_position_age_hours': 24}
     
     async def resolve_weights_context(self) -> Dict[str, Any]:
-        """Resolve score weights from policy."""
+        """Resolve score weights from policy with pending changes."""
         try:
             policy = self._get_policy()
             scoring = policy.get('trading', {}).get('scoring', {})
+            
+            # Get pending weights from action dispatcher
+            pending_weights = {}
+            try:
+                from adapters.telegram.action_dispatcher import get_action_dispatcher
+                dispatcher = get_action_dispatcher()
+                pending_weights = getattr(dispatcher, '_pending_weights', {})
+            except Exception:
+                pass
             
             return {
                 'ta_weight': scoring.get('ta_weight', 0.7),
                 'ml_weight': scoring.get('ml_weight', 0.1),
                 'news_weight': scoring.get('news_weight', 0.1),
                 'risk_weight': scoring.get('risk_weight', 0.1),
+                'pending_weights': pending_weights,
             }
         except Exception as e:
             self.logger.error(f"Failed to resolve weights context: {e}")
-            return {'ta_weight': 0.7, 'ml_weight': 0.1, 'news_weight': 0.1, 'risk_weight': 0.1}
+            return {'ta_weight': 0.7, 'ml_weight': 0.1, 'news_weight': 0.1, 'risk_weight': 0.1, 'pending_weights': {}}
     
     async def resolve_ml_boost_context(self) -> Dict[str, Any]:
         """Resolve ML boost settings from policy."""
@@ -1064,14 +1117,44 @@ class ContextResolver:
             self.logger.error(f"Failed to resolve ML boost context: {e}")
             return {'ml_boost': {'enabled': False, 'tiers': []}}
     
+    async def resolve_atr_context(self) -> Dict[str, Any]:
+        """Resolve ATR TP/SL multiplier settings from policy with pending changes."""
+        try:
+            policy = self._get_policy()
+            tp_sl_atr = policy.get('trading', {}).get('risk', {}).get('tp_sl_atr', {})
+            
+            # Get pending ATR from action dispatcher
+            pending_atr = {}
+            try:
+                from adapters.telegram.action_dispatcher import get_action_dispatcher
+                dispatcher = get_action_dispatcher()
+                pending_atr = getattr(dispatcher, '_pending_atr', {})
+            except Exception:
+                pass
+            
+            return {
+                'sl_atr_mult': tp_sl_atr.get('sl_atr_mult', 2.0),
+                'tp_atr_mult': tp_sl_atr.get('tp_atr_mult', 4.0),
+                'fallback_sl_pct': tp_sl_atr.get('fallback_sl_pct', 1.5),
+                'fallback_tp_pct': tp_sl_atr.get('fallback_tp_pct', 3.0),
+                'pending_atr': pending_atr,
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve ATR context: {e}")
+            return {'sl_atr_mult': 2.0, 'tp_atr_mult': 4.0, 'fallback_sl_pct': 1.5, 'fallback_tp_pct': 3.0, 'pending_atr': {}}
+    
     async def resolve_signal_history_context(self) -> Dict[str, Any]:
         """Resolve signal history main menu context."""
         try:
             from application.signal_history import get_all_symbols, get_stats
             
+            symbols = get_all_symbols()
+            stats = get_stats()
+            self.logger.info(f"[SIG_HIST] resolve_signal_history_context: symbols={symbols}, stats={stats}")
+            
             return {
-                'symbols': get_all_symbols(),
-                'stats': get_stats()
+                'symbols': symbols,
+                'stats': stats
             }
         except Exception as e:
             self.logger.error(f"Failed to resolve signal history context: {e}")

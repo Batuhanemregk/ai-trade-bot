@@ -165,12 +165,11 @@ class MultiSourceNewsClient:
     async def get_news_for_symbol(self, symbol: str, limit: int = 20) -> List[Dict[str, Any]]:
         """Get news from CryptoCompare for a symbol"""
         try:
-            # Use persistent session
+            # Use persistent session - avoid context manager which creates new session
             session = await self._get_session()
-            async with self.cryptocompare as cc:
-                cc.session = session  # Use persistent session
-                news = await cc.get_news_for_symbol(symbol, limit)
-                return news
+            self.cryptocompare.session = session
+            news = await self.cryptocompare.get_news_for_symbol(symbol, limit)
+            return news
             
         except Exception as e:
             logger.error(f"Failed to get news for symbol {symbol}: {e}")

@@ -1034,6 +1034,29 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
             
             if transition:
                 logger.info(f"✅ State transition successful: {transition.from_state}→{transition.to_state}")
+                
+                # Only send notification for reversals (not for regular entries/exits)
+                try:
+                    is_reversal = transition.action == 'REVERSE'
+                    
+                    if is_reversal:
+                        from infrastructure.notification_service import NotificationService
+                        notifier = NotificationService()
+                        await notifier.start()
+                        
+                        direction = 'long' if composite_signal.decision == 'long' else 'short'
+                        await notifier.send_reversal_notification(
+                            symbol=symbol,
+                            strength=composite_signal.final_score / 100.0,
+                            confirm=2,  # persist_bars
+                            result=f"REVERSE to {direction.upper()}"
+                        )
+                        
+                        await notifier.stop()
+                        logger.info(f"📱 Reversal notification sent for {symbol}")
+                    # No notification for regular entry/exit
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to send reversal notification: {e}")
             else:
                 logger.warning(f"⚠️ State transition failed")
         
@@ -1508,14 +1531,19 @@ async def _calculate_tp_sl_levels(entry_price: float, decision: str, ta_flags: d
     """
     try:
         import numpy as np
+        from infrastructure.bootstrap import load_policy
         
-        # Default ATR multipliers from policy
-        sl_atr_mult = 2.0  # 2 ATR for Stop Loss
-        tp_atr_mult = 4.0  # 4 ATR for Take Profit (2:1 RR ratio)
+        # Load ATR settings from policy
+        policy = load_policy()
+        tp_sl_config = policy.get('trading', {}).get('risk', {}).get('tp_sl_atr', {})
         
-        # Fallback percentages if ATR not available
-        fallback_tp_pct = 0.03  # 3% TP
-        fallback_sl_pct = 0.015  # 1.5% SL
+        # ATR multipliers from policy (with defaults)
+        sl_atr_mult = tp_sl_config.get('sl_atr_mult', 2.0)
+        tp_atr_mult = tp_sl_config.get('tp_atr_mult', 4.0)
+        
+        # Fallback percentages from policy (with defaults)
+        fallback_sl_pct = tp_sl_config.get('fallback_sl_pct', 1.5) / 100  # Convert to decimal
+        fallback_tp_pct = tp_sl_config.get('fallback_tp_pct', 3.0) / 100  # Convert to decimal
         
         # Calculate ATR from OHLCV data
         atr = None
