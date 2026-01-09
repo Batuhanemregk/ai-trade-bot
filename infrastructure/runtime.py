@@ -698,6 +698,20 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         from execution.prevalidation import validate_bracket_order
         from execution.okx_symbol import okx_to_ccxt_symbol
         
+        # Step 0a: Check if trading is paused
+        import json
+        from pathlib import Path
+        try:
+            state_file = Path("data/runtime_state.json")
+            if state_file.exists():
+                with open(state_file, 'r') as f:
+                    runtime_state = json.load(f)
+                if runtime_state.get('trading_paused', False):
+                    logger.info(f"⏸️ [PAUSED] Trading paused - skipping {symbol}")
+                    return False
+        except Exception as e:
+            logger.warning(f"Failed to check trading_paused: {e}")
+        
         # Step 0: Enforcements (gate/state/once-per-bar/safety)
         try:
             from application.decision_tracer import get_decision_tracer
@@ -791,7 +805,10 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
         # Step 4: Convert MARGIN to contract amount
         # margin × leverage = notional
         # notional / price = contracts
-        leverage = 5  # Fixed leverage
+        # Read leverage from policy.yaml (same as Telegram setting)
+        from infrastructure.bootstrap import load_policy
+        policy = load_policy()
+        leverage = policy.get('trading', {}).get('risk', {}).get('leverage', {}).get('default', 7)
         notional_usdt = position_size_usdt * leverage
         position_size = notional_usdt / current_price
         logger.info(f"🪙 Position: margin=${position_size_usdt:.2f} × {leverage}x = ${notional_usdt:.2f} notional = {position_size:.6f} contracts")
@@ -1034,6 +1051,17 @@ async def _execute_trade(exchange_adapter, symbol: str, composite_signal, live: 
             
             if transition:
                 logger.info(f"✅ State transition successful: {transition.from_state}→{transition.to_state}")
+                
+                # CRITICAL: Clear signal history to reset persistence counter
+                # This prevents immediate re-entry on the same signal
+                try:
+                    from application.jobs.trading_analysis import _get_shared_signal_gate
+                    signal_gate = _get_shared_signal_gate()
+                    if signal_gate:
+                        signal_gate.clear_history(symbol)
+                        logger.info(f"🔄 Persistence reset for {symbol} after trade execution")
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to reset persistence: {e}")
                 
                 # Only send notification for reversals (not for regular entries/exits)
                 try:

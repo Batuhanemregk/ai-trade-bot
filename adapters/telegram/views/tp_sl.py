@@ -48,13 +48,13 @@ def build_tpsl_view(context: Dict[str, Any], formatter: TelegramFormatter = None
                 tp_str = f"${tp:.4f}"
             
             lines.append(f"{sym}")
-            lines.append(f"  📍 Giriş : {entry_str}")
+            lines.append(f"  📍 Entry : {entry_str}")
             lines.append(f"  🔻 SL    : {sl_str}")
             lines.append(f"  🔺 TP    : {tp_str}")
             lines.append(f"  📊 R:R   : {rr}")
             lines.append("")
     else:
-        lines.append("Açık pozisyon yok")
+        lines.append("No open position")
         lines.append("")
     
     now = datetime.now()

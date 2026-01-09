@@ -1,0 +1,40 @@
+2026-01-08 22:00:56.153 | INFO     | infrastructure.runtime:_execute_trade:994 - 🎯 Executing LIVE TP/SL as OCO bracket
+2026-01-08 22:00:56.155 | INFO     | infrastructure.runtime:_create_oco_bracket:1711 - 🔗 Creating OCO bracket: symbol=NEAR-USDT-SWAP TP=1.7408571428571429 SL=1.6772857142857143 link=OCO1767898856153
+2026-01-08 22:00:56.155 | INFO     | infrastructure.runtime:_create_oco_bracket:1731 - 📋 Creating TP/SL using OKX algo order API
+2026-01-08 22:00:56.643 | INFO     | infrastructure.runtime:_create_oco_bracket:1756 - ✅ TP/SL created successfully: TP=3200973913610424320, SL=3200973921764151296
+2026-01-08 22:00:56.643 | INFO     | infrastructure.runtime:_create_oco_bracket:1775 - [OCO-MAP] {'oco_link_id': 'OCO1767898856153', 'tp_algo_id': '3200973913610424320', 'sl_algo_id': '3200973921764151296', 'symbol': 'NEAR-USDT-SWAP', 'entry_client_id': 'NEAH01081900', 'created_at': '2026-01-08T19:00:56.643703+00:00', 'status': 'active'}
+2026-01-08 22:00:56.644 | INFO     | infrastructure.runtime:_execute_trade:1011 - [OCO-BRACKET] sym=NEAR-USDT-SWAP oco_link=OCO1767898856153 tp_id=3200973913610424320 sl_id=3200973921764151296
+2026-01-08 23:15:34.333 | INFO     | infrastructure.runtime:_calculate_position_size:1239 - 💰 Available balance (free): $310.61
+2026-01-08 23:15:34.333 | INFO     | infrastructure.runtime:_calculate_position_size:1269 - 📊 Signal strength: composite=63.1(LONG), ml=80.4(LONG), agreement=AGREE, strength=0.43
+2026-01-08 23:15:34.334 | INFO     | infrastructure.runtime:_calculate_position_size:1296 - 📈 Tier: strong → 8.0%
+2026-01-08 23:15:35.518 | INFO     | infrastructure.runtime:_calculate_position_size:1354 - 💰 FINAL: balance=$310.61, strength=0.43, tier=strong(8.0%), position=$24.85
+2026-01-08 23:15:35.575 | INFO     | infrastructure.runtime:_execute_trade:885 - 🔧 Quantized - Price: 0.3122, Size: 558.0
+2026-01-08 23:15:36.600 | INFO     | infrastructure.runtime:_execute_trade:994 - 🎯 Executing LIVE TP/SL as OCO bracket
+2026-01-08 23:15:36.601 | INFO     | infrastructure.runtime:_create_oco_bracket:1711 - 🔗 Creating OCO bracket: symbol=OP-USDT-SWAP TP=0.31971428571428573 SL=0.3103214285714285 link=OCO1767903336600
+2026-01-08 23:15:36.602 | INFO     | infrastructure.runtime:_create_oco_bracket:1731 - 📋 Creating TP/SL using OKX algo order API
+2026-01-08 23:15:37.086 | INFO     | infrastructure.runtime:_create_oco_bracket:1756 - ✅ TP/SL created successfully: TP=3201124254477881344, SL=3201124262564499456
+2026-01-08 23:15:37.086 | INFO     | infrastructure.runtime:_create_oco_bracket:1775 - [OCO-MAP] {'oco_link_id': 'OCO1767903336600', 'tp_algo_id': '3201124254477881344', 'sl_algo_id': '3201124262564499456', 'symbol': 'OP-USDT-SWAP', 'entry_client_id': 'OPH01082015', 'created_at': '2026-01-08T20:15:37.086240+00:00', 'status': 'active'}
+2026-01-08 23:15:37.086 | INFO     | infrastructure.runtime:_execute_trade:1011 - [OCO-BRACKET] sym=OP-USDT-SWAP oco_link=OCO1767903336600 tp_id=3201124254477881344 sl_id=3201124262564499456
+  max_position_size_pct: 0.01 (source=policy.yaml)
+2026-01-09 02:15:50.489 | INFO     | infrastructure.runtime:_calculate_position_size:1239 - 💰 Available balance (free): $311.60
+2026-01-09 02:15:50.489 | INFO     | infrastructure.runtime:_calculate_position_size:1269 - 📊 Signal strength: composite=63.8(LONG), ml=80.7(LONG), agreement=AGREE, strength=0.45
+2026-01-09 02:15:50.489 | INFO     | infrastructure.runtime:_calculate_position_size:1296 - 📈 Tier: strong → 8.0%
+2026-01-09 02:15:50.979 | INFO     | infrastructure.runtime:_calculate_position_size:1354 - 💰 FINAL: balance=$311.60, strength=0.45, tier=strong(8.0%), position=$24.93
+2026-01-09 02:15:51.053 | INFO     | infrastructure.runtime:_execute_trade:885 - 🔧 Quantized - Price: 1.692, Size: 104.0
+2026-01-09 02:15:52.073 | INFO     | infrastructure.runtime:_execute_trade:994 - 🎯 Executing LIVE TP/SL as OCO bracket
+2026-01-09 02:15:52.083 | INFO     | infrastructure.runtime:_create_oco_bracket:1711 - 🔗 Creating OCO bracket: symbol=NEAR-USDT-SWAP TP=1.7308571428571429 SL=1.6822857142857142 link=OCO1767914152074
+2026-01-09 02:15:52.084 | INFO     | infrastructure.runtime:_create_oco_bracket:1731 - 📋 Creating TP/SL using OKX algo order API
+2026-01-09 02:15:52.560 | ERROR    | infrastructure.runtime:_create_oco_bracket:1761 - ❌ SL creation failed: okx {"code":"1","data":[{"algoClOrdId":"","algoId":"","clOrdId":"","sCode":"51088","sMsg":"You can only place 1 TP/SL order to close an entire position ","tag":""}],"msg":""}
+2026-01-09 02:15:52.560 | INFO     | infrastructure.runtime:_create_oco_bracket:1775 - [OCO-MAP] {'oco_link_id': 'OCO1767914152074', 'tp_algo_id': '3201487164685324288', 'sl_algo_id': 'AMK62FU6QZE4', 'symbol': 'NEAR-USDT-SWAP', 'entry_client_id': 'NEAH01082315', 'created_at': '2026-01-08T23:15:52.560837+00:00', 'status': 'active'}
+2026-01-09 02:15:52.561 | INFO     | infrastructure.runtime:_execute_trade:1011 - [OCO-BRACKET] sym=NEAR-USDT-SWAP oco_link=OCO1767914152074 tp_id=3201487164685324288 sl_id=None
+2026-01-09 02:45:46.264 | INFO     | infrastructure.runtime:_calculate_position_size:1239 - 💰 Available balance (free): $311.01
+2026-01-09 02:45:46.264 | INFO     | infrastructure.runtime:_calculate_position_size:1269 - 📊 Signal strength: composite=60.1(LONG), ml=75.2(LONG), agreement=AGREE, strength=0.35
+2026-01-09 02:45:46.265 | INFO     | infrastructure.runtime:_calculate_position_size:1296 - 📈 Tier: strong → 8.0%
+2026-01-09 02:45:46.784 | INFO     | infrastructure.runtime:_calculate_position_size:1354 - 💰 FINAL: balance=$311.01, strength=0.35, tier=strong(8.0%), position=$24.88
+2026-01-09 02:45:46.833 | INFO     | infrastructure.runtime:_execute_trade:885 - 🔧 Quantized - Price: 1.689, Size: 104.0
+2026-01-09 02:45:47.803 | INFO     | infrastructure.runtime:_execute_trade:994 - 🎯 Executing LIVE TP/SL as OCO bracket
+2026-01-09 02:45:47.805 | INFO     | infrastructure.runtime:_create_oco_bracket:1711 - 🔗 Creating OCO bracket: symbol=NEAR-USDT-SWAP TP=1.7227142857142856 SL=1.6805714285714286 link=OCO1767915947803
+2026-01-09 02:45:47.805 | INFO     | infrastructure.runtime:_create_oco_bracket:1731 - 📋 Creating TP/SL using OKX algo order API
+2026-01-09 02:45:48.277 | ERROR    | infrastructure.runtime:_create_oco_bracket:1761 - ❌ SL creation failed: okx {"code":"1","data":[{"algoClOrdId":"","algoId":"","clOrdId":"","sCode":"51088","sMsg":"You can only place 1 TP/SL order to close an entire position ","tag":""}],"msg":""}
+2026-01-09 02:45:48.277 | INFO     | infrastructure.runtime:_create_oco_bracket:1775 - [OCO-MAP] {'oco_link_id': 'OCO1767915947803', 'tp_algo_id': '3201547413781909504', 'sl_algo_id': 'AMK63IBRW6EUH', 'symbol': 'NEAR-USDT-SWAP', 'entry_client_id': 'NEAH01082345', 'created_at': '2026-01-08T23:45:48.277346+00:00', 'status': 'active'}
+2026-01-09 02:45:48.277 | INFO     | infrastructure.runtime:_execute_trade:1011 - [OCO-BRACKET] sym=NEAR-USDT-SWAP oco_link=OCO1767915947803 tp_id=3201547413781909504 sl_id=None

@@ -99,6 +99,22 @@ class TelegramHandlers:
         elif view_id == 'pnl':
             context = await self.context_resolver.resolve_pnl_context()
             return build_pnl_view(context, self.formatter)
+        elif view_id == 'pnl_coins':
+            from adapters.telegram.views.pnl import build_pnl_coins_view
+            context = await self.context_resolver.resolve_pnl_context()
+            return build_pnl_coins_view(context, self.formatter)
+        elif view_id == 'pnl_day':
+            from adapters.telegram.views.pnl import build_pnl_period_view
+            context = await self.context_resolver.resolve_pnl_context()
+            return build_pnl_period_view(context, 'day', self.formatter)
+        elif view_id == 'pnl_week':
+            from adapters.telegram.views.pnl import build_pnl_period_view
+            context = await self.context_resolver.resolve_pnl_context()
+            return build_pnl_period_view(context, 'week', self.formatter)
+        elif view_id == 'pnl_month':
+            from adapters.telegram.views.pnl import build_pnl_period_view
+            context = await self.context_resolver.resolve_pnl_context()
+            return build_pnl_period_view(context, 'month', self.formatter)
         elif view_id == 'emg':
             context = await self.context_resolver.resolve_emergency_context()
             return build_emergency_view(context, self.formatter)
@@ -126,7 +142,10 @@ class TelegramHandlers:
         elif view_id == 'adv_cat':
             from adapters.telegram.views.advanced import build_coin_category_view
             category = params.get('c', 'all')
+            # Check both 'p' (raw) and 'page' (expanded by registry)
+            page = int(params.get('p', params.get('page', 0)))
             context = await self.context_resolver.resolve_coin_category_context(category)
+            context['page'] = page
             return build_coin_category_view(context, self.formatter)
         elif view_id == 'adv_thresh':
             from adapters.telegram.views.advanced import build_thresholds_view
@@ -148,6 +167,10 @@ class TelegramHandlers:
             from adapters.telegram.views.advanced import build_atr_view
             context = await self.context_resolver.resolve_atr_context()
             return build_atr_view(context, self.formatter)
+        elif view_id == 'adv_trail':
+            from adapters.telegram.views.advanced import build_trailing_view as build_trailing_settings_view
+            context = await self.context_resolver.resolve_trailing_settings_context()
+            return build_trailing_settings_view(context, self.formatter)
         # Signal history views
         elif view_id == 'sig_hist':
             from adapters.telegram.views.signals_history import build_signal_history_menu

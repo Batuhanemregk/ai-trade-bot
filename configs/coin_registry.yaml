@@ -66,21 +66,35 @@ tier_settings:
       low: 10000
     ml_enabled: false
 ml_enabled_symbols:
-- BTC
-- ETH
-- SOL
-- XRP
-- DOGE
-- AVAX
-- VET
-- OP
-- RENDER
-- WLD
-- SUI
-- UNI
-- ARB
-- ATOM
-- NEAR
+  - BTC
+  - ETH
+  - SOL
+  - AAVE
+  - ARB
+  - ATOM
+  - AVAX
+  # CAKE - OKX'te yok
+  - CRO
+  - DOGE
+  # FET - OKX'te yok
+  - GRT
+  - HYPE
+  - JUP
+  - NEAR
+  - OP
+  - PENGU
+  - RENDER
+  - SEI
+  - STX
+  - SUI
+  - TAO
+  - UNI
+  - VET
+  - VIRTUAL
+  - WLD
+  - XLM
+  - XRP
+  - ZEC
 tier_models:
   tier_2: TIER_2_ALT_15m
   tier_3: TIER_3_15m
@@ -97,6 +111,11 @@ coin_tiers:
   XRP: tier_2
   DOGE: tier_2
   AVAX: tier_2
+  BNB: tier_2
+  ADA: tier_2
+  TRX: tier_2
+  LINK: tier_2
+  # Tier 3 - Major Alts / High Volume
   VET: tier_3
   OP: tier_3
   RENDER: tier_3
@@ -106,12 +125,28 @@ coin_tiers:
   ARB: tier_3
   ATOM: tier_3
   NEAR: tier_3
+  TAO: tier_3
+  FET: tier_3
+  GRT: tier_3
+  INJ: tier_3
+  IMX: tier_3
+  FIL: tier_3
+  STX: tier_3
+  MKR: tier_3
+  # Tier 4 - Mid Cap / ML Supported
+  AAVE: tier_4
+  CAKE: tier_4
+  CRO: tier_4
+  HYPE: tier_4
+  JUP: tier_4
+  PENGU: tier_4
+  SEI: tier_4
+  VIRTUAL: tier_4
+  XLM: tier_4
+  ZEC: tier_4
   ARKM: tier_4
-  GRT: tier_4
-  TEST: tier_5
-  FET: tier_5
+  # Tier 5 - Others
   ENJ: tier_5
   JTO: tier_5
-  TAO: tier_5
   NMR: tier_5
-last_updated: '2025-12-24T02:13:15.743362+00:00'
+last_updated: "2026-01-04T02:26:00.000000+00:00"

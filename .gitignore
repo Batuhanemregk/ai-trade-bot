@@ -135,3 +135,31 @@ state/
 agent_*.log
 main.log
 aibotbs.log
+
+# Data files (may contain sensitive trading info)
+data/
+*.json
+!package.json
+!tsconfig.json
+!configs/*.json
+
+# Temporary files
+temp_*.py
+hype_analysis.txt
+*.tmp
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Models (potentially large)
+models/checkpoints/
+*.pkl
+*.joblib
+
+# OS
+.DS_Store
+Thumbs.db

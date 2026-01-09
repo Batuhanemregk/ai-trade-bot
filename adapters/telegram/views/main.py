@@ -5,8 +5,23 @@ Clean, minimal design for the main trading dashboard.
 
 from typing import Dict, Any, List, Tuple
 from datetime import datetime
+import json
+from pathlib import Path
 
 from adapters.telegram.formatter import TelegramFormatter, get_formatter
+
+
+def _is_trading_paused() -> bool:
+    """Check if trading is paused from runtime_state.json."""
+    try:
+        state_file = Path("data/runtime_state.json")
+        if state_file.exists():
+            with open(state_file, 'r') as f:
+                state = json.load(f)
+            return state.get('trading_paused', False)
+    except:
+        pass
+    return False
 
 
 def build_main_view(context: Dict[str, Any], formatter: TelegramFormatter = None) -> Tuple[str, List[List[Dict[str, str]]]]:
@@ -29,36 +44,37 @@ def build_main_view(context: Dict[str, Any], formatter: TelegramFormatter = None
     cb_state = risk.get('cb_state', 'OFF')
     health = status.get('health', 'unknown')
     
+    # Check trading pause status
+    trading_paused = _is_trading_paused()
+    
     # Mode indicator
     mode_icon = "🔴" if mode.upper() == 'LIVE' else "🧪"
     health_icon = "🟢" if health == 'ok' else "🟡" if health == 'warning' else "🔴"
+    trading_status = "⏸️ PAUSED" if trading_paused else "▶️ ACTIVE"
     
     # Build clean text
     lines = [
         f"📊 AI Trading Bot",
         f"━━━━━━━━━━━━━━━━━━━━",
         f"",
-        f"💼 Balance: ${balance:,.2f}",
-        f"📈 1D: ${pnl_1d:+,.2f} │ 7D: ${pnl_7d:+,.2f}",
+        f"💼 Balance: <b>${balance:,.2f}</b>",
         f"",
-        f"📊 Pozisyonlar: {open_pos}",
+        f"📊 Positions: {open_pos}",
         f"⚡ Exposure: {exposure_pct:.0f}%",
         f"🛡️ Circuit Breaker: {cb_state}",
-        f"",
+        f"🤖 Trading: {trading_status}",
     ]
     
-    # Top signals (max 3, compact format)
+    # Top signals (max 3, compact format) - only show if there are signals
     if signals:
+        lines.append(f"")
         signal_parts = []
         for sig in signals[:3]:
             sym = sig.get('symbol', '???').replace('-USDT-SWAP', '').replace('/USDT:USDT', '')[:4]
             score = sig.get('final_score', 0)
-            grade = sig.get('grade', '?')
             dir_icon = "▲" if sig.get('direction') == 'LONG' else "▼" if sig.get('direction') == 'SHORT' else "─"
             signal_parts.append(f"{sym}{dir_icon}{score:.0f}")
         lines.append(f"📡 {' │ '.join(signal_parts)}")
-    else:
-        lines.append("📡 Sinyal yok")
     
     lines.append("")
     
@@ -68,22 +84,27 @@ def build_main_view(context: Dict[str, Any], formatter: TelegramFormatter = None
     now = datetime.now()
     text += f"\n{mode_icon} {mode.upper()} │ {health_icon} │ {now.strftime('%H:%M:%S')}"
     
+    # Trading control button text
+    trade_btn_text = "▶️ Start" if trading_paused else "⏸️ Pause"
+    
     # Clean button layout
     buttons = [
         [
-            {"text": "📊 Pozisyonlar", "callback_data": "ai:pos"},
+            {"text": "📊 Positions", "callback_data": "ai:pos"},
             {"text": "⚠️ Risk", "callback_data": "ai:risk"},
-            {"text": "📋 Emirler", "callback_data": "ai:ord"},
+            {"text": "📋 Orders", "callback_data": "ai:ord"},
         ],
         [
-            {"text": "📡 Sinyaller", "callback_data": "ai:sig_hist"},
-            {"text": "🚨 Hatalar", "callback_data": "ai:alerts"},
+            {"text": "📡 Signals", "callback_data": "ai:sig_hist"},
+            {"text": "🚨 Alerts", "callback_data": "ai:alerts"},
             {"text": "💰 PnL", "callback_data": "ai:pnl"},
         ],
         [
-            {"text": "🔄 Yenile", "callback_data": "ai:main|r=1"},
-            {"text": "⚙️ Ayarlar", "callback_data": "ai:set"},
+            {"text": trade_btn_text, "callback_data": "ai:act|t=toggle_trading"},
+            {"text": "🔄 Refresh", "callback_data": "ai:main|r=1"},
+            {"text": "⚙️ Settings", "callback_data": "ai:set"},
         ]
     ]
     
     return text, buttons
+

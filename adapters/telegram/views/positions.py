@@ -22,7 +22,7 @@ def build_positions_view(context: Dict[str, Any], formatter: TelegramFormatter =
     time_str = last_update.strftime('%H:%M:%S') if isinstance(last_update, datetime) else str(last_update)
     
     lines = [
-        f"📊 Pozisyonlar │ {open_positions} açık",
+        f"📊 Positions │ {open_positions} open",
         f"━━━━━━━━━━━━━━━━━━━━",
         "",
     ]
@@ -48,7 +48,7 @@ def build_positions_view(context: Dict[str, Any], formatter: TelegramFormatter =
             line = f"{sym:5} {side_icon} {side:5} │ {size:.4f} │ {pnl_icon} ${upnl:+.2f}"
             lines.append(line)
     else:
-        lines.append("Açık pozisyon yok")
+        lines.append("No open positions")
     
     lines.append("")
     lines.append(f"⏰ {time_str}")
@@ -65,14 +65,14 @@ def build_positions_view(context: Dict[str, Any], formatter: TelegramFormatter =
         side_icon = "🟢" if side == 'LONG' else "🔴"
         
         buttons.append([
-            {"text": f"{side_icon} {short_sym} Kapat", "callback_data": f"ai:act|t=close|s={short_sym}"},
+            {"text": f"{side_icon} {short_sym} Close", "callback_data": f"ai:act|t=close|s={short_sym}"},
             {"text": f"🎯 TP/SL", "callback_data": f"ai:tpsl|s={short_sym}"},
         ])
     
     # Navigation
     buttons.append([
-        {"text": "🔄 Yenile", "callback_data": "ai:pos|r=1"},
-        {"text": "🏠 Ana Sayfa", "callback_data": "ai:main"},
+        {"text": "🔄 Refresh", "callback_data": "ai:pos|r=1"},
+        {"text": "🏠 Home", "callback_data": "ai:main"},
         {"text": "💰 PnL", "callback_data": "ai:pnl"},
     ])
     

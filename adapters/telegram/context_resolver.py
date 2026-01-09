@@ -710,73 +710,52 @@ class ContextResolver:
     
     async def resolve_pnl_context(self) -> Dict[str, Any]:
         """
-        Resolve context for PnL view.
+        Resolve context for PnL view using OKX trade history.
         
         Returns:
-            Dict with: balance, unrealized_pnl, realized_pnl, positions (with PnL breakdown)
+            Dict with: balance, unrealized_pnl, pnl_report (from PnL tracker)
         """
         try:
             context = {
                 'balance': 0.0,
                 'unrealized_pnl': 0.0,
-                'realized_pnl': 0.0,
-                'positions': []
+                'pnl_report': {}
             }
             
-            # Get portfolio data
+            # Get balance and unrealized PnL
             try:
-                from application.portfolio_service import PortfolioService
-                from adapters.exchange_okx_ccxt import OKXExchangeAdapter
+                from adapters.exchange_okx_ccxt import OKXCCXTAdapter
                 
-                portfolio_service = self._get_service('portfolio', lambda: PortfolioService(None))
-                exchange_adapter = self._get_service('exchange', lambda: OKXExchangeAdapter())
-                
-                if portfolio_service:
-                    balance = await portfolio_service.get_portfolio_value()
-                    context['balance'] = balance
-                
-                # Get positions with PnL
-                if exchange_adapter:
-                    exchange_positions = await exchange_adapter.fetch_positions()
+                exchange = self._get_service('exchange_ccxt', lambda: OKXCCXTAdapter())
+                if exchange:
+                    # Get account balance
+                    balance_data = exchange.ccxt_client.fetch_balance()
+                    context['balance'] = float(balance_data.get('total', {}).get('USDT', 0) or 0)
+                    
+                    # Get unrealized PnL from positions
+                    positions = exchange.ccxt_client.fetch_positions()
                     total_upnl = 0.0
-                    
-                    for pos_data in exchange_positions:
-                        contracts = float(pos_data.get('contracts', 0))
-                        if contracts == 0:
-                            continue
-                        
-                        symbol = pos_data.get('symbol', 'UNKNOWN')
-                        entry = float(pos_data.get('avgPrice', 0))
-                        mark = float(pos_data.get('markPrice', 0))
-                        upnl = float(pos_data.get('unrealizedPnl', 0))
-                        side = pos_data.get('side', 'long')
-                        
-                        # Calculate UPNL percentage
-                        upnl_pct = (upnl / (entry * contracts)) * 100 if entry > 0 and contracts > 0 else 0.0
-                        
+                    for pos in positions:
+                        upnl = float(pos.get('unrealizedPnl', 0) or 0)
                         total_upnl += upnl
-                        
-                        context['positions'].append({
-                            'symbol': symbol,
-                            'qty': contracts,
-                            'entry': entry,
-                            'mark': mark,
-                            'upnl': upnl,
-                            'upnl_pct': upnl_pct
-                        })
-                    
                     context['unrealized_pnl'] = total_upnl
-                    # Realized PnL would need trade history - placeholder for now
-                    context['realized_pnl'] = 0.0
             except Exception as e:
-                self.logger.warning(f"Failed to get PnL data: {e}")
-                self.metrics_hook.record_error('resolver', 'telegram')
+                self.logger.warning(f"Failed to get balance: {e}")
+            
+            # Get PnL report from tracker
+            try:
+                from application.pnl_tracker import get_pnl_tracker
+                tracker = get_pnl_tracker()
+                context['pnl_report'] = await tracker.get_full_report()
+            except Exception as e:
+                self.logger.error(f"Failed to get PnL report: {e}")
+                context['pnl_report'] = {'error': str(e)}
             
             return context
             
         except Exception as e:
             self.logger.error(f"Failed to resolve PnL context: {e}", exc_info=True)
-            return {'balance': 0.0, 'unrealized_pnl': 0.0, 'realized_pnl': 0.0, 'positions': []}
+            return {'balance': 0.0, 'unrealized_pnl': 0.0, 'pnl_report': {'error': str(e)}}
     
     async def resolve_settings_context(self, user_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -1142,6 +1121,39 @@ class ContextResolver:
         except Exception as e:
             self.logger.error(f"Failed to resolve ATR context: {e}")
             return {'sl_atr_mult': 2.0, 'tp_atr_mult': 4.0, 'fallback_sl_pct': 1.5, 'fallback_tp_pct': 3.0, 'pending_atr': {}}
+    
+    async def resolve_trailing_settings_context(self) -> Dict[str, Any]:
+        """Resolve trailing stop settings from policy with pending changes."""
+        try:
+            policy = self._get_policy()
+            trailing = policy.get('trading', {}).get('scoring', {}).get('trailing', {})
+            
+            # Get pending trailing from action dispatcher
+            pending_trailing = {}
+            try:
+                from adapters.telegram.action_dispatcher import get_action_dispatcher
+                dispatcher = get_action_dispatcher()
+                pending_trailing = getattr(dispatcher, '_pending_trail', {})
+            except Exception:
+                pass
+            
+            return {
+                'trailing': trailing,
+                'pending_trailing': pending_trailing,
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to resolve trailing context: {e}")
+            return {
+                'trailing': {
+                    'enabled': True,
+                    'activation_r_multiple': 0.3,
+                    'breakeven_r_multiple': 0.7,
+                    'tight_r_multiple': 1.0,
+                    'tight_offset': 0.3,
+                    'presets': {}
+                },
+                'pending_trailing': {}
+            }
     
     async def resolve_signal_history_context(self) -> Dict[str, Any]:
         """Resolve signal history main menu context."""

@@ -23,11 +23,11 @@ def build_signal_history_menu(context: Dict[str, Any], formatter) -> Tuple[str, 
     stats = context.get('stats', {})
     
     lines = [
-        "📊 <b>Sinyal Geçmişi</b>",
+        "📊 <b>Signal History</b>",
         "",
-        f"Toplam: <b>{stats.get('total_signals', 0)}</b> sinyal | <b>{stats.get('symbols', 0)}</b> coin",
+        f"Total: <b>{stats.get('total_signals', 0)}</b> signals | <b>{stats.get('symbols', 0)}</b> coins",
         "",
-        "<i>Görüntülemek için coin seçin:</i>",
+        "<i>Select a coin to view:</i>",
     ]
     
     # Build coin buttons (5 per row, max 5 rows = 25 coins)
@@ -56,11 +56,11 @@ def build_signal_history_menu(context: Dict[str, Any], formatter) -> Tuple[str, 
     
     # Add action buttons
     buttons.append([
-        {"text": "🗑️ Temizle", "callback_data": "ai:act|t=clear_all_sig"},
-        {"text": "🔄 Yenile", "callback_data": "ai:sig_hist"},
+        {"text": "🗑️ Clear", "callback_data": "ai:act|t=clear_all_sig"},
+        {"text": "🔄 Refresh", "callback_data": "ai:sig_hist"},
     ])
     buttons.append([
-        {"text": "◀️ Ana Menü", "callback_data": "ai:main"},
+        {"text": "◀️ Main Menu", "callback_data": "ai:main"},
     ])
     
     return "\n".join(lines), buttons
@@ -82,17 +82,17 @@ def build_coin_signals_view(context: Dict[str, Any], formatter) -> Tuple[str, Li
     short_symbol = symbol.replace('-USDT-SWAP', '').replace('USDT', '')
     
     lines = [
-        f"📈 <b>{short_symbol} Sinyal Geçmişi</b>",
+        f"📈 <b>{short_symbol} Signal History</b>",
         "",
     ]
     
     if not signals:
-        lines.append("<i>Henüz sinyal kaydı yok.</i>")
+        lines.append("<i>No signal records yet.</i>")
     else:
-        lines.append(f"Son <b>{len(signals)}</b> sinyal:")
+        lines.append(f"Last <b>{len(signals)}</b> signals:")
         lines.append("")
         lines.append("<code>")
-        lines.append("Zaman  | TA   ML   → Final  Dir")
+        lines.append("Time   | TA   ML   → Final  Dir")
         lines.append("─" * 32)
         
         for sig in signals[:20]:  # Max 20 in view
@@ -121,16 +121,16 @@ def build_coin_signals_view(context: Dict[str, Any], formatter) -> Tuple[str, Li
         lines.append("</code>")
         
         if len(signals) > 20:
-            lines.append(f"\n<i>+{len(signals) - 20} daha...</i>")
+            lines.append(f"\n<i>+{len(signals) - 20} more...</i>")
     
     # Buttons
     buttons = [
         [
-            {"text": "🔄 Yenile", "callback_data": f"ai:sig_coin|s={symbol}"},
-            {"text": "🗑️ Temizle", "callback_data": f"ai:act|t=clear_sig|s={symbol}"},
+            {"text": "🔄 Refresh", "callback_data": f"ai:sig_coin|s={symbol}"},
+            {"text": "🗑️ Clear", "callback_data": f"ai:act|t=clear_sig|s={symbol}"},
         ],
         [
-            {"text": "◀️ Coin Listesi", "callback_data": "ai:sig_hist"},
+            {"text": "◀️ Coin List", "callback_data": "ai:sig_hist"},
         ],
     ]
     

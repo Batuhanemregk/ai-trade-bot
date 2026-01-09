@@ -14,6 +14,7 @@ class CircuitBreakerState:
     """Circuit breaker state enumeration."""
     NORMAL = "normal"
     WARNING = "warning"
+    SIZE_REDUCED = "size_reduced"  # New: 2 consecutive losses
     PAUSED = "paused"
     EMERGENCY = "emergency"
 
@@ -38,8 +39,17 @@ class CircuitBreaker:
         risk_config = policy.get('trading', {}).get('risk', {})
         self.daily_loss_limit = risk_config.get('max_daily_loss', 0.25)  # 25% default
         self.max_drawdown = risk_config.get('max_drawdown', 0.15)  # 15% default
-        self.max_consecutive_losses = risk_config.get('streak_guard', {}).get('max_losses', 3)
-        self.cooldown_hours = risk_config.get('streak_guard', {}).get('cooldown_hours', 24)
+        
+        # Kademeli streak guard seviyeleri
+        streak_config = risk_config.get('streak_guard', {})
+        self.streak_levels = streak_config.get('levels', [
+            {'losses': 2, 'action': 'reduce_size', 'reduction_pct': 50},
+            {'losses': 3, 'action': 'cooldown', 'cooldown_hours': 2},
+            {'losses': 5, 'action': 'cooldown', 'cooldown_hours': 6},
+            {'losses': 7, 'action': 'full_stop', 'cooldown_hours': 24, 'notify_admin': True}
+        ])
+        self.max_consecutive_losses = streak_config.get('max_losses', 3)  # Eski uyumluluk
+        self.cooldown_hours = streak_config.get('cooldown_hours', 24)  # Eski uyumluluk
         
         # State tracking
         self.daily_start_balance = None
@@ -47,6 +57,12 @@ class CircuitBreaker:
         self.consecutive_losses = 0
         self.paused_until = None
         self.emergency_triggered = False
+        
+        # Yeni: Position size reduction tracking
+        self.size_reduction_active = False
+        self.size_reduction_pct = 0
+        self.size_reduction_until = None
+        self.last_win_time = None
         
         # Load previous state
         self._load_state()
@@ -147,27 +163,110 @@ class CircuitBreaker:
         return False
     
     async def _check_consecutive_losses(self, recent_trades: list) -> bool:
-        """Check consecutive loss streak."""
+        """Check consecutive loss streak with tiered response."""
         if not recent_trades:
             return False
         
         # Count consecutive losses (most recent first)
         consecutive = 0
         for trade in reversed(recent_trades[-10:]):  # Last 10 trades
-            if trade.get('pnl', 0) < 0:
+            pnl = trade.get('pnl', 0)
+            if pnl < 0:
                 consecutive += 1
             else:
+                # Kazanç görüldü - size reduction'ı sıfırla
+                if self.size_reduction_active:
+                    await self._reset_size_reduction("Winning trade detected")
                 break
         
         self.consecutive_losses = consecutive
+        self._save_state()
         
-        if consecutive >= self.max_consecutive_losses:
-            logger.warning(
-                f"⚠️ Consecutive losses: {consecutive} >= {self.max_consecutive_losses}"
-            )
+        # Kademeli streak kontrolü
+        action_taken = await self._apply_streak_action(consecutive)
+        
+        return action_taken
+    
+    async def _apply_streak_action(self, consecutive: int) -> bool:
+        """Apply appropriate action based on consecutive loss count."""
+        # En yüksek eşiği bul
+        applicable_level = None
+        for level in sorted(self.streak_levels, key=lambda x: x['losses'], reverse=True):
+            if consecutive >= level['losses']:
+                applicable_level = level
+                break
+        
+        if not applicable_level:
+            # Streak seviyesinin altında - size reduction varsa ve 2 saat geçtiyse sıfırla
+            if self.size_reduction_active and self.size_reduction_until:
+                if datetime.now(timezone.utc) >= self.size_reduction_until:
+                    await self._reset_size_reduction("2 hour timeout expired")
+            return False
+        
+        action = applicable_level['action']
+        losses_threshold = applicable_level['losses']
+        
+        logger.warning(f"⚠️ Streak Guard: {consecutive} kayıp >= {losses_threshold} eşiği, aksiyon: {action}")
+        
+        if action == 'reduce_size':
+            reduction_pct = applicable_level.get('reduction_pct', 50)
+            await self._activate_size_reduction(reduction_pct, consecutive)
+            return False  # Trading devam eder, sadece size azalır
+        
+        elif action == 'cooldown':
+            hours = applicable_level.get('cooldown_hours', 2)
+            await self._trigger_pause(hours, f"{consecutive} consecutive losses")
+            return True
+        
+        elif action == 'full_stop':
+            hours = applicable_level.get('cooldown_hours', 24)
+            notify = applicable_level.get('notify_admin', True)
+            await self._trigger_pause(hours, f"{consecutive} consecutive losses - FULL STOP")
+            if notify:
+                await self._send_telegram_alert(
+                    "🚨 STREAK GUARD: FULL STOP",
+                    f"**{consecutive} ardışık kayıp!**\n"
+                    f"Trading 24 saat durduruldu.\n"
+                    f"Manuel inceleme gerekli."
+                )
             return True
         
         return False
+    
+    async def _activate_size_reduction(self, reduction_pct: int, consecutive: int):
+        """Activate position size reduction."""
+        self.size_reduction_active = True
+        self.size_reduction_pct = reduction_pct
+        self.size_reduction_until = datetime.now(timezone.utc) + timedelta(hours=2)
+        self.state = CircuitBreakerState.SIZE_REDUCED
+        self._save_state()
+        
+        logger.warning(f"📉 Position size %{reduction_pct} azaltıldı ({consecutive} kayıp). "
+                      f"1 kazanç veya 2 saat sonra normale döner.")
+        
+        await self._send_telegram_alert(
+            "📉 Position Size Azaltıldı",
+            f"**{consecutive} ardışık kayıp tespit edildi**\n"
+            f"Position size %{reduction_pct} azaltıldı.\n"
+            f"Sıfırlama: 1 kazanç veya 2 saat"
+        )
+    
+    async def _reset_size_reduction(self, reason: str):
+        """Reset position size reduction."""
+        self.size_reduction_active = False
+        self.size_reduction_pct = 0
+        self.size_reduction_until = None
+        if self.state == CircuitBreakerState.SIZE_REDUCED:
+            self.state = CircuitBreakerState.NORMAL
+        self._save_state()
+        
+        logger.info(f"✅ Position size normale döndü: {reason}")
+    
+    def get_position_size_multiplier(self) -> float:
+        """Get current position size multiplier (for use by trading logic)."""
+        if self.size_reduction_active:
+            return 1.0 - (self.size_reduction_pct / 100.0)  # e.g., 0.5 for 50% reduction
+        return 1.0
     
     async def _trigger_emergency(self, reason: str):
         """Trigger emergency stop."""

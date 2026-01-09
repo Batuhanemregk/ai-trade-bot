@@ -1319,19 +1319,29 @@ class OKXCCXTAdapter:
             
             td_mode = os.getenv('OKX_TD_MODE', 'cross')
             
-            # Convert size to contracts for swaps - MUST be integer (lot size multiple)
-            market = self.exchange.market(symbol if '/' in symbol else f"{symbol.split('-')[0]}/USDT:USDT")
-            ct_val = float(market.get('info', {}).get('ctVal', 1))
-            if ct_val != 1.0:
-                contracts = int(size / ct_val)  # Must be integer for lot size
-            else:
-                contracts = int(size)  # Must be integer
+            # CRITICAL FIX: Size is in BASE CURRENCY, must convert to contracts using ctVal
+            # Example: 7.9 HYPE with ctVal=0.1 → 7.9 / 0.1 = 79 contracts
+            # Before this fix: int(round(7.9)) = 8 contracts (WRONG!)
             
-            # Ensure at least 1 contract
+            # Get ctVal from market info
+            try:
+                ccxt_symbol = symbol if '/' in symbol else symbol.replace('-USDT-SWAP', '/USDT:USDT')
+                market = self.exchange.market(ccxt_symbol)
+                ct_val = float(market.get('info', {}).get('ctVal', 1))
+            except Exception as e:
+                logger.warning(f"[ALGO_SL] Could not get ctVal for {symbol}: {e}, using 1")
+                ct_val = 1
+            
+            # Convert base currency to contracts
+            contracts_float = size / ct_val
+            contracts = int(round(contracts_float))
+            
             if contracts < 1:
                 contracts = 1
             
-            # OKX algo order params
+            logger.info(f"[ALGO_SL] {symbol}: base_size={size} / ctVal={ct_val} = {contracts} contracts")
+            
+            # OKX algo order params - use sz with actual position size
             algo_params = {
                 'instId': okx_symbol,
                 'tdMode': td_mode,
@@ -1354,7 +1364,7 @@ class OKXCCXTAdapter:
                     'algoId': algo_id,
                     'symbol': symbol,
                     'triggerPrice': trigger_price,
-                    'size': size
+                    'size': contracts
                 }
             else:
                 logger.error(f"❌ Failed to create SL algo order: {result}")
@@ -1391,19 +1401,29 @@ class OKXCCXTAdapter:
             
             td_mode = os.getenv('OKX_TD_MODE', 'cross')
             
-            # Convert size to contracts for swaps - MUST be integer (lot size multiple)
-            market = self.exchange.market(symbol if '/' in symbol else f"{symbol.split('-')[0]}/USDT:USDT")
-            ct_val = float(market.get('info', {}).get('ctVal', 1))
-            if ct_val != 1.0:
-                contracts = int(size / ct_val)  # Must be integer for lot size
-            else:
-                contracts = int(size)  # Must be integer
+            # CRITICAL FIX: Size is in BASE CURRENCY, must convert to contracts using ctVal
+            # Example: 7.9 HYPE with ctVal=0.1 → 7.9 / 0.1 = 79 contracts
+            # Before this fix: int(round(7.9)) = 8 contracts (WRONG!)
             
-            # Ensure at least 1 contract
+            # Get ctVal from market info
+            try:
+                ccxt_symbol = symbol if '/' in symbol else symbol.replace('-USDT-SWAP', '/USDT:USDT')
+                market = self.exchange.market(ccxt_symbol)
+                ct_val = float(market.get('info', {}).get('ctVal', 1))
+            except Exception as e:
+                logger.warning(f"[ALGO_TP] Could not get ctVal for {symbol}: {e}, using 1")
+                ct_val = 1
+            
+            # Convert base currency to contracts
+            contracts_float = size / ct_val
+            contracts = int(round(contracts_float))
+            
             if contracts < 1:
                 contracts = 1
             
-            # OKX algo order params
+            logger.info(f"[ALGO_TP] {symbol}: base_size={size} / ctVal={ct_val} = {contracts} contracts")
+            
+            # OKX algo order params - use sz with proper contract amount
             algo_params = {
                 'instId': okx_symbol,
                 'tdMode': td_mode,

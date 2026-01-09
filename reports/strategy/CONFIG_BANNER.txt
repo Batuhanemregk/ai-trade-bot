@@ -16,7 +16,7 @@ RISK LIMITS:
   max_leverage: 3.0 (source=default)
 
 SYMBOLS:
-  supported_pairs: ['BTC-USDT-SWAP', 'ETH-USDT-SWAP', 'SOL-USDT-SWAP'] (source=policy.yaml)
+  supported_pairs: ['BTC-USDT-SWAP', 'ETH-USDT-SWAP', 'SOL-USDT-SWAP', 'DOGE-USDT-SWAP', 'OP-USDT-SWAP', 'SUI-USDT-SWAP', 'UNI-USDT-SWAP', 'AVAX-USDT-SWAP', 'WLD-USDT-SWAP', 'CRO-USDT-SWAP', 'RENDER-USDT-SWAP', 'PENGU-USDT-SWAP', 'SEI-USDT-SWAP', 'ZEC-USDT-SWAP', 'XRP-USDT-SWAP', 'ATOM-USDT-SWAP', 'STX-USDT-SWAP'] (source=policy.yaml)
   timeframe: 15m (source=default)
 
 SCALE-IN CONFIG (if enabled):

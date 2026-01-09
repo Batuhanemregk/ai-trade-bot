@@ -84,6 +84,13 @@ class ActionDispatcher:
             'clear_all_sig': self._handle_clear_all_signals,
             # Alert history handlers
             'clear_alerts': self._handle_clear_alerts,
+            # Trading control
+            'toggle_trading': self._handle_toggle_trading,
+            # Trailing stop handlers
+            'trail_preset': self._handle_trail_preset,
+            'trail_adj': self._handle_trail_adjust,
+            'save_trail': self._handle_save_trail,
+            'cancel_trail': self._handle_cancel_trail,
         }
         
         # Session states for pending adjustments
@@ -91,6 +98,7 @@ class ActionDispatcher:
         self._pending_weights: Dict[str, float] = {}
         self._pending_atr: Dict[str, float] = {}
         self._pending_thresh: Dict[str, int] = {}
+        self._pending_trail: Dict[str, float] = {}
     
     def _get_exchange_adapter(self):
         """Lazy load exchange adapter."""
@@ -1410,6 +1418,156 @@ class ActionDispatcher:
             return ActionResult(True, "❌ Değişiklikler iptal edildi", next_view='adv_size')
         except Exception as e:
             return ActionResult(False, f"Error: {e}")
+    
+    async def _handle_toggle_trading(self, params: Dict) -> ActionResult:
+        """
+        Toggle trading on/off.
+        
+        When paused:
+        - trading_analysis job will skip opening new positions
+        - Existing positions will continue to be managed (trailing stop, etc.)
+        """
+        try:
+            import json
+            from pathlib import Path
+            
+            state_file = Path("data/runtime_state.json")
+            
+            # Load current state
+            if state_file.exists():
+                with open(state_file, 'r') as f:
+                    runtime_state = json.load(f)
+            else:
+                runtime_state = {}
+            
+            # Toggle trading_paused
+            current_paused = runtime_state.get('trading_paused', False)
+            new_paused = not current_paused
+            runtime_state['trading_paused'] = new_paused
+            
+            # Save state
+            with open(state_file, 'w') as f:
+                json.dump(runtime_state, f, indent=2)
+            
+            if new_paused:
+                self.logger.warning("⏸️ Trading PAUSED via Telegram")
+                return ActionResult(
+                    True, 
+                    "⏸️ Trading durduruldu!\n\nYeni pozisyon açılmayacak.\nMevcut pozisyonlar yönetilmeye devam edecek.",
+                    next_view='main'
+                )
+            else:
+                self.logger.info("▶️ Trading RESUMED via Telegram")
+                return ActionResult(
+                    True, 
+                    "▶️ Trading başlatıldı!\n\nBot normal şekilde işlem yapabilir.",
+                    next_view='main'
+                )
+                
+        except Exception as e:
+            self.logger.error(f"Failed to toggle trading: {e}")
+            return ActionResult(False, f"Hata: {e}")
+
+    # ========================= TRAILING STOP HANDLERS =========================
+    
+    async def _handle_trail_preset(self, params: Dict) -> ActionResult:
+        """Apply a trailing stop preset (aggressive, balanced, conservative)."""
+        try:
+            mode = params.get('m', 'balanced')
+            policy = self._get_policy()
+            
+            presets = policy.get('trading', {}).get('scoring', {}).get('trailing', {}).get('presets', {})
+            preset = presets.get(mode)
+            
+            if not preset:
+                return ActionResult(False, f"Preset bulunamadı: {mode}")
+            
+            # Store all preset values as pending
+            self._pending_trail = {
+                'activation_r_multiple': preset.get('activation_r_multiple', 0.3),
+                'breakeven_r_multiple': preset.get('breakeven_r_multiple', 0.7),
+                'tight_r_multiple': preset.get('tight_r_multiple', 1.0),
+                'tight_offset': preset.get('tight_offset', 0.3),
+            }
+            
+            preset_names = {'aggressive': '🔥 Agresif', 'balanced': '⚖️ Dengeli', 'conservative': '🛡️ Konservatif'}
+            return ActionResult(
+                True, 
+                f"{preset_names.get(mode, mode)} preset uygulandı.\nKaydetmek için ✅ Kaydet butonuna basın.",
+                next_view='adv_trail'
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to apply trail preset: {e}")
+            return ActionResult(False, f"Hata: {e}")
+    
+    async def _handle_trail_adjust(self, params: Dict) -> ActionResult:
+        """Adjust a single trailing parameter."""
+        try:
+            key = params.get('k', '')  # activation, breakeven, tight_r, offset
+            direction = params.get('d', 'up')
+            
+            policy = self._get_policy()
+            trailing = policy.get('trading', {}).get('scoring', {}).get('trailing', {})
+            
+            # Map short keys to full keys
+            key_map = {
+                'activation': 'activation_r_multiple',
+                'breakeven': 'breakeven_r_multiple', 
+                'tight_r': 'tight_r_multiple',
+                'offset': 'tight_offset',
+            }
+            full_key = key_map.get(key, key)
+            
+            # Get current value (from pending or policy)
+            current = self._pending_trail.get(full_key) or trailing.get(full_key, 0.5)
+            
+            # Adjust by 0.1
+            delta = 0.1 if direction == 'up' else -0.1
+            new_value = round(max(0.1, current + delta), 1)
+            
+            # Store in pending
+            self._pending_trail[full_key] = new_value
+            
+            return ActionResult(
+                True, 
+                f"{key}: {current} → {new_value}",
+                next_view='adv_trail'
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to adjust trail param: {e}")
+            return ActionResult(False, f"Hata: {e}")
+    
+    async def _handle_save_trail(self, params: Dict) -> ActionResult:
+        """Save pending trailing stop settings to policy.yaml."""
+        try:
+            if not self._pending_trail:
+                return ActionResult(False, "Kaydedilecek değişiklik yok.")
+            
+            # Save each pending value
+            for key, value in self._pending_trail.items():
+                path = f"trading.scoring.trailing.{key}"
+                await asyncio.to_thread(self._save_to_policy, path, value)
+            
+            saved_count = len(self._pending_trail)
+            self._pending_trail.clear()
+            
+            return ActionResult(
+                True, 
+                f"✅ {saved_count} trailing ayarı kaydedildi!\nDeğişiklikler hemen aktif.",
+                next_view='adv_trail'
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to save trail settings: {e}")
+            return ActionResult(False, f"Kaydetme hatası: {e}")
+    
+    async def _handle_cancel_trail(self, params: Dict) -> ActionResult:
+        """Cancel pending trailing stop changes."""
+        self._pending_trail.clear()
+        return ActionResult(
+            True, 
+            "Değişiklikler iptal edildi.",
+            next_view='adv_trail'
+        )
 
 
 # Global instance

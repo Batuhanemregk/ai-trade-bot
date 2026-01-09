@@ -333,8 +333,8 @@ class RiskMonitorJob(BaseJob):
                 logger.warning(f"⚠️ Failed to fetch portfolio for circuit breaker: {e}")
                 return
             
-            # Get recent trades (simplified - would need trade history)
-            recent_trades = []  # TODO: Implement trade history tracking
+            # Get recent trades from history
+            recent_trades = await self._get_recent_trades()
             
             # Check circuit breaker
             state = await self.circuit_breaker.check_conditions(portfolio, recent_trades)
@@ -346,3 +346,16 @@ class RiskMonitorJob(BaseJob):
             
         except Exception as e:
             logger.error(f"❌ Circuit breaker check failed: {e}")
+    
+    async def _get_recent_trades(self) -> list:
+        """Get recent trades for streak analysis using TradeHistory."""
+        try:
+            # Use TradeHistory module for consolidated trade tracking
+            from application.trade_history import get_trade_history
+            trade_history = get_trade_history()
+            return trade_history.get_recent_trades(limit=10)
+        except Exception as e:
+            logger.warning(f"Failed to get recent trades: {e}")
+            return []
+
+

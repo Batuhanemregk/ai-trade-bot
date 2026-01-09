@@ -258,6 +258,24 @@ class FeatureBuilder:
         vol_std = vol_20.rolling(window=100).std()
         df['volatility_zscore'] = (vol_20 - vol_mean) / vol_std
         
+        # ===== Market Trend Regime (YENİ) =====
+        # 1 = BULLISH (EMA20 > EMA50 + ADX > 20)
+        # -1 = BEARISH (EMA20 < EMA50 + ADX > 20)
+        # 0 = SIDEWAYS (ADX < 20)
+        ema_20 = df['close'].ewm(span=20, adjust=False).mean()
+        ema_50 = df['close'].ewm(span=50, adjust=False).mean()
+        adx_current = df['adx'] if 'adx' in df.columns else 20
+        
+        conditions = [
+            (ema_20 > ema_50) & (adx_current > 20),  # BULLISH
+            (ema_20 < ema_50) & (adx_current > 20),  # BEARISH
+        ]
+        choices = [1, -1]
+        df['market_trend_regime'] = np.select(conditions, choices, default=0)
+        
+        # Trend strength (EMA gap normalized)
+        df['trend_strength'] = (ema_20 - ema_50) / df['close'] * 100
+        
         # ===== Normalized Price Distance from Key Levels =====
         # Distance from SMAs (normalized by price)
         df['distance_sma_20'] = (df['close'] - df['sma_20']) / df['close']

@@ -26,18 +26,18 @@ def build_risk_view(context: Dict[str, Any], formatter: TelegramFormatter = None
     cb_icon = "🟢" if cb_state == 'OFF' else "🔴"
     
     lines = [
-        f"⚠️ Risk Durumu",
+        f"⚠️ Risk Status",
         f"━━━━━━━━━━━━━━━━━━━━",
         "",
         f"📊 Exposure  : {exp_icon} {exposure_pct:.1f}%",
-        f"📈 Pozisyon  : {open_pos} / {max_pos}",
+        f"📈 Positions : {open_pos} / {max_pos}",
         f"🛡️ CB        : {cb_icon} {cb_state}",
         "",
     ]
     
     # Alerts
     if alerts:
-        lines.append("── Uyarılar ──")
+        lines.append("── Alerts ──")
         for alert in alerts[:3]:
             lines.append(f"⚠️ {alert}")
         lines.append("")
@@ -49,8 +49,8 @@ def build_risk_view(context: Dict[str, Any], formatter: TelegramFormatter = None
     
     buttons = [
         [
-            {"text": "🔄 Yenile", "callback_data": "ai:risk|r=1"},
-            {"text": "🏠 Ana Sayfa", "callback_data": "ai:main"},
+            {"text": "🔄 Refresh", "callback_data": "ai:risk|r=1"},
+            {"text": "🏠 Home", "callback_data": "ai:main"},
         ]
     ]
     

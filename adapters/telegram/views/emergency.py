@@ -47,7 +47,7 @@ def build_emergency_view(context: Dict[str, Any], formatter: TelegramFormatter =
         f"{cb_emoji} Circuit Breaker: {cb_state}",
         "",
         "━━━━━━━━━━━━━━━━━━━━━━━━",
-        "⚠️ DİKKAT: Aşağıdaki işlemler geri alınamaz!",
+        "⚠️ WARNING: The following actions cannot be undone!",
         "━━━━━━━━━━━━━━━━━━━━━━━━",
         ""
     ]
@@ -60,27 +60,27 @@ def build_emergency_view(context: Dict[str, Any], formatter: TelegramFormatter =
     # Close all positions button (only if positions exist)
     if open_positions > 0:
         buttons.append([
-            {"text": "🔴 TÜM POZİSYONLARI KAPAT", "callback_data": "ai:act|t=close_all|back=main"}
+            {"text": "🔴 CLOSE ALL POSITIONS", "callback_data": "ai:act|t=close_all|back=main"}
         ])
     
     # Circuit breaker controls
     if cb_state == 'OFF':
         buttons.append([
-            {"text": "🚫 Circuit Breaker AKTİF", "callback_data": "ai:act|t=cb_on|back=main"}
+            {"text": "🚫 Circuit Breaker ACTIVATE", "callback_data": "ai:act|t=cb_on|back=main"}
         ])
     else:
         buttons.append([
-            {"text": "✅ Circuit Breaker KAPAT", "callback_data": "ai:act|t=cb_off|back=main"}
+            {"text": "✅ Circuit Breaker DEACTIVATE", "callback_data": "ai:act|t=cb_off|back=main"}
         ])
     
     # Cancel all pending orders
     buttons.append([
-        {"text": "❌ Tüm Bekleyen Emirleri İptal", "callback_data": "ai:act|t=cancel_all|back=main"}
+        {"text": "❌ Cancel All Pending Orders", "callback_data": "ai:act|t=cancel_all|back=main"}
     ])
     
     # Navigation - prominent back button
     buttons.append([
-        {"text": "◀️ GERİ (Güvenli)", "callback_data": "ai:main"}
+        {"text": "◀️ BACK (Safe)", "callback_data": "ai:main"}
     ])
     
     return text, buttons

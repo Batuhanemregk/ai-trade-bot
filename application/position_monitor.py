@@ -572,14 +572,33 @@ class PositionMonitor:
             logger.error(f"Failed to calculate realized PnL for {symbol}: {e}")
             return None
     
-    async def _notify_position_closed(self, symbol: str, realized_pnl: float):
-        """Notify about position closure."""
+    async def _notify_position_closed(self, symbol: str, realized_pnl: float, 
+                                       direction: str = None, entry_price: float = 0):
+        """Notify about position closure and record to trade history."""
         try:
             logger.info(f"Position closed for {symbol}: Realized PnL: {realized_pnl:.2f}")
             
             # Update portfolio PnL
             self.total_pnl += realized_pnl
             self.daily_pnl += realized_pnl
+            
+            # Record to TradeHistory for per-symbol streak tracking
+            try:
+                from application.trade_history import get_trade_history
+                trade_history = get_trade_history()
+                result = trade_history.record_trade(
+                    symbol=symbol,
+                    direction=direction or 'unknown',
+                    pnl=realized_pnl,
+                    entry_price=entry_price
+                )
+                
+                # Log streak status
+                if result['new_streak'] >= 2:
+                    logger.warning(f"⚠️ [{symbol}] Streak: {result['new_streak']} ardışık kayıp!")
+                    
+            except Exception as e:
+                logger.warning(f"Failed to record trade to history: {e}")
             
             # Notify risk service
             await self.risk_service.on_position_closed(symbol, realized_pnl)

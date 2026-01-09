@@ -116,20 +116,34 @@ class MLScorer:
             for tf in timeframes:
                 key = f"{symbol}_{tf}"
                 
-                # Try new format first (advanced models with feature selection)
-                # New format: BTC_USDT_15m_last18m.pkl (from train_advanced.py)
-                model_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_last18m.pkl")
-                metadata_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_last18m_metadata.json")
+                # PRIORITY 1: Multi-class models (UP/NEUTRAL/DOWN - best quality)
+                model_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_multiclass.pkl")
+                metadata_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_multiclass_metadata.json")
+                is_multiclass = True
                 
-                # Fallback: old format BTCUSDT_15m_last18m.pkl
+                # PRIORITY 2: Regime v2 models
+                if not model_path.exists():
+                    model_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_regime_v2.pkl")
+                    metadata_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_regime_v2_metadata.json")
+                    is_multiclass = False
+                
+                # PRIORITY 3: Advanced 18m models
+                if not model_path.exists():
+                    model_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_last18m.pkl")
+                    metadata_path = Path(f"models/lgbm/{symbol}_USDT_{tf}_last18m_metadata.json")
+                    is_multiclass = False
+                
+                # PRIORITY 4: Old format BTCUSDT_15m_last18m.pkl
                 if not model_path.exists():
                     model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m.pkl")
                     metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last18m_metadata.json")
+                    is_multiclass = False
                 
-                # Fallback: 6-month models
+                # PRIORITY 5: 6-month models
                 if not model_path.exists():
                     model_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m.pkl")
                     metadata_path = Path(f"models/lgbm/{symbol}USDT_{tf}_last6m_metadata.json")
+                    is_multiclass = False
                 
                 try:
                     if not model_path.exists():
@@ -147,13 +161,20 @@ class MLScorer:
                     else:
                         self.metadata[key] = {}
                     
-                    # Try to get AUC from metrics
-                    auc = self.metadata[key].get('metrics', {}).get('auc', 'unknown')
-                    if auc == 'unknown':
-                        auc = self.metadata[key].get('metrics', {}).get('auc_mean', 'unknown')
+                    # Mark if multiclass
+                    self.metadata[key]['is_multiclass'] = is_multiclass
+                    
+                    # Try to get metrics
+                    metrics = self.metadata[key].get('metrics', {})
+                    model_type = self.metadata[key].get('model_type', 'binary')
                     n_features = self.metadata[key].get('n_features', 'unknown')
                     
-                    logger.info(f"✅ Loaded LGBM model: {key} (AUC={auc}, Features={n_features})")
+                    if model_type == 'multi-class' or is_multiclass:
+                        f1 = metrics.get('f1_macro_mean', 'unknown')
+                        logger.info(f"✅ Loaded MULTICLASS model: {key} (F1={f1}, Features={n_features})")
+                    else:
+                        auc = metrics.get('auc', metrics.get('auc_mean', 'unknown'))
+                        logger.info(f"✅ Loaded LGBM model: {key} (AUC={auc}, Features={n_features})")
                     loaded_dedicated += 1
                     
                 except Exception as e:
@@ -243,8 +264,11 @@ class MLScorer:
                 return self._fallback_score(symbol)
             
             # Get feature columns from model metadata
-            # Note: train_advanced.py saves as 'feature_columns', not 'features'
+            # Note: different training scripts use different keys
             model_features = self.metadata.get(model_key, {}).get('feature_columns', [])
+            if not model_features:
+                # Multi-class pipeline uses 'selected_features'
+                model_features = self.metadata.get(model_key, {}).get('selected_features', [])
             if not model_features:
                 # Try alternate key
                 model_features = self.metadata.get(model_key, {}).get('features', [])
@@ -279,53 +303,96 @@ class MLScorer:
             
             # Predict with DataFrame (preserves feature names)
             model = self.models[model_key]
-            p_up = model.predict_proba(latest_features_df)[0, 1]
+            probs = model.predict_proba(latest_features_df)[0]
             
-            # Convert to 0-100 score (bidirectional mapping for SHORT/LONG)
-            # Updated for new 1% threshold model with sharper predictions
-            # p_up >= 0.70: Strong LONG (70-100)
-            # 0.55 < p_up < 0.70: Moderate LONG (60-69)
-            # 0.45 < p_up < 0.55: NEUTRAL (40-59)
-            # 0.30 < p_up <= 0.45: Moderate SHORT (20-39)
-            # p_up <= 0.30: Strong SHORT (0-19)
-            if p_up >= 0.70:
-                ml_score = round(70 + (p_up - 0.70) / 0.30 * 30, 1)  # 70-100
-                signal_dir = "LONG"
-            elif p_up >= 0.55:
-                ml_score = round(60 + (p_up - 0.55) / 0.15 * 10, 1)  # 60-70
-                signal_dir = "LONG_WEAK"
-            elif p_up >= 0.45:
-                ml_score = round(40 + (p_up - 0.45) / 0.10 * 20, 1)  # 40-60
-                signal_dir = "NEUTRAL"
-            elif p_up >= 0.30:
-                ml_score = round(20 + (p_up - 0.30) / 0.15 * 20, 1)  # 20-40
-                signal_dir = "SHORT_WEAK"
+            # Check if multi-class model (3 classes: DOWN, NEUTRAL, UP)
+            is_multiclass = self.metadata.get(model_key, {}).get('is_multiclass', False)
+            
+            if is_multiclass or len(probs) == 3:
+                # MULTI-CLASS MODEL: [p_down, p_neutral, p_up]
+                p_down = probs[0]
+                p_neutral = probs[1] if len(probs) > 2 else 0
+                p_up = probs[2] if len(probs) > 2 else probs[1]
+                
+                # ML Score = 50 + (p_up - p_down) * 50
+                # This gives balanced scores: p_up > p_down → bullish, p_down > p_up → bearish
+                net_bullish = p_up - p_down
+                ml_score = round(50 + net_bullish * 50, 1)
+                ml_score = max(0.0, min(100.0, ml_score))  # Clamp 0-100
+                
+                # Determine direction
+                if ml_score >= 65:
+                    signal_dir = "LONG"
+                elif ml_score >= 55:
+                    signal_dir = "LONG_WEAK"
+                elif ml_score >= 45:
+                    signal_dir = "NEUTRAL"
+                elif ml_score >= 35:
+                    signal_dir = "SHORT_WEAK"
+                else:
+                    signal_dir = "SHORT"
+                
+                # Confidence based on max probability
+                max_prob = max(p_down, p_neutral, p_up)
+                if max_prob >= 0.6:
+                    confidence = "high"
+                elif max_prob >= 0.45:
+                    confidence = "medium"
+                else:
+                    confidence = "low"
+                
+                rationale = f"MULTICLASS {model_key}: p_up={p_up:.3f}, p_down={p_down:.3f} -> {ml_score:.1f}/100 ({signal_dir})"
+                
+                details = {
+                    'model': model_key,
+                    'p_up': float(p_up),
+                    'p_down': float(p_down),
+                    'p_neutral': float(p_neutral),
+                    'ml_score': float(ml_score),
+                    'signal_direction': signal_dir,
+                    'confidence': confidence,
+                    'model_type': 'MultiClass-LightGBM',
+                    'n_features': len(model_features)
+                }
             else:
-                ml_score = round((p_up / 0.30) * 20, 1)  # 0-20
-                signal_dir = "SHORT"
-            
-            # Determine confidence
-            confidence = self._calculate_confidence(p_up)
-            
-            # Rationale
-            rationale = f"LGBM {model_key}: p_up={p_up:.3f} -> {ml_score:.1f}/100 ({signal_dir}, confidence={confidence})"
-            
-            # Details
-            auc = self.metadata[model_key].get('metrics', {}).get('auc', 0)
-            if not auc:
-                auc = self.metadata[model_key].get('metrics', {}).get('auc_mean', 0)
-            
-            details = {
-                'model': model_key,
-                'p_up': float(p_up),
-                'p_down': float(1 - p_up),
-                'ml_score': float(ml_score),
-                'signal_direction': signal_dir,
-                'confidence': confidence,
-                'model_type': 'LightGBM',
-                'auc': float(auc) if auc else None,
-                'n_features': len(model_features)
-            }
+                # BINARY MODEL: [p_down, p_up]
+                p_up = probs[1]
+                
+                # Original binary scoring logic
+                if p_up >= 0.70:
+                    ml_score = round(70 + (p_up - 0.70) / 0.30 * 30, 1)
+                    signal_dir = "LONG"
+                elif p_up >= 0.55:
+                    ml_score = round(60 + (p_up - 0.55) / 0.15 * 10, 1)
+                    signal_dir = "LONG_WEAK"
+                elif p_up >= 0.45:
+                    ml_score = round(40 + (p_up - 0.45) / 0.10 * 20, 1)
+                    signal_dir = "NEUTRAL"
+                elif p_up >= 0.30:
+                    ml_score = round(20 + (p_up - 0.30) / 0.15 * 20, 1)
+                    signal_dir = "SHORT_WEAK"
+                else:
+                    ml_score = round((p_up / 0.30) * 20, 1)
+                    signal_dir = "SHORT"
+                
+                confidence = self._calculate_confidence(p_up)
+                rationale = f"LGBM {model_key}: p_up={p_up:.3f} -> {ml_score:.1f}/100 ({signal_dir}, confidence={confidence})"
+                
+                auc = self.metadata[model_key].get('metrics', {}).get('auc', 0)
+                if not auc:
+                    auc = self.metadata[model_key].get('metrics', {}).get('auc_mean', 0)
+                
+                details = {
+                    'model': model_key,
+                    'p_up': float(p_up),
+                    'p_down': float(1 - p_up),
+                    'ml_score': float(ml_score),
+                    'signal_direction': signal_dir,
+                    'confidence': confidence,
+                    'model_type': 'LightGBM',
+                    'auc': float(auc) if auc else None,
+                    'n_features': len(model_features)
+                }
             
             # Determine if this is a new model (not BTC/ETH/SOL)
             is_new_model = symbol_short not in ['BTC', 'ETH', 'SOL']

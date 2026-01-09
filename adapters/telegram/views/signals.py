@@ -84,7 +84,7 @@ def build_signals_view(context: Dict[str, Any], formatter: TelegramFormatter = N
             
             lines.append("")
     else:
-        lines.append("Sinyal bulunamadı")
+        lines.append("No signals found")
         lines.append("")
     
     lines.append(f"⏰ {time_str}")

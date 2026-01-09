@@ -8,8 +8,19 @@ from datetime import datetime
 
 # Static coin categories
 COIN_CATEGORIES = {
+    'ml': {
+        'name': '🤖 ML Supported',
+        'coins': [
+            'BTC', 'ETH', 'SOL',           # Core
+            'AAVE', 'ARB', 'ATOM', 'AVAX', 'CAKE', 'CRO',  # DeFi/L1
+            'DOGE', 'FET', 'GRT', 'HYPE', 'JUP',           # AI/Meme
+            'NEAR', 'OP', 'PENGU', 'RENDER', 'SEI',        # L1/L2/New
+            'STX', 'SUI', 'TAO', 'UNI', 'VET',             # Various
+            'VIRTUAL', 'WLD', 'XLM', 'XRP', 'ZEC'          # New additions
+        ]
+    },
     'ai': {
-        'name': '🤖 AI/ML',
+        'name': '🧠 AI/ML',
         'coins': ['FET', 'RENDER', 'TAO', 'NEAR', 'GRT', 'OCEAN', 'AGIX', 'NMR', 'AKT', 'ARKM']
     },
     'meme': {
@@ -62,31 +73,32 @@ COIN_CATEGORIES = {
 def build_advanced_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
     """Build main advanced settings menu."""
     lines = [
-        "🔧 <b>Gelişmiş Ayarlar</b>",
+        "🔧 <b>Advanced Settings</b>",
         "",
-        "Aşağıdaki ayarları değiştirebilirsiniz.",
-        "Tüm değişiklikler <b>restart</b> gerektirir.",
+        "You can change the following settings.",
+        "All changes require <b>restart</b>.",
         "",
     ]
     
     buttons = [
         [
-            {"text": "📊 Pozisyon Boyutu", "callback_data": "ai:adv_size"},
-            {"text": "🪙 Coinler", "callback_data": "ai:adv_coins"},
+            {"text": "📊 Position Size", "callback_data": "ai:adv_size"},
+            {"text": "🪙 Coins", "callback_data": "ai:adv_coins"},
         ],
         [
             {"text": "📈 Thresholds", "callback_data": "ai:adv_thresh"},
-            {"text": "⏰ Poz. Yaşı", "callback_data": "ai:adv_age"},
+            {"text": "⏰ Pos. Age", "callback_data": "ai:adv_age"},
         ],
         [
-            {"text": "⚖️ Score Ağırlıkları", "callback_data": "ai:adv_weight"},
+            {"text": "⚖️ Score Weights", "callback_data": "ai:adv_weight"},
             {"text": "🚀 ML Boost", "callback_data": "ai:adv_mlboost"},
         ],
         [
             {"text": "🎯 ATR TP/SL", "callback_data": "ai:adv_atr"},
+            {"text": "🔄 Trailing Stop", "callback_data": "ai:adv_trail"},
         ],
         [
-            {"text": "◀️ Ayarlara Dön", "callback_data": "ai:set"},
+            {"text": "◀️ Back to Settings", "callback_data": "ai:set"},
         ],
     ]
     
@@ -121,12 +133,12 @@ def build_position_size_view(context: Dict[str, Any], formatter) -> Tuple[str, L
     d_strong = int(p_strong * 100)
     d_extreme = int(p_extreme * 100)
     
-    status = "📝 Değişiklikler bekliyor..." if has_changes else "✅ Kayıtlı"
+    status = "📝 Changes pending..." if has_changes else "✅ Saved"
     
     lines = [
-        "📊 <b>Pozisyon Boyutu (Tier-Based)</b>",
+        "📊 <b>Position Size (Tier-Based)</b>",
         "",
-        "Sinyal gücüne göre pozisyon yüzdesi:",
+        "Position percentage based on signal strength:",
         "",
         f"🟢 Weak:    <b>{d_weak}%</b>  (strength 0.0-0.3)",
         f"🟡 Medium:  <b>{d_medium}%</b>  (strength 0.3-0.5)",
@@ -171,11 +183,11 @@ def build_position_size_view(context: Dict[str, Any], formatter) -> Tuple[str, L
     # Save/Cancel if pending
     if has_changes:
         buttons.append([
-            {"text": "✅ Kaydet", "callback_data": "ai:act|t=save_tiers"},
-            {"text": "❌ İptal", "callback_data": "ai:act|t=cancel_tiers"},
+            {"text": "✅ Save", "callback_data": "ai:act|t=save_tiers"},
+            {"text": "❌ Cancel", "callback_data": "ai:act|t=cancel_tiers"},
         ])
     
-    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
+    buttons.append([{"text": "◀️ Back", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons
 
@@ -184,23 +196,35 @@ def build_coins_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[List
     """Build coin management menu."""
     active_coins = context.get('active_coins', [])
     
+    # ML-enabled coins (multiclass models)
+    ML_ENABLED_COINS = ['BTC', 'ETH', 'SOL', 'ARB', 'ATOM', 'AVAX', 'DOGE', 'NEAR', 'OP', 'RENDER', 'SUI', 'UNI', 'VET', 'WLD', 'XRP']
+    
     # Extract base symbols
     display_coins = [c.split('-')[0] for c in active_coins]
     
+    # Separate ML-enabled and regular coins
+    ml_coins = [c for c in display_coins if c in ML_ENABLED_COINS]
+    regular_coins = [c for c in display_coins if c not in ML_ENABLED_COINS]
+    
     lines = [
-        "🪙 <b>Coin Yönetimi</b>",
+        "🪙 <b>Coin Management</b>",
         "",
-        f"Aktif: <b>{len(active_coins)}</b> coin",
-        f"📋 {', '.join(display_coins[:5])}{'...' if len(display_coins) > 5 else ''}",
+        f"Active: <b>{len(active_coins)}</b> coins",
+        "",
+        f"🤖 <b>ML Supported ({len(ml_coins)}):</b>",
+        f"   {', '.join(ml_coins[:8])}{'...' if len(ml_coins) > 8 else ''}" if ml_coins else "   -",
+        "",
+        f"📊 <b>TA Only ({len(regular_coins)}):</b>",
+        f"   {', '.join(regular_coins[:5])}{'...' if len(regular_coins) > 5 else ''}" if regular_coins else "   -",
         "",
     ]
     
     buttons = [
         [
-            {"text": "📋 Aktif Coinler", "callback_data": "ai:adv_active"},
-            {"text": "➕ Coin Ekle", "callback_data": "ai:adv_add"},
+            {"text": "📋 Active Coins", "callback_data": "ai:adv_active"},
+            {"text": "➕ Add Coin", "callback_data": "ai:adv_add"},
         ],
-        [{"text": "◀️ Geri", "callback_data": "ai:adv"}],
+        [{"text": "◀️ Back", "callback_data": "ai:adv"}],
     ]
     
     return "\n".join(lines), buttons
@@ -210,11 +234,25 @@ def build_active_coins_view(context: Dict[str, Any], formatter) -> Tuple[str, Li
     """Build active coins list with remove buttons."""
     active_coins = context.get('active_coins', [])
     
+    # Get ML-enabled coins from CoinRegistry (dynamic)
+    try:
+        from application.coin_registry import get_coin_registry
+        registry = get_coin_registry()
+        ml_enabled_symbols = registry.get_ml_enabled_symbols()
+    except Exception:
+        # Fallback to hardcoded list if registry unavailable
+        ml_enabled_symbols = [
+            'BTC', 'ETH', 'SOL', 'AAVE', 'ARB', 'ATOM', 'AVAX', 'CAKE', 'CRO',
+            'DOGE', 'FET', 'GRT', 'HYPE', 'JUP', 'NEAR', 'OP', 'PENGU', 'RENDER',
+            'SEI', 'STX', 'SUI', 'TAO', 'UNI', 'VET', 'VIRTUAL', 'WLD', 'XLM', 'XRP', 'ZEC'
+        ]
+    
     lines = [
-        "📋 <b>Aktif Coinler</b>",
+        "📋 <b>Active Coins</b>",
         "",
-        f"Toplam: {len(active_coins)} coin",
-        "Kaldırmak için butona basın:",
+        f"Total: {len(active_coins)} coins",
+        "🤖 = ML supported",
+        "Click to remove:",
     ]
     
     # Group coins into rows of 4 to respect 8 row limit
@@ -222,14 +260,16 @@ def build_active_coins_view(context: Dict[str, Any], formatter) -> Tuple[str, Li
     row = []
     for coin in active_coins:
         base = coin.split('-')[0]
-        row.append({"text": f"❌ {base}", "callback_data": f"ai:act|t=remove_coin|s={coin}"})
+        is_ml = base in ml_enabled_symbols
+        text = f"{'🤖' if is_ml else '❌'} {base}"
+        row.append({"text": text, "callback_data": f"ai:act|t=remove_coin|s={coin}"})
         if len(row) == 4:
             buttons.append(row)
             row = []
     if row:
         buttons.append(row)
     
-    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv_coins"}])
+    buttons.append([{"text": "◀️ Back", "callback_data": "ai:adv_coins"}])
     
     return "\n".join(lines), buttons
 
@@ -237,13 +277,17 @@ def build_active_coins_view(context: Dict[str, Any], formatter) -> Tuple[str, Li
 def build_add_coins_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
     """Build category selection menu for adding coins."""
     lines = [
-        "➕ <b>Coin Ekle</b>",
+        "➕ <b>Add Coin</b>",
         "",
-        "Kategori seçin:",
+        "Select category:",
         "",
     ]
     
     buttons = [
+        # ML-enabled coins - TOP PRIORITY
+        [
+            {"text": "🤖 ML Supported", "callback_data": "ai:adv_cat|c=ml"},
+        ],
         # Dynamic categories - row 1
         [
             {"text": "📈 Top Hacim", "callback_data": "ai:adv_cat|c=volume"},
@@ -252,16 +296,16 @@ def build_add_coins_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[
         # Dynamic categories - row 2
         [
             {"text": "📈 Top Gainers", "callback_data": "ai:adv_cat|c=gainers"},
-            {"text": "📉 Düşenler", "callback_data": "ai:adv_cat|c=losers"},
+            {"text": "📉 Losers", "callback_data": "ai:adv_cat|c=losers"},
         ],
         # Dynamic categories - row 3
         [
             {"text": "🆕 New Listings", "callback_data": "ai:adv_cat|c=new_listings"},
-            {"text": "💰 Tüm Coinler", "callback_data": "ai:adv_cat|c=all"},
+            {"text": "💰 All Coins", "callback_data": "ai:adv_cat|c=all"},
         ],
         # Static categories - row 1
         [
-            {"text": "🤖 AI", "callback_data": "ai:adv_cat|c=ai"},
+            {"text": "🧠 AI", "callback_data": "ai:adv_cat|c=ai"},
             {"text": "🐕 Meme", "callback_data": "ai:adv_cat|c=meme"},
             {"text": "🎮 Gaming", "callback_data": "ai:adv_cat|c=gaming"},
         ],
@@ -277,18 +321,32 @@ def build_add_coins_menu(context: Dict[str, Any], formatter) -> Tuple[str, List[
             {"text": "🌐 L1", "callback_data": "ai:adv_cat|c=l1"},
             {"text": "💼 DeFi", "callback_data": "ai:adv_cat|c=defi"},
         ],
-        [{"text": "◀️ Geri", "callback_data": "ai:adv_coins"}],
+        [{"text": "◀️ Back", "callback_data": "ai:adv_coins"}],
     ]
     
     return "\n".join(lines), buttons
 
 
 def build_coin_category_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
-    """Build coin list for selected category."""
+    """Build coin list for selected category with pagination."""
     category = context.get('category', '')
     coins = context.get('coins', [])
     active_coins = context.get('active_coins', [])
     category_name = context.get('category_name', category)
+    page = context.get('page', 0)
+    
+    # Pagination settings
+    COINS_PER_ROW = 3
+    ROWS_PER_PAGE = 6  # Max 6 rows of coins to stay within Telegram limits
+    COINS_PER_PAGE = COINS_PER_ROW * ROWS_PER_PAGE  # 18 coins per page
+    
+    total_pages = (len(coins) + COINS_PER_PAGE - 1) // COINS_PER_PAGE
+    page = max(0, min(page, total_pages - 1))  # Clamp page number
+    
+    # Get coins for current page
+    start_idx = page * COINS_PER_PAGE
+    end_idx = min(start_idx + COINS_PER_PAGE, len(coins))
+    page_coins = coins[start_idx:end_idx]
     
     # Extract base symbols from active
     active_bases = {c.split('-')[0] for c in active_coins}
@@ -296,25 +354,36 @@ def build_coin_category_view(context: Dict[str, Any], formatter) -> Tuple[str, L
     lines = [
         f"🪙 <b>{category_name}</b>",
         "",
-        "Eklemek için butona basın:",
+        f"Sayfa {page + 1}/{total_pages} ({len(coins)} coin)" if total_pages > 1 else f"{len(coins)} coin",
+        "Click to add:",
         "",
     ]
     
     buttons = []
     row = []
-    for coin in coins:
+    for coin in page_coins:
         base = coin.split('-')[0] if '-' in coin else coin
         is_active = base in active_bases
         text = f"{'✓ ' if is_active else ''}{base}"
         cb = f"ai:act|t=add_coin|s={base}"
         row.append({"text": text, "callback_data": cb})
-        if len(row) == 3:
+        if len(row) == COINS_PER_ROW:
             buttons.append(row)
             row = []
     if row:
         buttons.append(row)
     
-    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv_add"}])
+    # Pagination buttons (if needed)
+    if total_pages > 1:
+        nav_row = []
+        if page > 0:
+            nav_row.append({"text": "◀️ Prev", "callback_data": f"ai:adv_cat|c={category}|p={page-1}"})
+        if page < total_pages - 1:
+            nav_row.append({"text": "Sonraki ▶️", "callback_data": f"ai:adv_cat|c={category}|p={page+1}"})
+        if nav_row:
+            buttons.append(nav_row)
+    
+    buttons.append([{"text": "◀️ Back", "callback_data": "ai:adv_add"}])
     
     return "\n".join(lines), buttons
 
@@ -340,15 +409,15 @@ def build_thresholds_view(context: Dict[str, Any], formatter) -> Tuple[str, List
         p_es != enter_short or p_xs != exit_short
     )
     
-    status = "📝 Değişiklikler bekliyor..." if has_changes else "✅ Kayıtlı"
+    status = "📝 Changes pending..." if has_changes else "✅ Saved"
     
     lines = [
-        "📈 <b>Threshold Ayarları</b>",
+        "📈 <b>Threshold Settings</b>",
         "",
-        f"LONG Giriş: <b>{p_el}</b>",
-        f"LONG Çıkış: <b>{p_xl}</b>",
-        f"SHORT Giriş: <b>{p_es}</b>",
-        f"SHORT Çıkış: <b>{p_xs}</b>",
+        f"LONG Entry: <b>{p_el}</b>",
+        f"LONG Exit: <b>{p_xl}</b>",
+        f"SHORT Entry: <b>{p_es}</b>",
+        f"SHORT Exit: <b>{p_xs}</b>",
         "",
         f"<i>{status}</i>",
     ]
@@ -356,25 +425,25 @@ def build_thresholds_view(context: Dict[str, Any], formatter) -> Tuple[str, List
     # +/- buttons for each threshold (adj_thresh for preview)
     buttons = [
         [
-            {"text": "L.Giriş", "callback_data": "ai:noop"},
+            {"text": "L.Entry", "callback_data": "ai:noop"},
             {"text": "◀ -2", "callback_data": "ai:act|t=adj_thresh|k=enter_long|d=down"},
             {"text": f"{p_el}", "callback_data": "ai:noop"},
             {"text": "+2 ▶", "callback_data": "ai:act|t=adj_thresh|k=enter_long|d=up"},
         ],
         [
-            {"text": "L.Çıkış", "callback_data": "ai:noop"},
+            {"text": "L.Exit", "callback_data": "ai:noop"},
             {"text": "◀ -2", "callback_data": "ai:act|t=adj_thresh|k=exit_long|d=down"},
             {"text": f"{p_xl}", "callback_data": "ai:noop"},
             {"text": "+2 ▶", "callback_data": "ai:act|t=adj_thresh|k=exit_long|d=up"},
         ],
         [
-            {"text": "S.Giriş", "callback_data": "ai:noop"},
+            {"text": "S.Entry", "callback_data": "ai:noop"},
             {"text": "◀ -2", "callback_data": "ai:act|t=adj_thresh|k=enter_short|d=down"},
             {"text": f"{p_es}", "callback_data": "ai:noop"},
             {"text": "+2 ▶", "callback_data": "ai:act|t=adj_thresh|k=enter_short|d=up"},
         ],
         [
-            {"text": "S.Çıkış", "callback_data": "ai:noop"},
+            {"text": "S.Exit", "callback_data": "ai:noop"},
             {"text": "◀ -2", "callback_data": "ai:act|t=adj_thresh|k=exit_short|d=down"},
             {"text": f"{p_xs}", "callback_data": "ai:noop"},
             {"text": "+2 ▶", "callback_data": "ai:act|t=adj_thresh|k=exit_short|d=up"},
@@ -384,11 +453,11 @@ def build_thresholds_view(context: Dict[str, Any], formatter) -> Tuple[str, List
     # Save/Cancel if pending
     if has_changes:
         buttons.append([
-            {"text": "✅ Kaydet", "callback_data": "ai:act|t=save_thresh"},
-            {"text": "❌ İptal", "callback_data": "ai:act|t=cancel_thresh"},
+            {"text": "✅ Save", "callback_data": "ai:act|t=save_thresh"},
+            {"text": "❌ Cancel", "callback_data": "ai:act|t=cancel_thresh"},
         ])
     
-    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
+    buttons.append([{"text": "◀️ Back", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons
 
@@ -398,11 +467,11 @@ def build_age_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[D
     current_age = context.get('max_position_age_hours', 24)
     
     lines = [
-        "⏰ <b>Pozisyon Yaşı Ayarı</b>",
+        "⏰ <b>Position Age Setting</b>",
         "",
-        f"Mevcut: <b>{current_age} saat</b>",
+        f"Current: <b>{current_age}h</b>",
         "",
-        "Bu süreden eski pozisyonlar otomatik kapatılır.",
+        "Positions older than this will be auto-closed.",
         "",
     ]
     
@@ -418,7 +487,7 @@ def build_age_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[D
     if row:
         buttons.append(row)
     
-    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
+    buttons.append([{"text": "◀️ Back", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons
 
@@ -455,17 +524,17 @@ def build_weights_view(context: Dict[str, Any], formatter) -> Tuple[str, List[Li
     total_ok = "✅" if total == 100 else f"⚠️ {total}%"
     
     # Show pending changes indicator
-    status = "📝 Değişiklikler bekliyor..." if has_changes else "✅ Kayıtlı"
+    status = "📝 Changes pending..." if has_changes else "✅ Saved"
     
     lines = [
-        "⚖️ <b>Score Ağırlıkları</b>",
+        "⚖️ <b>Score Weights</b>",
         "",
         f"📊 TA:    <b>{ta_pct}%</b>",
         f"🤖 ML:    <b>{ml_pct}%</b>",
         f"📰 News:  <b>{news_pct}%</b>",
         f"🛡️ Risk:  <b>{risk_pct}%</b>",
         "",
-        f"Toplam: <b>{total}%</b> {total_ok}",
+        f"Total: <b>{total}%</b> {total_ok}",
         "",
         f"<i>{status}</i>",
     ]
@@ -505,11 +574,11 @@ def build_weights_view(context: Dict[str, Any], formatter) -> Tuple[str, List[Li
     # Save/Cancel buttons if there are pending changes
     if has_changes:
         buttons.append([
-            {"text": "✅ Kaydet", "callback_data": "ai:act|t=save_weights"},
-            {"text": "❌ İptal", "callback_data": "ai:act|t=cancel_weights"},
+            {"text": "✅ Save", "callback_data": "ai:act|t=save_weights"},
+            {"text": "❌ Cancel", "callback_data": "ai:act|t=cancel_weights"},
         ])
     
-    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
+    buttons.append([{"text": "◀️ Back", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons
 
@@ -524,11 +593,11 @@ def build_ml_boost_view(context: Dict[str, Any], formatter) -> Tuple[str, List[L
     sorted_tiers = sorted(tiers, key=lambda x: x.get('ta_threshold', 0))
     
     lines = [
-        "🚀 <b>ML Score Boost Ayarları</b>",
+        "🚀 <b>ML Score Boost Settings</b>",
         "",
-        f"Durum: <b>{'✅ Aktif' if enabled else '❌ Kapalı'}</b>",
+        f"Status: <b>{'✅ Active' if enabled else '❌ Disabled'}</b>",
         "",
-        "<b>Tier Ayarları:</b>",
+        "<b>Tier Settings:</b>",
     ]
     
     for tier in sorted_tiers:
@@ -541,8 +610,8 @@ def build_ml_boost_view(context: Dict[str, Any], formatter) -> Tuple[str, List[L
     
     lines.extend([
         "",
-        "<i>TA yüksek olduğunda ML skorunu çarparak</i>",
-        "<i>final skoru artırır.</i>",
+        "<i>When TA is high, multiplies ML score</i>",
+        "<i>to increase final score.</i>",
     ])
     
     # Buttons for tier 0 (60 threshold)
@@ -558,7 +627,7 @@ def build_ml_boost_view(context: Dict[str, Any], formatter) -> Tuple[str, List[L
     tier2_mult = tier2.get('multiplier', 0)
     
     buttons = [
-        [{"text": f"{'✅' if enabled else '❌'} ML Boost {'Kapat' if enabled else 'Aç'}", "callback_data": f"ai:act|t=toggle_mlboost|v={0 if enabled else 1}"}],
+        [{"text": f"{'✅' if enabled else '❌'} ML Boost {'Disable' if enabled else 'Enable'}", "callback_data": f"ai:act|t=toggle_mlboost|v={0 if enabled else 1}"}],
         # TA ≥ 60 row
         [
             {"text": "60:", "callback_data": "ai:noop"},
@@ -583,7 +652,7 @@ def build_ml_boost_view(context: Dict[str, Any], formatter) -> Tuple[str, List[L
             {"text": f"{'✅' if tier2_mult == 4 else ''} 4x", "callback_data": "ai:act|t=set_ml_tier|th=70|m=4"},
             {"text": f"{'✅' if tier2_mult == 5 else ''} 5x", "callback_data": "ai:act|t=set_ml_tier|th=70|m=5"},
         ],
-        [{"text": "◀️ Geri", "callback_data": "ai:adv"}],
+        [{"text": "◀️ Back", "callback_data": "ai:adv"}],
     ]
     
     return "\n".join(lines), buttons
@@ -608,10 +677,10 @@ def build_atr_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[D
     # Calculate R:R ratio using display values
     rr_ratio = p_tp / p_sl if p_sl > 0 else 0
     
-    status = "📝 Değişiklikler bekliyor..." if has_changes else "✅ Kayıtlı"
+    status = "📝 Changes pending..." if has_changes else "✅ Saved"
     
     lines = [
-        "🎯 <b>ATR TP/SL Ayarları</b>",
+        "🎯 <b>ATR TP/SL Settings</b>",
         "",
         f"🛡️ Stop Loss: <b>{p_sl} ATR</b>",
         f"🎯 Take Profit: <b>{p_tp} ATR</b>",
@@ -643,10 +712,107 @@ def build_atr_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[D
     # Save/Cancel if pending
     if has_changes:
         buttons.append([
-            {"text": "✅ Kaydet", "callback_data": "ai:act|t=save_atr"},
-            {"text": "❌ İptal", "callback_data": "ai:act|t=cancel_atr"},
+            {"text": "✅ Save", "callback_data": "ai:act|t=save_atr"},
+            {"text": "❌ Cancel", "callback_data": "ai:act|t=cancel_atr"},
         ])
     
-    buttons.append([{"text": "◀️ Geri", "callback_data": "ai:adv"}])
+    buttons.append([{"text": "◀️ Back", "callback_data": "ai:adv"}])
+    
+    return "\n".join(lines), buttons
+
+
+def build_trailing_view(context: Dict[str, Any], formatter) -> Tuple[str, List[List[Dict[str, str]]]]:
+    """Build trailing stop settings view with presets and individual adjustments."""
+    trailing = context.get('trailing', {})
+    pending = context.get('pending_trailing', {})
+    has_changes = bool(pending)
+    
+    # Get current values (pending or saved)
+    activation = pending.get('activation_r_multiple') or trailing.get('activation_r_multiple', 0.3)
+    breakeven = pending.get('breakeven_r_multiple') or trailing.get('breakeven_r_multiple', 0.7)
+    tight_r = pending.get('tight_r_multiple') or trailing.get('tight_r_multiple', 1.0)
+    offset = pending.get('tight_offset') or trailing.get('tight_offset', 0.3)
+    enabled = trailing.get('enabled', True)
+    
+    # Detect current preset
+    presets = trailing.get('presets', {})
+    current_preset = 'custom'
+    for preset_name, preset_vals in presets.items():
+        if (abs(activation - preset_vals.get('activation_r_multiple', 0)) < 0.01 and
+            abs(breakeven - preset_vals.get('breakeven_r_multiple', 0)) < 0.01 and
+            abs(tight_r - preset_vals.get('tight_r_multiple', 0)) < 0.01 and
+            abs(offset - preset_vals.get('tight_offset', 0)) < 0.01):
+            current_preset = preset_name
+            break
+    
+    preset_icons = {
+        'aggressive': '🔥',
+        'balanced': '⚖️', 
+        'conservative': '🛡️',
+        'custom': '⚙️'
+    }
+    
+    lines = [
+        "🔄 <b>Trailing Stop Settings</b>",
+        "",
+        f"Status: {'✅ Active' if enabled else '❌ Disabled'}",
+        f"Mod: {preset_icons.get(current_preset, '⚙️')} {current_preset.title()}",
+        "",
+        "📊 <b>R-Multiple Levels:</b>",
+        f"• Trailing Active: R={activation} ({activation*100:.0f}% of SL)",
+        f"• Breakeven: R={breakeven} ({breakeven*100:.0f}% of SL)",  
+        f"• Tight Trail: R={tight_r} ({tight_r*100:.0f}% of SL)",
+        f"• Tight Offset: {offset}%",
+        "",
+    ]
+    
+    if has_changes:
+        lines.append("⚠️ <i>Unsaved changes</i>")
+    
+    buttons = [
+        # Preset buttons
+        [
+            {"text": "🔥 Agresif", "callback_data": "ai:act|t=trail_preset|m=aggressive"},
+            {"text": "⚖️ Dengeli", "callback_data": "ai:act|t=trail_preset|m=balanced"},
+            {"text": "🛡️ Konservatif", "callback_data": "ai:act|t=trail_preset|m=conservative"},
+        ],
+        # Activation row
+        [
+            {"text": "🟡 Aktif R", "callback_data": "ai:noop"},
+            {"text": "-0.1", "callback_data": "ai:act|t=trail_adj|k=activation|d=down"},
+            {"text": f"{activation}", "callback_data": "ai:noop"},
+            {"text": "+0.1", "callback_data": "ai:act|t=trail_adj|k=activation|d=up"},
+        ],
+        # Breakeven row
+        [
+            {"text": "🟢 BE R", "callback_data": "ai:noop"},
+            {"text": "-0.1", "callback_data": "ai:act|t=trail_adj|k=breakeven|d=down"},
+            {"text": f"{breakeven}", "callback_data": "ai:noop"},
+            {"text": "+0.1", "callback_data": "ai:act|t=trail_adj|k=breakeven|d=up"},
+        ],
+        # Tight R row
+        [
+            {"text": "🔵 Tight R", "callback_data": "ai:noop"},
+            {"text": "-0.1", "callback_data": "ai:act|t=trail_adj|k=tight_r|d=down"},
+            {"text": f"{tight_r}", "callback_data": "ai:noop"},
+            {"text": "+0.1", "callback_data": "ai:act|t=trail_adj|k=tight_r|d=up"},
+        ],
+        # Offset row
+        [
+            {"text": "📏 Offset", "callback_data": "ai:noop"},
+            {"text": "-0.1", "callback_data": "ai:act|t=trail_adj|k=offset|d=down"},
+            {"text": f"{offset}%", "callback_data": "ai:noop"},
+            {"text": "+0.1", "callback_data": "ai:act|t=trail_adj|k=offset|d=up"},
+        ],
+    ]
+    
+    # Save/Cancel if pending
+    if has_changes:
+        buttons.append([
+            {"text": "✅ Save", "callback_data": "ai:act|t=save_trail"},
+            {"text": "❌ Cancel", "callback_data": "ai:act|t=cancel_trail"},
+        ])
+    
+    buttons.append([{"text": "◀️ Back", "callback_data": "ai:adv"}])
     
     return "\n".join(lines), buttons

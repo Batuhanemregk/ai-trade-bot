@@ -30,16 +30,16 @@ def build_settings_view(context: Dict[str, Any], formatter: TelegramFormatter = 
     def status(val): return "✅" if val else "❌"
     
     lines = [
-        f"⚙️ Ayarlar",
+        f"⚙️ Settings",
         f"━━━━━━━━━━━━━━━━━━━━",
         "",
         f"📦 Compact   : {status(compact_mode)}",
         f"😀 Emoji     : {status(emojis)}",
-        f"✋ Onay      : {status(confirmations)}",
+        f"✋ Confirm   : {status(confirmations)}",
         f"⏱️ Timeframe : {timeframe} 🔒",
-        f"⚡ Kaldıraç  : {leverage}x",
+        f"⚡ Leverage  : {leverage}x",
         "",
-        f"── Çıkış Stratejisi ──",
+        f"── Exit Strategy ──",
         f"📈 Trailing  : {status(trailing_enabled)}",
         f"💰 Partial TP: {status(partial_tp_enabled)}",
         f"⏰ Time Exit : {status(time_exit_enabled)}",
@@ -58,7 +58,7 @@ def build_settings_view(context: Dict[str, Any], formatter: TelegramFormatter = 
         [
             {"text": f"📦 Compact", "callback_data": "ai:act|t=toggle|k=compact"},
             {"text": f"😀 Emoji", "callback_data": "ai:act|t=toggle|k=emojis"},
-            {"text": f"✋ Onay", "callback_data": "ai:act|t=toggle|k=confirmations"},
+            {"text": f"✋ Confirm", "callback_data": "ai:act|t=toggle|k=confirmations"},
         ],
     ]
     
@@ -85,14 +85,14 @@ def build_settings_view(context: Dict[str, Any], formatter: TelegramFormatter = 
     
     # Advanced Settings link
     buttons.append([
-        {"text": "🔧 Gelişmiş Ayarlar", "callback_data": "ai:adv"},
+        {"text": "🔧 Advanced Settings", "callback_data": "ai:adv"},
     ])
     
     # Navigation + Restart
     buttons.append([
-        {"text": "🔄 Yenile", "callback_data": "ai:set|r=1"},
+        {"text": "🔄 Refresh", "callback_data": "ai:set|r=1"},
         {"text": "🔃 Bot Restart", "callback_data": "ai:act|t=restart"},
-        {"text": "🏠 Ana Sayfa", "callback_data": "ai:main"},
+        {"text": "🏠 Home", "callback_data": "ai:main"},
     ])
     
     return text, buttons

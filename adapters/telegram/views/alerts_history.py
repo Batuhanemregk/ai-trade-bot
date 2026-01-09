@@ -31,7 +31,7 @@ def build_alerts_view(context: Dict[str, Any], formatter) -> Tuple[str, List[Lis
     }
     
     lines = [
-        "🚨 <b>Uyarı ve Hatalar</b>",
+        "🚨 <b>Warnings & Errors</b>",
         "",
         f"⚠️ Warning: <b>{counts.get('WARNING', 0)}</b>",
         f"❌ Error: <b>{counts.get('ERROR', 0)}</b>",
@@ -40,9 +40,9 @@ def build_alerts_view(context: Dict[str, Any], formatter) -> Tuple[str, List[Lis
     ]
     
     if not alerts:
-        lines.append("<i>Henüz uyarı veya hata yok. 👍</i>")
+        lines.append("<i>No warnings or errors yet. 👍</i>")
     else:
-        lines.append(f"Son <b>{len(alerts)}</b> mesaj:")
+        lines.append(f"Last <b>{len(alerts)}</b> messages:")
         lines.append("")
         
         for alert in alerts[:15]:  # Max 15 in view
@@ -62,7 +62,7 @@ def build_alerts_view(context: Dict[str, Any], formatter) -> Tuple[str, List[Lis
             lines.append("")
         
         if len(alerts) > 15:
-            lines.append(f"<i>+{len(alerts) - 15} daha...</i>")
+            lines.append(f"<i>+{len(alerts) - 15} more...</i>")
     
     # Buttons
     buttons = [
@@ -71,11 +71,11 @@ def build_alerts_view(context: Dict[str, Any], formatter) -> Tuple[str, List[Lis
             {"text": "❌ Errors", "callback_data": "ai:alerts|l=ERROR"},
         ],
         [
-            {"text": "🔄 Yenile", "callback_data": "ai:alerts"},
-            {"text": "🗑️ Temizle", "callback_data": "ai:act|t=clear_alerts"},
+            {"text": "🔄 Refresh", "callback_data": "ai:alerts"},
+            {"text": "🗑️ Clear", "callback_data": "ai:act|t=clear_alerts"},
         ],
         [
-            {"text": "◀️ Ana Menü", "callback_data": "ai:main"},
+            {"text": "◀️ Main Menu", "callback_data": "ai:main"},
         ],
     ]
     

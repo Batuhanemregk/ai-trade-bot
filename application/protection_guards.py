@@ -1,6 +1,7 @@
 """
 Protection Guards - Trading Protection System
-Implements once_per_bar, entry_cooldown, same_direction_block, reversal, idempotency
+Implements once_per_bar, entry_cooldown, same_direction_block, reversal, idempotency,
+re-entry guard, and higher timeframe bias filter.
 """
 
 import os
@@ -9,8 +10,25 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 from loguru import logger
+import pandas as pd
 
 from infrastructure.config_manager import config_manager
+
+# Import new guard modules
+try:
+    from application.re_entry_guard import get_re_entry_guard
+    RE_ENTRY_GUARD_AVAILABLE = True
+except ImportError:
+    RE_ENTRY_GUARD_AVAILABLE = False
+    logger.warning("ReEntryGuard not available")
+
+try:
+    from application.higher_tf_bias_filter import get_htf_bias_filter
+    HTF_BIAS_FILTER_AVAILABLE = True
+except ImportError:
+    HTF_BIAS_FILTER_AVAILABLE = False
+    logger.warning("HigherTimeframeBiasFilter not available")
+
 
 
 @dataclass
@@ -41,6 +59,10 @@ class ProtectionGuards:
         self.use_position_tpsl, _ = self.config.get('trading.use_position_tpsl', True)
         self.reduce_only, _ = self.config.get('trading.reduce_only', True)
         
+        # Initialize new guard modules
+        self.re_entry_guard = get_re_entry_guard() if RE_ENTRY_GUARD_AVAILABLE else None
+        self.htf_bias_filter = get_htf_bias_filter() if HTF_BIAS_FILTER_AVAILABLE else None
+        
         logger.info(f"[GUARDS] Protection guards initialized:")
         logger.info(f"  once_per_bar: {self.once_per_bar_enabled}")
         logger.info(f"  same_direction_block: {self.same_direction_block}")
@@ -48,6 +70,79 @@ class ProtectionGuards:
         logger.info(f"  entry_cooldown_bars: {self.entry_cooldown_bars}")
         logger.info(f"  use_position_tpsl: {self.use_position_tpsl}")
         logger.info(f"  reduce_only: {self.reduce_only}")
+        logger.info(f"  re_entry_guard: {'enabled' if self.re_entry_guard else 'disabled'}")
+        logger.info(f"  htf_bias_filter: {'enabled' if self.htf_bias_filter else 'disabled'}")
+    
+    def check_re_entry(self, symbol: str, direction: str, 
+                       ohlcv_data: Optional[pd.DataFrame] = None) -> ProtectionResult:
+        """
+        Check re-entry guard after a losing trade.
+        NOTE: Full integration requires RSI, ATR, volume data from signal processor.
+        For now, we check only time-based bypass.
+        """
+        if not self.re_entry_guard:
+            return ProtectionResult(True, "re_entry_disabled", {})
+        
+        try:
+            # Simplified check - just verify no recent loss state or time bypass
+            base_symbol = symbol.split('-')[0] if '-' in symbol else symbol
+            
+            if base_symbol not in self.re_entry_guard.last_loss_state:
+                return ProtectionResult(True, "no_previous_loss", {})
+            
+            last_loss = self.re_entry_guard.last_loss_state[base_symbol]
+            last_direction = last_loss.get('direction', '')
+            
+            # Opposite direction always allowed
+            if direction.upper() != last_direction.upper():
+                return ProtectionResult(True, "opposite_direction", {})
+            
+            # Check time bypass
+            time_since_loss = self.re_entry_guard._hours_since(last_loss.get('timestamp', ''))
+            if time_since_loss >= self.re_entry_guard.bypass_hours:
+                # Clear state and allow
+                del self.re_entry_guard.last_loss_state[base_symbol]
+                self.re_entry_guard._save_state()
+                return ProtectionResult(True, f"bypass_{self.re_entry_guard.bypass_hours}h_timeout", 
+                                       {"hours_since_loss": time_since_loss})
+            
+            # Block same direction within bypass period
+            return ProtectionResult(False, "same_direction_within_bypass_period", 
+                                   {"hours_since_loss": time_since_loss, 
+                                    "bypass_hours": self.re_entry_guard.bypass_hours})
+            
+        except Exception as e:
+            logger.warning(f"Re-entry guard error: {e}")
+            return ProtectionResult(True, "re_entry_error", {"error": str(e)})
+    
+    def check_htf_bias(self, symbol: str, direction: str,
+                       ohlcv_1h: Optional[pd.DataFrame] = None,
+                       ohlcv_4h: Optional[pd.DataFrame] = None) -> ProtectionResult:
+        """
+        Check higher timeframe bias filter.
+        """
+        if not self.htf_bias_filter:
+            return ProtectionResult(True, "htf_bias_disabled", {})
+        
+        try:
+            # Call check_signal_alignment - returns BiasResult object
+            result = self.htf_bias_filter.check_signal_alignment(
+                symbol, direction, ohlcv_1h, ohlcv_4h
+            )
+            
+            # BiasResult has: bias, confidence, aligned_with_signal, block_trade, reason, details
+            if result.block_trade:
+                return ProtectionResult(False, f"htf_bias_blocked_{result.reason}", 
+                                       {"bias": result.bias, "confidence": result.confidence})
+            else:
+                return ProtectionResult(True, f"htf_bias_aligned", 
+                                       {"bias": result.bias, "confidence": result.confidence})
+                                       
+        except Exception as e:
+            logger.warning(f"HTF bias filter error: {e}")
+            return ProtectionResult(True, "htf_bias_error", {"error": str(e)})
+
+
     
     def check_once_per_bar(self, symbol: str, timeframe: str, bar_id: str) -> ProtectionResult:
         """
@@ -290,7 +385,10 @@ class ProtectionGuards:
                            gate_result: str, client_order_id: str, size: float, 
                            min_size: float, min_notional: float, price: float,
                            mode: str, current_positions: Dict[str, Any],
-                           last_entry_time: Optional[datetime] = None) -> Tuple[bool, str, Dict[str, Any]]:
+                           last_entry_time: Optional[datetime] = None,
+                           ohlcv_15m: Optional[pd.DataFrame] = None,
+                           ohlcv_1h: Optional[pd.DataFrame] = None,
+                           ohlcv_4h: Optional[pd.DataFrame] = None) -> Tuple[bool, str, Dict[str, Any]]:
         """
         Perform comprehensive protection check.
         
@@ -304,7 +402,11 @@ class ProtectionGuards:
             ("same_direction_block", self.check_same_direction_block(symbol, direction, current_positions)),
             ("reversal", self.check_reversal(symbol, direction, current_positions)),
             ("idempotency", self.check_idempotency(client_order_id)),
-            ("min_notional", self.check_min_notional(size, min_size, min_notional, price, mode))
+            ("min_notional", self.check_min_notional(size, min_size, min_notional, price, mode)),
+            # NEW: Re-entry guard
+            ("re_entry", self.check_re_entry(symbol, direction, ohlcv_15m)),
+            # NEW: Higher timeframe bias filter
+            ("htf_bias", self.check_htf_bias(symbol, direction, ohlcv_1h, ohlcv_4h)),
         ]
         
         # Check each protection guard

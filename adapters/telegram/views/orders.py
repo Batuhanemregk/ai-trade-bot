@@ -23,7 +23,7 @@ def build_orders_view(context: Dict[str, Any], formatter: TelegramFormatter = No
     time_str = last_update.strftime('%H:%M:%S') if isinstance(last_update, datetime) else str(last_update)
     
     lines = [
-        f"📋 Emirler",
+        f"📋 Orders",
         f"━━━━━━━━━━━━━━━━━━━━",
         "",
     ]
@@ -43,7 +43,7 @@ def build_orders_view(context: Dict[str, Any], formatter: TelegramFormatter = No
             
             lines.append(f"{sym:5} {side_icon} {order_type} │ {qty:.3f} @ ${price:,.2f} {status_icon}")
     else:
-        lines.append("Emir bulunamadı")
+        lines.append("No orders found")
     
     lines.append("")
     lines.append(f"⏰ {time_str}")
@@ -61,23 +61,23 @@ def build_orders_view(context: Dict[str, Any], formatter: TelegramFormatter = No
             symbol = order.get('symbol', 'UNKNOWN').replace('-USDT-SWAP', '')[:5]
             if order_id:
                 buttons.append([
-                    {"text": f"❌ {symbol} İptal", "callback_data": f"ai:act|t=cancel|id={order_id[:8]}"}
+                    {"text": f"❌ {symbol} Cancel", "callback_data": f"ai:act|t=cancel|id={order_id[:8]}"}
                 ])
     
     # Pagination
     nav = []
     if has_prev:
-        nav.append({"text": "⬅️ Önceki", "callback_data": f"ai:ord|p={page-1}"})
+        nav.append({"text": "⬅️ Prev", "callback_data": f"ai:ord|p={page-1}"})
     if has_next:
-        nav.append({"text": "➡️ Sonraki", "callback_data": f"ai:ord|p={page+1}"})
+        nav.append({"text": "➡️ Next", "callback_data": f"ai:ord|p={page+1}"})
     if nav:
         buttons.append(nav)
     
     # Navigation
     buttons.append([
-        {"text": "🔄 Yenile", "callback_data": "ai:ord|r=1"},
-        {"text": "🏠 Ana Sayfa", "callback_data": "ai:main"},
-        {"text": "📊 Pozisyonlar", "callback_data": "ai:pos"},
+        {"text": "🔄 Refresh", "callback_data": "ai:ord|r=1"},
+        {"text": "🏠 Home", "callback_data": "ai:main"},
+        {"text": "📊 Positions", "callback_data": "ai:pos"},
     ])
     
     return text, buttons

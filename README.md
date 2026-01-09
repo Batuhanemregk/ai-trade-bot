@@ -1,169 +1,224 @@
-# 🤖 AiBotBS Runtime Agent System
+# 🤖 AI Trading Bot
 
-> **Production-grade AI Trading Bot with Scheduler Architecture & SOLID Principles**
+> **Production-Grade Multi-Agent AI Cryptocurrency Trading System**
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-org/aibotbs)
-[![Test Coverage](https://img.shields.io/badge/coverage-65%25-orange)](https://github.com/your-org/aibotbs)
-[![Code Quality](https://img.shields.io/badge/ruff-passing-brightgreen)](https://github.com/your-org/aibotbs)
-[![Type Check](https://img.shields.io/badge/mypy-passing-brightgreen)](https://github.com/your-org/aibotbs)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![OKX Exchange](https://img.shields.io/badge/exchange-OKX-green.svg)](https://www.okx.com/)
+[![Telegram Bot](https://img.shields.io/badge/telegram-bot-blue.svg)](https://core.telegram.org/bots)
 
-## 🚀 Quick Start
+## 🎯 Overview
 
-```bash
-# Clone and setup
-git clone <your-repo>
-cd ai-trade-bot
-pip install -r requirements.txt
+A sophisticated algorithmic trading bot that combines **Technical Analysis**, **Machine Learning predictions**, **News Sentiment Analysis**, and **Risk Management** into a unified scoring system for cryptocurrency futures trading on OKX.
 
-# Create .env (OKX, Telegram, OpenAI keys)
-cp .env.example .env  # then edit values
+### Key Highlights
 
-# Test scheduler
-python scripts/test_scheduler.py
-
-# Configure OKX IP whitelist (IMPORTANT!)
-# https://www.okx.com → API Management → Add your IP
-
-# Start production scheduler
-python -m infrastructure.scheduler_runner
-```
-
-**📖 Quick Guide:** See [docs/QUICKSTART.md](docs/QUICKSTART.md) for 5-minute setup  
-**📚 Scheduler Guide:** See [docs/SCHEDULER_CALISTIRMA_KILAVUZU.md](docs/SCHEDULER_CALISTIRMA_KILAVUZU.md) (Turkish)  
-**🔧 Development:** See [docs/DEVELOPMENT_TESTING.md](docs/DEVELOPMENT_TESTING.md) for dev workflow  
-**🚀 Start & Monitoring:** See [docs/START_AND_MONITORING.md](docs/START_AND_MONITORING.md) for scripts & monitoring setup  
-**📊 Enhanced Logging:** See [docs/ENHANCED_LOGGING.md](docs/ENHANCED_LOGGING.md) for professional logging system (v2.0)
+- 🧠 **Multi-Agent Scoring**: TA (40%) + ML (25%) + News (20%) + Risk (15%)
+- ⚡ **Real-Time Execution**: Sub-second order placement with OCO brackets
+- 📱 **Full Telegram Control**: Interactive dashboard with live positions, PnL tracking
+- 🛡️ **Enterprise Risk Management**: Circuit breaker, trailing stops, dynamic TP/SL
+- 🔄 **24/7 Automated Trading**: APScheduler-based job system
 
 ## ✨ Features
 
-- **🧠 Multi-Source Scoring**: Technical Analysis, ML Models, LLM-backed News Sentiment, Risk Assessment
-- **⚡ Real-time Execution**: OKX Exchange integration via CCXT + REST APIs
-- **🤖 Agent Runtime**: Configurable agent graphs with dry-run safety
-- **📱 Telegram Notifications + Bot**: Trade/alert cards and command interface with inline keyboards
-- **⏰ Job Scheduler**: APScheduler-based cron jobs (15m trading, 5m trailing, 5m news, 1h regime, 1m risk)
-- **🔒 Risk Management**: Position sizing, stop-loss, take-profit automation
-- **📊 Portfolio Tracking**: Real-time PnL, exposure, correlation analysis
-- **🧪 Offline Testing**: Deterministic mocks for development
+### Trading Engine
+
+- **Smart Order Execution**: Market/Limit orders with automatic TP/SL brackets
+- **ATR-Based TP/SL**: Dynamic stop-loss and take-profit based on volatility
+- **Trailing Stop**: R-multiple based trailing with configurable presets
+- **Partial Take Profit**: Automatic position scaling at profit targets
+- **Position Management**: Maximum age limits, exposure controls
+
+### Signal Generation
+
+- **Technical Analysis**: RSI, MACD, Bollinger Bands, ATR, SMA
+- **ML Predictions**: XGBoost/LightGBM models for 25+ coin pairs
+- **News Sentiment**: Real-time sentiment from CryptoCompare, CryptoPanic
+- **Signal Gating**: Persistence filters, hysteresis, regime detection
+
+### Risk Management
+
+- **Circuit Breaker**: Auto-stop on consecutive losses or daily drawdown
+- **Exposure Limits**: Per-position and portfolio-wide limits
+- **Correlation Risk**: Tiered exposure based on market cap
+- **Loss Streak Protection**: Progressive position reduction
+
+### Telegram Interface
+
+- 📊 **Live Dashboard**: Balance, positions, exposure, signals
+- 💰 **PnL Tracking**: Daily, weekly, monthly breakdowns by coin
+- ⚙️ **Settings Control**: Leverage, thresholds, exit strategies
+- 🚨 **Emergency Controls**: Close all, circuit breaker activation
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- OKX Account with API access
+- Telegram Bot Token
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/Batuhanemregk/ai-trade-bot.git
+cd ai-trade-bot
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+### Configuration
+
+Create `.env` file:
+
+```env
+OKX_API_KEY=your_api_key
+OKX_SECRET_KEY=your_secret_key
+OKX_PASSPHRASE=your_passphrase
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+```
+
+### Running
+
+```powershell
+# Windows - Interactive Menu
+.\run_live.ps1 -menu
+
+# Direct start
+python main.py
+```
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Telegram Bot  │    │   Agent Runtime │    │   Scheduler     │
-│   Commands      │    │   Graph Engine  │    │   Job Manager   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Application   │    │     Domain      │    │   Execution     │
-│   Services      │    │   Entities      │    │   Adapters      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│     Scoring     │    │   Risk Engine   │    │   OKX CCXT     │
-│   TA/ML/News    │    │   Validation    │    │   + REST       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        Telegram Interface                        │
+│         Dashboard • Settings • Positions • PnL • Alerts          │
+└─────────────────────────────────────────────────────────────────┘
+                                 │
+┌─────────────────────────────────────────────────────────────────┐
+│                      Application Services                        │
+│   Signal Gate • Position Manager • Risk Service • Notifier       │
+└─────────────────────────────────────────────────────────────────┘
+                                 │
+┌───────────────┬───────────────┬───────────────┬─────────────────┐
+│   TA Agent    │   ML Agent    │  News Agent   │   Risk Agent    │
+│  Indicators   │   XGBoost     │  Sentiment    │  Exposure       │
+│  Pattern Det. │   LightGBM    │  Headlines    │  Correlation    │
+└───────────────┴───────────────┴───────────────┴─────────────────┘
+                                 │
+┌─────────────────────────────────────────────────────────────────┐
+│                        Execution Layer                           │
+│      OKX CCXT Adapter • Order Quantization • Prevalidation       │
+└─────────────────────────────────────────────────────────────────┘
+                                 │
+┌─────────────────────────────────────────────────────────────────┐
+│                         Infrastructure                           │
+│    APScheduler • State Persistence • Logging • Monitoring        │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## 📚 Documentation
+## 📁 Project Structure
 
-### **Getting Started:**
-- **[⚡ Quick Start](docs/QUICKSTART.md)** - 5-minute setup guide
-- **[🇹🇷 Türkçe Başlangıç](docs/BASLATMA_ONEMLI.md)** - Hızlı başlatma (Turkish)
-- **[📊 Scheduler Guide](docs/SCHEDULER_CALISTIRMA_KILAVUZU.md)** - Complete scheduler guide (Turkish)
-
-### **Architecture & Design:**
-- **[🏗️ Architecture](docs/ARCHITECTURE_FINAL.md)** - Clean Architecture layers, SOLID principles
-- **[🤖 Agents](docs/AGENTS.md)** - Multi-agent system, workflows, message protocol
-- **[⏰ Scheduler](docs/SCHEDULER.md)** - Job architecture, scheduling patterns
-
-### **Development:**
-- **[🔧 Development & Testing](docs/DEVELOPMENT_TESTING.md)** - Dev workflow, when to use which mode
-- **[🧪 Testing Strategy](docs/TESTING.md)** - Test types, markers, best practices
-- **[🤝 Contributing](docs/CONTRIBUTING.md)** - PR process, code standards
-
-### **Operations:**
-- **[⚡ Execution](docs/EXECUTION.md)** - Order execution, bracket orders, quantization
-- **[📱 Telegram](docs/TELEGRAM.md)** - Bot commands, notifications, cards
-- **[⚙️ Configuration](docs/CONFIG.md)** - Policy.yaml reference, risk settings
-
-### **Production:**
-- **[✅ Production Readiness](docs/SCHEDULER_PRODUCTION_READY.md)** - Deployment checklist, monitoring
-- **[📖 Scheduler Operations](docs/START_SCHEDULER.md)** - Operations guide, troubleshooting
-
-## 🛠️ Development
-
-```bash
-# Install development dependencies
-pip install -r requirements_testing.txt
-
-# Run tests with markers
-pytest -m "core"      # Core functionality tests
-pytest -m "glue"      # Integration tests
-pytest --cov          # Coverage report
-
-# Code quality
-ruff check .          # Linting
-mypy .                # Type checking
-black .               # Code formatting
+```
+ai-trade-bot/
+├── adapters/               # External integrations
+│   ├── exchange_okx_ccxt.py    # OKX trading adapter
+│   └── telegram/               # Telegram bot & views
+├── application/            # Business logic
+│   ├── signal_gate.py          # Signal filtering
+│   ├── position_state_manager.py
+│   └── risk_service.py
+├── domain/                 # Core entities
+│   ├── agents/                 # TA, ML, News, Risk agents
+│   └── scoring/                # Score calculation
+├── execution/              # Order execution
+│   ├── quantize.py             # Size/price quantization
+│   └── prevalidation.py        # Order validation
+├── infrastructure/         # Framework & utilities
+│   ├── runtime.py              # Trade execution engine
+│   └── scheduler.py            # Job scheduling
+├── configs/
+│   └── policy.yaml             # Trading configuration
+└── main.py                 # Application entry point
 ```
 
-## 🔧 Configuration
+## ⚙️ Configuration
 
-The system uses `configs/policy.yaml` for all configuration:
+Key settings in `configs/policy.yaml`:
 
 ```yaml
-exchange:
-  mode: "dry-run"  # or "live"
-  
 trading:
   risk:
-    max_position_size: 0.1
-    max_total_risk: 0.6
-    stop_loss_pct: 0.02
-  
+    leverage:
+      default: 7
+    exposure:
+      max_single: 15 # Max 15% per position
+      max_total: 60 # Max 60% total exposure
+
   scoring:
-    ta_weight: 0.4
-    ml_weight: 0.25
-    news_weight: 0.2
-    risk_weight: 0.15
+    weights:
+      ta: 0.40 # Technical Analysis
+      ml: 0.25 # Machine Learning
+      news: 0.20 # News Sentiment
+      risk: 0.15 # Risk Assessment
+
+    thresholds:
+      enter_long: 60 # Long entry threshold
+      exit_long: 50 # Long exit threshold
+      enter_short: 40 # Short entry threshold
+      exit_short: 50 # Short exit threshold
+
+  exit_strategies:
+    trailing:
+      enabled: true
+      activation_r: 0.5 # Activate at 0.5R profit
+    partial_tp:
+      enabled: true
+    dynamic_tpsl:
+      sl_atr_multiplier: 1.0
+      tp_atr_multiplier: 4.0
 ```
 
-See [docs/CONFIG.md](docs/CONFIG.md) for complete configuration reference.
+## 🛡️ Safety Features
 
-## 🚨 Safety Features
+- **Dry-Run Mode**: Test without live trading
+- **Circuit Breaker**: Auto-stop on 25% daily loss or 3 consecutive losses
+- **Prevalidation**: All orders validated before submission
+- **API Key Redaction**: Sensitive data masked in logs
+- **Position Limits**: Maximum positions and exposure limits
+- **Telegram Kill Switch**: Emergency stop commands
 
-- **Dry-Run Mode**: Test strategies without live trading
-- **Circuit Breaker**: Auto emergency stop on 25% daily loss, 3 consecutive losses
-- **Risk Limits**: Configurable position sizing and loss limits
-- **Config Validation**: JSON Schema + Pydantic validation
-- **Log Redaction**: Automatic API key/secret masking
-- **Decision Logging**: Full trade replay capability
-- **Prevalidation**: Order validation before execution
-- **Telegram Controls**: /stop, /pause, /resume commands
+## 📊 Supported Coins
 
-## 📈 Status
+Currently configured for 17 trading pairs including:
 
-- **Current Version**: 1.0.0
-- **Architecture**: Clean Architecture + SOLID Principles
-- **Scheduler**: Production Ready ✅
-- **Security**: Log Redaction, Circuit Breaker ✅
-- **Config Validation**: JSON Schema + Pydantic ✅
-- **Decision Logging**: Structured JSONL ✅
-- **Testing**: 26+ tests (Core + Integration)
-- **Coverage**: 65%+ (target: 80%)
-- **Quality**: Ruff + MyPy compliant
-- **Jobs**: 7 automated jobs (trading, trailing, news, regime, risk, overview, telegram)
+- **Large Cap**: BTC, ETH, SOL
+- **DeFi**: UNI, AVAX, ATOM
+- **Layer 2**: OP, ARB
+- **Others**: DOGE, XRP, NEAR, RENDER, SEI, and more
 
-## 🤝 Contributing
+ML predictions available for 26+ coins.
 
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development guidelines, code standards, and PR process.
+## 📝 License
 
-## 📄 License
+This project is for educational and personal use. Use at your own risk.
 
-[Your License] - see LICENSE file for details.
+## ⚠️ Disclaimer
+
+**Trading cryptocurrency involves significant risk.** This bot is provided as-is with no guarantees. Always:
+
+- Test thoroughly in dry-run mode
+- Start with small positions
+- Never risk more than you can afford to lose
+- Monitor positions actively
 
 ---
 
-**⚠️ Warning**: This is a production trading system. Always test in dry-run mode first and ensure proper risk management configuration.
+**Built with** ❤️ **using Python, CCXT, APScheduler, and Telegram**

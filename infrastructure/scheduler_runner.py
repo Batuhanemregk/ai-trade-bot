@@ -26,6 +26,7 @@ from application.jobs.regime_1h import Regime1hJob
 from application.jobs.risk_monitor import RiskMonitorJob
 from application.jobs.market_overview import MarketOverviewJob
 from application.jobs.news_incremental_5m import NewsIncremental5mJob
+from application.jobs.pnl_report_6h import PnLReport6hJob
 # from application.jobs.telegram_summary_15m import TelegramSummary15mJob  # DISABLED
 from application.jobs.run_watchdog import RunWatchdog
 
@@ -176,6 +177,7 @@ class SchedulerRunner:
                 'risk_monitor': RiskMonitorJob(self.policy, self.semaphore, self.runtime_state),
                 'market_overview': MarketOverviewJob(self.policy, self.semaphore, self.runtime_state),
                 'news_incremental_5m': NewsIncremental5mJob(self.policy, self.semaphore, self.runtime_state),
+                'pnl_report_6h': PnLReport6hJob(self.policy, self.semaphore, self.runtime_state),
                 # 'telegram_summary_15m': TelegramSummary15mJob(self.policy, self.semaphore, self.runtime_state),  # DISABLED
             }
             
@@ -262,6 +264,17 @@ class SchedulerRunner:
             name='Market Overview (15m)',
             replace_existing=True,
             second=3  # Align to 15m boundaries
+        )
+        
+        # PnL Report (6h) - Every 6 hours at 00:00, 06:00, 12:00, 18:00
+        self.scheduler.add_job(
+            self._execute_job,
+            CronTrigger.from_crontab(schedule_config.get('pnl_report_6h', '0 */6 * * *'), timezone="Europe/Istanbul"),
+            args=['pnl_report_6h'],
+            id='pnl_report_6h',
+            name='PnL Report (6h)',
+            replace_existing=True,
+            second=15
         )
         
         # Telegram Summary (15m) - DISABLED
